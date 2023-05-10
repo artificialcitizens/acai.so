@@ -110,33 +110,30 @@ import { Meta } from '@storybook/blocks';
 
 # LLMs
 
+<p>LangChain provides a standard interface for using a variety of LLMs.</p>
 <p>
-  [LLMs](https://js.langchain.com/docs/modules/models/) are the foundational building block of Langchain. Using the LLM
-  wrapper we can integrate language models from a variety of supported providers.
+  To get started, simply use the call method of an LLM implementation, passing in a string input. In this example, we
+  are using the OpenAI implementation:
 </p>
 
-<p>Langchain provides support for text-based LLMs, Chat Models, and Text Embedding models</p>
+```js
+import { OpenAI } from 'langchain/llms/openai';
 
-<div className="subheading">Sections</div>
+export const run = async () => {
+  const model = new OpenAI();
+  // `call` is a simple string-in, string-out method for interacting with the model.
+  const resA = await model.call(`What is a good name for a company that makes enterprise level design systems?
+      (Hint: it is Knapsack)`);
+  console.log({ resA });
+  // { resA: '\n\nSocktastic Colors' }
+};
+```
 
-<p>The course is broken down into sections covering the main concepts of Langchain</p>
-<div className="link-list">
-  <a className="link-item" href="https://storybook.js.org/docs/react/addons/addon-types" target="_blank">
-    <span>
-      <strong>Chat Models</strong>
-      Chat models are used for conversational interfaces and chatbots
-    </span>
-  </a>
-  <a className="link-item" href="https://storybook.js.org/docs/react/configure/webpack" target="_blank">
-    <span>
-      <strong>LLMs</strong>
-      The LLM wrappers are a main building block of Langchain
-    </span>
-  </a>
-  <a className="link-item" href="https://storybook.js.org/docs/react/configure/styling-and-css" target="_blank">
-    <span>
-      <strong>Embeddings</strong>
-      We use LLMs to create embeddings that we can store for data augmented chains
-    </span>
-  </a>
-</div>
+## Available Models
+
+`modelName`
+
+- text-davinci-003 (default)
+- text-curie-001
+- text-babbage-001
+- text-ada-001
