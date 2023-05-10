@@ -1,15 +1,47 @@
-# React-Tailwind-Vite-TS-Starter
+# Langchain JS Crash Course
 
-Get up and running with this powerful stack. Now with Storybook!
+Langchain is a powerful tool that allows you to compose language models in to chains (Lang Chain get it?).
 
+This repo is designed to get you up and running with the JavaScript version of this library. We will be focused on Langchain's core functionality and how to use it in your own projects.
+
+This library is bleeding edge and constantly changing, so we will be adding the latest features as they be come available/time allows.
+
+note: The content in this course assumes that you are leveraging a server to manage you environment variables, never store these in your client side code. The code in this repo is for demonstration purposes only and should not be used in production.
+
+## Technology Stack
+
+- [LangchainJS](https://js.langchain.com/docs/)
 - [React](https://reactjs.org/) - A JavaScript library for building user interfaces
-- [Vite](https://vitejs.dev/) - A build tool and development server that focuses on speed and simplicity
-- [TypeScript](https://www.typescriptlang.org/) - A typed superset of JavaScript that adds optional static types
 - [Storybook](https://storybook.js.org/) - A tool for developing UI components in isolation
+- [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapid UI development
+- [TypeScript](https://www.typescriptlang.org/) - A typed superset of JavaScript that adds optional static types
+- [Vite](https://vitejs.dev/) - A build tool and development server that focuses on speed and simplicity
 - [Vitest](https://vitest.dev/) - A test runner for Vite projects
 - [ESLint](https://eslint.org/) - A pluggable and configurable linter tool for identifying and reporting on patterns in JavaScript
 - [Prettier](https://prettier.io/) - An opinionated code formatter
-- [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapid UI development
+
+## Getting Started
+
+Clone this repo and install the dependencies:
+
+```bash
+git clone
+cd langchain-js-crash-course
+npm install
+npm run storybook
+```
+
+## Running the App
+
+The crash course takes place in Storybook, however you can run the app in development mode using Vite if you want to experiment with the components in a standard React app.
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+## Running the Tests
 
 ## Available Scripts
 
@@ -50,3 +82,7 @@ Runs the tests using Vitest.
 ### `npm run test:ui`
 
 Runs the tests with UI using Vitest.
+
+## License
+
+MIT
