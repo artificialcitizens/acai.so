@@ -9,7 +9,10 @@
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "coverage": "vitest run --coverage",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -25,6 +28,7 @@
     "@storybook/testing-library": "^0.0.14-next.2",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
+    "@types/react-test-renderer": "^18.0.0",
     "@typescript-eslint/eslint-plugin": "^5.57.1",
     "@typescript-eslint/parser": "^5.57.1",
     "@vitejs/plugin-react": "^4.0.0",
@@ -39,9 +43,11 @@
     "postcss": "^8.4.23",
     "prettier": "^2.8.8",
     "prop-types": "^15.8.1",
+    "react-test-renderer": "^18.2.0",
     "storybook": "^7.0.10",
     "tailwindcss": "^3.3.2",
     "typescript": "^5.0.2",
-    "vite": "^4.3.2"
+    "vite": "^4.3.2",
+    "vitest": "^0.31.0"
   }
 }
