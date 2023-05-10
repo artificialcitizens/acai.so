@@ -4,7 +4,7 @@ Langchain is a powerful tool that allows you to compose language models in to ch
 
 This repo is designed to get you up and running with the JavaScript version of this library. We will be focused on Langchain's core functionality and how to use it in your own projects.
 
-This library is bleeding edge and constantly changing, so we will be adding the latest features as they be come available/time allows.
+This library is bleeding edge and constantly changing, so we will be adding the latest features as they become available/time allows.
 
 note: The content in this course assumes that you are leveraging a server to manage you environment variables, never store these in your client side code. The code in this repo is for demonstration purposes only and should not be used in production.
 
