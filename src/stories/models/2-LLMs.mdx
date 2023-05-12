@@ -1,4 +1,5 @@
-import { Meta } from '@storybook/blocks';
+import { Meta, Canvas } from '@storybook/blocks';
+import * as ModelStories from './models.stories';
 
 <Meta title="Models/LLMs" />
 
@@ -110,24 +111,26 @@ import { Meta } from '@storybook/blocks';
 
 # LLMs
 
-<p>LangChain provides a standard interface for using a variety of LLMs.</p>
-<p>
-  To get started, simply use the call method of an LLM implementation, passing in a string input. In this example, we
-  are using the OpenAI implementation:
-</p>
+LangChain provides a standard interface for using a variety of LLMs
+
+To get started, simply use the call method of an LLM implementation, passing in a string input. In this example, we are using
+the OpenAI implementation:
 
 ```js
 import { OpenAI } from 'langchain/llms/openai';
 
-export const run = async () => {
+export const llmModelExample = async () => {
   const model = new OpenAI();
   // `call` is a simple string-in, string-out method for interacting with the model.
-  const resA = await model.call(`What is a good name for a company that makes enterprise level design systems?
-      (Hint: it is Knapsack)`);
-  console.log({ resA });
-  // { resA: '\n\nSocktastic Colors' }
+  const response = await model.call(`What is a good name for a company that makes enterprise level design systems?
+      (Hint: it is Knapsack)`); 
+  return response;
 };
 ```
+<Canvas of={ModelStories.LLMModelExample} />
+
+Notes: There is no memory being saved here, each query is a new context and the AI does not remember previous queries.
+
 
 ## Available Models
 

@@ -1,6 +1,6 @@
 import { Meta } from '@storybook/blocks';
 
-<Meta title="Documents/Intro" />
+<Meta title="Indexes/Text Splitters" />
 
 <style>
   {`
@@ -108,35 +108,44 @@ import { Meta } from '@storybook/blocks';
   `}
 </style>
 
-# Document Loaders
+# File Loaders
 
 <p>
-  [LLMs](https://js.langchain.com/docs/modules/models/) are the foundational building block of Langchain. Using the LLM
-  wrapper we can integrate language models from a variety of supported providers.
+  [File loaders](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/) are, as the name suggests, loaders for files of various types.
 </p>
 
-<p>Langchain provides support for text-based LLMs, Chat Models, and Text Embedding models</p>
+<p>
+  Examples of available file loaders include:
+</p>
 
-<div className="subheading">Sections</div>
+<ul>
+  <li>[Directory](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/directory)</li>
+  <li>[CSV](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/csv)</li>
+  <li>[JSON](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/json)</li>
+  <li>[EPUB](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/epub)</li>
+  <li>[...and more](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders)</li>
+</ul>
 
-<p>The course is broken down into sections covering the main concepts of Langchain</p>
-<div className="link-list">
-  <a className="link-item" href="https://storybook.js.org/docs/react/configure/webpack" target="_blank">
-    <span>
-      <strong>LLMs</strong>
-      The LLM wrappers are a main building block of Langchain
-    </span>
-  </a>
-  <a className="link-item" href="https://storybook.js.org/docs/react/addons/addon-types" target="_blank">
-    <span>
-      <strong>Chat Models</strong>
-      Chat models are a variation on LLMs for conversational interfaces and chatbots
-    </span>
-  </a>
-  <a className="link-item" href="https://storybook.js.org/docs/react/configure/styling-and-css" target="_blank">
-    <span>
-      <strong>Embeddings</strong>
-      We use language models to create embeddings that we can store for data augmented chains
-    </span>
-  </a>
-</div>
+## Examples
+
+<p>
+  The following example shows how to use the <code>TextLoader</code> loads a standard <code>.txt</code> file
+</p>
+
+```js
+import { TextLoader } from 'langchain/document_loaders/fs/text';
+const loader = new TextLoader("./assets/monty-grail.txt");
+
+const docs = await loader.load();
+console.log(docs[0].pageContent)
+// Output:
+// Whoa there!
+// Halt!
+// Who goes there?
+// It is I, Arthur, son of Uther Pendragon
+// from the castle of Camelot.
+// King of the Britons!
+// Defeater of the Saxons!
+// Sovereign of all England!
+// (continued...)
+```

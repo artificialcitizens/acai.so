@@ -12,11 +12,13 @@ import Linkify from 'react-linkify';
 
 interface ChatProps {
   onSubmitHandler: (message: string, chatHistory: string) => Promise<string>;
+  height?: string;
+  startingValue?: string;
 }
 
-const Chat: React.FC<ChatProps> = ({ onSubmitHandler }) => {
+const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue }) => {
   const inputRef = useRef(null);
-  const [msgInputValue, setMsgInputValue] = useState('');
+  const [msgInputValue, setMsgInputValue] = useState(startingValue);
   const [messages, setMessages] = useState<MessageModel[]>([
     {
       message: 'Welcome to the Langchain JS Crash Course!',
@@ -75,7 +77,7 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler }) => {
   return (
     <div
       style={{
-        height: '500px',
+        height: height || '500px',
       }}
     >
       <ChatContainer>
@@ -108,6 +110,7 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler }) => {
           onChange={setMsgInputValue}
           value={msgInputValue}
           ref={inputRef}
+          sendOnReturnDisabled={false}
           attachButton={false}
         />
       </ChatContainer>

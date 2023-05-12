@@ -1,5 +1,5 @@
 import { Canvas, Meta } from '@storybook/blocks';
-import * as ButtonStories from '../../components/Button/Button.stories';
+import * as ModelStories from './models.stories';
 
 <Meta title="Models/Chat" />
 
@@ -109,8 +109,6 @@ import * as ButtonStories from '../../components/Button/Button.stories';
   `}
 </style>
 
-<Canvas of={ButtonStories.Primary} />
-
 # Chat Models
 
 <p>
@@ -122,7 +120,7 @@ import * as ButtonStories from '../../components/Button/Button.stories';
 
 <p>A ChatMessage is a modular message component that is used to pass information to the language model</p>
 
-<p>There are fourtypes of ChatMessages:</p>
+<p>There are four types of ChatMessages:</p>
 <ul>
   <li>`HumanChatMessage`: A chat message that is sent as if from a Human's point of view.</li>
   <li>
@@ -140,20 +138,24 @@ import * as ButtonStories from '../../components/Button/Button.stories';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
 
-export const run = async () => {
-  const chat = new ChatOpenAI();
+export const chatModelExample = async (query: string) => {
+  const chat = new ChatOpenAI({ openAIApiKey: process.env.OPENAI_API_KEY });
   // Pass in a list of messages to `call` to start a conversation.
   const response = await chat.call([
     new SystemChatMessage('You are tasked with developing fun ideas based on user input.'),
-    new HumanChatMessage(
-      `What is a good name for a company that makes enterprise level design systems?
-      (Hint: it is Knapsack)`,
-    ),
+    new HumanChatMessage(query),
   ]);
-  console.log(response);
-  // AIChatMessage { text: '\n\nKnapsack ' }
+  return response.text;
 };
+
 ```
+
+## Demo
+
+Note: There is no memory being saved here, each query is a new context and the AI does not remember previous queries.
+
+<Canvas of={ModelStories.ChatLLMExample} />
+
 
 ### Available Models
 

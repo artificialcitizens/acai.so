@@ -1,6 +1,6 @@
 import { Meta } from '@storybook/blocks';
 
-<Meta title="Indexes/Intro" />
+<Meta title="Indexes/Vector Stores" />
 
 <style>
   {`
@@ -108,38 +108,44 @@ import { Meta } from '@storybook/blocks';
   `}
 </style>
 
-# Indexes
+# File Loaders
 
 <p>
-  Now that we've learned how to load Documents from various sources lets learn
-  how to [index](https://js.langchain.com/docs/modules/indexes/) these documents for easy
-  retrieval and querying.
+  [File loaders](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/) are, as the name suggests, loaders for files of various types.
 </p>
 
-<p>Langchain provides support for text-based LLMs, Chat Models, and Text Embedding models</p>
+<p>
+  Examples of available file loaders include:
+</p>
 
-<div className="subheading">Sections</div>
+<ul>
+  <li>[Directory](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/directory)</li>
+  <li>[CSV](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/csv)</li>
+  <li>[JSON](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/json)</li>
+  <li>[EPUB](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/epub)</li>
+  <li>[...and more](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders)</li>
+</ul>
 
-<p>The course is broken down into sections covering the main concepts of Langchain</p>
-<div className="link-list">
-    <span className="link-item">
-      <strong>[Document Loaders](?path=/docs/indexes-documents--docs)</strong>
-      The first step to indexing is loading documents from various sources.
-    
-    </span>
-    <span className="link-item">
-      <strong>[Text Splitters](?path=/docs/indexes-text-splitters--docs)</strong>
-      For preserving context space and grouping information we need to split our documents into smaller chunksD.
-    [Learn more ->](?path=/docs/indexes-text-splitters--docs)
-    </span>
-    <span className="link-item">
-      <strong>[Vector Stores](?path=/docs/indexes-vector-stores--docs)</strong>
-      These loaders are used to load web resources.
-    
-    </span>
-    <span className="link-item">
-      <strong>[Retrievers](?path=/docs/indexes-retrievers--docs)</strong>
-      Once the data is embedded and stored we need a way to retrieve the data
-    
-    </span>
-</div>
+## Examples
+
+<p>
+  The following example shows how to use the <code>TextLoader</code> loads a standard <code>.txt</code> file
+</p>
+
+```js
+import { TextLoader } from 'langchain/document_loaders/fs/text';
+const loader = new TextLoader("./assets/monty-grail.txt");
+
+const docs = await loader.load();
+console.log(docs[0].pageContent)
+// Output:
+// Whoa there!
+// Halt!
+// Who goes there?
+// It is I, Arthur, son of Uther Pendragon
+// from the castle of Camelot.
+// King of the Britons!
+// Defeater of the Saxons!
+// Sovereign of all England!
+// (continued...)
+```
