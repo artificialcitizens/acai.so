@@ -28,6 +28,9 @@ dependencies:
   react-linkify:
     specifier: 1.0.0-alpha
     version: 1.0.0-alpha
+  zod:
+    specifier: ^3.21.4
+    version: 3.21.4
 
 devDependencies:
   '@storybook/addon-essentials':

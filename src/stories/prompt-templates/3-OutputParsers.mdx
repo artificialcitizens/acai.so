@@ -1,6 +1,6 @@
 import { Meta } from '@storybook/blocks';
 
-<Meta title="Prompts/Prompt Templates" />
+<Meta title="Prompts/Output Parsers" />
 
 <style>
   {`
@@ -108,13 +108,13 @@ import { Meta } from '@storybook/blocks';
   `}
 </style>
 
-# Prompt Templates
+# Output Parsers
 
-A PromptTemplate allows you to make use of templating to generate a prompt. 
-This is useful for when you want to use the same prompt outline in multiple places, but with certain values changed. 
-Prompt templates are supported for both LLMs and chat models, as shown below:
+Language models output text. But many times you may want to get more structured 
+information than just text back. This is where output parsers come in.
 
-<p>
-  [Prompts](https://js.langchain.com/docs/modules/prompts/) cover a variety of tools to help manage
-  language model prompts and output
-</p>
+[Output Parsers](https://js.langchain.com/docs/modules/prompts/output_parsers/) are classes 
+that help structure language model responses. There are two main methods an output parser must implement:
+
+
+Langchain provides support for text-based LLMs, Chat Models, and Text Embedding models

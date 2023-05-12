@@ -1,3 +1,5 @@
+WIP: Nothing to see here yet, check back soon!
+
 # Langchain JS Crash Course
 
 Langchain is a powerful tool that allows you to compose language models in to chains (Lang Chain get it?).
