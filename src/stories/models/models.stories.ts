@@ -38,13 +38,14 @@ const llmExample = async (msg: string) => {
 // Storybook
 // #########
 const meta = {
-  title: 'Components/Chat',
+  title: 'Models/Stories',
   component: Chat,
   tags: ['autodocs'],
   argTypes: {
     onSubmitHandler: { control: 'function' },
     height: { control: 'string' },
     startingValue: { control: 'string' },
+    placeHolder: { control: 'string' },
   },
 } satisfies Meta<typeof Chat>;
 
@@ -58,9 +59,8 @@ export const ChatLLMExample: Story = {
       const response = await chatModelExample(message).then((response) => response);
       return response;
     },
-    height: '250px',
-    startingValue:
-      'What is a good name for a company that makes enterprise level design systems? (Hint: it is Knapsack)',
+    height: '500px',
+    placeHolder: 'What is a good name for a company that makes enterprise level design systems? (Hint: it is Knapsack)',
   },
 };
 
@@ -71,9 +71,8 @@ export const LLMModelExample: Story = {
       const response = await llmExample(message).then((response) => response);
       return response;
     },
-    height: '250px',
-    startingValue:
-      'What is a good name for a company that makes enterprise level design systems? (Hint: it is Knapsack)',
+    height: '500px',
+    placeHolder: 'What is a good name for a company that makes enterprise level design systems? (Hint: it is Knapsack)',
   },
 };
 
@@ -85,6 +84,6 @@ export const EmbeddingModelExample: Story = {
       return response;
     },
     height: '500px',
-    startingValue: '',
+    placeHolder: 'Hello World!',
   },
 };

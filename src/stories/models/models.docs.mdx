@@ -1,0 +1,92 @@
+import { Meta, Canvas } from '@storybook/blocks';
+import * as ModelStories from './models.stories';
+
+<Meta title="Models/Overview" />
+
+# Models
+
+<p>
+  [Models](https://js.langchain.com/docs/modules/models/) are the foundational building block of Langchain. Using the
+  model wrappers we can integrate language models from a variety of supported providers.
+</p>
+
+<p>Langchain provides support for text-based LLMs, Chat Models, and Text Embedding models</p>
+
+
+## LLMs
+
+LangChain provides a standard interface for using a variety of LLMs
+
+To get started, simply use the call method of an LLM implementation, passing in a string input. In this example, we are using
+the OpenAI implementation:
+
+```js
+import { OpenAI } from 'langchain/llms/openai';
+
+export const llmModelExample = async () => {
+  const model = new OpenAI();
+  // `call` is a simple string-in, string-out method for interacting with the model.
+  const response = await model.call(`What is a good name for a company that makes enterprise level design systems?
+      (Hint: it is Knapsack)`); 
+  return response;
+};
+```
+
+## Try It
+Notes: There is no memory being saved here, each query is a new context and the AI does not remember previous queries.
+
+<Canvas of={ModelStories.LLMModelExample} />
+
+
+# Chat Models
+
+<p>
+  [Chat Models](https://js.langchain.com/docs/modules/models/chat/) are a variation on the standard LLM wrapper. While
+  similar under the hood, their interface is a bit different
+</p>
+
+## Chat Messages
+
+<p>A ChatMessage is a modular message component that is used to pass information to the language model</p>
+
+<p>There are four types of ChatMessages:</p>
+<ul>
+  <li>
+  `HumanChatMessage`: A chat message that is sent as if from a Human's point of view.
+  </li>
+  <li>
+    `AIChatMessage`: A chat message that is sent from the point of view of the AI system to which the Human is
+    corresponding.
+  </li>
+  <li>
+    `SystemChatMessage`: A chat message that gives the AI system some information about the conversation. This is
+    usually sent at the beginning of a conversation. Currently this is mostly just an initial prompt. OpenAI has state it doesn't carry as much weight as they would like
+  </li>
+  <li>
+  `ChatMessage`: A generic chat message, with not only a "text" field but also an arbitrary "role" field.
+  </li>
+</ul>
+
+
+```ts
+import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
+
+const chat = new ChatOpenAI({ openAIApiKey: process.env.OPENAI_API_KEY });
+
+export const chatModelExample = async (query: string) => {
+  // Pass in a list of messages to `call` to start a conversation.
+  const response = await chat.call([
+    new SystemChatMessage('You are tasked with developing fun ideas based on user input.'),
+    new HumanChatMessage(query),
+  ]);
+  return response.text;
+};
+
+```
+
+## Try It
+
+Note: There is no memory being saved here, each query is a new context and the AI does not remember previous queries.
+
+<Canvas of={ModelStories.ChatLLMExample} />
