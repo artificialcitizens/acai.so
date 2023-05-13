@@ -18,12 +18,16 @@
     "@chatscope/chat-ui-kit-react": "^1.10.1",
     "@chatscope/chat-ui-kit-styles": "^1.4.0",
     "@storybook/theming": "^7.0.10",
+    "@tiptap/pm": "^2.0.3",
+    "@tiptap/react": "^2.0.3",
+    "@tiptap/starter-kit": "^2.0.3",
     "cheerio": "1.0.0-rc.12",
     "dotenv": "^16.0.3",
     "langchain": "^0.0.74",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-linkify": "1.0.0-alpha",
+    "ts-node": "^10.9.1",
     "zod": "^3.21.4"
   },
   "devDependencies": {
