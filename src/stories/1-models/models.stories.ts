@@ -59,7 +59,7 @@ export const ChatLLMExample: Story = {
       const response = await chatModelExample(message).then((response) => response);
       return response;
     },
-    height: '500px',
+    height: '300px',
     placeHolder: 'What is a good name for a company that makes enterprise level design systems? (Hint: it is Knapsack)',
   },
 };
@@ -71,7 +71,7 @@ export const LLMModelExample: Story = {
       const response = await llmExample(message).then((response) => response);
       return response;
     },
-    height: '500px',
+    height: '300px',
     placeHolder: 'What is a good name for a company that makes enterprise level design systems? (Hint: it is Knapsack)',
   },
 };

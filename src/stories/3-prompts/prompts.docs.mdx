@@ -42,7 +42,7 @@ we can also use the `fromTemplate` method to create a new prompt from a template
 ```
 
 
-## ChatPromptTemplate
+### ChatPromptTemplate
 
 Chat prompt templates work a bit differently to match the input formats of chat models.
 
@@ -116,13 +116,13 @@ Edit the text field and press the button to see the result
 
 <Canvas of={PromptStories.LanguageToJsonExample} />
 
-### Output Parsers
+## Output Parsers
 
 Instead of passing the data structure as part of the prompt, we can also use an output parser to convert the output of the model similar to using a typing system.
 
 This will also allow us to parse the output of the model and verify the correct data structure is returned.
 
-#### StructuredOutputParser
+### StructuredOutputParser
 
 There are several types of output parsers available to us in the JS library. 
 The `StructuredOutputParser` allows us to define a schema for the output of the model.
@@ -133,18 +133,13 @@ import { StructuredOutputParser } from "langchain/output_parsers";
 // With a `StructuredOutputParser` we can define a schema for the output.
 const parser = StructuredOutputParser.fromNamesAndDescriptions({
   name: "users name",
-  source: "users age",
-  cars: : [
-    {
-      make: "car make",
-      models: [],
-
-    }
-  ]
+  age: "users age",
+  cars: : "users cars brands as a string",
 });
 ```
 
 We can then use the `getFormatInstructions` method to return a formatted string to pass to the model.
+`partialVariables` are template partials that allow us to pass in portion of the prompt for the model
 
 ```ts
 
@@ -152,7 +147,7 @@ const formatInstructions = parser.getFormatInstructions();
 
 const prompt = new PromptTemplate({
   template:
-    `Answer the users question as best as possible.
+    `You are tasked with taking the users input and converting it to a JSON object.
     {format_instructions}
     {question}
     `,
@@ -160,10 +155,67 @@ const prompt = new PromptTemplate({
   partialVariables: { format_instructions: formatInstructions },
 });
 
+
+console.log(prompt.format({ question: "My name is Josh Mabry and I'm 38 years old. I have a Pontiac GTO, a Pontiac Firebird, and a Pontiac Solstice. I also have a Ford Mustang, and a Ford Econoline"}))
 ```
 
-`partialVariables` are template partials that allow us to pass in portion of the prompt for the model
 
 #### Try It
 
-Edit the text field and press the button to see the result
+Press the button and see the output of the language model
+
+<Canvas of={PromptStories.StructuredOutputParserExample} />
+
+### Using Zod schema
+
+This output parser can be also be used when you want to define the output schema using Zod, a TypeScript validation library. The Zod schema passed in needs be parseable from a JSON string, so eg. z.date() is not allowed, but z.coerce.date() is.
+
+```ts
+import { z } from "zod";
+import { OpenAI } from "langchain/llms/openai";
+import { PromptTemplate } from "langchain/prompts";
+import { StructuredOutputParser } from "langchain/output_parsers";
+
+// We can use zod to define a schema for the output using the `fromZodSchema` method of `StructuredOutputParser`.
+const parser = StructuredOutputParser.fromZodSchema(
+  z.object({
+    name: z.string().describe("the users name"),
+    age: z.number().describe("the users age"),
+    cars: z.array(
+      z.object({
+        name: z.string().describe("the name of the car"),
+        models: z.array(z.string()).describe("the models of the car"),
+      })
+    ).describe("the users cars"),
+  })
+);
+
+const formatInstructions = parser.getFormatInstructions();
+
+const prompt = new PromptTemplate({
+  template:
+    "Answer the users question as best as possible.\n{format_instructions}\n{question}",
+  inputVariables: ["question"],
+  partialVariables: { format_instructions: formatInstructions },
+});
+
+const model = new OpenAI({ temperature: 0 });
+
+const input = await prompt.format({
+  question: `My name is Josh Mabry and I'm 38 years old. 
+  I have a Pontiac GTO, a Pontiac Firebird, and a Pontiac Solstice. 
+  I also have a Ford Mustang, and a Ford Econoline.`,
+});
+const response = await model.call(input);
+// verify the output using the parse method
+await parser.parse(response);
+
+return response;
+
+```
+
+#### Try It
+
+Press the button and see the output of the language model
+
+<Canvas of={PromptStories.ZodOutputParserExample} />

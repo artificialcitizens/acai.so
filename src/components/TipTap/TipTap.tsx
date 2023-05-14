@@ -10,7 +10,7 @@ interface MenuBarProps {
   onClickHandler: (message: string) => Promise<string>;
   label: string;
 }
-
+// @todo refresh button
 const MenuBar: React.FC<MenuBarProps> = ({ editor, onClickHandler, label }) => {
   if (!editor) {
     return null;

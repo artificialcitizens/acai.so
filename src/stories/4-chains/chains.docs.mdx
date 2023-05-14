@@ -1,0 +1,97 @@
+import { Meta, Canvas } from '@storybook/blocks';
+import * as ChainStories from './chains.stories'
+
+<Meta title="Chains/Intro" />
+
+# Chains
+
+[Chains](https://js.langchain.com/docs/modules/chains/) are where we begin to combine multiple prompts and language models together.
+This will allow us to combine language models with tools and our own data to create more complex and interesting results. 
+
+We'll take a look at the more advanced uses later, but first lets get familiar with a some basic examples
+
+## LLMChain
+
+The foundational chain is the LLMChain, here we can add a prompt template, memory, and a model to chain together the examples we've seen so far.
+
+```js
+import { BufferWindowMemory } from "langchain/memory";
+import { OpenAI } from "langchain/llms/openai";
+import { PromptTemplate } from "langchain/prompts";
+import { LLMChain } from "langchain/chains";
+
+const llm = new OpenAI();
+// We can use a BufferWindowMemory to store the last 5 interactions
+const memory = new BufferWindowMemory({ k: 5 });
+
+const basicLlmChain = async (input: string) => {
+  const prompt = PromptTemplate.fromTemplate('What is a good name for a company that makes {product}?');
+  // We can construct an LLMChain from a PromptTemplate and an LLM.
+  // we could use a chatModel here as well `llm: chatModel`
+  const chain = new LLMChain({ llm, prompt, memory });
+  
+  // The result is an object with a `text` property.
+  const res = await chain.call({ product: input });
+
+  return res.text;
+};
+```
+
+### Try It
+
+Enter the name of a company and see what the model comes up with.
+
+<Canvas of={ChainStories.LlmChainExample} />
+
+## SequentialChain
+
+We've seen how powerful the LLMChain can be, but we can also chain together multiple LLMs to create more complex results.
+
+```js
+const basicSequentialChain = async (input: string) => {
+  // First let's create a template and chain that takes a company name and makes up a description for the company
+  const template = `You are a brand consultant. Given the name of a company, 
+  it is your job to write a description of what the company does based on the name alone.
+ 
+  Company: {name}
+  Description: This is a description for the {name} company:`;
+  const promptTemplate = new PromptTemplate({
+    template,
+    inputVariables: ['name'],
+  });
+  const descriptionChain = new LLMChain({ llm, prompt: promptTemplate });
+
+  // Now lets make another one that creates a blogpost about the company based on the first chains description
+  const blogTemplate = `You are a writer covering the latest and greatest in companies.
+  Given a description of a company, it is your job to write a long form blog post about the company.
+
+  Only output the blog post and nothing else
+ 
+  Business Description:
+  {description}
+  Post:`;
+  const blogPromptTemplate = new PromptTemplate({
+    template: blogTemplate,
+    inputVariables: ['description'],
+  });
+  const blogChain = new LLMChain({
+    llm,
+    prompt: blogPromptTemplate,
+  });
+
+// Now we will make our simple sequential chain and run it
+  const overallChain = new SimpleSequentialChain({
+    chains: [descriptionChain, blogChain],
+    verbose: true,
+  });
+  const review = await overallChain.run(input);
+
+  return review.trim();
+};
+```
+
+### Try It
+
+Enter the name of a company and see what the model comes up with.
+
+<Canvas of={ChainStories.SequentialChainExample} />

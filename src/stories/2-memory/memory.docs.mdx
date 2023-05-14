@@ -1,0 +1,36 @@
+import { Meta, Canvas } from '@storybook/blocks';
+import * as MemoryStories from './memory.stories';
+
+<Meta title="Memory/Overview" />
+
+# Memory
+
+[Memory](https://js.langchain.com/docs/modules/memory/) gives us wrappers to manage the contextual memory
+of our models. This allows us to create an ongoing interaction with the user.
+
+## Basic Memory
+Ultimately we are just keeping track of the conversation and sending all of the history to the model as one query.
+
+Lets take a look at this simple chat component that shows how this can be managed without a memory wrapper
+
+```js
+import { OpenAI } from "langchain/llms/openai";
+
+const model = new OpenAI();
+chatHistory = "";
+
+const chat = async (input: string, chatHistory: string) => {
+  console.log('chat_history', chatHistory);
+  const response = model.call(chatHistory + `\n` + input + '\n');
+  return response;
+};
+```
+
+### Try it out
+
+Each call is passing in the entirety of the chat history, original prompt, etc and the end user only
+sees the last message.
+
+Check your dev console to see the full chat history
+
+<Canvas of={MemoryStories.BasicMemoryExample} />

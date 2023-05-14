@@ -58,7 +58,7 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, pla
       setMsgInputValue('');
       inputRef.current?.focus();
       setLoading(true);
-      const chatHistory = messages.map((msg) => msg.message).join(' ');
+      const chatHistory = messages.map((msg) => msg.message).join('\n');
       try {
         const answer = await onSubmitHandler(message, chatHistory);
         setLoading(false);
