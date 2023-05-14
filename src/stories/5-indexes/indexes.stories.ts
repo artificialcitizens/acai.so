@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import fs from 'fs';
 import { z } from 'zod';
 import {
   ChatPromptTemplate,
@@ -30,7 +31,7 @@ const splitter = new CharacterTextSplitter({
   chunkSize: 150,
   chunkOverlap: 10,
 });
-const loader = new TextLoader('src/stories/assets/documents/vector_store_guide.txt');
+const text = fs.readFileSync('assets/', 'utf8');
 
 const memoryStoreExample = async () => {
   try {
@@ -40,7 +41,7 @@ const memoryStoreExample = async () => {
     console.log('splitDocs', splitDocs[5]);
     const vectorStore = await MemoryVectorStore.fromDocuments(
       splitDocs,
-      new OpenAIEmbeddings({ openAIApiKey: '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' }),
+      new OpenAIEmbeddings({ openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY }),
     );
 
     // Search for the most similar document

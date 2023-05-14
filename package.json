@@ -12,7 +12,8 @@
     "build-storybook": "storybook build",
     "coverage": "vitest run --coverage",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "test-script": "ts-node-esm src/scripts.ts"
   },
   "dependencies": {
     "@chatscope/chat-ui-kit-react": "^1.10.1",

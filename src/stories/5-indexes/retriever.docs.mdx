@@ -1,0 +1,15 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Indexes/Retriever" />
+
+# Retrievers
+
+Now that we've indexed our documents, we need to be able to retrieve them. LangChain
+gives us several wrappers that allow us to do this..
+
+[Retrievers](https://js.langchain.com/docs/modules/indexes/retrievers/) are used to retrieve documents from a vector store. 
+There are several methods to do this that give us varying degrees of control over our results
+
+## Vector Store Retrievers
+
+The vector store wrapper has a `asRetriever` method for retrieving documents from it's vectorstore
