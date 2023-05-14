@@ -1,0 +1,111 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Indexes/Documents" />
+
+# Documents
+
+Document loaders are used to create Documents from various input sources. 
+These Documents can then be embedded and placed in a Vectorstore to be retrieved 
+and used to augment the language models responses.
+
+### Documents
+
+In order to understand how to use Document Loaders, we first need to understand what a Document is.
+
+Language models only know information about what they were trained on. 
+In order to get them to answer questions or summarize other information you have to pass it to the language model. 
+Therefore, it is very important to have a concept of a document.
+
+A document at its core is fairly simple. It consists of a piece of text and optional metadata. 
+The piece of text is what we interact with the language model, while the optional metadata 
+is useful for keeping track of metadata about the document (such as the source).
+
+```js
+interface Document {
+  pageContent: string;
+  metadata: Record<string, any>;
+}
+```
+
+Let's say we have a blog post that we want to use as a source for our language model. 
+We add the blog content as the pageContent and then add any relevant information we want to the metadata object.
+
+```js import {Document} from 'langchain/document';
+
+const blogPost = new Document({
+  pageContent: 'This is the content of my blog post...',
+  metadata: {
+  // We can add any metadata we want to the document
+    title: 'My Blog Post',
+    url: 'https://myblog.com/my-blog-post',
+  }
+
+});
+
+```
+
+<p>We'll see how to use this in a later lesson, but for now let's look at how we 
+can create Documents from various sources using loaders.</p>
+
+
+## Loaders
+
+Document loaders allow us to create these Documents from a wide variety of sources. 
+We can use them to load data from a file, a url, or even a database.
+
+The Document Loaders offer two methods: load and loadAndSplit. 
+The load method loads the documents from the source and returns them as an array of Documents. 
+On the other hand, the loadAndSplit method loads the documents from the source, 
+splits them using the provided TextSplitter, and returns them as an array of Documents.
+
+```js
+interface DocumentLoader {
+  load(): Promise<Document[]>;
+  loadAndSplit(textSplitter?: TextSplitter): Promise<Document[]>;
+}
+```
+
+<p>Note: we'll learn more about Text Splitters in a bit.</p>
+
+## File Loaders
+
+<p>
+  [File loaders](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/) 
+  are, as the name suggests, loaders for files of various types.
+</p>
+
+<p>
+  Examples of available file loaders include:
+</p>
+
+<ul>
+  <li>[Directory](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/directory)</li>
+  <li>[CSV](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/csv)</li>
+  <li>[JSON](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/json)</li>
+  <li>[EPUB](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/epub)</li>
+  <li>[...and more](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders)</li>
+</ul>
+
+### Example
+
+<p>
+  The following example shows how to use the <code>TextLoader</code> loads a standard <code>.txt</code> file
+</p>
+
+```js
+import { TextLoader } from 'langchain/document_loaders/fs/text';
+const loader = new TextLoader("./assets/monty-grail.txt");
+
+const docs = await loader.load();
+console.log(docs[0].pageContent)
+// Output:
+// Whoa there!
+// Halt!
+// Who goes there?
+// It is I, Arthur, son of Uther Pendragon
+// from the castle of Camelot.
+// King of the Britons!
+// Defeater of the Saxons!
+// Sovereign of all England!
+// (continued...)
+```

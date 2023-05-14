@@ -4,164 +4,44 @@ import { Meta } from '@storybook/blocks';
 
 # Indexes
 
-  Now lets learn how to [index](https://js.langchain.com/docs/modules/indexes/) our data to see how we can start.
+Now lets learn how to [index](https://js.langchain.com/docs/modules/indexes/) our data to see how we can start getting
+our language models to start seeing the world outside of their own knowledge bubble.
+
+Indexing encompasses several new concepts lets go over the pipeline at a high level and then 
+we'll dive into each of the components in more detail.
+
+Our new concepts are:
+
+  - [Documents](https://js.langchain.com/docs/modules/indexes/document_loaders/)
+  - [Text Splitters](https://js.langchain.com/docs/modules/indexes/text_splitter/)
+  - [Embeddings](https://js.langchain.com/docs/modules/models/embeddings/)
+  - [Vector Stores](https://js.langchain.com/docs/modules/indexes/vector_stores/)
+  - [Retrievers](https://js.langchain.com/docs/modules/indexes/retrievers/)
 
 ## Document Loaders
 
-  [Document loaders](https://js.langchain.com/docs/modules/indexes/document_loaders/) are used to create Documents from
-  various input sources. These Documents can then be embedded and placed in a Vectorstore to augment the language models
-  responses.
+Document loaders are used to create Documents from various input sources. 
+These Documents can then be embedded and placed in a Vectorstore to be retrieved 
+and used to augment the language models responses.
 
-### Documents
-
-In order to understand how to use Document Loaders, we first need to understand what a Document is.
-
-Language models only know information about what they were trained on. 
-In order to get them to answer questions or summarize other information you have to pass it to the language model. 
-Therefore, it is very important to have a concept of a document.
-
-A document at its core is fairly simple. It consists of a piece of text and optional metadata. 
-The piece of text is what we interact with the language model, while the optional metadata 
-is useful for keeping track of metadata about the document (such as the source).
-
-```js
-interface Document {
-  pageContent: string;
-  metadata: Record<string, any>;
-}
-```
-
-Let's say we have a blog post that we want to use as a source for our language model. 
-We add the blog content as the pageContent and then add any relevant information we want to the metadata object.
-
-```js import {Document} from 'langchain/document';
-
-const blogPost = new Document({
-  pageContent: 'This is the content of my blog post...',
-  metadata: {
-  // We can add any metadata we want to the document
-    title: 'My Blog Post',
-    url: 'https://myblog.com/my-blog-post',
-  }
-
-});
-
-```
-
-<p>We'll see how to use this in a later lesson, but for now let's look at how we 
-can create Documents from various sources using loaders.</p>
-
-
-## Loaders
-
-Document loaders allow us to create these Documents from a wide variety of sources. 
-We can use them to load data from a file, a url, or even a database.
-
-The Document Loaders offer two methods: load and loadAndSplit. 
-The load method loads the documents from the source and returns them as an array of Documents. 
-On the other hand, the loadAndSplit method loads the documents from the source, 
-splits them using the provided TextSplitter, and returns them as an array of Documents.
-
-```js
-interface DocumentLoader {
-  load(): Promise<Document[]>;
-  loadAndSplit(textSplitter?: TextSplitter): Promise<Document[]>;
-}
-```
-
-<p>Note: we'll learn more about TextSplitters in a bit.</p>
-
-## File Loaders
-
-<p>
-  [File loaders](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/) 
-  are, as the name suggests, loaders for files of various types.
-</p>
-
-<p>
-  Examples of available file loaders include:
-</p>
-
-<ul>
-  <li>[Directory](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/directory)</li>
-  <li>[CSV](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/csv)</li>
-  <li>[JSON](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/json)</li>
-  <li>[EPUB](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/epub)</li>
-  <li>[...and more](https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders)</li>
-</ul>
-
-### Example
-
-<p>
-  The following example shows how to use the <code>TextLoader</code> loads a standard <code>.txt</code> file
-</p>
-
-```js
-import { TextLoader } from 'langchain/document_loaders/fs/text';
-const loader = new TextLoader("./assets/monty-grail.txt");
-
-const docs = await loader.load();
-console.log(docs[0].pageContent)
-// Output:
-// Whoa there!
-// Halt!
-// Who goes there?
-// It is I, Arthur, son of Uther Pendragon
-// from the castle of Camelot.
-// King of the Britons!
-// Defeater of the Saxons!
-// Sovereign of all England!
-// (continued...)
-```
 
 ## Text Splitters
 
 Language Models are often limited by the amount of text that you can pass to them. 
-Therefore, it is neccessary to split them up into smaller chunks. 
+Therefore, it is necessary to split them up into smaller chunks. 
 LangChain provides several utilities for doing so.
 
-Using a Text Splitter can also help improve the results from vector store searches, 
-as eg. smaller chunks may sometimes be more likely to match a query. 
-Testing different chunk sizes (and chunk overlap) is a worthwhile exercise 
-to tailor the results to your use case.
+## Embeddings
 
-### RecursiveCharacterTextSplitter
+Embeddings can be used to create a numerical representation of textual data. 
+This numerical representation is useful because it can be used to find similar documents.
 
-This is the recommended splitter for most use cases. This will split documents 
-recursively by different characters starting with "\n\n", then "\n", then " ". 
-This tries to keep the semantically relevant parts of the text together.
+## Vector Stores
 
-```js
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+A vector store is a database designed for storing documents and their embeddings.
+We can then query this database to find documents that are similar to a given query.
 
-const text = `Hi.\n\nI'm Harrison.\n\nHow? Are? You?\nOkay then f f f f.
-This is a weird text to write, but gotta test the splittingggg some how.\n\n
-Bye!\n\n-H.`;
-const splitter = new RecursiveCharacterTextSplitter({
-  chunkSize: 10,
-  chunkOverlap: 1,
-});
+## Retrievers
 
-const output = await splitter.createDocuments([text]);
-```
-
-You'll note that in the above example we are splitting a raw text string and getting back a list of documents. 
-We can also split documents directly.
-
-```js
-import { Document } from "langchain/document";
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-
-const text = `Hi.\n\nI'm Harrison.\n\nHow? Are? You?\nOkay then f f f f.
-This is a weird text to write, but gotta test the splittingggg some how.\n\n
-Bye!\n\n-H.`;
-const splitter = new RecursiveCharacterTextSplitter({
-  chunkSize: 10,
-  chunkOverlap: 1,
-});
-
-const docOutput = await splitter.splitDocuments([
-  new Document({ pageContent: text }),
-]);
-```
-
+Retrievers are used to retrieve documents from a vector store. There are several
+methods to do this that give us varying degrees of control over our results
