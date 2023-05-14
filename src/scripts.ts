@@ -23,10 +23,7 @@ const memoryStoreExample = async () => {
     console.log('docs', docs);
     const splitDocs = await splitter.splitDocuments(docs);
     console.log('splitDocs', splitDocs[5]);
-    const vectorStore = await MemoryVectorStore.fromDocuments(
-      splitDocs,
-      new OpenAIEmbeddings({ openAIApiKey: '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' }),
-    );
+    const vectorStore = await MemoryVectorStore.fromDocuments(splitDocs, new OpenAIEmbeddings({ openAIApiKey: '' }));
 
     // Search for the most similar document
     const result = await vectorStore.similaritySearch('what if I want something like Python?', 1);
