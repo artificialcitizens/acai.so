@@ -1,0 +1,138 @@
+Hi, and welcome to the Design Systems Podcast. This podcast is about the place where design and development overlap. We talk with experts to get their point of view about trends in design, code, and how it relates to the world around us. As always, this podcast is brought to you by Knapsack. Check us out at knapsack.cloud. If you want to get in touch with the show, ask some questions, or generally tell us what you think, go ahead and tweet us @TheDSPod. We'd love to hear from you.
+
+Hey, everyone. Chris here, the host of the Design Systems Podcast. I wanted to let you all know that this is a continuation of last week's episode with Meta. If you haven't listened to part one yet, it might be worthwhile to rewind time and take a peek at that before you go ahead and listen to this one. It'll just help you make sure that you have context. Without further ado, here's part two of the episode with Meta. I hope you all enjoy the show.
+
+Thinking about a provocative take here, one of the ideas that is sort of percolating around the larger-scale companies that are looking at this sort of stuff, the Salesforces and the Googles and whatnot, that all have these ideas of what a design system means, a lot of this is about changing the role of design to focus on product innovation and product value. And I think that's very well-aligned with your stated intention.
+
+A design system is intended not just to make things faster or easier. That's a great benefit and it's not one to be ignored. But even more so than that, it allows us to focus on the more interesting problem sets. And what I mean by those interesting problems are the things that really generate user value. And those are usually really hard problems and they're usually very unrelated to the production idea of design. It's less about this idea of let me make a bunch of variants of components, or let me think about how these components assemble themselves. And it's a lot more about how do I create attention and focus on that really interesting UX and design problem?
+
+And I think that there's a bit of fabric here that you guys have this opportunity to weave that looks at a design system as a set of best practices for how you're able to connect all of the insights you can gather within an organization of the scale of Meta and really create some real magic for your users. And I think that's this awesome idea that you have.
+
+I kind of want to think also how this changes the work itself. And maybe we can hear from Adelle for a second around when you think about inspiration that drives from this sort of change, where does that really look at both in terms of the similarities that you're going to see moving forward and also the differences?
+
+Adelle:
+
+Yeah. I mean, I think it's actually kind of approaching inspiring individuals in the organizations. I think it's essential to actually consider both goals when inspiring change. And I think a lot of our culture has been changing over the past year in a really exciting and great way.
+
+I think if we do this right, it'll help us effectively utilize our design system, enabling and empowering designers to be more creative and inspired. I think they'll be more empowered to work on deep problems and new experiences. And that's why we sign up. That's why we want to be here. We want to work on those deep problems and that's what gets us up and going every day. But I think design systems is kind of like the venue to get us there.
+
+I think it's equally as important to ensure that our organizational goals, such as efficiency and unification, are taken into account when we inspire change. I think we need to build empathy for our system's mindset at Meta and how it relates to our individual goals.
+
+I think it becomes actually less of a challenge at scale, as we have a lot of internal tools that we've built and a lot of programs that we represent to service the great work that's being created across Meta. A good example I think is Origami, our prototyping tool. We allow designers and engineers and content designers to collaborate. I think Origami is a really good example of this, which it's a really powerful tool with almost no ceiling on what can be imagined, engineered, or designed.
+
+But I think going back to the work, what's really important to me, and maybe I'm biased, but I think we really do a good job of celebrating and uplifting the work at Meta and across Facebook.
+
+Chris:
+
+I want to come back to that cross-functional point in just a second. But I wanted to basically say one of the cool things that I heard there was that maintaining of that mindset and that leveraging of your scale in which to do something interesting.
+
+And before the program, Mitch was talking about leveraging a lot of the parameters and tools and processes that capture these design decisions to continue to really look at how you leverage them in decision points and have this idea of the testing shades of colors for a button. Mitch, can you please remind me of that story because I think it's a really fitting sort of piece for this?
+
+Mitch:
+
+Yeah, I think as you look at kind of experimentation as a good way to represent a lot of the work that happens at Meta, there's a million little levers you can turn to find additional impact in the products that you're working on. And I always kind of go back to the story that has kind of been emblazoned in a lot of designers minds around, well at Google they tested 50 shades of blue on the search button and found out which one performed the best. And I think a lot of people look at that as like, "Oh, cool, these little tiny design decisions can actually impact higher-level metrics."
+
+But what's always kind of irked me about that story is some of the higher-leverage questions they could have been asking because they were focused on testing 50 shades of blue, should that be a button? Should it have just automatically executed the search when a user finished typing, taking you to things like autocomplete?
+
+And I think by really building a lot of these foundational design parameters into the design system, it frees up a lot of time and it enables you to really think about those higher-leverage points in your design. Is it about am I using the right components, or is the question of how should a user fundamentally move through this experience? And when you can more rapidly in sort of a day-to-day design efficiency standpoint leverage a really great system to validate those assumptions, you can start to test those more complex sort of hypotheses that you have.
+
+Andrew:
+
+That actually reminds me of something we've seen a number of times, especially very large organizations that are a few years into their system journey and even have good adoption. I heard this from IBM a couple years ago that like, "We're good with the system and we've got teams using the system and all the colors, and now what we have is a bunch of really on- brand, very different account management experiences across our flow."
+
+And so it both was a focus challenge, but also because they then got used to using the system, they were then able to up-level and say, "All right, now we're going to think about things like account management flows as part of the system because I don't want everyone in these products to do that differently."
+
+So it's both a warning about what to focus on and also an opportunity that comes once you start to adopt a system practice of we can tackle higher-order problems and actually make that part of the system as well. And per the comment earlier, maybe lose a little bit of some of the strictness around some of the lower-level elements. So I think that's awesome.
+
+Chris:
+
+Yeah, Andrew, I think you also probably have some good insight on the cross-functional nature of these problems. And Mitch, by the way, I loved that explanation where you talked a little bit about design, you talked a little bit about code and implementation, and you talked a little bit about content sort of all in one example. And to our conversation with Elizabeth earlier about the role of content and how important that is, that cross-functional nature is essential to the success of these sorts of systems. Where have you seen that play out at scale, Andrew?
+
+Andrew:
+
+Yeah. I mean, there's different parts of the journey to talk about in this way. There's how do teams that have a solid system practice utilize it best cross-functionally? And that's where the system should be part of every stage in the product lifecycle. We should be using this to inform what problems we're working on, not just how do we solve them well and how do we work on the unique parts of these experiences.
+
+And that is, we've all been through the PLC. It is a fundamentally cross-functional operation. But I think it allows us as a cross-functional team to really rise above some of the things that we've been mired in for the past 20 years of building stuff for this and instead focus on, again, what's going to be most impactful. And that's not always going to be redesigning the button or changing the shade. I got to stop talking about the button.
+
+Chris:
+
+It's our favorite punching bag.
+
+Andrew:
+
+It's just too easy. We got to make T-shirts with the button. When we take that as a fundamental, this is cross-functional and things we all do, everyone in this room contribute to the quality and the effectiveness of that end experience, if that's a baseline, it allows us to talk like, "Hey, maybe this release is all about content. This is all about changing some of our information architecture," not just, "Hey, what's the new feature we can ship?"
+
+Because Chris and I talk about this a lot. We have for years in digital production talked about ship more and, yeah, ship better, but ship faster. And it's like, "Are we shipping the right stuff? Does it need to be a new feature or can we actually pair back some features and think about what state of mind the user's in when they get to this part of the experience?" And that doesn't happen if all we're thinking about is how do we design and build this thing a little bit faster and a little bit more consistent. It's fundamentally getting at that higher-order problem, which necessitates a cross-functional approach in my opinion.
+
+Chris:
+
+Yeah. I think also given the audience for this being mostly about designers and design, I do want to take a moment to highlight that design experience. And so we talked a lot about leveraging work. I think that there's some very specific things that you all have planned that really aim at that leverage point. And Dan and Adelle, do you guys want to tag team this and talk about some of those shifts and how the folks that are in this room can think about how they can use that leverage?
+
+Adelle:
+
+Yeah, absolutely. I think in the tool space, we are focusing on the designer's experience really by this thing that we kind of call internally. And hopefully, now more people will know what we say when we mean this. But we really want to shift left in the designer's experience and focus on catching issues upfront before they hit production. I think this all ties back to playing back to efficiency and being unified. But we have this plugin in Figma that we've built internally called Quality Check, and it's an amazing evolution that we've made in our tooling over the last year and a half and I've been so excited to be a part of.
+
+But at the very base, it starts with our heuristics-based automation through linting of rules that we apply. The heuristics are very specific to Facebook and we've worked a lot on those over the last year. And we can lint rules for things such as accessibility, usability, color contrast. We can work in design tokens, color and radius and border. We also have specific content, specific actions where we pair with our content design partners. It's a pretty cool space to be in, but again, I'm biased.
+
+Get started
+See how Knapsack helps you reach your design system goals.
+Explore Case Studies
+We also have a tool called DDR, which is Designer Diff Review, and this is kind of where we empower designers to kind of stop the line on code landing and product, which I think is really powerful. We also think about towards the end of the phase and where we want to catch issues either in auditing or in production. We have a tool called UI Quality Review, which can do this kind of automatically on the fly.
+
+We have tons of tools, but we also have design systems overlays kind of dubbed internally, like the pink overlay, where you can open any screen and automatically see what is or isn't a part of our design system, or blueprint as we call it going forward. And we also have a lot of ways to distribute these design systems and sources of truth along with our design system documentation. But Dan, if you want to kind of tag team on this.
+
+Dan:
+
+Yeah, I think you hear a lot of engineers and developers talk about the developer experience. So it's just great to see how our company has been able to invest so much in the designer experience. And this is all internal tooling, but these are things that if I were to ever leave Meta, it's like I would miss these things because it's such a vital part of my day-to-day.
+
+Designer Diff Review was a game changer. We've had it for a couple of years now. And I'm constantly catching issues, looking at the code and catching engineers using a different color constant from what I had in my design spec or in Figma, and I'm able to kind of catch that at the line of code where it was being accidentally changed and prevent that from actually landing in the product. So all this stuff together is extremely powerful and it kind of puts designers at the frontline in maintaining quality.
+
+Chris:
+
+Yeah. I really love that you all have taken to heart the idea of build something one time and then figure out how you can leverage that for years to come, ultimately even if that means that it displaces something else inside of your ecosystem. And I think this is kind of a good lesson as we kind of relate back to that theme of change that we talked about early on, change, intention, and then outcome. You have different design systems needs now than you did a year ago. You'll have different design needs again a year from now. And so I think that the ability to focus on this gap in unification really is going to help with adoption.
+
+And I want to just take a second for Andrew to talk about the adoption at scale idea. We tend to think about organizations organized in two different ways. We think about it as large platform organizations that have lots of individual parts of the product that have specific and unique needs, or we think about organizations that are lots of different brands underneath a one common umbrella that all have unique needs. One of the wonderful things about this conversation is you all are both. And so I think that there's some practical insights around adoption here that Andrew has that kind of makes sense to share.
+
+Andrew:
+
+Yeah, I was going to say the exact same thing. There's two categories and you all fit in both. Two of the things that I see as most impactful here across teams is regardless of the resources they have, they have a big dedicated team on the system or they have no one on the system except some people moonlighting, the first is it comes back to the human element. Chris, from the start, you talked about the culture side of any sort of change, especially around something so pivotal as this. Enabling and empowering the users of your system to be a part of the system journey and evolution is just by far the most powerful thing I've seen.
+
+We get a lot of teams where just by nature of the concept of what we're doing, it's all routed through the system team and it becomes a very one-way flow of here are the Lego pieces, here's the testing suite, here's the templating. And when teams inevitably hit the things they can't find in the system, they go solve it. And then 20 teams solve for that limitation.
+
+So again, I've seen this in the form of small teams basically crowdsourcing their system from teams already designing and building things and recognizing we can iterate over time if we centralize and redistribute to teams that it's just about everyone being able to leave things better than they found it, all managed through nice processes so nothing just goes up because an intern said this could be better. But enabling that two-way conversation so the system isn't a one-way flow is one big part.
+
+And the other I'd say, which is really related to that, and I think this even came up in the Eric podcast a couple years ago, is how do we accommodate departure from the system as part of the system? Just testing or content or all these other things that aren't UI elements, but teams are going to need to do things that are unique to them.
+
+And Chris and I were just rambling about the concept of can we get to a web standard, not good practice, but there's a date picker that everyone in the web recognizes is the best thing. The only way that happens is if the departure individual teams will need to make from the date picker is baked into that spec and that concept of that date picker. So accommodating the reality that people are going to have to do what they need to do to make the best product, but doing it in a way that allows us to learn from it or monitor it or have discussions around it.
+
+Both of those things go into the people using the system are empowered to be a part of this and to help the whole organization in the future, not just say "Thank you. I'll take it and go do my job."
+
+Chris:
+
+Yeah. I love the idea of this opportunity to think about scale across all of Meta but also scale that relates to how the web gets built. And there was some interesting ideas that Mitch had that kind of thought about how we maybe bring this more broadly from this conversation into the greater context of the organization.
+
+Mitch:
+
+Yeah. I mean, I think a lot of the things that we're talking about inside of Facebook, breaking down silos, finding ways to stitch together experiences across multiple touchpoints, when you take a step back to sort of that next ring out of Meta, are a lot of similar conversations that we hear. There's a lot of initiatives that now cut across the Meta family of apps. And as we look at these rings of efficiencies, some of these fundamental challenges that we're solving today as a team, I think are the same fundamental challenges we see when we try to work across our family of apps.
+
+So whether it's thinking about things like content liquidity or our appreciation systems or messaging experiences, how we are breaking apart some of the visual design decisions from the semantic design of the components can scale as you look at these different rings of efficiency. I think we're pretty well-equipped as Facebook now with sort of the changes to the platform design team, how we're thinking about shifting to those higher-leverage opportunities of design to really be able to continue that momentum as we look at solving some of these problems across the company.
+
+Dan:
+
+Just speaking as somebody who worked on the web for the past seven years across Meta, it's like web is always something that teams across Instagram and Messenger and whatever, meta.com site there is that's currently being worked on, people always just want to know what's the correct pattern. Like you were saying, with the date picker, what's the best date picker? And basically, not shipping our org chart and being able to cross these company lines is something that we do a lot on the web just because it's a smaller group of folks who are working on it. So I've personally been able to partner a lot with the Instagram folks and we collaborate and chat a lot about how should Instagram and facebook.com relate.
+
+And so we do a lot of that on the website and I think we're going to start to do it in other ways as well. And I think Adelle can definitely speak to the tooling side and how that is overlapping across our company.
+
+Adelle:
+
+Basically, I think this always goes back to the single source of truth mentality that we talked about earlier. We have the shared tooling infrastructure that allows designers and engineers to work faster and, again, more efficiently. Our goal is really to make everything available to everyone through our tooling so that single source of truth is easily accessible and of highest quality. And I think if we can do that right, we're taking the right steps.
+
+Through tools like Design Kit and Design to Engineering Handoff, even shared insights through research across the organizations, sharing those foundations even in something as simple as a component library in Origami, we have many powerful collaboration tools.
+
+I think essentially taking the way that we work together, we want to answer how can Meta make better decisions faster? How can we elevate design efficiency and process? I think this really includes sharing the wealth. One of the ways that we do that is getting high-fidelity prototypes to leadership without having to wait on syncs or crits, enabling Origami to plug into tooling, like Figma, that already has product market fit, than rather reinventing the wheel. And I think these are just some of the small ways that we can all work together besides our human connections, which are priceless.
+
+Chris:
+
+Yeah, I love the idea that you're so focused on the idea of creating the path of least resistance to a good product. And I think that's really a big part of the adoption side of things as well. Nobody likes to be the design systems police. And in the sense of control versus adoption, more control almost always leads to a harder pathway to adoption. And I think you all are doing a great job thinking about what enables and empowers people to build products easier.
+
+Thank you guys so much for allowing us to be here. Mitch, Adelle, Dan, Elizabeth, Andrew, and Chris. Really appreciate this.
