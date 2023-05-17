@@ -1,0 +1,36 @@
+
+Single Sign-On (SSO)
+
+Introduction
+ Knapsack offers Single Sign-On (SSO) for Enterprise customers, enabled via Auth0, the industry-standard authentication management solution.
+ Once enabled SSO lets workspace users access to the workspace using their company-wide login (or active session) vs. entering a username and password. This gives the organization ultimate control over who can access the platform - a critical requirement for security-conscious businesses.
+ Enabling SSO for one or more workspaces requires collaboration between Knapsack's Help team and the team managing the Identity Provider (IdP) with which we'll be connecting. Typically, this is someone in the IT (or similar) function of an organization.
+ To get started with SSO implementation for your workspace, email help@knapasck.cloud.
+ For more information on the workflow to enable SSO, continue on to the section below.
+SSO Configuration Workflow
+In order to configure SSO for a workspace to work with a customer’s IdP, the customer team must provide the following:
+
+Point of contact that manages / implements SSO connections with customer’s IdP
+Email domains to be routed to SSO
+  
+Users logging in with these email domains will be sent to the SSO system. Users with other email domains can still be invited to the workspace and access via username & password.
+
+Configuration Data:
+  
+Sign-In URL
+X509 Signing Certificate (PEM or CER format)
+Sign Out URL
+
+Test accounts
+  
+These can be real user accounts or accounts set up specifically for testing the SSO implementation once configured.
+
+
+Configuration Steps
+
+Once the above information is provided, Knapsack’s Help team will do the initial SSO configuration in the underlying authentication platform, Auth0.
+Once initial configuration is complete, Knapsack will provide a post-back URL to the point of contact on the customer team. Example post-back URL: https://auth.knapsack.cloud/login/callback?connection=YOUR_CONNECTION_NAME
+Customer team will finish configuration in the IdP and notify Knapsack when complete.
+Customer & Knapsack will initiate a test using the provided test accounts.
+If needed, customer’s point of contact and Knapsack’s help team will continue to troubleshoot the configuration until working as expected.
+

@@ -1,0 +1,29 @@
+
+Managing Tokens in JSON
+
+Introduction to Design Tokens
+ Design tokens are atomic design properties - a color, font, border radius, or some combination of these sorts of properties - expressed as a source variable that can be combined, translated, and consumed across an entire digital ecosystem.
+ Adding design tokens to your Knapsack workspace can help your team define, document, and distribute color, typography, and other core styling properties to your design system users. 
+ Knapsack ships with its own Token Rendering Engine but supports the same formatting as Amazon's Style Dictionary. If you already use Style Dictionary, you don’t have to adjust your design token format to work with Knapsack. Otherwise, you might need to reformat your existing design tokens to match our standards.
+ Note: To make these changes to your workspace, you must be logged in and have either Admin or Editor permissions.
+ 
+Design token source and formatting
+ In the preconfigured repository, design token data is stored in the /data/knapsack.design-tokens.json file. You’ll see several top-level token categories in the file by default (color, spacing, and breakpoint), each of which map to display settings and filters in the Design Tokens Content Block, per the diagram below:
+ 
+ The above data + configured content block then have the following effect (showing all blue color token values):
+ 
+Add/edit design token data (local dev)
+ To get started quickly, you can modify the provided demo token data (color, spacing, breakpoint) within the /data/knapsack.design-tokens.json file (same as the above example). Values you enter will be immediately available in the Design Tokens content block in the Knapsack Cloud UI.
+
+If additional top-level categories are desirable (such as animation, font, z-index, etc.), then you may add additional categories as needed:
+Nested under the top level categories are the second level (etc.) of token class, "tags": 
+Tags are extremely useful for creating content block token demos. They work for all token types, not just colors! The below demonstrates the use of tags within the "breakpoint" category:
+
+Building your tokens (local dev)
+ Once your token data is in the correct format — from the root of your workspace, run a full build ( yarn build) OR build tokens: yarn knapsack build:tokens
+
+By default — tokens build (in just about every format) to the design-token package directory "/packages/design-tokens/dist": 
+It should also be noted — the contents of this design-token package (above) are immediately released into your NPM package once merged into the main branch 🎉
+
+ Note: If you’d like assistance in customizing the format for design token data within your Workspace, contact us at help@knapsack.cloud.
+ See also: Documenting Design Tokens

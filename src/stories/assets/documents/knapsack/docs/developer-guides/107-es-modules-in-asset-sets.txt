@@ -1,0 +1,31 @@
+
+ES Modules in Asset Sets
+
+ Using ES Modules (and custom asset set attributes) within Knapsack is easy! 
+ From a markup-level perspective — the only difference between a "vanilla" JS script tag and an ES Module is the type="module" attribute.
+Example
+
+The below code shows a standard asset set (here called "default").
+The third asset in the list ("../packages/web-components/dist/index.js") contains an attributes object.
+Within the attributes object we're able to set the type to "module".
+All set! 🎉
+
+{
+  "globalAssetSetIds": ["default"],
+  "allAssetSets": {
+    "default": {
+      "id": "default",
+      "title": "Default",
+      "assets": [
+        { "src": "../packages/design-tokens/dist/design-tokens.css" },
+        { "src": "../packages/styles/dist/styles.css" },
+        {
+          "src": "../packages/web-components/dist/index.js",
+          "includedRenderers": ["web-components"],
+          "attributes": { "type": "module" }
+        }
+      ]
+    }
+  }
+}
+

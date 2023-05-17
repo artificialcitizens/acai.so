@@ -1,0 +1,125 @@
+
+Running Knapsack Locally
+
+In This Article:
+
+Prerequisites for Running Knapsack
+Mac OS Setup
+Windows Setup
+Set Up and Run a Knapsack Workspace
+
+
+Prerequisites to Running Knapsack
+ Before you can start running Knapsack, you need to prepare your system for the setup process. We recommend using our preconfigured repository when you first start using Knapsack. Once your workspace is up and running, you can reconfigure your workspace and connect it to your preferred repo.
+ If you already meet the pre-requisites, jump straight to how to set up and run a Knapsack workspace
+
+Software
+ Knapsack workspaces build and run locally on your machine, which means that you need to install a few software packages.
+ Before you set up and run Knapsack on your local machine, you must have the following software installed:
+
+Git
+Node 14 or 16 (NVM recommended)
+Yarn
+Python
+
+ For Twig renderer support, the following must also be installed:
+
+PHP 7.4 or later
+Composer
+
+Git Repository Access
+ Managing the code of your system and workspace requires access to the connected git repository. Our preconfigured sandbox repository that comes with your workspace is hosted on Github, and you need access to it in order to get started. If you don’t have access to the repository, contact us at help@knapsack.cloud.
+
+
+ 
+Mac OS Setup
+  On Mac OS and Linux, we recommend using Homebrew to install the required packages. You can can install all packages using a single Homebrew command: brew install git nvm composer yarn php
+ Of course, if you have some packages already installed, you can run the same command with only the missing packages.
+
+
+Windows Setup
+ In order to use Knapsack locally on a Windows 10 machine — we need to enable the Linux Subsystem (WSL) and install a few packages. 
+ NOTES: 
+
+Several steps will require you to restart your system. Make sure everything is saved and prepped for a system restart.
+If using VS Code — it's highly recommended that you review and install the Remote WSL extension.
+
+Enable Window Subsystem for Linux
+ If you are not already using Linux on Windows 10, you must enable the Windows Subsystem for Linux with these steps:
+
+Open Start on Windows 10
+Search for Turn Windows features on or off and click the top result to open the experience.
+Check the "Windows Subsystem for Linux" option 
+Click the OK button.
+Click the Restart button.
+
+
+Enable Virtual Machine Platform
+
+Open PowerShell (as administrator)
+Run the following command: Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform
+Restart the computer.
+
+
+
+Install Ubuntu
+
+Navigate to this link (on the Microsoft Store): Download Ubuntu 20.04.4 LTS
+From the distribution's page, select "Get". Note: The first time you launch a newly installed Linux distribution, a console window will open and you'll be asked to wait for a minute or two for files to de-compress and be stored on your PC. All future launches should take less than a second. 
+You will then need to create a user account and password for your new Linux distribution.
+CONGRATULATIONS! You've successfully installed and set up a Linux distribution that is completely integrated with your Windows operating system!
+
+
+
+
+
+Install Windows Terminal (Recommended)
+ Windows Terminal enables multiple tabs (quickly switch between multiple Linux command lines, Windows Command Prompt, PowerShell, Azure CLI, etc), create custom key bindings (shortcut keys for opening or closing tabs, copy+paste, etc.), use the search feature, and custom themes (color schemes, font styles and sizes, background image/blur/transparency).
+
+Install from Microsoft Store: https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701
+When we want to run our Linux commands we can now do so through Windows Terminal and Opening a new Ubuntu tab 
+
+
+Install nvm, node.js, and npm
+
+Open Windows Terminal with a new Ubuntu tab
+Run: sudo apt-get install curl
+Install nvm with: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+Verify nvm has been installed correctly by running: nvm --version (you should see a version number)
+Next we will install Node 14 by running nvm install 14
+Verify node installed correctly by running: node --version (you should see node 14 version displayed)
+
+Install Yarn
+
+Run this command: npm install --global yarn
+ Check that Yarn is installed by running: yarn --version
+
+Install PHP and required packages
+ NOTE: PHP is used specifically with the Twig renderer. If you are not using the Twig renderer within your workspace, you can skip this step.
+
+Run this command: sudo add-apt-repository ppa:ondrej/php
+Next, we need to update our Ubuntu packages. Run: sudo apt-get update && sudo apt-get upgrade (this may take a while)
+After the above completes, run: sudo apt-get install php-fpm php-mysql php7.1-cli php7.1-curl php7.1-mbstring php7.1-mcrypt php7.1-xml php7.1-zip php7.1-intl unzip php-cli
+
+
+
+ 
+Set up and run a Knapsack workspace
+ Setting up a Knapsack workspace from our preconfigured repository is simple. We did the heavy lifting for you ahead of time so that you can get right to the action.
+ To ensure a smooth setup, confirm that you’ve met all the prerequisites for running a workspace, listed above.
+
+Clone our preconfigured Github repository. 
+  
+In a terminal, navigate to the directory where you want to clone the repository.
+Enter git clone https://github.com/knapsack-cloud/your-workspace-name.git, where your-workspace-name is the name of the repository we provided to you
+
+In the command line, navigate to the cloned repository, and enter yarn.
+Enter yarn build. 
+Enter yarn start. If everything was successful, you should see the following output in the terminal:   
+In a web browser, navigate to http://localhost:3999. If the setup was successful, you should see the Knapsack user interface.
+Sign into your Knapsack account using the menu in the top right corner. 
+  
+Click Log In 
+Enter your email address and password, then click Sign In
+
+

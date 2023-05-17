@@ -14,10 +14,11 @@ interface ChatProps {
   onSubmitHandler: (message: string, chatHistory: string) => Promise<string>;
   height?: string;
   startingValue?: string;
+  placeHolder?: string;
 }
 
-const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue }) => {
-  const inputRef = useRef(null);
+const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, placeHolder }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [msgInputValue, setMsgInputValue] = useState(startingValue);
   const [messages, setMessages] = useState<MessageModel[]>([
     {
@@ -57,7 +58,7 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue }) =
       setMsgInputValue('');
       inputRef.current?.focus();
       setLoading(true);
-      const chatHistory = messages.map((msg) => msg.message).join(' ');
+      const chatHistory = messages.map((msg) => msg.message).join('\n');
       try {
         const answer = await onSubmitHandler(message, chatHistory);
         setLoading(false);
@@ -105,7 +106,7 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue }) =
           ))}
         </MessageList>
         <MessageInput
-          placeholder="Type question here"
+          placeholder={placeHolder || 'Type question here'}
           onSend={handleSend}
           onChange={setMsgInputValue}
           value={msgInputValue}

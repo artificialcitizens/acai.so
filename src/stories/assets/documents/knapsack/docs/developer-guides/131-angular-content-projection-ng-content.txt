@@ -1,0 +1,21 @@
+
+Angular Content Projection (ng-content)
+
+ Knapsack version 3.53.0 and on supports Angular content project. This provides the use of "slot" functionality within our Angular renderer.
+Basic Usage Example
+ Content Projection can be implemented within the following steps:
+
+Within your Angular template — add the <ng-content></ng-content> tag where you'd like your content to be projected.  For example:    <div class="ex-card">
+  <img *ngIf="img" src="{{ img }}" class="ex-card_img" alt="" />
+  <div class="ex-card_body">
+    <h4 *ngIf="title" class="ex-card_title">{{ title }}</h4>
+    <h6 *ngIf="subtitle" class="ex-card_subtitle">{{ subtitle }}</h6>
+    <div *ngIf="cardBody" [outerHTML]="cardBody"></div>
+    <ng-content></ng-content>
+  </div>
+</div><br>
+	
+Within Knapsack (and while editing your Angular pattern) — click the gear icon and scroll down to the "slots" definition area.
+IMPORTANT: When adding your new slot you must name it default. Be sure to click the purple "Save Changes" button when done.
+Now you can add any combination of existing Angular patterns and text! 🎉
+

@@ -1,0 +1,35 @@
+
+Advanced: Using Arrays of Objects
+
+ There are times where an array of object is required for passing more complex data into your components. We'll use the same process outlined within our previous doc, Advanced: Using Objects as Props.
+ We start with adding an object prop within the ui
+ This help doc assumes you're already reviewed our previous doc, Advanced: Using Objects as Props. Please refresh yourself on that doc before moving on to the steps below.
+Quick steps for adding an object as a prop
+
+Click the "Edit Pattern API" gear icon to edit the props
+Add the Object prop (for our example, let's call it "navigation") — by clicking the "+ Prop" button and opening the prop to select "Object" as the Type.
+Scroll down to expose more of the prop configuration, then toggle the "Prop Spec" pane.
+Within the spec, let's define an array of objects (e.g. for something like a new navigation component):  solutions in the below example is the Array of Objects. In a react component, you would access this with navigation.solutions.  {
+  "type": "object",
+  "properties": {
+    "solutions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+Next click the "Format JSON" button to ensure the code is clean and valid. Then the purple "Save" button.
+IMPORTANT: Click the final "Save Changes" button to see your pattern's schema form update with the new object configuration
+Now your pattern's schema form will be updated to reflect the new Array of Objects prop 🎉
+

@@ -1,0 +1,221 @@
+import { Meta, Canvas } from '@storybook/blocks';
+import * as PromptStories from './prompts.stories';
+
+<Meta title="Prompts/Overview" />
+
+# Prompts
+
+<p>
+  [Prompts](https://js.langchain.com/docs/modules/prompts/) cover a variety of tools to help manage
+  language model prompts and output
+</p>
+
+## Prompt Templates
+
+A PromptTemplate allows you to make use of templating to generate a prompt. 
+This is useful for when you want to use the same prompt outline in multiple places, but with certain values changed. 
+Prompt templates are supported for both LLMs and chat models, as shown below:
+
+```js
+import {
+  ChatPromptTemplate,
+  HumanMessagePromptTemplate,
+  PromptTemplate,
+  SystemMessagePromptTemplate,
+} from "langchain/prompts";
+
+  const template = "What is a good name for a company that makes {product}?";
+  const prompt = new PromptTemplate({ template, inputVariables: ["product"] });
+
+  // We can use the `format` method to format the template with the given input values.
+  const response = await prompt.format({ product: "design systems" });
+
+```
+
+we can also use the `fromTemplate` method to create a new prompt from a template:
+
+```js
+  const prompt = PromptTemplate.fromTemplate(
+    "What is a good name for a company that makes {product}?"
+  );
+  const response = await prompt.format({ product: "enterprise level design systems" });
+```
+
+
+### ChatPromptTemplate
+
+Chat prompt templates work a bit differently to match the input formats of chat models.
+
+```js
+  const chatPrompt = ChatPromptTemplate.fromPromptMessages([
+    SystemMessagePromptTemplate.fromTemplate(
+      "You are a coding assistant that translates {input_language} to {output_language}."
+    ),
+    HumanMessagePromptTemplate.fromTemplate("{text}"),
+  ]);
+
+  const response = await chatPrompt.format({
+    input_language: "JSON",
+    output_language: "YAML",
+    text: `
+    {
+      "name": "John Doe",
+      "age": 30,
+      "cars": [
+        { "name": "Ford", "models": ["Fiesta", "Focus", "Mustang"] },
+        { "name": "BMW", "models": ["320", "X3", "X5"] },
+        { "name": "Fiat", "models": ["500", "Panda"] }
+      ]
+    }
+    `,
+  });
+ ```
+
+#### Try It
+
+Edit the JSON and press the button to see the result. 
+From this simple prompt we are able to convert data formats 🤯
+
+@TODO: Loading state
+
+<Canvas of={PromptStories.JsonToYamlExample} />
+
+### Creating Data Structures
+
+We can obviously do a JSON to YAML conversion with a code based solution, 
+the real power in these models comes in their abilities to take natural language 
+and convert to a data structure
+
+```ts
+import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
+
+const chat = new ChatOpenAI({ openAIApiKey: process.env.OPENAI_API_KEY });
+
+export const chatModelExample = async (query: string) => {
+  const response = await chat.call([
+    new SystemChatMessage(`You are tasked with taking the users input and translating it to a JSON object. 
+    Only return the object with no explanation or context in the following format:
+  name: 'John Doe',
+  age: 30,
+  cars: [
+    { name: 'Ford', models: ['Fiesta', 'Focus', 'Mustang'] },
+    { name: 'BMW', models: ['320', 'X3', 'X5'] },
+    { name: 'Fiat', models: ['500', 'Panda'] },
+  ],
+  `),
+    new HumanChatMessage(query),
+  ]);
+  return <pre><code>${response.text}</code></pre>;
+};
+```
+
+#### Try It
+
+Edit the text field and press the button to see the result
+
+<Canvas of={PromptStories.LanguageToJsonExample} />
+
+## Output Parsers
+
+Instead of passing the data structure as part of the prompt, we can also use an output parser to convert the output of the model similar to using a typing system.
+
+This will also allow us to parse the output of the model and verify the correct data structure is returned.
+
+### StructuredOutputParser
+
+There are several types of output parsers available to us in the JS library. 
+The `StructuredOutputParser` allows us to define a schema for the output of the model.
+
+```ts
+import { StructuredOutputParser } from "langchain/output_parsers";
+
+// With a `StructuredOutputParser` we can define a schema for the output.
+const parser = StructuredOutputParser.fromNamesAndDescriptions({
+  name: "users name",
+  age: "users age",
+  cars: : "users cars brands as a string",
+});
+```
+
+We can then use the `getFormatInstructions` method to return a formatted string to pass to the model.
+`partialVariables` are template partials that allow us to pass in portion of the prompt for the model
+
+```ts
+
+const formatInstructions = parser.getFormatInstructions();
+
+const prompt = new PromptTemplate({
+  template:
+    `You are tasked with taking the users input and converting it to a JSON object.
+    {format_instructions}
+    {question}
+    `,
+  inputVariables: ["question"],
+  partialVariables: { format_instructions: formatInstructions },
+});
+
+
+console.log(prompt.format({ question: "My name is Josh Mabry and I'm 38 years old. I have a Pontiac GTO, a Pontiac Firebird, and a Pontiac Solstice. I also have a Ford Mustang, and a Ford Econoline"}))
+```
+
+
+#### Try It
+
+Press the button and see the output of the language model
+
+<Canvas of={PromptStories.StructuredOutputParserExample} />
+
+### Using Zod schema
+
+This output parser can be also be used when you want to define the output schema using Zod, a TypeScript validation library. The Zod schema passed in needs be parseable from a JSON string, so eg. z.date() is not allowed, but z.coerce.date() is.
+
+```ts
+import { z } from "zod";
+import { OpenAI } from "langchain/llms/openai";
+import { PromptTemplate } from "langchain/prompts";
+import { StructuredOutputParser } from "langchain/output_parsers";
+
+// We can use zod to define a schema for the output using the `fromZodSchema` method of `StructuredOutputParser`.
+const parser = StructuredOutputParser.fromZodSchema(
+  z.object({
+    name: z.string().describe("the users name"),
+    age: z.number().describe("the users age"),
+    cars: z.array(
+      z.object({
+        name: z.string().describe("the name of the car"),
+        models: z.array(z.string()).describe("the models of the car"),
+      })
+    ).describe("the users cars"),
+  })
+);
+
+const formatInstructions = parser.getFormatInstructions();
+
+const prompt = new PromptTemplate({
+  template:
+    "Answer the users question as best as possible.\n{format_instructions}\n{question}",
+  inputVariables: ["question"],
+  partialVariables: { format_instructions: formatInstructions },
+});
+
+const model = new OpenAI({ temperature: 0 });
+
+const input = await prompt.format({
+  question: `My name is Josh Mabry and I'm 38 years old. 
+  I have a Pontiac GTO, a Pontiac Firebird, and a Pontiac Solstice. 
+  I also have a Ford Mustang, and a Ford Econoline.`,
+});
+const response = await model.call(input);
+// verify the output using the parse method
+await parser.parse(response);
+
+return response;
+
+```
+
+#### Try It
+
+Press the button and see the output of the language model
+
+<Canvas of={PromptStories.ZodOutputParserExample} />

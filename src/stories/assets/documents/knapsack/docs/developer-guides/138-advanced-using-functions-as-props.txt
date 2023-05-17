@@ -1,0 +1,49 @@
+
+Advanced: Using Functions as Props
+
+ Sometimes you’ll want to pass a function into a component. You can do this by passing a function prop to the component and configuring Knapsack manually or infer spec if you're using TypeScript. Currently, this feature is only available for our React renderer.
+Adding a function prop using infer spec with TypeScript
+ Your component should have a function prop defined and look something like this:
+import * as React from 'react';
+
+export interface ButtonProps {
+  children?: React.ReactNode;
+  handleClick?: () => void;
+}
+
+export const Button: React.FC<ButtonProps> = ({
+  children = 'I am a button',
+  handleClick,
+}) => {
+  return (
+    <button onClick={(event) => handleClick()}>{children}</button>
+  );
+};
+
+ Verify your component is using infer spec before adding it to Knapsack. Once your component is connected, Knapsack will display your function prop inside the component's form.
+ 
+Adding a function prop manually in the UI
+ Your component should have a function prop defined and look something like this:
+import * as React from 'react';
+
+export interface ButtonProps {
+  children?: React.ReactNode;
+  handleClick?: () => void;
+}
+
+export const Button: React.FC<ButtonProps> = ({
+  children = 'I am a button',
+  handleClick,
+}) => {
+  return (
+    <button onClick={(event) => handleClick()}>{children}</button>
+  );
+};
+
+ Note: For this example, we will use the same architecture as the above Typescript example with handleClick.
+
+Navigate to the Knapsack UI in your browser and locate the pattern you'd like to add the function prop. In this example I'm using the button component.
+Edit the component spec by clicking the gear icon: 
+Scroll down to the "Props" spec and add a new prop:
+In this example, we'll add a new function prop called handleClick. Toggle open the configuration of the new prop and select function from the. First name your function, then select function under the type dropdown, update the prop spec to include typeof function, and click save. You've just successfully added a function prop in Knapsack. 
+

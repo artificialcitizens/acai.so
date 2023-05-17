@@ -1,0 +1,61 @@
+
+Creating Documentation
+
+ NOTE: In order to edit content, Cloud users must first create a branch via the UI. For more information, see Editing + Publishing Workflow.
+ Knapsack uses Content Blocks (or just “Blocks”) to manage content in various areas of your documentation site. Blocks can be added to Pages and Pattern Pages on a content tab or at the bottom of a template tab.
+ When viewing a blank page, you’ll see a select menu that allows you to choose a content block to add.
+ 
+Available Content Blocks
+ Knapsack provides a range of content blocks that can be used for embedding content and third-party resources directly within your system documentation:
+
+Text & Media: For adding text and media content that lives directly within Knapsack 
+  
+Markdown - Markdown text editor with simple WYSIWYG controls
+Divider - create visual separation with a divider
+Gallery - upload images to display as a gallery
+Attachments - upload the following file types:
+
+pdf
+eps
+mp4
+mov
+json
+xd
+txt
+fonts (ttf, otf, woff, woff2)
+Microsoft Office extensions
+Design programs
+
+sketch
+xd
+fig
+
+
+
+System: For embedding dynamic, coded design system assets into documentation 
+  
+Design Tokens - document design tokens visually or as a simple list, all with click-to-copy functionality
+System Overview - a grid view of all available patterns
+Status Table - all pattern statuses in table format
+Component Embed - a specific configuration of a pattern (created in the Pattern Playground)
+Component Demo - an array of all variations of a specific pattern by a specific property (e.g. size, outline, etc.)
+
+Embed: For including third-party assets and resources from the following tools: 
+  
+Abstract
+Adobe XD
+Airtable
+Framer
+Lucidchart
+YouTube
+Whimsical
+iFrame
+
+
+ Each block allows you to add a different form of content and uses slightly different interactions or controls. For example, click into the Text block to begin typing markdown text (markdown allows you to write text and add formatting with special syntax, see this cheat sheet to get started).
+ Looking for a content block that we don't have? Contact us at help@knapsack.cloud
+Editing & Reordering Content Blocks
+ When hovering over a block, you’ll see a series of controls associated with it.
+ 
+ The right controls allow you to edit the block settings, move up or down or drag and drop the block amongst other blocks on the page, or delete the block. The plus button at the top middle of the block allow you to add a block directly above the hovered block. Hover over the bottom middle of the block and click the plus sign to add a block below. 
+ When multiple blocks are on a page, a drag handle allows you to drag and drop to reorder them. 

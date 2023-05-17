@@ -1,0 +1,58 @@
+import { Meta, Canvas } from '@storybook/blocks';
+import * as IndexStories from './indexes.stories';
+
+<Meta title="Indexes/Retriever" />
+
+# Retrievers
+
+Now that we've indexed our documents, we need to be able to retrieve them. LangChain
+gives us several wrappers that allow us to do this..
+
+[Retrievers](https://js.langchain.com/docs/modules/indexes/retrievers/) are used to retrieve documents from a vector store. 
+There are several methods to do this that give us varying degrees of control over our results
+
+## Vector Store Retrievers
+
+The vector store wrapper has a `asRetriever` method for retrieving documents from it's vectorstore
+
+```ts
+vectorStore = ...
+retriever = vectorStore.asRetriever()
+```
+
+### Retrieving documents
+
+Lets pull together some of the concepts we've learned so far and retrieve some documents from our vector store
+
+```ts
+import { PineconeClient } from "@pinecone-database/pinecone";
+// We are importing one of the special chains that Langchain provides for us
+import { RetrievalQAChain } from "langchain/chains";
+import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+import { OpenAI } from "langchain/llms/openai";
+import { PineconeStore } from "langchain/vectorstores/pinecone";
+
+
+const client = new PineconeClient();
+await client.init({
+  apiKey: PINECONE_API_KEY,
+  environment: PINECONE_ENVIRONMENT,
+});
+const pineconeIndex = client.Index(PINECONE_INDEX);
+
+const vectorStore = await PineconeStore.fromExistingIndex(
+  new OpenAIEmbeddings({ openaiApiKey: OPENAI_API_KEY }),
+  { pineconeIndex }
+);
+
+const chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever());
+
+const res = await chain.call({
+  query: "How do I import Figma tokens?",
+});
+
+response 
+
+```
+
+<Canvas of={IndexStories.PineconeExample} />

@@ -1,0 +1,227 @@
+
+Cypress Manual Setup
+
+ If your workspace was created before July 21st, 2022 — this article will provide the steps to configure your workspace for Cypress E2E testing for components!
+ If your workspace was created after July 21st, 2022 — please see this article for more information about the built-in Cypress testing.
+Introduction
+ This manual configuration guide will provide a walkthrough for:
+
+Adding Cypress to your workspace and initial configuration
+Knapsack-specific configuration 
+Our demo helper function
+Adding the Cypress test scripts to automation
+Creating the first test!
+Adding Cypress tests to GitHub Actions CI/CD
+Wrapping things up
+
+Step 1: Adding Cypress to your workspace
+ This section will cover adding the Cypress package to your workspace and running through the installation.
+
+At the root of your repo add Cypress: yarn add cypress -WD
+After the installation completes, run Cypress for the first time: yarn cypress open
+Select "E2E Testing" 
+After clicking "E2W Testing", Cypress will let you know that it added 4 new files to your system —> Click the purple Continue button
+At this point you can close the Cypress App and move onto the next section
+
+Step 2: Knapsack-specific configuration
+
+Using VS Code or the IDE of your choice, open the cypress.config.ts file created during the previous installation process.
+Within the e2e object, add the following properties: 
+  
+baseUrl:'http://localhost:3999' — sets the base testing URL to the base Knapsack API URL
+video:false — disables video recordings
+
+At this point, your config should closely match:
+
+import { defineConfig } from "cypress";
+
+export default defineConfig({
+  e2e: {
+    baseUrl: 'http://localhost:3999',
+    setupNodeEvents(on, config) {
+      // implement node event listeners here
+    },
+    video: false,
+  },
+});
+
+Step 3: Demo Helper
+ We've written a helper function that makes selecting specific component demos easy. Add the following within a new file /cypress/support/knapsack.ts:
+// Import all Knapsack demo variations
+import variations from '../../dist/meta/ks-meta.json';
+
+// Our helper function to filter the specific variation
+export const ksDemo = (patternId, templateId, demoId, assetSetId = 'default') => {
+  const specificVariation = variations.demoUrls.filter((item) => {
+    return (
+      item.templateId === templateId &&
+      item.demoId === demoId &&
+      item.assetSetId === assetSetId &&
+      item.patternId === patternId
+    );
+  });
+  return specificVariation[0].url;
+};
+
+ Note: the above example assumes Knapsack is generating the ks-meta.json file from the root dist. Your workspace could have this being built within packages/shared-types/dist.
+ We're able to use this helper function like so:
+import { ksDemo } from '../../support/knapsack';
+
+cy.visit(ksDemo('button', 'react', 'main'));
+
+ The above example:
+
+Grabs the 'button' component 
+Selecting the 'main' demo
+From the 'react' renderer
+We can optionally provide a fourth argument to specify the 'theme' (see asset sets)
+
+Step 4: Adding the Cypress test scripts to automation
+ Now that we've configured Cypress, let's add our runners to automation within package.json.
+ Open the root  package.json and the following scripts:
+"cypress:e2e": "cypress open --e2e --browser electron",
+"cy:open": "yarn cypress:e2e",
+"cy:run": "yarn cypress run",
+
+ Script breakdown:
+
+cypress:e2e — runs our E2E tests within the Electron browser
+cy:open — convenience method for the above script
+cy:run — runs our tests in headless mode (for CI/CD)
+
+Step 5: Creating your first test!
+ For this example, we're going to add a test for a React Button component.
+
+Create a new file: cypress/e2e/components/button.cy.js
+Within that file, we'll import our ksDemo helper function and write our first test:  /// <reference types="cypress" />
+
+import { ksDemo } from '../../support/knapsack';
+
+describe('Button component (React > Main)', () => {
+  beforeEach(() => {
+    // From the button pattern pull the react 'main' demo
+    cy.visit(ksDemo('button', 'react', 'main'));
+  });
+
+  it('contains text (is not empty)', () => {
+    cy.get('.ex-button').should('not.be.empty');
+  });
+});
+	
+We'll need two terminals for the next step (running both commands from repo root): 
+  
+In the first terminal — start Knapsack: yarn start
+In the second terminal — open Cypress: yarn cy:open
+
+Select the new button test to run:
+Enjoy the show! 🎉 
+
+Step 6: Adding Cypress tests to GitHub Actions CI/CD
+ Now that we have functional Cypress tests running we should add them to our CI/CD pipeline! Knapsack already ships with pre-configured GitHub Actions so this guide will cover updates to that setup.
+Cypress testing on Pull Requests
+ To setup Cypress tests on Pull Requests so that a PR cannot be merged without all tests passing, create the following .github/workflows/pull-request.yml:
+name: PR
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  cypress-run:
+    name: Cypress Tests
+    timeout-minutes: 15 # Don't allow tests to exceed 15 minutes
+    runs-on: ubuntu-latest
+    container: 
+      image: knapsack/cypress-php:latest
+      options: --user 1001
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Cypress run
+        uses: cypress-io/github-action@v4
+        with:
+          browser: chrome
+          wait-on: 'http://localhost:3999'
+          wait-on-timeout: 120
+          build: yarn build
+          start: yarn serve
+        env:
+          CYPRESS_CACHE_FOLDER: '${GITHUB_WORKSPACE}/.cypress-cache'
+
+  build:
+    name: Build & Release
+    needs: [cypress-run]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Use actions/checkout@v2
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: Handle Cache
+        uses: actions/cache@v2
+        # https://github.com/actions/cache/blob/master/examples.md#node---lerna
+        id: cache # use this to check for `cache-hit` (`steps.cache.outputs.cache-hit != 'true'`)
+        with:
+          path: |
+            node_modules
+            **/node_modules
+            ~/.cache/yarn
+          key: node-deps-${{ hashFiles('yarn.lock') }}
+          # restore-keys: node-deps-
+      - name: Install Deps
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: yarn install --cache-folder ~/.cache/yarn --prefer-offline --frozen-lockfile
+        env:
+          CYPRESS_INSTALL_BINARY: 0 # skipping big Cypress binary download.
+      - name: Run Full Build
+        run: yarn build
+      - name: Run Knapsack Test
+        run: yarn test
+      - name: Release
+        run: yarn auto shipit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+ Cypress testing on merges into the main branch
+ To setup Cypress tests on merges into the main branch, update the .github/workflows/main.yml with the below.
+ Change the on reference:
+on: [push]
+
+ to
+on:
+  push:
+    branches:
+      - main
+
+ then add the job below at the bottom of main.yml:
+  cypress-run:
+    name: Cypress Tests
+    timeout-minutes: 15 # Don't allow tests to exceed 15 minutes
+    runs-on: ubuntu-latest
+    container: 
+      image: knapsack/cypress-php:latest
+      options: --user 1001
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      # Install NPM dependencies, cache them correctly
+      # and run all Cypress tests
+      - name: Cypress run
+        uses: cypress-io/github-action@v4
+        with:
+          browser: chrome
+          wait-on: 'http://localhost:3999'
+          wait-on-timeout: 120
+          build: yarn build
+          start: yarn serve
+        env:
+          CYPRESS_CACHE_FOLDER: '${GITHUB_WORKSPACE}/.cypress-cache'
+
+Wrapping things up
+ That concludes our walkthrough for manually configuring Cypress within your Knapsack workspace. Happy testing!

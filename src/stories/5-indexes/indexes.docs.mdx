@@ -1,0 +1,47 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Indexes/Overview" />
+
+# Indexes
+
+Now lets learn how to [index](https://js.langchain.com/docs/modules/indexes/) our data to see how we can start getting
+our language models to start seeing the world outside of their own knowledge bubble.
+
+Indexing encompasses several new concepts lets go over the pipeline at a high level and then 
+we'll dive into each of the components in more detail.
+
+Our new concepts are:
+
+  - [Documents](https://js.langchain.com/docs/modules/indexes/document_loaders/)
+  - [Text Splitters](https://js.langchain.com/docs/modules/indexes/text_splitter/)
+  - [Embeddings](https://js.langchain.com/docs/modules/models/embeddings/)
+  - [Vector Stores](https://js.langchain.com/docs/modules/indexes/vector_stores/)
+  - [Retrievers](https://js.langchain.com/docs/modules/indexes/retrievers/)
+
+## Document Loaders
+
+Document loaders are used to create Documents from various input sources. 
+These Documents can then be embedded and placed in a Vectorstore to be retrieved 
+and used to augment the language models responses.
+
+
+## Text Splitters
+
+Language Models are often limited by the amount of text that you can pass to them. 
+Therefore, it is necessary to split them up into smaller chunks. 
+LangChain provides several utilities for doing so.
+
+## Embeddings
+
+Embeddings can be used to create a numerical representation of textual data. 
+This numerical representation is useful because it can be used to find similar documents.
+
+## Vector Stores
+
+A vector store is a database designed for storing documents and their embeddings.
+We can then query this database to find documents that are similar to a given query.
+
+## Retrievers
+
+Retrievers are used to retrieve documents from a vector store. There are several
+methods to do this that give us varying degrees of control over our results

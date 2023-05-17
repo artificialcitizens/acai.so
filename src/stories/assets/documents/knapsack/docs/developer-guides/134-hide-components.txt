@@ -1,0 +1,31 @@
+
+Hide Components
+
+ 
+Overview
+ By default, all components are visible. Knapsack enables workspace administrators to mark components as "hidden" to prevent them from appearing in the Component Overview Block and Component Blocks. Components will be hidden from all users in the Knapsack UI but are still accessible via a direct link to any user with access to the workspace in general.
+Use Cases
+
+Hide components and sub-component patterns that you need in the system but don't want to show to end-users
+In-progress components that are not yet ready for general access
+
+Implementation
+ Note: setting up hidden pages is only available when running Knapsack locally.
+ Prerequisites: Knapsack Packages ^3.55.3
+Hide from Components Overview Block
+ To hide a component from the Component Overview Block, open a component's JSON file (e.g., knapsack.pattern.card.json) and add the following top-level meta property to the main pattern object:
+ "hideFromOverviewBlocks": "true"
+
+ Example:
+ data/knapsack.pattern.card.json
+ 
+ Result:
+ 
+Hide Components from Component Blocks
+ To hide a component from Component Blocks (e.g., Component Embed, Component Demo Blocks), open a component's JSON file (e.g., knapsack.pattern.card.json) and add the following top-level meta property to the main pattern object:
+ "hideFromComponentBlocks": "true"
+ Example:
+ data/knapsack.pattern.card.json
+ 
+ Result:
+ 
