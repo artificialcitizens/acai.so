@@ -1,0 +1,31 @@
+
+Hide Pages
+
+Overview
+ Knapsack enables workspace administrators to mark certain pages or sections as "hidden," which prevents them from appearing in the navigation for Viewer users or non-logged-in users visiting a public workspace (or when viewing the workspace in Preview mode).
+ Hidden pages will be denoted to Editors and Admins with lighter color text within the navigation (see GIF below)
+ NOTE: Hidden pages are still accessible via direct link to any user with access to the workspace in general.
+Use Cases
+
+Admin / Editor-facing content not relevant to general visitors
+In-progress components and content that are not yet ready for general access
+Experimental components and resources that need to be shared selectively
+Team-specific components and subsections
+
+Implementation
+Setup via the Web UI
+To toggle a page's visibility:
+
+Click on the ••• button next to the page within a menu
+Select "Hide page" or "Show page"
+
+
+Setup via Local Development
+ Pages and Groups can be hidden by editing the knapsack.navs.json file directly.
+ To mark any page or group as hidden, add the following property to the nav item in the JSON:
+  "hidden": true 
+ NOTE: When marking any parent item as hidden, all children will also be set to hidden by default.
+Example Implementation
+ 
+Resulting Behavior
+ 

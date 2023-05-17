@@ -1,0 +1,30 @@
+
+Managing Design Tokens in Knapsack
+
+ Adding design tokens to your Knapsack workspace can help your team define, document, and distribute color, typography, and other core styling properties to your design system users. 
+ Editing existing design tokens
+ Click on any existing design token to edit it using the right-side panel.
+ 
+ Users can add unique token values (e.g., a hex code for color) or map the token to another token's value using the auto-complete feature in the Value field.
+ 
+Managing Color Tokens via the Design Tokens content block
+ In addition to the Tokens manager UI, color tokens can be managed directly within the Design Tokens content block.
+Available Edit Actions
+ When working in Edit mode, users have the following actions available:
+
+Edit the token value
+Add metadata
+Delete token
+
+ 
+Editing Color Token Values
+ There are two methods available for defining the value of a token:
+ Enter or select a specific color value
+ 
+ Select another color token to reference
+ 
+ Tokens that are set to reference other tokens will indicate this in the UI once changes are saved:
+ 
+Publishing your changes
+ When you're ready to publish or submit your changes, use the Publish / Request Review button in the top right to kick off a commit, review, or publishing workflow.
+ 

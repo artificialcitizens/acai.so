@@ -1,29 +1,47 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from './assets/vite.svg';
 import './App.css';
+import Chat from './components/Chat/Chat';
+import { OpenAI } from 'langchain/llms/openai';
+import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
+
+import { PineconeClient } from '@pinecone-database/pinecone';
+// We are importing one of the special chains that Langchain provides for us
+import { RetrievalQAChain } from 'langchain/chains';
+import { PineconeStore } from 'langchain/vectorstores/pinecone';
+
+const llm = new OpenAI({ openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY });
+// Retriever Docs
+const client = new PineconeClient();
+await client.init({
+  apiKey: import.meta.env.VITE_PINECONE_API_KEY,
+  environment: import.meta.env.VITE_PINECONE_ENVIRONMENT,
+});
+const pineconeIndex = client.Index(import.meta.env.VITE_PINECONE_INDEX);
+
+const vectorStore = await PineconeStore.fromExistingIndex(
+  new OpenAIEmbeddings({ openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY }),
+  { pineconeIndex },
+);
+
+const queryPinecone = async (msg: string) => {
+  const result = await vectorStore.similaritySearch(msg, 1);
+  const chain = RetrievalQAChain.fromLLM(llm, vectorStore.asRetriever());
+  try {
+    const res = await chain.call({
+      query: msg,
+    });
+
+    // return res.text;
+    return result[0].pageContent;
+  } catch (error: any) {
+    console.error(error);
+    return error.message;
+  }
+};
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <>
-      <div className="flex flex-row justify-around mx-">
-        <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-          <img src={viteLogo} className="logo react" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>count is {count}</button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">Click on the Vite and React logos to learn more</p>
+      <Chat onSubmitHandler={queryPinecone} />
     </>
   );
 }

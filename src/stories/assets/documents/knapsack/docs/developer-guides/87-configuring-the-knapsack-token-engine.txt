@@ -1,0 +1,91 @@
+
+Configuring the Knapsack Token Engine
+
+Overview
+ Knapsack comes out-of-the-box with it's own robust design token engine which supports nearly every web format, along with Android and iOS.
+ For more information about Adding / Changing Design Tokens, see this article.
+Supported input formats
+
+JSON (hand-written or auto-generated via tools like the Figma Tokens plugin)
+Human-readable text (via Knapsack web UI)
+
+Supported output formats
+ Web
+
+CommonJS
+CSS Vars
+JS/TS
+JSON (and nested JSON)
+LESS
+SCSS
+
+ Native
+
+Android — XML
+iOS — SWIFT
+
+Example: all formats
+ The below example, pulled from knapsack.config.js, provides the foundation for configuring the token engine to output all formats.
+const DesignTokenDir = join(__dirname, './packages/design-tokens/dist');
+
+module.exports = configureKnapsack({
+  designTokens: {
+    createCodeSnippet: (token) => `${token.name}`,
+    distDir: DesignTokenDir,
+    targets: {
+      android: {
+        enabled: true,
+      },
+      css: {
+        enabled: true,
+      },
+      ios: {
+        enabled: true,
+      },
+      js: {
+        enabled: true,
+      },
+    },
+  },
+  ...
+});
+
+ The above configuration would result in a compilation like so:
+ Setting any of the included formats to false will wipe that format from being output.
+Configuration
+
+
+
+ Option 
+ Detail 
+ Expected 
+
+
+ createCodeSnippet  
+ Function to format token code snippet format 
+ Function — (token) =>`$${token.name}`  
+
+
+ distDir  
+ Output destination for design token assets | Defaults to design token package directory 
+ String — output file path 
+
+
+ targets  
+ Accepts four (4) object keys, which must set an enabled boolean 
+ android: {
+  enabled: true,
+},
+css: {
+  enabled: true,
+},
+ios: {
+  enabled: true,
+},
+js: {
+  enabled: true,
+},
+		
+
+
+

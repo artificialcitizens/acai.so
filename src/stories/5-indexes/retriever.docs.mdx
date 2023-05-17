@@ -1,4 +1,5 @@
-import { Meta } from '@storybook/blocks';
+import { Meta, Canvas } from '@storybook/blocks';
+import * as IndexStories from './indexes.stories';
 
 <Meta title="Indexes/Retriever" />
 
@@ -30,19 +31,17 @@ import { RetrievalQAChain } from "langchain/chains";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { OpenAI } from "langchain/llms/openai";
 import { PineconeStore } from "langchain/vectorstores/pinecone";
-import * as dotenv from "dotenv";
 
-dotenv.config();
 
 const client = new PineconeClient();
 await client.init({
-  apiKey: process.env.PINECONE_API_KEY,
-  environment: process.env.PINECONE_ENVIRONMENT,
+  apiKey: PINECONE_API_KEY,
+  environment: PINECONE_ENVIRONMENT,
 });
-const pineconeIndex = client.Index(process.env.PINECONE_INDEX);
+const pineconeIndex = client.Index(PINECONE_INDEX);
 
 const vectorStore = await PineconeStore.fromExistingIndex(
-  new OpenAIEmbeddings({ openaiApiKey: process.env.OPENAI_API_KEY }),
+  new OpenAIEmbeddings({ openaiApiKey: OPENAI_API_KEY }),
   { pineconeIndex }
 );
 
@@ -51,6 +50,9 @@ const chain = RetrievalQAChain.fromLLM(model, vectorStore.asRetriever());
 const res = await chain.call({
   query: "How do I import Figma tokens?",
 });
-console.log({ res });
+
+response 
 
 ```
+
+<Canvas of={IndexStories.PineconeExample} />

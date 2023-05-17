@@ -53,8 +53,8 @@ dependencies:
     specifier: ^4.18.2
     version: 4.18.2
   langchain:
-    specifier: ^0.0.74
-    version: 0.0.74(@pinecone-database/pinecone@0.1.5)(cheerio@1.0.0-rc.12)
+    specifier: ^0.0.75
+    version: 0.0.75(@pinecone-database/pinecone@0.1.5)(cheerio@1.0.0-rc.12)
   react:
     specifier: ^18.2.0
     version: 18.2.0
@@ -6612,8 +6612,8 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
-  /langchain@0.0.74(@pinecone-database/pinecone@0.1.5)(cheerio@1.0.0-rc.12):
-    resolution: {integrity: sha512-xQZGin2ovuh3tjjEkKeP4ZrOpSNP8EllMpPVMjkV/qKEMEASlVwWD1kuO7oKkpvZcSciFy3eFTBUgEFpt2DJ9w==}
+  /langchain@0.0.75(@pinecone-database/pinecone@0.1.5)(cheerio@1.0.0-rc.12):
+    resolution: {integrity: sha512-5bulBe3pEDnCuO3W84E+pmns6+7oKdNomsApPD1PqjplEwT3szSYaY8bvqJVxYz2Hq1wcS3sL1OyL9rbC/s0NA==}
     engines: {node: '>=18'}
     peerDependencies:
       '@aws-sdk/client-dynamodb': ^3.310.0

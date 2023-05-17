@@ -1,0 +1,97 @@
+
+Customizing Your Workspace
+
+Overview
+ Workspace Admins and Editors can customize your design system’s styles to help the site better reflect your brand experience. 
+ This article outlines how to customize the following elements and styles of your workspace:
+
+Logo
+Navigation & Accent Colors
+Home Page
+Page Headers
+Workspace Name
+NEW Workspace Settings
+
+
+Customizing the Workspace Logo
+ When logged in as an Admin, the logo space to the left of the workspace name in the top right corner of the workspace will display either the  Upload logo UI or a Delete (x) button for removing the existing logo. Follow the prompts to upload, remove or replace the workspace logo.
+ 
+ NOTE: This change does not require a user to go through the Git publishing workflow or merge any changes (if made locally) into the repo.
+
+Customizing the Home Page
+
+  NOTE: An Editor or Admin must create or select a branch to begin making changes. Branches can be created using the 
+ + New Branch button in the top admin toolbar or the 
+ Edit button at the top of any page. Users can also select an existing branch by clicking the branches dropdown (defaulted to "latest"). 
+
+
+Navigate to the home page by clicking the Knapsack logo or workspace name.
+Click the “Edit” button to open the home page styling menu  Note: If you haven’t already made a new branch, you’ll be prompted to do so here.  
+Click the “Style” button to update additional options: 
+  
+Hide/show text
+Title Color
+Description Color
+Background Color
+Background Image
+Banner Size 
+
+Add any additional content by clicking the + button at the bottom of the page. 
+Commit your changes through Knapsack’s publishing workflow.
+
+
+Customizing Page Headers
+
+  Admins and Editors can also customize page headers on individual pages to feature your company’s branding throughout the design system.  
+
+
+Navigate to the page whose header you want to update (or add a new page). 
+Click the “Edit” button to open the header styling menu.  Note: If you haven’t already made a new branch, you’ll be prompted to do so here. 
+Update the title and description text by clicking on the default text.
+Click the “Style” button to open customization options. 
+Customize additional options: 
+  
+Hide/show text
+Title Color
+Description Color
+Background Color
+Background Image
+Banner Size
+
+Commit your changes!
+
+
+Advanced Page Header Settings
+ NOTE: configuration options are only available for Content Pages. Configure options by editing the Page's corresponding YAML file when running Knapsack locally.
+ Content Page Headers currently support the following configuration options found under the pageHeader map:
+ backgroundSize
+
+Type: String
+Available values: cover, contain, string
+
+ backgroundPosition
+
+Type: String
+Available values: left, center, right, string
+
+ backgroundRepeat
+
+Type: String
+Available values: repeat-x, repeat-y, repeat, no-repeat
+
+ knapsack.custom-page.homepage.yml is an example of a Content Page with a Page Header that can be configured using the above options.
+ Example:
+  data/knapsack.custom-page.homepage.yml
+ 
+
+Looking for workspace-level settings?
+ As of 12/2/22 — we've created a new one-stop location for all workspace-level settings, the Workspace Settings Dashboard.
+ The dashboard will allow you to:
+
+Add custom fonts
+Adjust system typography (page title, page description, headings, body, and links)
+Customize your primary and secondary navigation
+Customize pattern page tabs
+
+ Learn more here!
+ NOTE: This change does require a user to go through the Git publishing workflow or merge the changes (if made locally) into the repo.

@@ -1,0 +1,10 @@
+
+Getting Help
+
+To request help, report a bug, or share feedback, email help@knapsack.cloud or use the chat feature below.
+
+ Please refer to the Support Plans page for detailed information on technical support offerings.
+ In addition to our Knowledge Base and Platform Documentation, all Knapsack users receive complimentary email support from our Help team on weekdays from 8am - 8pm ET and can expect a response time within 3 business days.
+ Enterprise customers can expect a response within 1 business day, and are guaranteed uptime of 99.5% or better.
+ Enterprise customers have the option to upgrade support and service level agreements (SLAs), enabling additional support channels (chat, telephone), expanded coverage hours (up to 24x5), shorter response times (down to < 2 hours), and greater uptime guarantee (up to 99.999%).
+ In addition, Knapsack's Customer Success team is available to provide on-demand workshops, consults, and trainings. For more information on services, contact us at hello@knapsack.cloud.

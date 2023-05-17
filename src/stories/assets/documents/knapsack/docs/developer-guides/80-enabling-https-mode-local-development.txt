@@ -1,0 +1,28 @@
+
+Enabling HTTPS Mode for Local Development
+
+ Knapsack supports HTTPS with automatic setup, as well as the option to pass in a custom SSL certificate.
+ Enabling HTTPS mode for local development
+
+Update your package.json to use @knapsack/app version 3.15.0 or later
+ To enable HTTPS mode, update your knapsack.config.js file to include the following
+  devServer: {
+    https: true,
+
+    // uncomment and update these file paths if you'd prefer to use your own SSL cert you've manually created
+    // ssl: {
+    //   cert: './optional-path-to-SSL-cert',
+    //   key: './optional-path-to-SSL-key',
+    // }
+  }
+
+If you'd prefer to have Knapsack automatically generate an SSL certificate for your machine (recommended!) via mkcert, skip to step 4. No additional configuration required! 
+  
+Otherwise, you'll need to manually generate an SSL certificate yourself ( https://web.dev/how-to-use-local-https/) and update your knapsack.config.js ssl config to point to these new SSL certificate file paths.
+
+Finally, start up your local Knapsack dev environment per usual (ex.  yarn start) to automatically spin up a local HTTPS dev server.
+
+
+  Note: the first time this is run, keep an eye out for a prompt asking you to enter in your password. This is required so  
+ mkcert can get your SSL certificate automatically generated and securely registered. 
+

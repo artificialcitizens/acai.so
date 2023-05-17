@@ -1,0 +1,40 @@
+
+Custom Typography
+
+Overview
+ As of 12/2/22 — Alongside the NEW Workspace Settings Dashboard comes the ability to add and use custom typography within the Knapsack UI.
+ In this document, you'll learn how to add your own custom fonts and configure the Knapsack UI to use them.
+Adding a custom font
+ Adding custom fonts is easy! Follow the steps below to begin customizing your workspace's typography:
+
+Navigate over to the NEW Workspace Settings Dashboard (in the top right menu, click "Settings")
+Next, click on the "Custom Font" configuration
+Click the "+ Add a Font" button
+Add the font's details: 
+  
+Font Name (display name within the system)
+Font Weight
+Font Styles
+Font URL — for example: https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap
+
+When finished, click the blue "Save Changes" button
+
+ 
+Applying a custom font
+ After you've added a custom font, it's time to apply it to the UI.
+
+Navigate to the typographic element you'd like to customize (for this example, we'll navigate to Page Title)
+Click the "Font Family" select menu and choose the new custom font
+Click the blue "Save Changes" button
+You've just configured your first custom font! 🎉
+
+Further typography customizations!
+ We didn't stop at just custom type faces! We've also integrated design tokens and provided several other configurable properties:
+
+Color — Customize the text color with either a custom hex code OR by selecting from your workspace's design tokens!
+Font Size — Pixels are supported, but we recommend REMs to keep your typography fluid.
+Font Weight — Values between 100 and 900 are supported in increments of 50.
+Letter Spacing — Adjusts the horizontal space between characters.
+Line Height — Values with or without (recommended) units are supported.
+
+ 

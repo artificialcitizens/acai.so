@@ -1,0 +1,95 @@
+
+Support Plans
+
+ This page describes the support plans available to Knapsack customers based on their license type:
+
+
+
+ 
+ Starter  
+ Enterprise  
+ Enterprise Premium 
+
+
+
+
+ Price 
+ Included with Starter Plan subscription 
+ Included with Enterprise Plan subscription 
+ 10% of Enterprise platform fee 
+
+
+ Hours of availability 
+ 8am-8pm ET weekdays 
+ 24x5 
+ 24x5 
+
+
+ Guaranteed time to first reply 
+ 2 business day 
+ < 8 hours 
+ <8 hours 
+
+
+ Uptime guarantee 
+ 99.5% 
+ 99.9% 
+ 99.9% 
+
+
+ Email support 
+ Yes 
+ Yes 
+ Yes 
+
+
+ Knowledge base access 
+ Yes 
+ Yes 
+ Yes 
+
+
+ Shared Slack or Teams channel 
+ – 
+ Available * 
+ Yes 
+
+
+ Live onboarding sessions 
+ Yes 
+ Yes 
+ Yes 
+
+
+ Live 1:1 sessions 
+ – 
+ Yes 
+ Yes 
+
+
+ Add-on professional services (workshops, seminars, etc.) 
+ Yes ** 
+ Available ** 
+ Available ** 
+
+
+ Quarterly business success check-ins 
+ Yes *** 
+ Yes *** 
+ Yes 
+
+
+ Dedicated Solution Engineer 
+ – 
+ – 
+ Yes
+
+
+ Priority response queuing 
+ – 
+ – 
+ Yes 
+
+
+
+ * Additional fees and terms required  ** Additional fees may apply  *** Requires reaching ARR minimum threshold.

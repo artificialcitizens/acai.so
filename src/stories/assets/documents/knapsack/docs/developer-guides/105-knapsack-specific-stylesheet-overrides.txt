@@ -1,0 +1,21 @@
+
+Knapsack-Specific Stylesheet Overrides
+
+ There will almost undoubtably come a time when a team wishes to showcase a component in isolation — where in normal circumstances the same component resides within or alongside other layouts, components, etc. In this case, often times additional styles would be required in order to get things "flush" or aligned as desired. For this, we recommend the use of an override stylesheet. 
+Benefits and uses of an override stylesheet
+
+You're able to add "missing" styles in situations that would require them in order for a component to appear correctly in isolation (e.g. alignment, overflow, emulating state, etc).
+You have complete control over how your components are displayed within Knapsack.
+All customizations added to the override stylesheet remain within Knapsack and are not published.
+
+Caveat
+ The above fix does not work well in situations where components are using Shadow DOM or Style Encapsulation. This is due to the fact that you would need to add that same override stylesheet into the build of the production-level template OR come up with a clever way of handling that during the production release of your components.
+ Adding an override stylesheet
+ If you need a quick refresher on asset sets, please review this article and then proceed with the below instruction.
+
+Add a new CSS file somewhere that makes sense within your workspace. We recommend placing an ks-overrides.css within /packages/styles (not in src).
+Add the following as the last line to your /data/knapsack.asset-sets.json:   {"src":"../packages/styles/ks-overrides.css"} 
+Verify your overrides are working! 🎉
+
+ The complete /data/knapsack.asset-sets.json should look something like:
+ 

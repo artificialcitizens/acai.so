@@ -1,0 +1,56 @@
+
+Glossary
+
+
+ Here's a list of terms used in Knapsack and what they're in reference to.
+
+Asset Set
+ A collection of CSS and Javascript files that are loaded with Templates when rendered. A Knapsack Workspace can declare multiple Asset Sets which allow users to switch the styling on components, commonly used for showing off different “themes”.
+Branch
+You can think of a branch as a working copy of your design system. A branch is where you can safely edit and collaborate before updating your system.
+Commit
+A commit is a snapshot of the changes you’ve made in a branch at a certain point in time. Commits are like a super save because they have extra context: including a space to write a message about what changed.
+Content Block
+ A flexible and customizable unit of content, which can be added on any page, used to document and demonstrate information related to the customers design system. Content Block options include a large variety of out of the box embeds to cover the most common use cases a design system must support.
+Group
+ A Group is an organizational element in the Left Nav (similar to a "folder") used to group a set of pages or patterns.
+Navigation
+ The means of navigation for a workspace, located on the left side of the user interface. This is where the design system pattern, documentation and token pages are arranged, and can be nested up to a depth of three.
+Page
+ A new blank page where text content and documentation slices can be combined to document anything (e.g. “Getting Started”). They are distinct from Pattern Pages in that they do not contain tabs or pattern specific settings and have no relationship to statuses.
+Pattern
+ A pattern is a generic term for what some refer to as a "component". Where a component represents a reusable UI element, the term pattern can also encompass layouts, pages, etc.
+Pattern Example(s)
+ Examples of patterns generated using either the Schema Editor and Pattern preview or by connecting to a coded Template Example.
+Pattern Preview
+ The area on a Template Tab that shows a preview of a new or existing pattern variation. The pattern preview displays a pattern variation, edits made in the schema editor, as well as results of resizing or interacting directly with the pattern.
+Pattern Page
+ A new UI pattern page (e.g. button, hero, tabs). This content type will create the groundwork for defining and developing a new pattern for your design system. They may have multiple tabs and include Status assignments.
+Propose Change
+ A method of submitting content for review that contains edits generated via the Knapsack UI.
+Props
+ Properties that can be used to pass in data or otherwise manipulate the display and functionality of a pattern.
+Renderer
+ A template language specific plugin that has a  .render() function that takes in the patternId, templateId, and demoId and returns HTML. Examples: twig, react, web-components, and html.
+Schema
+ Json file that holds the shape of data to be supplied to an element, component, or layout.
+Schema Editor
+ The form on the Template Stage used to modify Props and Slots for a pattern and saved to create Pattern Examples.
+Slots
+ A term derived from the Web Components spec. Slots are used to pass patterns into other patterns (e.g. a button inside a card), both in production code and via the Schema Editor.
+Status
+ Flexible key value pairs used to communicate the current state of a pattern (e.g. React: "Needs Development", or "Ready To Use").
+Status Set
+ A key and series of values for a single Status (e.g. "Design" may be the key, and it can be set to any one of the values defined).
+Template
+ A coded file used to render a pattern (e.g.  button.tsx for a React button).
+Template Language
+ A code language that renders templates into a UI (e.g. React, Vue, Angular, Web Components, Twig).
+Template Stage
+ The area on a Pattern Page, specifically on a Template Tab that contains a list of Pattern Examples, an area to preview an example and a Schema Editor for manipulating or generating examples.
+Template Tab
+ On a Pattern Page, a Template Tab is associated with a template file for displaying a coded pattern.
+Workspace
+ A designated space for users to collaborate around a system. Knapsack users can be invited to multiple workspaces using the same login credentials. 
+Design Token
+ The smallest, most portable unit of design. A token is a key value pair that's used to style patterns (e.g. a color, spacing value, border radius, etc). There are lots of online articles discussing design tokens and strategies for using them (like this one from css-tricks).

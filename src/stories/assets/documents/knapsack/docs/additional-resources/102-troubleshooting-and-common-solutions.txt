@@ -1,0 +1,41 @@
+
+Troubleshooting and Common Solutions
+
+ Below we've included a number of super quick — and often very helpful troubleshooting tips. Please reach out to help@knapsack.cloud if you need more assistance.
+Technical tips
+
+
+
+ Did you use npm instead of yarn? 
+ Knapsack requires the use of yarn, so the proper steps to get rolling should be yarn & yarn build (install and build) then yarn start to kick off the local server. 
+
+
+ What version of node are you using? 
+ Knapsack best supports Node versions 14-16. Please run node -v to verify. 
+
+
+ Are you on Windows? 
+ If so, are you using WSL2? If not, that could be the problem. 
+
+
+
+Working in the UI
+
+
+
+ Have you tried clearing the Application Cache? 
+ Cache invalidation is one of the hardest things in the realm of computer science. To simplify the manual process we've included a short guide here.   For Chrome
+
+Open the "Developer Tools" by navigating to Options > More Tools > Developer Tools OR by using the keyboard shortcut: 
+      
+Mac: option + command + i
+Windows: control + shift + i
+ 
+ Select “Application” in the console’s top menu.
+ Select “Local Storage” in the console’s left menu.
+Right click "https://app.knapsack.cloud" and click clear to delete the local storage.
+Close the browser tab and reload Knapsack
+ 
+
+
+

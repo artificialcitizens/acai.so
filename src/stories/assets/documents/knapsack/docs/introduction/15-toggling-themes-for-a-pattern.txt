@@ -1,0 +1,8 @@
+
+Toggling Themes for a Pattern
+
+ Toggling multiple themes for a pattern is accomplished by toggling which Asset Set is being applied. You can think of an asset set as a way to toggle some component of a pattern, in this case we're talking about switching which CSS is being referenced. Although we're talking about pattern themes here for the sake of simplicity, the concept of switching Asset Sets has potential for greater pattern variance that display style alone.
+ Asset Sets are created on a global level, each pattern needs to be explicitly setup to handle each Asset Set. If a pattern has been setup accordingly, you can toggle Asset Sets from the top right of a Pattern Page's Template Tab.
+
+ Note that for the sake of Pattern Example blocks, etc. the default Asset Set is generally applied.
+ For information on configuring and applying asset sets, see our Technical Documentation on Asset Sets

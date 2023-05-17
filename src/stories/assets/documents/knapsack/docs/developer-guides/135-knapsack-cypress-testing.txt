@@ -1,0 +1,58 @@
+
+Knapsack + Cypress Testing
+
+ Our workspace starter kit now comes out-of-the-box with Cypress testing! We've also added helper functions that pull directly from your pattern inventory catalog and make it super easy to get started right away. All that and more below.
+ Was your workspace created before July 21st, 2022? See the article here for a manual setup process.
+Cypress out-of-the-box 🎉
+ As of July 21st, 2022 — all new workspaces will ship with pre-configured Cypress End-to-End testing for Components. 
+ Let's cover the basics of the Knapsack + Cypress configuration:
+
+The Knapsack API creates isolated renders of all components in the form of a pattern inventory catalog (ks-meta.json). 
+  
+We talked about how we can use this catalog for automated testing in our previous article, "Automated Testing Prerequisites".
+
+Building off of our last article, Knapsack provides the ksDemo() helper function to access individual pattern renders for testing.
+All tests live within the usual cypress/e2e directory.
+The cypress.config.ts lives at the root of the repo.
+
+Getting started with testing
+ We include a helper function that allows engineers to access isolated pattern renders via:
+import { ksDemo } from '../../support/knapsack';
+
+ We're able to use this helper function like so:
+cy.visit(ksDemo('button', 'react', 'main'));
+
+ The above example:
+
+Grabs the 'button' component 
+Selecting the 'main' demo
+From the 'react' renderer
+We can optionally provide a fourth argument to specify the 'theme'
+
+ Putting it all together, we can quickly write our test!
+/// <reference types="cypress" />
+
+import { ksDemo } from '../../support/knapsack';
+
+describe('Button component (React > Main)', () => {
+  beforeEach(() => {
+    cy.visit(ksDemo('button', 'react', 'main'));
+  });
+
+  it('contains text (is not empty)', () => {
+    cy.get('.ex-button').should('not.be.empty');
+  });
+});
+
+Running our tests!
+ An engineer can run the tests locally (from the root of the repo) via the following commands:
+
+yarn cy:open — will open the Cypress application and run through the tests via the Cypress GUI
+yarn cy:run — will run the tests in headless mode
+
+Automated Testing in CI
+ Cypress tests run during and with the following conditions:
+
+Pull Requests — by default, a pull request must pass all Cypress testing before it can be mergable and canary packages are created.
+Merging into the main branch — Cypress tests run in parallel to the usual Build & Release flow, but don't restrict Release and Deployment on failed tests.
+

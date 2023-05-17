@@ -1,0 +1,81 @@
+
+Embedding Knapsack Playgrounds Externally
+
+Overview
+ The Knapsack pattern playground can be embedded in third-party applications and UIs (e.g. via iframe), providing teams an easy way to ensure all examples of their system used across their tools are up to date with the system source assets. 
+ Embedded playgrounds can optionally include the following elements in addition to the rendered pattern itself:
+
+Prop / data edit form
+Code snippet
+Prop documentation table
+Link back to the Knapsack workspace
+Portrait (vs. default Landscape) layout
+Playground background UI (vs. seamless)
+
+Generating Embeddable URLs
+ Embeddable playground URLs are created by manually copying and manipulating the URL of any specific pattern variation. Use the instructions below to configure the specific presentation you're looking to embed for your use case:
+
+Navigate to a Pattern Page Code Tab and select the variation you'd like to embed, such as the example below (linked here).   
+  Copy the URL from the browser address bar 
+  Replace /pattern/ in the URL with /pattern-embed/ 
+  Append the preferred URL parameters to the end of the URL based on the options outlined in the table below using the convention &[parameter]=[value]. Your final URL should appear similar to:   https://app.knapsack.cloud/site/demo-design-system/latest/pattern-embed/card?templateId=react&demoId=RN96ZpJJpY&showControls=1&showSnippet=1&seamless=0&showDocs=0&showBackLink=1 
+  Open the URL in a fresh browser tab or window to verify presentation is as expected. Below is the output of the link above:   
+  Use the URL as the source for your embed in the third-party platform or UI. 
+
+
+URL Parameters for Playground Configuration
+
+
+
+ URL Parameter 
+ Description 
+ Default Value 
+ Optional Value 
+
+
+ showPlayground 
+ Controls display of the pattern playground / stage. 
+ True (=1) 
+ False (=0) 
+
+
+ showControls 
+ Controls display of the prop / data edit form 
+ True (=1) 
+ False (=0) 
+
+
+ showSnippet 
+ Controls display of the code snippet 
+ True (=1) 
+ False (=0) 
+
+
+ seamless 
+ Hides playground 'stage' background UI 
+ False (=0) 
+ True (=1) 
+
+
+ layout 
+ Choose between Landscape & Portrait orientation 
+ Landscape (=landscape) 
+ Portrait (=portrait) 
+
+
+ showDocs 
+ Controls display of the prop documentation table 
+ False (=0) 
+ True (=1) 
+
+
+ showBackLink 
+ Controls display of the backlink to Knapsack 
+ True (=1) 
+ False (=0) 
+
+
+
+Sample Embeds
+ 
+ 

@@ -1,0 +1,103 @@
+
+Adding Component Templates to Knapsack
+
+ NOTE: This functionality is only available when running Knapsack locally.
+Adding a Component Template to Knapsack
+ Knapsack enables engineers to connect source component templates directly to the platform. Once your component is added to Knapsack, non-technical team members will be able to interact with the live pattern and create variations to share and include in documentation from the Knapsack Cloud UI.
+Component templates are best connected to Knapsack using an NPM package path, though relative path is also available if Knapsack and the source code are managed in the same repo.
+If you are not yet publishing NPM packages of your system, see the "Using Knapsack's out-of-the-box package publishing setup" section below.
+ Note: To make these changes to your workspace, you must be logged in and have either Admin or Editor permissions.
+
+Create a new Pattern Page in your workspace
+ After you have a template file ready, create a pattern.
+
+In Knapsack, click Add Nav Item. 
+Select Pattern.
+Enter a name for the new pattern. This name does not need to be the same as your component template, and you can edit it later.
+Click Add.
+
+(Optional) Add content tabs + content blocks
+ In addition to coded templates, you can add static or dynamic content to document your system. Add content blocks on the default Overview tab to add information about your component, or create a new content tab for more documentation space.
+ For more information on using content blocks, see our User Guides.
+Add a template to the pattern
+ Note: The option to add a Code Template only appears when running Knapsack locally.
+ Now that you have a new pattern in your workspace, you can integrate a coded component. While there is some nuance from one templating language to the next, adding any template begins by adding a tab to the pattern page and selecting Code Template.
+ 
+ From there — the setup continues as you select the desired Template Renderer and fill in the required details (path and named export). Below we have outlined the process for adding a template to each supported renderer.
+React
+
+Click Add a Tab.
+Select Code Template.
+Select React as the template renderer. 
+Template Path: Enter the name of the React package. For example, @knapsack-cloud/workspace-react.  Note: The package name is located within the package.json inside the packages/react directory. 
+Named Export: Enter the named export.
+Click Add.
+
+Vue
+
+Click Add a Tab.
+Select Code Template.
+Select Vue as the template renderer. 
+Template Path: The path is constructed using the name of the Vue package and the path to the source template file. For example, @knapsack-cloud/workspace-vue/src/card.vue. Note: The package name is located within the package.json inside the packages/vue directory. 
+Click Add.
+
+Web Components
+
+Click Add a Tab.
+Select Code Template.
+Select Web Components as the template renderer. 
+Template Path: Enter the name of the Web Components package. For example, @knapsack-cloud/workspace-web-components. Note: The package name is located within the package.json inside the packages/web-components directory. 
+Custom Element Name: Enter the custom element name.
+Click Add.
+
+Twig
+
+Click Add a Tab.
+Select Code Template.
+Select Twig as the template renderer. 
+Template Path: The path you provide can be relative to your system's root directory or the current working directory of your instance(repo root). The path will look something like ../packages/twig/src/button/button.twig OR /Users/yourname/documents/knapsack-workspace-example/packages/twig/src/button/button.twig
+Namespaced Path: Provide the same value you would use in a Twig include statement, such as “@components/button.twig”.
+Click Add.
+
+HTML
+
+Click Add a Tab.
+Select Code Template.
+Select HTML as the template renderer. 
+Template Path: The path you provide can be relative to your system's root directory or the current working directory of your instance(repo root). The path will look something like ../packages/html/button/button.html OR /Users/yourname/documents/knapsack-workspace-example/packages/html/button/button.html
+Click Add.
+
+Angular
+
+Click Add a Tab.
+Select Code Template.
+Select Angular as the template renderer. 
+Template Path: The path you provide can be relative to your system's root directory or the current working directory of your instance(repo root). The path will look something like ../packages/angular/src/lib/button/button.component.ts OR /Users/yourname/documents/knapsack-workspace-example/packages/angular/src/lib/button/button.component.ts
+Named Export: Enter the named export.
+Click Add.
+
+Handlebars
+
+Click Add a Tab.
+Select Code Template.
+Select Handlebars as the template renderer. 
+Template Path: The path is constructed using the name of the Handlebars package and the path to the source template file. For example, @knapsack-cloud/workspace-handlebars/src/card/card.hbs.
+Click Add.
+
+Next steps
+ Now that you have a component in your workspace, you can modify the component by adding Props and Slots.
+Committing your changes
+ Editing content through the UI in the ways described here, when working locally, automatically writes the changes to the corresponding local files.
+ In order to commit your changes and have them appear in the cloud workspace, your updated files will need to be merged into the main branch of the repo through your established git workflow.
+ For instructions on adding and changing content from the Knapsack Cloud UI, please refer here.
+Using Knapsack's out-of-the-box package publishing setup
+Prepare a template file
+If you aren't currently publishing NPM packages of your system that can be connected to Knapsack, you can use the publishing pipeline set up in the default repo provided with your workspace. To get started, create a new template file, grab one from your current design system, or duplicate an example component template that’s included in the preconfigured repository.
+
+By default, template files are located within their associated renderer directory (package), inside the packages directory.
+Every package (with exception to HTML) within the packages directory will generate a private npm package containing the dist directory and whatever else is deemed necessary within the relative package.json.
+It should be noted that this is only the default configuration — and customizing this configuration is not only possible, but encouraged!
+
+For example, the React templates are located within  packages/react/src:
+
+Once your source component is added, follow the steps above to connect it to Knapsack using the provided NPM package path.

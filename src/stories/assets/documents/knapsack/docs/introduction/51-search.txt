@@ -1,0 +1,5 @@
+
+Search
+
+ Users can search the contents of the design system from the Search bar located at the top of the navigation. The search works by filtering nav items based on name and metadata added directly in the knapsack.navs.json file in the connected repo.
+ 

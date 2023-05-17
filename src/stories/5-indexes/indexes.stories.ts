@@ -1,20 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import Chat from '../../components/Chat/Chat';
-import { OpenAI } from 'langchain/llms/openai';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { CharacterTextSplitter } from 'langchain/text_splitter';
-import { PineconeClient } from '@pinecone-database/pinecone';
 // We are importing one of the special chains that Langchain provides for us
-import { RetrievalQAChain } from 'langchain/chains';
-import { PineconeStore } from 'langchain/vectorstores/pinecone';
-
+import { fetchDocBotEndpoint } from './index-scripts';
 //##########
 // LangChain
 //##########
 
-const llm = new OpenAI({ openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY });
 const splitter = new CharacterTextSplitter({
   separator: '\n',
   chunkSize: 150,
@@ -46,32 +41,8 @@ const memoryStoreExample = async () => {
 };
 
 // Retriever Docs
-const client = new PineconeClient();
-await client.init({
-  apiKey: import.meta.env.VITE_PINECONE_API_KEY,
-  environment: import.meta.env.VITE_PINECONE_ENVIRONMENT,
-});
-const pineconeIndex = client.Index(import.meta.env.VITE_PINECONE_INDEX);
-
-const vectorStore = await PineconeStore.fromExistingIndex(
-  new OpenAIEmbeddings({ openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY }),
-  { pineconeIndex },
-);
-const queryPinecone = async (msg: string) => {
-  const result = await vectorStore.similaritySearch(msg, 1);
-  const chain = RetrievalQAChain.fromLLM(llm, vectorStore.asRetriever());
-  try {
-    const res = await chain.call({
-      query: msg,
-    });
-
-    // return res.text;
-    return result[0].pageContent;
-  } catch (error: any) {
-    console.error(error);
-    return error.message;
-  }
-};
+// beginning of errors
+// see src/langchain-cc.ts
 
 // #########
 // Storybook
@@ -100,14 +71,7 @@ export const MemoryStoreExample: Story = {
 
 export const PineconeExample: Story = {
   args: {
-    onSubmitHandler: queryPinecone,
+    onSubmitHandler: fetchDocBotEndpoint,
     startingValue: ``,
   },
 };
-
-// export const SequentialChainExample: Story = {
-//   args: {
-//     onSubmitHandler: basicSequentialChain,
-//     startingValue: ``,
-//   },
-// };

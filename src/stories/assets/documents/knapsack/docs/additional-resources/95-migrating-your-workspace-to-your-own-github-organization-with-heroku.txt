@@ -1,0 +1,118 @@
+
+Migrating Your Workspace To Your Own GitHub Organization with Heroku
+
+Introduction
+ Knapsack customers are welcome to maintain their workspace on the provided private GitHub repo within Knapsack's GitHub organization, along with the Heroku application.
+ However, Enterprise customers have the option of migrating their workspace to their own GitHub Organization and connecting the same (or their own) Heroku application.
+ Note: Knapsack also supports GitLab and BitBucket! Please reach out if you'd like to discuss a migration to either service.
+ To kick off the process, please contact your Knapsack representative or email help@knapsack.cloud. Someone will reach out to help you complete the process outlined below.
+ Prerequisites
+ This process will cover both the migration of the source Knapsack repo and the configuration of the Heroku deployment. If you require a different deployment strategy (e.g. something custom, not Heroku, etc), please reach out to help@knapsack.cloud.
+ GitHub App
+ Important: Before beginning the migration/transfer process, please install the Knapsack GitHub App. You must have the proper GitHub Organization permissions to install and configure the app.
+ Heroku
+ There are two main ways to handle the ownership of the Heroku application:
+
+Use the existing Heroku app we spun up during the initial workspace creation process. Most customers choose this route. 
+  
+This option is the easiest/quickest option for migration and does not require configuration on the customers side.
+For this flow, we will invite a member from your team to the existing Heroku application so we can use that members Heroku API Key for deployments.
+
+Create an organization-specific Heroku account and create a new application under that account. More on this process in the sections below. 
+  
+Note: If your team is setting up your own Heroku application, you'll need to install the Heroku CLI and authenticate after creating an account.
+
+
+Migrating the Knapsack repo
+
+Send an email with your migration request to help@knapsack.cloud  
+  
+Include your GitHub organization so we can initiate the transfer.
+NOTE: Sending this email will help us track your request within our support system.
+
+Knapsack will kick off the migration process (or schedule time to walk you through it) 
+
+You or an organization admin will need to accept the transfer (an email will be generated).
+In some cases — it makes more sense to push the Knapsack repo directly to the new organization repo as opposed to the formal GitHub repo transfer process.  
+    
+In this flow we recommend adding a new remote in your existing Knapsack repo and pushing your contents directly to that new remote.
+
+
+When the migration is complete — update your knapsack.config.js and all package.json files (root and within the 'packages' directory) 
+
+knapsack.config.js will require an update to repoOwner to your organization
+package.json files will need to update the organization name as well as validate all other fields, such as the repository field.
+It's recommended to perform a search/replace for the updated scoped package name  
+    
+e.g. search for @knapsack-cloud/name-of-workspace-here and replace with @yourOrganizationName/name-of-workspace-here
+Be sure you can run a full build without errors and that all patterns continue to render correctly
+
+
+Commit the changes and push back up to the main branch
+Keep an eye on the "Actions" tab for a successful build — which will result in a new release, version bump, and published private npm packages 
+  
+For the manual migration approach (using a new remote to push the repo) — It is normal for the "Deploy" process to fail at this point of the migration.
+
+After verifying everything is building/releasing as it should —> Let's move on to configuring Heroku deployments
+
+Configuring the Heroku app
+ Configuring Heroku deployments within GitHub Actions requires the creation of three repository secrets. 
+ Notes: 
+
+If the repository was migrated using the formal GitHub ownership transfer methods the below secrets are likely already specified for you. Double bonus if the original Knapsack-created Heroku app is being maintained, as your migration process is likely complete!
+If your Knapsack repo was migrated using the "push to new remote" method — the below secrets will need to be added manually.
+
+Required GitHub Actions Secrets for Heroku Deployments
+
+HEROKU_EMAIL —> The email associated with the Heroku account 
+  
+If you're using the Knapsack provided Heroku app, we'll add this user to your app.
+If you've created a new organization-specific account, use the email associated with that account
+
+HEROKU_API_KEY —> The Heroku API key associated with the HEROKU_EMAIL user 
+  
+The API key is located under the Heroku "Account settings" page (top right under user avatar).
+
+HEROKU_GIT_URL —> The Heroku git repo associated with the Heroku app (Heroku provides this at the time of app creation) 
+  
+This is located under the Heroku app Settings page under "App Information"
+
+
+ If a new Heroku application is required (for the purposes of Heroku app ownership), please follow the below steps to complete the configuration.
+Manually creating a new Heroku app to deploy Knapsack
+ To reiterate — this step is only required if you are no longer planning to use the Heroku app that was created when your Knapsack workspace was create.
+ Note: you'll need to install the Heroku CLI and authenticate after creating an account.
+
+Using the Heroku CLI run the following —>  heroku create NewAppNameHere --stack heroku-20
+
+If using Heroku teams, you may also specify the team by adding the --team teamNameHere flag.
+The command will create a new Heroku app, "NewAppNameHere", using the correct build stack, "heroku-20".
+The command will also provide you with the correct value to use for the HEROKU_GIT_URL secret — copy this value for steps 2 & 4 below! 
+    
+Also copy the base url for step 5 below.
+
+
+Head back over to GitHub and add all three required secrets:
+
+HEROKU_EMAIL 
+HEROKU_API_KEY 
+HEROKU_GIT_URL — The value we copied from step 1c above!
+
+Test Heroku! 
+
+This can be as simple as making a very small change to the repo's root README file and pushing that commit to the main branch.
+Keep an eye on the "Actions" tab for a successful build AND deploy.
+
+When Heroku has completed the build —> Verify everything deployed as expected     
+  
+Visit the Heroku app by navigating to the base URL from step 1 above. 
+Alternatively, you can view the app from within the Heroku app dashboard by clicking the "Open App" button in the top right.
+
+IMPORTANT: Since we now have a new Heroku application, we need to update our database to match your new deployment
+
+If you copied the base url provided from the command run in step 1 above — send us that value.
+If you did not copy the base url or cannot locate it, it can be found within the Heroku app dashboard. Simply right-click on the "Open App" button in the top right of the application and click "Copy Link Address".
+Once we update your workspace within our DB you'll be able to access your workspace via the usual http://app.knapsack.cloud/site/[YOUR-WORKSPACE]/latest URL
+
+
+ Reach out to your Knapsack representative or email us at help@knapsack.cloud if you run into any issues along the way or would like to chat with a Solutions Engineer.
