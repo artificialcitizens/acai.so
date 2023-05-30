@@ -4,13 +4,14 @@ import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { OpenAI } from 'langchain/llms/openai';
 import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
+import 'dotenv/config';
 
 //##########
 // LangChain
 //##########
 
 /* Create embeddings instance */
-const embeddings = new OpenAIEmbeddings({ openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY });
+const embeddings = new OpenAIEmbeddings({ openAIApiKey: import.meta.env.STORYBOOK_OPENAI_API_KEY });
 /* Embed queries */
 const embeddingExample = async (input: string) => {
   const res = await embeddings.embedQuery(input);
@@ -18,7 +19,7 @@ const embeddingExample = async (input: string) => {
 };
 
 const chatModelExample = async (query: string) => {
-  const chat = new ChatOpenAI({ openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY });
+  const chat = new ChatOpenAI({ openAIApiKey: import.meta.env.STORYBOOK_OPENAI_API_KEY });
   // Pass in a list of messages to `call` to start a conversation.
   const response = await chat.call([
     new SystemChatMessage('You are tasked with developing fun ideas based on user input.'),
@@ -28,7 +29,7 @@ const chatModelExample = async (query: string) => {
 };
 
 const llmExample = async (msg: string) => {
-  const model = new OpenAI({ openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY });
+  const model = new OpenAI({ openAIApiKey: import.meta.env.STORYBOOK_OPENAI_API_KEY });
   // `call` is a simple string-in, string-out method for interacting with the model.
   const response = await model.call(msg + '\n');
   return response.trim();

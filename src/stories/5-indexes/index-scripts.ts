@@ -7,13 +7,12 @@ import { PineconeClient } from '@pinecone-database/pinecone';
 // We are importing one of the special chains that Langchain provides for us
 import { RetrievalQAChain } from 'langchain/chains';
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
-import { openAi, pineconeEnv, pineconeIndexName, pineconeToken } from '../../env';
 
 //##########
 // LangChain
 //##########
 
-const llm = new OpenAI({ openAIApiKey: openAi });
+const llm = new OpenAI({ openAIApiKey: process.env.STORYBOOK_OPENAI_API_KEY });
 const splitter = new CharacterTextSplitter({
   separator: '\n',
   chunkSize: 150,
@@ -27,7 +26,7 @@ export const memoryStoreExample = async () => {
     const splitDocs = await splitter.splitDocuments(docs);
     const vectorStore = await MemoryVectorStore.fromDocuments(
       splitDocs,
-      new OpenAIEmbeddings({ openAIApiKey: openAi }),
+      new OpenAIEmbeddings({ openAIApiKey: process.env.STORYBOOK_OPENAI_API_KEY }),
     );
 
     // Search for the most similar document
@@ -45,13 +44,16 @@ export const queryPinecone = async (msg: string) => {
   // Retriever Docs
   const client = new PineconeClient();
   await client.init({
-    apiKey: pineconeToken,
-    environment: pineconeEnv,
+    apiKey: process.env.STORYBOOK_PINECONE_API_KEY!,
+    environment: process.env.STORYBOOK_PINECONE_ENVIRONMENT!,
   });
-  const pineconeIndex = client.Index(pineconeIndexName);
-  const vectorStore = await PineconeStore.fromExistingIndex(new OpenAIEmbeddings({ openAIApiKey: openAi }), {
-    pineconeIndex,
-  });
+  const pineconeIndex = client.Index(process.env.STORYBOOK_PINECONE_INDEX!);
+  const vectorStore = await PineconeStore.fromExistingIndex(
+    new OpenAIEmbeddings({ openAIApiKey: process.env.STORYBOOK_OPENAI_API_KEY }),
+    {
+      pineconeIndex,
+    },
+  );
   // const result = await vectorStore.similaritySearch(msg, 1);
   const chain = RetrievalQAChain.fromLLM(llm, vectorStore.asRetriever());
   try {

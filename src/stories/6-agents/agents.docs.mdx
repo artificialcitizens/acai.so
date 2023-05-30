@@ -65,7 +65,6 @@ import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { SerpAPI } from 'langchain/tools';
 import { Calculator } from 'langchain/tools/calculator';
-import { openAi, pineconeEnv, pineconeIndexName, pineconeToken, serpApiKey } from '../../env';
 import { DynamicTool } from 'langchain/tools';
 
 const model = new ChatOpenAI({ openAIApiKey: openAi, temperature: 0 });

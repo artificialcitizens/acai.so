@@ -19,8 +19,8 @@ import { BufferWindowMemory } from 'langchain/memory';
 // LangChain
 //##########
 
-const chatModel = new ChatOpenAI({ temperature: 0, openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY });
-const llm = new OpenAI({ openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY });
+const chatModel = new ChatOpenAI({ temperature: 0, openAIApiKey: import.meta.env.STORYBOOK_OPENAI_API_KEY });
+const llm = new OpenAI({ openAIApiKey: import.meta.env.STORYBOOK_OPENAI_API_KEY });
 const memory = new BufferWindowMemory({ k: 5 });
 
 const basicLlmChain = async (input: string) => {

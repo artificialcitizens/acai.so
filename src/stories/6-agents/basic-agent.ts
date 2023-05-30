@@ -2,11 +2,11 @@ import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { OpenAI } from 'langchain/llms/openai';
 import { SerpAPI } from 'langchain/tools';
 import { Calculator } from 'langchain/tools/calculator';
-import { openAi, pineconeEnv, pineconeIndexName, pineconeToken, serpApiKey } from '../../env';
+import 'dotenv/config';
 
-const model = new OpenAI({ openAIApiKey: openAi, temperature: 0 });
+const model = new OpenAI({ openAIApiKey: process.env.STORYBOOK_OPENAI_API_KEY, temperature: 0 });
 const tools = [
-  new SerpAPI(serpApiKey, {
+  new SerpAPI(process.env.STORYBOOK_SERPAPI_KEY, {
     location: 'Austin,Texas,United States',
     hl: 'en',
     gl: 'us',

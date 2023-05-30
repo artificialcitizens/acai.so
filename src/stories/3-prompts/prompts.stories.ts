@@ -12,8 +12,8 @@ import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
 import { StructuredOutputParser } from 'langchain/output_parsers';
 import { OpenAI } from 'langchain/llms/openai';
 
-const chatModel = new ChatOpenAI({ temperature: 0, openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY });
-const llmModel = new OpenAI({ openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY });
+const chatModel = new ChatOpenAI({ temperature: 0, openAIApiKey: import.meta.env.STORYBOOK_OPENAI_API_KEY });
+const llmModel = new OpenAI({ openAIApiKey: import.meta.env.STORYBOOK_OPENAI_API_KEY });
 
 //##########
 // LangChain

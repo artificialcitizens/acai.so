@@ -90,7 +90,7 @@ and convert to a data structure
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
 
-const chat = new ChatOpenAI({ openAIApiKey: process.env.OPENAI_API_KEY });
+const chat = new ChatOpenAI({ openAIApiKey: import.meta.env.STORYBOOK_OPENAI_API_KEY });
 
 export const chatModelExample = async (query: string) => {
   const response = await chat.call([

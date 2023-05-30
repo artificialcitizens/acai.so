@@ -2,17 +2,17 @@ import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { SerpAPI } from 'langchain/tools';
 import { Calculator } from 'langchain/tools/calculator';
-import { openAi, pineconeEnv, pineconeIndexName, pineconeToken, serpApiKey } from '../../env';
 import { DynamicTool } from 'langchain/tools';
+import 'dotenv/config';
 
-const model = new ChatOpenAI({ openAIApiKey: openAi, temperature: 0 });
+const model = new ChatOpenAI({ openAIApiKey: process.env.STORYBOOK_OPENAI_API_KEY, temperature: 0 });
 
 const exampleToolFunction = async (input: string) => {
   return 'foo';
 };
 
 const tools = [
-  new SerpAPI(serpApiKey, {
+  new SerpAPI(process.env.STORYBOOK_SERPAPI_KEY, {
     location: 'Portland,Oregon,United States',
     hl: 'en',
     gl: 'us',

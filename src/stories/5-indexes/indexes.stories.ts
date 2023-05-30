@@ -16,7 +16,6 @@ const splitter = new CharacterTextSplitter({
   chunkOverlap: 10,
 });
 const loader = new TextLoader('src/stories/assets/documents/vector_store_guide.txt');
-
 const memoryStoreExample = async () => {
   try {
     const docs = await loader.load();
@@ -25,7 +24,7 @@ const memoryStoreExample = async () => {
     console.log('splitDocs', splitDocs[5]);
     const vectorStore = await MemoryVectorStore.fromDocuments(
       splitDocs,
-      new OpenAIEmbeddings({ openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY }),
+      new OpenAIEmbeddings({ openAIApiKey: import.meta.env.STORYBOOK_OPENAI_API_KEY }),
     );
 
     // Search for the most similar document

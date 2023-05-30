@@ -18,7 +18,7 @@ import {
 } from 'langchain/schema';
 import { SerpAPI, Tool } from 'langchain/tools';
 import { Calculator } from 'langchain/tools/calculator';
-import { openAi, pineconeEnv, pineconeIndexName, pineconeToken, serpApiKey } from '../../env';
+import 'dotenv/config';
 
 const PREFIX = `Answer the following questions as best you can. You have access to the following tools:`;
 const formatInstructions = (toolNames: string) => `Use the following format in your response:
@@ -102,9 +102,9 @@ class CustomOutputParser extends AgentActionOutputParser {
   }
 }
 
-const model = new ChatOpenAI({ openAIApiKey: openAi, temperature: 0 });
+const model = new ChatOpenAI({ openAIApiKey: process.env.STORYBOOK_OPENAI_API_KEY, temperature: 0 });
 const tools = [
-  new SerpAPI(serpApiKey, {
+  new SerpAPI(process.env.STORYBOOK_SERPAPI_KEY, {
     location: 'Portland,Oregon,United States',
     hl: 'en',
     gl: 'us',

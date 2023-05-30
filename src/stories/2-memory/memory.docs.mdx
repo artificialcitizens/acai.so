@@ -34,3 +34,20 @@ sees the last message.
 Check your dev console to see the full chat history
 
 <Canvas of={MemoryStories.BasicMemoryExample} />
+
+## BufferWindowMemory
+
+The BufferWindowMemory is a simple wrapper that allows us to keep track of the last N interactions
+
+```ts
+import { OpenAI } from "langchain/llms/openai";
+import { BufferWindowMemory } from "langchain/memory";
+import { ConversationChain } from "langchain/chains";
+
+const model = new OpenAI({});
+const memory = new BufferWindowMemory({ k: 5 });
+const chain = new ConversationChain({ llm: model, memory: memory });
+const res1 = await chain.call({ input: "Hi! I'm Jim." });
+console.log({ res1 });
+
+```

@@ -6,7 +6,7 @@ import { OpenAI } from 'langchain/llms/openai';
 // LangChain
 //##########
 
-const model = new OpenAI({ openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY });
+const model = new OpenAI({ openAIApiKey: import.meta.env.STORYBOOK_OPENAI_API_KEY });
 
 const llmExample = async (input: string, chatHistory: string) => {
   console.log('chat_history', chatHistory);

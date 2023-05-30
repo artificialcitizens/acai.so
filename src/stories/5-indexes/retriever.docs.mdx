@@ -41,7 +41,7 @@ await client.init({
 const pineconeIndex = client.Index(PINECONE_INDEX);
 
 const vectorStore = await PineconeStore.fromExistingIndex(
-  new OpenAIEmbeddings({ openaiApiKey: OPENAI_API_KEY }),
+  new OpenAIEmbeddings({ openaiApiKey: import.meta.env.STORYBOOK_OPENAI_API_KEY  }),
   { pineconeIndex }
 );
 

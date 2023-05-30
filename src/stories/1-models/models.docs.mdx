@@ -72,7 +72,7 @@ Notes: There is no memory being saved here, each query is a new context and the 
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
 
-const chat = new ChatOpenAI({ openAIApiKey: process.env.OPENAI_API_KEY });
+const chat = new ChatOpenAI({ openAIApiKey: import.meta.env.STORYBOOK_OPENAI_API_KEY });
 
 export const chatModelExample = async (query: string) => {
   // Pass in a list of messages to `call` to start a conversation.
