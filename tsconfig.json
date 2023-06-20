@@ -20,6 +20,14 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "src/**/*.ts", "src/**/*.tsx", "src/components/langchain-cc/**/*.ts", "vite.config.ts"],
+  "include": [
+    "src",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/components/langchain-cc/**/*.ts",
+    "vite.config.ts",
+    "src/main.tsx",
+    "server.ts"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
