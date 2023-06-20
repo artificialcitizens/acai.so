@@ -1,5 +1,6 @@
 import { useAudioRecorder } from 'react-audio-voice-recorder';
 import React, { useEffect, useState } from 'react';
+import CallbackQueue from './CallbackQueue';
 
 interface MicRecorderProps {
   onRecordingComplete: (blob: Blob) => void;
@@ -9,11 +10,12 @@ declare global {
     webkitSpeechRecognition: any;
   }
 }
+const queue = new CallbackQueue();
+
 const MicRecorder: React.FC<MicRecorderProps> = ({ onRecordingComplete }) => {
   const { startRecording, stopRecording, recordingBlob, isRecording } = useAudioRecorder();
   const [recognition, setRecognition] = useState<any | null>(null);
   const activationWord = 'start recording'; // Change this to your activation word
-
   useEffect(() => {
     if (!recordingBlob) return;
     onRecordingComplete(recordingBlob);
@@ -28,14 +30,14 @@ const MicRecorder: React.FC<MicRecorderProps> = ({ onRecordingComplete }) => {
 
     // // Restart the recognition service when it ends
     // speechRecognition.onend = () => {
-    //   speechRecognition.start();
+    //   queue.addCallback(speechRecognition.start());
     // };
 
     setRecognition(speechRecognition);
-    speechRecognition.start();
+    queue.addCallback(speechRecognition.start());
 
     return () => {
-      speechRecognition.stop();
+      queue.addCallback(speechRecognition.stop());
     };
   }, []);
 
@@ -43,7 +45,7 @@ const MicRecorder: React.FC<MicRecorderProps> = ({ onRecordingComplete }) => {
     if (!recognition) return;
 
     // Handle the result event
-    recognition.onresult = (event) => {
+    recognition.onresult = (event: { resultIndex: any; results: string | any[] }) => {
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
           const transcript = event.results[i][0].transcript.trim();
@@ -51,11 +53,13 @@ const MicRecorder: React.FC<MicRecorderProps> = ({ onRecordingComplete }) => {
           // If the transcript includes the activation word, start recording
           if (transcript.includes(activationWord)) {
             startRecording();
+          } else if (transcript.includes('stop recording')) {
+            stopRecording();
           }
         }
       }
     };
-  }, [recognition, startRecording, activationWord]);
+  }, [recognition, startRecording, activationWord, stopRecording]);
 
   return (
     <div>
