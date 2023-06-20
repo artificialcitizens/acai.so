@@ -1,9 +1,8 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
+  /* margin: 0 auto; */
   padding: 2rem;
-  text-align: center;
 }
+/* 
 
 .logo {
   height: 6em;
@@ -141,4 +140,4 @@
 .tip-wrapper code {
   font-size: 12px;
   display: inline-block;
-}
+} */
