@@ -1,7 +1,9 @@
 import { useAudioRecorder } from 'react-audio-voice-recorder';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import CallbackQueue from './CallbackQueue';
+import socketIOClient from 'socket.io-client';
 
+const SOCKET_SERVER_URL = 'http://192.168.4.94:8080';
 interface MicRecorderProps {
   onRecordingComplete: (blob: Blob) => void;
 }
@@ -16,8 +18,27 @@ const MicRecorder: React.FC<MicRecorderProps> = ({ onRecordingComplete }) => {
   const { startRecording, stopRecording, recordingBlob, isRecording } = useAudioRecorder();
   const [recognition, setRecognition] = useState<any | null>(null);
   const activationWord = 'start recording'; // Change this to your activation word
+  const socketRef = useRef<any | null>(null);
   useEffect(() => {
-    if (!recordingBlob) return;
+    socketRef.current = socketIOClient(SOCKET_SERVER_URL);
+    socketRef.current.on('connect', () => {
+      console.log('connected');
+    });
+    return () => {
+      socketRef.current.disconnect();
+    };
+  }, []);
+  useEffect(() => {
+    if (!recordingBlob || recordingBlob.size < 25000) return;
+
+    const reader = new FileReader();
+    reader.onloadend = (e) => {
+      if (e.target?.readyState == FileReader.DONE) {
+        // Send the audio file to the server
+        socketRef.current.emit('upload_audio', e.target.result);
+      }
+    };
+    reader.readAsDataURL(recordingBlob);
     onRecordingComplete(recordingBlob);
   }, [recordingBlob, onRecordingComplete]);
 
@@ -27,11 +48,6 @@ const MicRecorder: React.FC<MicRecorderProps> = ({ onRecordingComplete }) => {
     const speechRecognition = new window.webkitSpeechRecognition();
     speechRecognition.continuous = true;
     speechRecognition.interimResults = true;
-
-    // // Restart the recognition service when it ends
-    // speechRecognition.onend = () => {
-    //   queue.addCallback(speechRecognition.start());
-    // };
 
     setRecognition(speechRecognition);
     queue.addCallback(speechRecognition.start());
@@ -61,6 +77,20 @@ const MicRecorder: React.FC<MicRecorderProps> = ({ onRecordingComplete }) => {
     };
   }, [recognition, startRecording, activationWord, stopRecording]);
 
+  useEffect(() => {
+    const handleResponseText = (response_text) => {
+      console.log('Received text from server:', response_text.text[0]?.text);
+      // Do whatever you want with the text received from the server
+    };
+
+    console.log('Listening for transcription events');
+    socketRef.current.on('transcription', handleResponseText);
+
+    return () => {
+      // Clean up the listener when the component is unmounted
+      socketRef.current.off('transcription', handleResponseText);
+    };
+  }, []);
   return (
     <div>
       <button
