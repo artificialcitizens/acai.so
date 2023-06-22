@@ -1,12 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import {
-  ChatContainer,
-  MessageList,
-  Message,
-  MessageInput,
-  TypingIndicator,
-  MessageModel,
-} from '@chatscope/chat-ui-kit-react';
+import { ChatContainer, MessageList, Message, MessageInput, TypingIndicator } from '@chatscope/chat-ui-kit-react';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import Linkify from 'react-linkify';
 
@@ -77,12 +70,13 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, pla
 
   return (
     <div
+      className="rounded-xl overflow-hidden"
       style={{
         height: height || '500px',
       }}
     >
       <ChatContainer>
-        <MessageList typingIndicator={loading && <TypingIndicator content="Knapsack is typing" />}>
+        <MessageList className="pt-4" typingIndicator={loading && <TypingIndicator content="Knapsack is typing" />}>
           {messages.map((message) => (
             <Message
               key={message.sentTime}

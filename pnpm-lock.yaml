@@ -46,6 +46,9 @@ dependencies:
   '@tiptap/suggestion':
     specifier: ^2.0.3
     version: 2.0.3(@tiptap/core@2.0.3)(@tiptap/pm@2.0.3)
+  axios:
+    specifier: ^1.4.0
+    version: 1.4.0
   cheerio:
     specifier: 1.0.0-rc.12
     version: 1.0.0-rc.12
@@ -57,7 +60,7 @@ dependencies:
     version: 4.18.2
   langchain:
     specifier: ^0.0.91
-    version: 0.0.91(@pinecone-database/pinecone@0.1.5)(cheerio@1.0.0-rc.12)
+    version: 0.0.91(@pinecone-database/pinecone@0.1.5)(axios@1.4.0)(cheerio@1.0.0-rc.12)
   react:
     specifier: ^18.2.0
     version: 18.2.0
@@ -5248,6 +5251,16 @@ packages:
       - debug
     dev: false
 
+  /axios@1.4.0:
+    resolution: {integrity: sha512-S4XCWMEmzvo64T9GfvQDOXgYRDJ/wsSZc7Jvdgx5u1sd0JwsuPLqb3SYmusag+edF6ziyMensPVqLTSc1PiSEA==}
+    dependencies:
+      follow-redirects: 1.15.2
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
   /axobject-query@3.1.1:
     resolution: {integrity: sha512-goKlv8DZrK9hUh975fnHzhNIO4jUnFCfv/dszV5VwUGDFjI6vQ2VwoyjYjYNEbBE8AH87TduWP5uyDR1D+Iteg==}
     dependencies:
@@ -7940,7 +7953,7 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
-  /langchain@0.0.91(@pinecone-database/pinecone@0.1.5)(cheerio@1.0.0-rc.12):
+  /langchain@0.0.91(@pinecone-database/pinecone@0.1.5)(axios@1.4.0)(cheerio@1.0.0-rc.12):
     resolution: {integrity: sha512-oCilhNDZDSt8rdvnuVv5J3BIZ1FwCccdqdO6xHddiCko26UkAJ+wKRWmV8YQOYUDZzoRjp4ogDIifETfhfb30w==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -8087,6 +8100,7 @@ packages:
       '@anthropic-ai/sdk': 0.4.4
       '@pinecone-database/pinecone': 0.1.5
       ansi-styles: 5.2.0
+      axios: 1.4.0
       binary-extensions: 2.2.0
       cheerio: 1.0.0-rc.12
       expr-eval: 2.0.2
@@ -9310,7 +9324,6 @@ packages:
 
   /proxy-from-env@1.1.0:
     resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
-    dev: true
 
   /pstree.remy@1.1.8:
     resolution: {integrity: sha512-77DZwxQmxKnu3aR542U+X8FypNzbfJ+C5XQDk3uWjWxn6151aIMGthWYRXTqT1E5oJvg+ljaa2OJi+VfvCOQ8w==}

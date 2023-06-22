@@ -2,10 +2,12 @@ import { useAudioRecorder } from 'react-audio-voice-recorder';
 import React, { useEffect, useRef, useState } from 'react';
 import CallbackQueue from './CallbackQueue';
 import socketIOClient from 'socket.io-client';
+import { recognitionRouter } from './recognition-manager';
 
 const SOCKET_SERVER_URL = 'http://192.168.4.94:8080';
 interface MicRecorderProps {
   onRecordingComplete: (blob: Blob) => void;
+  onTranscriptionComplete: (transcript: string) => void;
 }
 declare global {
   interface Window {
@@ -14,7 +16,7 @@ declare global {
 }
 const queue = new CallbackQueue();
 
-const MicRecorder: React.FC<MicRecorderProps> = ({ onRecordingComplete }) => {
+const MicRecorder: React.FC<MicRecorderProps> = ({ onRecordingComplete, onTranscriptionComplete }) => {
   const { startRecording, stopRecording, recordingBlob, isRecording } = useAudioRecorder();
   const activationWord = 'start recording'; // Change this to your activation word
   const socketRef = useRef<any | null>(null);
@@ -59,12 +61,13 @@ const MicRecorder: React.FC<MicRecorderProps> = ({ onRecordingComplete }) => {
     speechRecognitionRef.current = new window.webkitSpeechRecognition();
     speechRecognitionRef.current.continuous = true;
     speechRecognitionRef.current.interimResults = true;
+    queue.addCallback(speechRecognitionRef.current.start());
     speechRecognitionRef.current.onend = () => {
       console.log('Speech recognition service disconnected');
-      speechRecognitionRef.current.start();
+      queue.addCallback(speechRecognitionRef.current.start());
     };
-    queue.addCallback(speechRecognitionRef.current.start());
     return () => {
+      speechRecognitionRef.current.onend = null;
       queue.addCallback(speechRecognitionRef.current.stop());
     };
   }, []);
@@ -73,12 +76,12 @@ const MicRecorder: React.FC<MicRecorderProps> = ({ onRecordingComplete }) => {
     if (!speechRecognitionRef.current) return;
 
     // Handle the result event
-    speechRecognitionRef.current.onresult = (event: { resultIndex: any; results: string | any[] }) => {
+    speechRecognitionRef.current.onresult = async (event: { resultIndex: any; results: string | any[] }) => {
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
           const transcript = event.results[i][0].transcript.trim();
-          console.log(transcript);
-          // If the transcript includes the activation word, start recording
+          console.log('Transcript:', transcript);
+          onTranscriptionComplete(transcript);
           if (transcript.includes(activationWord)) {
             startRecording();
           } else if (transcript.includes('stop recording')) {
@@ -87,10 +90,10 @@ const MicRecorder: React.FC<MicRecorderProps> = ({ onRecordingComplete }) => {
         }
       }
     };
-  }, [startRecording, activationWord, stopRecording]);
+  }, [startRecording, activationWord, stopRecording, onTranscriptionComplete]);
 
   useEffect(() => {
-    const handleResponseText = (response_text) => {
+    const handleResponseText = (response_text: any) => {
       console.log('Received text from server:', response_text.text[0]?.text);
       // Do whatever you want with the text received from the server
     };
@@ -108,9 +111,9 @@ const MicRecorder: React.FC<MicRecorderProps> = ({ onRecordingComplete }) => {
     stopRecording();
   };
   return (
-    <div>
+    <div className="m-4">
       <button
-        className={isRecording ? 'h-4 w-4 rounded-full bg-red-500' : 'h-4 w-4 rounded-full bg-slate-400'}
+        className={isRecording ? 'h-10 w-6 rounded-full bg-red-500' : 'h-10 w-6 rounded-full bg-slate-400'}
         onClick={isRecording ? handleStopRecording : startRecording}
       />
     </div>
