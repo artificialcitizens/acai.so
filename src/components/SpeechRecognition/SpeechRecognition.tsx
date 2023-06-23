@@ -1,9 +1,6 @@
-import { useAudioRecorder } from 'react-audio-voice-recorder';
 import React, { useEffect, useRef, useState } from 'react';
 import CallbackQueue from './CallbackQueue';
-import socketIOClient from 'socket.io-client';
 
-const SOCKET_SERVER_URL = 'http://192.168.4.94:8080';
 interface SpeechRecognitionProps {
   onTranscriptionComplete: (transcript: string) => void;
 }
@@ -36,7 +33,6 @@ const SpeechRecognition: React.FC<SpeechRecognitionProps> = ({ onTranscriptionCo
   useEffect(() => {
     if (!speechRecognitionRef.current) return;
 
-    // Handle the result event
     speechRecognitionRef.current.onresult = async (event: { resultIndex: any; results: string | any[] }) => {
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {

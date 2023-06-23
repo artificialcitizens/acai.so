@@ -65,7 +65,6 @@ const ElevenLabs: React.FC<ElevenLabsProps> = ({ text, voice }) => {
           11
         </button>
       </div>
-      ;
     </>
   );
 };
