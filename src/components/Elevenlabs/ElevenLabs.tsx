@@ -52,13 +52,13 @@ const ElevenLabs: React.FC<ElevenLabsProps> = ({ text, voice }) => {
 
   return (
     <>
-      <div className="max-w-min rounded-lg p-4 my-2 flex" style={{ border: '2px solid' }}>
+      <div className="max-w-min rounded-lg p-4 my-2 flex border-2 border-solid">
         <audio controls src={audioSrc} autoPlay />
         <button
           className="rounded-full bg-transparent hover:bg-neutral-950 text-white font-bold py-2 px-4 mx-2"
           onClick={() => setActive(!active)}
           style={{
-            backgroundColor: !active ? 'transparent' : 'revert',
+            backgroundColor: !active ? 'transparent' : 'green',
             border: '2px solid ',
           }}
         >

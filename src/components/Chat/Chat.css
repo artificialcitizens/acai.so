@@ -1,0 +1,19 @@
+.cs-message-input__content-editor,
+.cs-message-input__content-editor-wrapper {
+  background-color: #242424 !important;
+  color: white;
+}
+
+.cs-message__content {
+  background-color: #121212 !important;
+  border: 1px solid white !important;
+}
+
+.cs-message__custom-content {
+  color: white;
+}
+
+.cs-message--outgoing .cs-message__content {
+  background-color: #121212 !important;
+  color: white;
+}

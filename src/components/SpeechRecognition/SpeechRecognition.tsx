@@ -44,13 +44,8 @@ const SpeechRecognition: React.FC<SpeechRecognitionProps> = ({ onTranscriptionCo
   }, [onTranscriptionComplete]);
 
   return (
-    <span
-      className="flex items-center rounded-md max-w-min p-4"
-      style={{
-        border: '2px solid',
-      }}
-    >
-      <span className="mr-2">Whisper</span>
+    <span className="flex items-center rounded-md max-w-min p-4 border-2 border-solid">
+      <span className="mr-2">Speech</span>
     </span>
   );
 };
