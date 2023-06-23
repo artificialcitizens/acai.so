@@ -2,7 +2,7 @@ import { useAudioRecorder } from 'react-audio-voice-recorder';
 import React, { useEffect, useRef } from 'react';
 import socketIOClient from 'socket.io-client';
 
-const SOCKET_SERVER_URL = 'http://192.168.4.94:8080';
+const SOCKET_SERVER_URL = import.meta.env.VITE_WHISPER_SOCKET_SERVER;
 interface MicRecorderProps {
   onRecordingComplete: (blob: Blob) => void;
   onTranscriptionComplete: (transcript: string) => void;

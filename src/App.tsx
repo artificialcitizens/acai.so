@@ -1,11 +1,11 @@
 import './App.css';
 import React, { useState } from 'react';
-import Whisper from './components/MicRecorder/MicRecorder';
+import Whisper from './components/Whisper';
 import TipTap from './components/TipTap/TipTap';
 import Chat from './components/Chat/Chat';
 import ElevenLabs from './components/Elevenlabs/ElevenLabs';
 import SpeechRecognition from './components/SpeechRecognition/SpeechRecognition';
-import { recognitionRouter } from './components/MicRecorder/recognition-manager';
+import { recognitionRouter } from './components/Whisper/recognition-manager';
 
 export type State = 'strahl' | 'chat';
 
