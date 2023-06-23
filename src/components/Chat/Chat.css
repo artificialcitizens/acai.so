@@ -1,12 +1,14 @@
 .cs-message-input__content-editor,
 .cs-message-input__content-editor-wrapper {
-  background-color: #242424 !important;
+  background-color: #565656 !important;
   color: white;
 }
 
 .cs-message__content {
+  font-size: 1rem;
   background-color: #121212 !important;
   border: 1px solid white !important;
+  margin-bottom: 0.5rem;
 }
 
 .cs-message__custom-content {
@@ -14,6 +16,23 @@
 }
 
 .cs-message--outgoing .cs-message__content {
-  background-color: #121212 !important;
+  background-color: #565656 !important;
   color: white;
+}
+
+.cs-message-input__tools > button {
+  color: white;
+}
+
+.cs-typing-indicator {
+  background-color: transparent !important;
+  margin-left: 1.5rem;
+}
+
+.cs-typing-indicator > * {
+  color: white !important;
+}
+
+.cs-typing-indicator__dot {
+  background-color: white !important;
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useId } from 'react';
 import { ChatContainer, MessageList, Message, MessageInput, TypingIndicator } from '@chatscope/chat-ui-kit-react';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import Linkify from 'react-linkify';
@@ -9,9 +9,11 @@ interface ChatProps {
   height?: string;
   startingValue?: string;
   placeHolder?: string;
+  name: string;
+  avatar: string;
 }
 
-const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, placeHolder }) => {
+const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, name = 'Ava' }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [msgInputValue, setMsgInputValue] = useState(startingValue);
   const [messages, setMessages] = useState<MessageModel[]>([]);
@@ -63,19 +65,19 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, pla
 
   return (
     <div
-      className="rounded-xl overflow-hidden border-2 border-solid border-gray-300 w-full"
+      className="rounded-xl overflow-hidden border-2 border-solid border-gray-300 w-[600px]"
       style={{
         height: height || '500px',
       }}
     >
       <ChatContainer className="bg-transparent">
         <MessageList
-          className="pt-4 bg-transparent"
-          typingIndicator={loading && <TypingIndicator content="Knapsack is typing" />}
+          className="bg-transparent"
+          typingIndicator={loading && <TypingIndicator content={`${name} is thinking`} />}
         >
           {messages.map((message) => (
             <Message
-              key={message.sentTime}
+              key={message.sentTime + message.message}
               model={{
                 direction: message.direction,
                 position: message.position,

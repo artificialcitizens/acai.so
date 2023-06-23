@@ -8,6 +8,7 @@ interface ElevenLabsProps {
 
 const voices = {
   strahl: 'Gdbj8IU3v0OzqfE4M5dz',
+  ava: 'XNjihqQlHh33hdGwAdnE',
 };
 
 // Define a function called textToSpeech that takes in a string called inputText as its argument.
@@ -48,22 +49,19 @@ const ElevenLabs: React.FC<ElevenLabsProps> = ({ text, voice }) => {
       const audioUrl = URL.createObjectURL(audioBlob);
       setAudioSrc(audioUrl);
     });
-  }, [text, voice]);
+  }, [text, voice, active]);
 
   return (
     <>
-      <div className="max-w-min rounded-lg p-4 my-2 flex border-2 border-solid">
+      <div className="max-w-min rounded-lg p-4 my-2 flex border-2 border-solid items-center flex-col">
+        <div className="w-full flex items-center mb-4">
+          <span className="mr-2">Elevenlabs</span>
+          <button
+            className={active ? 'p-0 w-6 h-6 rounded-full bg-red-500' : 'rounded-full p-0 w-6 h-6 bg-slate-400'}
+            onClick={() => setActive(!active)}
+          />
+        </div>
         <audio controls src={audioSrc} autoPlay />
-        <button
-          className="rounded-full bg-transparent hover:bg-neutral-950 text-white font-bold py-2 px-4 mx-2"
-          onClick={() => setActive(!active)}
-          style={{
-            backgroundColor: !active ? 'transparent' : 'green',
-            border: '2px solid ',
-          }}
-        >
-          11
-        </button>
       </div>
     </>
   );

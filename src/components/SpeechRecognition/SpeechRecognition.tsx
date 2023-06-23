@@ -12,9 +12,11 @@ declare global {
 const queue = new CallbackQueue();
 
 const SpeechRecognition: React.FC<SpeechRecognitionProps> = ({ onTranscriptionComplete }) => {
+  const [active, setActive] = useState<boolean>(true);
   const speechRecognitionRef = useRef<any | null>(null);
 
   useEffect(() => {
+    if (!active) return;
     if (!('webkitSpeechRecognition' in window)) return;
     speechRecognitionRef.current = new window.webkitSpeechRecognition();
     speechRecognitionRef.current.continuous = true;
@@ -28,7 +30,7 @@ const SpeechRecognition: React.FC<SpeechRecognitionProps> = ({ onTranscriptionCo
       speechRecognitionRef.current.onend = null;
       queue.addCallback(speechRecognitionRef.current.stop());
     };
-  }, []);
+  }, [active]);
 
   useEffect(() => {
     if (!speechRecognitionRef.current) return;
@@ -46,6 +48,18 @@ const SpeechRecognition: React.FC<SpeechRecognitionProps> = ({ onTranscriptionCo
   return (
     <span className="flex items-center rounded-md max-w-min p-4 border-2 border-solid">
       <span className="mr-2">Speech</span>
+      <button
+        className={active ? 'p-0 w-6 h-6 rounded-full bg-red-500' : 'rounded-full p-0 w-6 h-6 bg-slate-400'}
+        onClick={() => {
+          if (!active) {
+            queue.addCallback(speechRecognitionRef.current.start());
+          } else {
+            speechRecognitionRef.current.onend = null;
+            queue.addCallback(speechRecognitionRef.current.stop());
+          }
+          setActive(!active);
+        }}
+      />
     </span>
   );
 };

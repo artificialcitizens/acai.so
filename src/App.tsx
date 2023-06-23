@@ -6,21 +6,26 @@ import Chat from './components/Chat/Chat';
 import ElevenLabs from './components/Elevenlabs/ElevenLabs';
 import SpeechRecognition from './components/SpeechRecognition/SpeechRecognition';
 import { recognitionRouter } from './components/SpeechRecognition/recognition-manager';
-import { hermesChat } from './components/Chat/chat-routes';
+import { avaChat, hermesChat } from './components/Chat/chat-routes';
+import ChromeNotification from './utils/ChromeNotification';
+export type State = 'strahl' | 'chat' | 'ava';
 
-export type State = 'strahl' | 'chat';
+new ChromeNotification('Incoming message', {
+  body: 'You have a new message from John Doe.',
+  requireInteraction: true,
+});
 
 function App() {
   const [transcript, setTranscript] = useState<string>('');
   const [voice2voice, setVoice2voice] = useState<boolean>(false);
-  const [currentState, setCurrentState] = useState<string>('chat');
+  const [currentState, setCurrentState] = useState<string>('ava');
   const [isRecording, setIsRecording] = useState<boolean>(false);
-
+  // Example usage:
   return (
     <>
-      <Chat startingValue={transcript} onSubmitHandler={async (message) => hermesChat(message)} />
+      <Chat startingValue={transcript} onSubmitHandler={async (message) => avaChat(message)} />
       {/* <TipTap label="test" onClickHandler={async () => 'hello world'} /> */}
-      <ElevenLabs text={transcript} voice="strahl" />
+      <ElevenLabs text={transcript} voice="ava" />
       <div className="flex items-center justify-start">
         <Whisper
           onRecordingComplete={(blob) => console.log(blob)}
@@ -33,6 +38,7 @@ function App() {
             console.log('speech', t);
             const response = await recognitionRouter({ state: currentState, transcript: t });
             console.log(response);
+            setTranscript(response as string);
             // if (!response || !response.ok) {
             //   throw new Error('Network response was not ok');
             // }
