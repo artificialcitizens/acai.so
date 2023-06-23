@@ -65,7 +65,7 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
 
   return (
     <div
-      className="rounded-xl overflow-hidden border-2 border-solid border-gray-300 w-[600px]"
+      className="pt-2 rounded-xl overflow-hidden border-2 border-solid border-gray-300 w-[600px]"
       style={{
         height: height || '500px',
       }}
