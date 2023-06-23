@@ -1,52 +1,62 @@
-import React, { useEffect, useState } from 'react';
+import { useAudioRecorder } from 'react-audio-voice-recorder';
+import React, { useEffect, useRef, useState } from 'react';
+import CallbackQueue from './CallbackQueue';
+import socketIOClient from 'socket.io-client';
 
+const SOCKET_SERVER_URL = 'http://192.168.4.94:8080';
+interface SpeechRecognitionProps {
+  onTranscriptionComplete: (transcript: string) => void;
+}
 declare global {
   interface Window {
     webkitSpeechRecognition: any;
   }
 }
+const queue = new CallbackQueue();
 
-const speechRecognitionRef = new window.webkitSpeechRecognition();
-const SpeechRecognition: React.FC = () => {
-  const [transcript, setTranscript] = useState<string>('');
-  const activationWord = 'start recording'; // Change this to your activation word
+const SpeechRecognition: React.FC<SpeechRecognitionProps> = ({ onTranscriptionComplete }) => {
+  const speechRecognitionRef = useRef<any | null>(null);
+
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window)) return;
-    speechRecognitionRef.continuous = true;
-    speechRecognitionRef.interimResults = true;
-    // on end we need to restart the service
-    speechRecognitionRef.onend = () => {
+    speechRecognitionRef.current = new window.webkitSpeechRecognition();
+    speechRecognitionRef.current.continuous = true;
+    speechRecognitionRef.current.interimResults = true;
+    queue.addCallback(speechRecognitionRef.current.start());
+    speechRecognitionRef.current.onend = () => {
       console.log('Speech recognition service disconnected');
-      speechRecognitionRef.start();
+      queue.addCallback(speechRecognitionRef.current.start());
     };
-
-    speechRecognitionRef.start();
-    // Clean up the listener when the component is unmounted
     return () => {
-      speechRecognitionRef.stop();
+      speechRecognitionRef.current.onend = null;
+      queue.addCallback(speechRecognitionRef.current.stop());
     };
   }, []);
 
   useEffect(() => {
-    if (!speechRecognitionRef) return;
+    if (!speechRecognitionRef.current) return;
 
     // Handle the result event
-    speechRecognitionRef.onresult = (event: { resultIndex: any; results: string | any[] }) => {
+    speechRecognitionRef.current.onresult = async (event: { resultIndex: any; results: string | any[] }) => {
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
           const transcript = event.results[i][0].transcript.trim();
-          console.log(transcript);
-          setTranscript(transcript);
-          // If the transcript includes the activation word, start recording
-          if (transcript.includes(activationWord)) {
-            console.log(activationWord);
-          }
+          onTranscriptionComplete(transcript);
         }
       }
     };
-  }, [activationWord]);
+  }, [onTranscriptionComplete]);
 
-  return <div>{transcript || 'Start Talking'}</div>;
+  return (
+    <span
+      className="flex items-center rounded-md max-w-min p-4"
+      style={{
+        border: '2px solid',
+      }}
+    >
+      <span className="mr-2">Whisper</span>
+    </span>
+  );
 };
 
 export default SpeechRecognition;

@@ -2,12 +2,12 @@ import { useAudioRecorder } from 'react-audio-voice-recorder';
 import React, { useEffect, useRef, useState } from 'react';
 import CallbackQueue from './CallbackQueue';
 import socketIOClient from 'socket.io-client';
-import { recognitionRouter } from './recognition-manager';
 
 const SOCKET_SERVER_URL = 'http://192.168.4.94:8080';
 interface MicRecorderProps {
   onRecordingComplete: (blob: Blob) => void;
   onTranscriptionComplete: (transcript: string) => void;
+  onVoiceActivation?: (transcript: string) => void;
 }
 declare global {
   interface Window {
@@ -111,12 +111,18 @@ const MicRecorder: React.FC<MicRecorderProps> = ({ onRecordingComplete, onTransc
     stopRecording();
   };
   return (
-    <div className="m-4">
+    <span
+      className="flex items-center rounded-md max-w-min p-4"
+      style={{
+        border: '2px solid',
+      }}
+    >
+      <span className="mr-2">Whisper</span>
       <button
-        className={isRecording ? 'h-10 w-6 rounded-full bg-red-500' : 'h-10 w-6 rounded-full bg-slate-400'}
+        className={isRecording ? 'p-0 w-6 h-6 rounded-full bg-red-500' : 'rounded-full p-0 w-6 h-6 bg-slate-400'}
         onClick={isRecording ? handleStopRecording : startRecording}
       />
-    </div>
+    </span>
   );
 };
 

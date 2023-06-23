@@ -8,16 +8,9 @@ import { recognitionRouter } from './components/MicRecorder/recognition-manager'
 
 function App() {
   const [transcript, setTranscript] = useState<string>('');
-  // const response = await recognitionRouter({ state: 'chris', transcript });
-  // if (!response.ok) {
-  //   throw new Error('Network response was not ok');
-  // }
-  // // console.log(response.body);
-  // // response.body?.pipeTo(new WritableStream());
-  // const result = await response.text();
-  // console.log(result);
-  // If the transcript includes the activation word, start recording
-  const voice2voice = false;
+  const [voice2voice, setVoice2voice] = useState<boolean>(false);
+  const [currentState, setCurrentState] = useState<string>('chat');
+
   return (
     <>
       <MicRecorder
@@ -27,21 +20,19 @@ function App() {
             setTranscript(transcript);
             return;
           }
-          const response = await recognitionRouter({ state: 'chris', transcript });
-          if (!response.ok) {
+          const response = await recognitionRouter({ state: currentState, transcript });
+          if (!response || !response.ok) {
             throw new Error('Network response was not ok');
           }
-          // console.log(response.body);
-          // response.body?.pipeTo(new WritableStream());
           const result = await response.json();
           const resp = result.response;
           setTranscript(resp);
           console.log(resp);
         }}
       />
-      {transcript && <ElevenLabs text={transcript} />}
-      <Chat onSubmitHandler={async (message) => `hello ${message}`} />
-      {/* <TipTap label="test" onClickHandler={async () => 'hello world'} /> */}
+      <ElevenLabs text={transcript} voice="strahl" />
+      <Chat startingValue={transcript} onSubmitHandler={async (message) => `hello ${message}`} />
+      <TipTap label="test" onClickHandler={async () => 'hello world'} />
     </>
   );
 }
