@@ -1,29 +1,82 @@
 import './App.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Whisper from './components/Whisper';
-import TipTap from './components/TipTap/TipTap';
 import Chat from './components/Chat/Chat';
 import ElevenLabs from './components/Elevenlabs/ElevenLabs';
 import SpeechRecognition from './components/SpeechRecognition/SpeechRecognition';
 import { recognitionRouter } from './components/SpeechRecognition/recognition-manager';
-import { avaChat, hermesChat } from './components/Chat/chat-routes';
+import { avaChat } from './components/Chat/chat-routes';
 import ChromeNotification from './utils/ChromeNotification';
+import ToastManager from './components/Toast';
+import { toast } from 'react-toastify';
+import TodoList from './components/Todo';
 export type State = 'strahl' | 'chat' | 'ava';
-
-new ChromeNotification('Incoming message', {
-  body: 'You have a new message from John Doe.',
-  requireInteraction: true,
-});
+// new ChromeNotification('Incoming message', {
+//   body: 'You have a new message from John Doe.',
+//   requireInteraction: true,
+// });
+import SocketContext from './SocketContext';
+if ('geolocation' in navigator) {
+  navigator.geolocation.getCurrentPosition(
+    function success(position) {
+      console.log('latitude', position.coords.latitude, 'longitude', position.coords.longitude);
+    },
+    function error(error_message) {
+      console.log('An error has occured while retrieving location', error_message);
+    },
+  );
+} else {
+  console.log('geolocation is not enabled on this browser');
+}
 
 function App() {
   const [transcript, setTranscript] = useState<string>('');
   const [voice2voice, setVoice2voice] = useState<boolean>(false);
   const [currentState, setCurrentState] = useState<string>('ava');
   const [isRecording, setIsRecording] = useState<boolean>(false);
+  const socket = useContext(SocketContext);
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('connect', () => {
+      console.log(`Connected: ${socket.id}`);
+    });
+
+    socket.on('message', (message: string) => {
+      console.log(message);
+    });
+
+    socket.on('disconnect', () => {
+      console.log(`Disconnected: ${socket.id}`);
+    });
+
+    // Clean up on unmount
+    return () => {
+      socket.off('connect');
+      socket.off('message');
+      socket.off('disconnect');
+    };
+  }, [socket]);
+  useEffect(() => {
+    toast('🦄 Wow so easy!', {
+      toastId: 'custom-id-yes',
+      className: 'custom-toast',
+      position: 'top-right',
+      autoClose: false,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: 1,
+      theme: 'dark',
+    });
+  }, []);
   // Example usage:
   return (
     <>
-      <Chat startingValue={transcript} onSubmitHandler={async (message) => avaChat(message)} />
+      <ToastManager />
+      {/* <TodoList /> */}
+      <Chat startingValue={transcript} name="Ava" avatar=".." onSubmitHandler={async (message) => avaChat(message)} />
       {/* <TipTap label="test" onClickHandler={async () => 'hello world'} /> */}
       <ElevenLabs text={transcript} voice="ava" />
       <div className="flex items-center justify-start">
