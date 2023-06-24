@@ -67,13 +67,13 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({ isOn, audioContext }) => 
 
   return (
     <div
-      className="rounded-full w-[150px] h-[150px]"
+      className="rounded-full w-[150px] h-[150px] transition-opacity duration-500"
       style={{
         position: 'absolute',
         bottom: '0',
         left: '0',
         zIndex: 100,
-        visibility: isOn ? 'visible' : 'hidden',
+        opacity: isOn ? 1 : 0,
       }}
     >
       <svg ref={ref} width="150" height="150" />

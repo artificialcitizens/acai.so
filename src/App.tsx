@@ -99,9 +99,7 @@ function App() {
             if (!t) return;
             if (t === 'Ava' || (t === 'ava' && !avaListening)) {
               setAvaListening(true);
-              toast('Ava is listening');
             } else if (t.toLowerCase() === 'cancel' && avaListening) {
-              toast('Ava is no longer listening');
               setAvaListening(false);
               return;
             }
