@@ -16,6 +16,7 @@ export type State = 'strahl' | 'chat' | 'ava';
 //   requireInteraction: true,
 // });
 import SocketContext from './SocketContext';
+import AudioWaveform from './components/AudioWave/AudioWave';
 if ('geolocation' in navigator) {
   navigator.geolocation.getCurrentPosition(
     function success(position) {
@@ -32,7 +33,9 @@ if ('geolocation' in navigator) {
 function App() {
   const [transcript, setTranscript] = useState<string>('');
   const [voice2voice, setVoice2voice] = useState<boolean>(false);
+  const [speechRecognition, setSpeechRecognition] = useState<boolean>(true);
   const [currentState, setCurrentState] = useState<string>('ava');
+  const [avaListening, setAvaListening] = useState<boolean>(false);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const socket = useContext(SocketContext);
 
@@ -57,24 +60,12 @@ function App() {
       socket.off('disconnect');
     };
   }, [socket]);
-  useEffect(() => {
-    toast('🦄 Wow so easy!', {
-      toastId: 'custom-id-yes',
-      className: 'custom-toast',
-      position: 'top-right',
-      autoClose: false,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: 1,
-      theme: 'dark',
-    });
-  }, []);
+
   // Example usage:
   return (
     <>
       <ToastManager />
+      <AudioWaveform isOn={true} />
       {/* <TodoList /> */}
       <Chat startingValue={transcript} name="Ava" avatar=".." onSubmitHandler={async (message) => avaChat(message)} />
       {/* <TipTap label="test" onClickHandler={async () => 'hello world'} /> */}
@@ -87,8 +78,22 @@ function App() {
           }}
         />
         <SpeechRecognition
+          active={speechRecognition}
+          onClick={() => {
+            setSpeechRecognition(!speechRecognition);
+          }}
           onTranscriptionComplete={async (t) => {
             console.log('speech', t);
+            if (!t) return;
+            if (t === 'Ava' || (t === 'ava' && !avaListening)) {
+              setAvaListening(true);
+              toast('Ava is listening');
+            } else if (t.toLowerCase() === 'cancel' && avaListening) {
+              toast('Ava is no longer listening');
+              setAvaListening(false);
+              return;
+            }
+            if (!avaListening) return;
             const response = await recognitionRouter({ state: currentState, transcript: t });
             console.log(response);
             setTranscript(response as string);

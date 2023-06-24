@@ -31,12 +31,7 @@ const Dropzone: React.FC<DropzoneProps> = ({ children, onFileDrop }) => {
   }, []);
 
   return (
-    <div
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      style={{ border: highlight ? '2px dashed #000' : '2px solid #000' }}
-    >
+    <div onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}>
       {children}
     </div>
   );

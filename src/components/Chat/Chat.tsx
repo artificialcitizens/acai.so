@@ -26,18 +26,12 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
   const ref = useClickAway(() => {
     setVisible(false);
   });
-  const handleEscape = useCallback(
-    (e: KeyboardEvent) => {
-      if (!visible) return;
-      setVisible(false);
-    },
-    [visible],
-  );
+
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, [handleEscape, ref]);
+  }, [ref]);
 
   const handleClick = () => {
     setVisible(!visible);
@@ -102,7 +96,6 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
       case '.jpg':
       case '.jpeg':
       case '.png':
-      case '.gif':
         reader.onload = () => {
           toastifySuccess('Image uploaded successfully');
         };

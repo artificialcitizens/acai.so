@@ -3,6 +3,8 @@ import CallbackQueue from './CallbackQueue';
 
 interface SpeechRecognitionProps {
   onTranscriptionComplete: (transcript: string) => void;
+  onClick?: () => void;
+  active: boolean;
 }
 declare global {
   interface Window {
@@ -11,8 +13,7 @@ declare global {
 }
 const queue = new CallbackQueue();
 
-const SpeechRecognition: React.FC<SpeechRecognitionProps> = ({ onTranscriptionComplete }) => {
-  const [active, setActive] = useState<boolean>(false);
+const SpeechRecognition: React.FC<SpeechRecognitionProps> = ({ onTranscriptionComplete, active, onClick }) => {
   const speechRecognitionRef = useRef<any | null>(null);
 
   useEffect(() => {
@@ -57,7 +58,7 @@ const SpeechRecognition: React.FC<SpeechRecognitionProps> = ({ onTranscriptionCo
             speechRecognitionRef.current.onend = null;
             queue.addCallback(speechRecognitionRef.current.stop());
           }
-          setActive(!active);
+          if (onClick) onClick();
         }}
       />
     </span>
