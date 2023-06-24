@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import './App.css';
 import React, { useState, useEffect, useContext } from 'react';
 import Whisper from './components/Whisper';
@@ -37,8 +39,13 @@ function App() {
   const [currentState, setCurrentState] = useState<string>('ava');
   const [avaListening, setAvaListening] = useState<boolean>(false);
   const [isRecording, setIsRecording] = useState<boolean>(false);
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const socket = useContext(SocketContext);
 
+  const activateAudioContext = () => {
+    const newAudioContext = new AudioContext();
+    setAudioContext(newAudioContext);
+  };
   useEffect(() => {
     if (!socket) return;
     socket.on('connect', () => {
@@ -61,11 +68,16 @@ function App() {
     };
   }, [socket]);
 
+  const handleWindowClick = () => {
+    if (!audioContext) {
+      activateAudioContext();
+    }
+  };
   // Example usage:
   return (
-    <>
+    <div className="w-[99vw] h-[99vh] p-2" onClick={handleWindowClick}>
       <ToastManager />
-      <AudioWaveform isOn={true} />
+      <AudioWaveform isOn={avaListening} audioContext={audioContext} />
       {/* <TodoList /> */}
       <Chat startingValue={transcript} name="Ava" avatar=".." onSubmitHandler={async (message) => avaChat(message)} />
       {/* <TipTap label="test" onClickHandler={async () => 'hello world'} /> */}
@@ -107,7 +119,7 @@ function App() {
           }}
         />
       </div>
-    </>
+    </div>
   );
 }
 

@@ -1,25 +1,21 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 
 interface AudioWaveformProps {
   isOn: boolean;
+  audioContext: AudioContext | null;
 }
 
-const AudioWaveform: React.FC<AudioWaveformProps> = ({ isOn }) => {
+const AudioWaveform: React.FC<AudioWaveformProps> = ({ isOn, audioContext }) => {
   const ref = useRef<SVGSVGElement>(null);
-  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
-
-  const startAudioContext = () => {
-    if (!audioContext) {
-      const newAudioContext = new AudioContext();
-      setAudioContext(newAudioContext);
-    } else if (audioContext.state === 'suspended') {
-      audioContext.resume();
-    }
-  };
 
   useEffect(() => {
-    if (isOn && audioContext) {
+    const svg = d3.select(ref.current);
+    const width = +svg.attr('width');
+    const height = +svg.attr('height');
+    const radius = Math.min(width, height) / 2;
+
+    if (audioContext) {
       const analyser = audioContext.createAnalyser();
 
       navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
@@ -28,11 +24,6 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({ isOn }) => {
 
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
-
-        const svg = d3.select(ref.current);
-        const width = +svg.attr('width');
-        const height = +svg.attr('height');
-        const radius = Math.min(width, height) / 2;
 
         const radialLine = d3
           .radialLine()
@@ -56,13 +47,36 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({ isOn }) => {
 
         renderFrame();
       });
+    } else {
+      // Render a radial line with the radius of the data circle when there's no audio context
+      const radialLine = d3
+        .radialLine()
+        .angle(() => 0)
+        .radius(() => radius);
+
+      svg
+        .selectAll('path')
+        .data([0])
+        .join('path')
+        .attr('transform', `translate(${width / 2}, ${height / 2})`)
+        .attr('d', radialLine)
+        .attr('stroke', 'none')
+        .attr('fill', 'none');
     }
   }, [isOn, audioContext]);
 
   return (
-    <div>
-      <button onClick={startAudioContext}>Start</button>
-      <svg ref={ref} width="300" height="300" />
+    <div
+      className="rounded-full w-[150px] h-[150px]"
+      style={{
+        position: 'absolute',
+        bottom: '0',
+        left: '0',
+        zIndex: 100,
+        visibility: isOn ? 'visible' : 'hidden',
+      }}
+    >
+      <svg ref={ref} width="150" height="150" />
     </div>
   );
 };
