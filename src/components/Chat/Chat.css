@@ -11,7 +11,8 @@
   margin-bottom: 0.5rem;
 }
 
-.cs-message__html-content {
+.cs-message__html-content,
+.cs-message__custom-content {
   color: white;
 }
 
