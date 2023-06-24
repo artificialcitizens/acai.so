@@ -12,7 +12,7 @@ declare global {
 const queue = new CallbackQueue();
 
 const SpeechRecognition: React.FC<SpeechRecognitionProps> = ({ onTranscriptionComplete }) => {
-  const [active, setActive] = useState<boolean>(true);
+  const [active, setActive] = useState<boolean>(false);
   const speechRecognitionRef = useRef<any | null>(null);
 
   useEffect(() => {
