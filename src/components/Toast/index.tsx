@@ -4,49 +4,66 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export const toastifySuccess = (msg: string) => {
   return toast.success(msg, {
-    position: toast.POSITION.TOP_RIGHT,
-    autoClose: 5000,
+    className: 'success-toast',
+    position: 'top-right',
+    autoClose: false,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,
     draggable: true,
-    progress: undefined,
+    theme: 'dark',
   });
 };
 
 export const toastifyError = (msg: string) => {
   return toast.error(msg, {
-    position: toast.POSITION.TOP_RIGHT,
-    autoClose: 5000,
+    className: 'error-toast',
+    position: 'top-right',
+    autoClose: false,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,
     draggable: true,
-    progress: undefined,
+    theme: 'dark',
   });
 };
 
 export const toastifyInfo = (msg: string) => {
   return toast.info(msg, {
-    position: toast.POSITION.TOP_RIGHT,
-    autoClose: 5000,
+    className: 'info-toast',
+    position: 'top-right',
+    autoClose: false,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,
     draggable: true,
-    progress: undefined,
+    theme: 'dark',
   });
 };
 
 export const toastifyWarning = (msg: string) => {
   return toast.warn(msg, {
-    position: toast.POSITION.TOP_RIGHT,
-    autoClose: 5000,
+    className: 'warning-toast',
+    position: 'top-right',
+    autoClose: false,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,
     draggable: true,
-    progress: undefined,
+    theme: 'dark',
+  });
+};
+
+export const toastifyDefault = (msg: string) => {
+  return toast(msg, {
+    className: 'custom-toast',
+    position: 'top-right',
+    autoClose: false,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    theme: 'dark',
   });
 };
 

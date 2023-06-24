@@ -1,9 +1,12 @@
 import React, { useEffect, useState, useRef, useCallback, useId } from 'react';
 import { ChatContainer, MessageList, Message, MessageInput, TypingIndicator } from '@chatscope/chat-ui-kit-react';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
-import { useClickAway, useKeyPress } from '@uidotdev/usehooks';
+import { useClickAway } from '@uidotdev/usehooks';
 import ReactMarkdown from 'react-markdown';
 import './Chat.css';
+import Dropzone from '../Dropzone/Dropzone';
+import { toast } from 'react-toastify';
+import { toastifyError, toastifySuccess } from '../Toast';
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
   onSubmitHandler: (message: string, chatHistory: string) => Promise<string>;
@@ -13,27 +16,28 @@ interface ChatProps {
   name: string;
   avatar: string;
 }
-
 const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, name = 'Ava' }) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
   const [msgInputValue, setMsgInputValue] = useState(startingValue);
   const [messages, setMessages] = useState<MessageModel[]>([]);
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(false);
-  const onKeyPress = (e: KeyboardEvent) => {
-    if (!visible) return;
-    e.preventDefault();
-    setVisible(false);
-  };
-  useKeyPress('Escape', onKeyPress);
   const ref = useClickAway(() => {
     setVisible(false);
   });
+  const handleEscape = useCallback(
+    (e: KeyboardEvent) => {
+      if (!visible) return;
+      setVisible(false);
+    },
+    [visible],
+  );
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, []);
+  }, [handleEscape, ref]);
 
   const handleClick = () => {
     setVisible(!visible);
@@ -78,50 +82,88 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
     [addMessage, setLoading, inputRef, setMsgInputValue, messages, onSubmitHandler],
   );
 
+  const handleFileDrop = (file: File) => {
+    console.log(file);
+    // Check file type
+    toast(`📁 Processing ${file.name}`, {
+      toastId: `${file.name}`,
+      className: 'custom-toast',
+      position: 'top-right',
+      autoClose: false,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: 'dark',
+    });
+    const fileExtension = file.name.split('.').pop();
+    const reader = new FileReader();
+    switch (fileExtension) {
+      case '.jpg':
+      case '.jpeg':
+      case '.png':
+      case '.gif':
+        reader.onload = () => {
+          toastifySuccess('Image uploaded successfully');
+        };
+        reader.readAsDataURL(file);
+        break;
+      default:
+        reader.onload = (e) => {
+          const text = e.target?.result as string;
+          console.log(text);
+          toastifySuccess('File uploaded successfully');
+        };
+        reader.readAsText(file);
+    }
+  };
+
   return !visible ? (
     <button onClick={handleClick} className="absolute bottom-8 right-8 rounded-full py-2 px-2">
       👐
     </button>
   ) : (
-    <div
-      ref={ref}
-      className="absolute bottom-8 right-8 pt-2 rounded-xl overflow-hidden border-2 border-solid border-gray-300 w-[600px]"
-      style={{
-        height: height || '500px',
-      }}
-    >
-      <ChatContainer className="bg-transparent">
-        <MessageList
-          className="bg-transparent"
-          typingIndicator={loading && <TypingIndicator content={`${name} is thinking`} />}
-        >
-          {messages.map((message) => (
-            <Message
-              key={message.sentTime + message.message}
-              model={{
-                direction: message.direction,
-                position: message.position,
-              }}
-            >
-              <Message.CustomContent>
-                <ReactMarkdown>{message.message}</ReactMarkdown>
-              </Message.CustomContent>
-            </Message>
-          ))}
-        </MessageList>
-        <MessageInput
-          style={{ backgroundColor: 'transparent', padding: '0.5rem' }}
-          onSend={handleSend}
-          onChange={setMsgInputValue}
-          value={msgInputValue}
-          ref={inputRef}
-          sendOnReturnDisabled={false}
-          onAttachClick={() => {
-            alert('Attach clicked');
-          }}
-        />
-      </ChatContainer>
-    </div>
+    <Dropzone onFileDrop={handleFileDrop}>
+      <div
+        ref={ref}
+        className="absolute bottom-8 right-8 pt-2 rounded-xl overflow-hidden border-2 border-solid border-gray-300 w-[600px]"
+        style={{
+          height: height || '500px',
+        }}
+      >
+        <ChatContainer className="bg-transparent">
+          <MessageList
+            className="bg-transparent"
+            typingIndicator={loading && <TypingIndicator content={`${name} is thinking`} />}
+          >
+            {messages.map((message) => (
+              <Message
+                key={message.sentTime + message.message}
+                model={{
+                  direction: message.direction,
+                  position: message.position,
+                }}
+              >
+                <Message.CustomContent>
+                  <ReactMarkdown>{message.message}</ReactMarkdown>
+                </Message.CustomContent>
+              </Message>
+            ))}
+          </MessageList>
+          <MessageInput
+            style={{ backgroundColor: 'transparent', padding: '0.5rem' }}
+            onSend={handleSend}
+            onChange={setMsgInputValue}
+            value={msgInputValue}
+            ref={inputRef}
+            sendOnReturnDisabled={false}
+            onAttachClick={() => {
+              alert('Attach clicked');
+            }}
+          />
+        </ChatContainer>
+      </div>
+    </Dropzone>
   );
 };
 
