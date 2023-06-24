@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback, useId } from 'react';
 import { ChatContainer, MessageList, Message, MessageInput, TypingIndicator } from '@chatscope/chat-ui-kit-react';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
+import { useClickAway } from '@uidotdev/usehooks';
 import Linkify from 'react-linkify';
 import './Chat.css';
 
@@ -18,12 +19,19 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
   const [msgInputValue, setMsgInputValue] = useState(startingValue);
   const [messages, setMessages] = useState<MessageModel[]>([]);
   const [loading, setLoading] = useState(false);
-
+  const [visible, setVisible] = useState(false);
+  const ref = useClickAway(() => {
+    setVisible(false);
+  });
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }, []);
+
+  const handleClick = () => {
+    setVisible(!visible);
+  };
 
   const addMessage = useCallback(
     (message: string, sender: string, direction: 'incoming' | 'outgoing') => {
@@ -40,6 +48,7 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
     },
     [setMessages],
   );
+
   const handleSend = useCallback(
     async (message: string) => {
       addMessage(message, 'User', 'outgoing');
@@ -63,9 +72,14 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
     [addMessage, setLoading, inputRef, setMsgInputValue, messages, onSubmitHandler],
   );
 
-  return (
+  return !visible ? (
+    <button onClick={handleClick} className="absolute bottom-8 right-8 rounded-full py-2 px-2">
+      👐
+    </button>
+  ) : (
     <div
-      className="pt-2 rounded-xl overflow-hidden border-2 border-solid border-gray-300 w-[600px]"
+      ref={ref}
+      className="absolute bottom-8 right-8 pt-2 rounded-xl overflow-hidden border-2 border-solid border-gray-300 w-[600px]"
       style={{
         height: height || '500px',
       }}
@@ -83,7 +97,8 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
                 position: message.position,
               }}
             >
-              <Message.CustomContent>
+              <Message.HtmlContent html={message.message} />
+              {/* <Message.CustomContent>
                 <Linkify
                   componentDecorator={(decoratedHref: string, decoratedText: string, key: React.Key) => (
                     <a target="blank" rel="noopener" href={decoratedHref} key={key}>
@@ -93,7 +108,7 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
                 >
                   {message.message}
                 </Linkify>
-              </Message.CustomContent>
+              </Message.CustomContent> */}
             </Message>
           ))}
         </MessageList>
