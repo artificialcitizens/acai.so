@@ -195,7 +195,7 @@ const TipTap: React.FC<TipTapProps> = ({ startingValue, onClickHandler, label })
   return (
     editor && (
       <div>
-        <MenuBar onClickHandler={onClickHandler} editor={editor} label={label} />
+        {/* <MenuBar onClickHandler={onClickHandler} editor={editor} label={label} /> */}
         <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
           <button
             onClick={() => {
