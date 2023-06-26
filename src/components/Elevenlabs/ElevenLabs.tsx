@@ -53,7 +53,7 @@ const ElevenLabs: React.FC<ElevenLabsProps> = ({ text, voice }) => {
 
   return (
     <>
-      <div className="max-w-min rounded-lg p-4 my-2 flex border-2 border-solid items-center flex-col">
+      <div className="max-w-min rounded-lg p-4 my-2 flex border-2 border-solid border-default items-center flex-col">
         <div className="w-full flex items-center mb-4">
           <span className="mr-2">Elevenlabs</span>
           <button
