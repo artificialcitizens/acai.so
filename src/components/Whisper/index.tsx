@@ -60,7 +60,7 @@ const Whisper: React.FC<MicRecorderProps> = ({ onRecordingComplete, onTranscript
   }, [onTranscriptionComplete]);
 
   return (
-    <span className="flex items-center rounded-md max-w-min p-4 border-2 border-solid">
+    <span className="flex items-center rounded-md max-w-min p-4 border-2 border-solid border-default">
       <span className="mr-2">Whisper</span>
       <button
         className={isRecording ? 'p-0 w-6 h-6 rounded-full bg-red-500' : 'rounded-full p-0 w-6 h-6 bg-slate-400'}
