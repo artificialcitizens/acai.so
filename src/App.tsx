@@ -12,13 +12,14 @@ import ChromeNotification from './utils/ChromeNotification';
 import ToastManager from './components/Toast';
 import { toast } from 'react-toastify';
 import TodoList from './components/Todo';
-export type State = 'strahl' | 'chat' | 'ava';
-// new ChromeNotification('Incoming message', {
-//   body: 'You have a new message from John Doe.',
-//   requireInteraction: true,
-// });
+import NotificationCenter from './components/NotificationCenter';
 import SocketContext from './SocketContext';
 import AudioWaveform from './components/AudioWave/AudioWave';
+import Sidebar from './components/Sidebar';
+import TipTap from './components/TipTap/TipTap';
+
+export type State = 'strahl' | 'chat' | 'ava' | 'notes';
+
 if ('geolocation' in navigator) {
   navigator.geolocation.getCurrentPosition(
     function success(position) {
@@ -38,7 +39,6 @@ function App() {
   const [speechRecognition, setSpeechRecognition] = useState<boolean>(true);
   const [currentState, setCurrentState] = useState<string>('ava');
   const [avaListening, setAvaListening] = useState<boolean>(false);
-  const [isRecording, setIsRecording] = useState<boolean>(false);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const socket = useContext(SocketContext);
 
@@ -77,10 +77,13 @@ function App() {
   return (
     <div className="w-[99vw] h-[99vh] p-2" onClick={handleWindowClick}>
       <ToastManager />
+      <Sidebar>
+        <NotificationCenter />
+        <Chat startingValue={transcript} name="Ava" avatar=".." onSubmitHandler={async (message) => avaChat(message)} />
+      </Sidebar>
       <AudioWaveform isOn={avaListening} audioContext={audioContext} />
       {/* <TodoList /> */}
-      <Chat startingValue={transcript} name="Ava" avatar=".." onSubmitHandler={async (message) => avaChat(message)} />
-      {/* <TipTap label="test" onClickHandler={async () => 'hello world'} /> */}
+      <TipTap label="test" onClickHandler={async () => 'hello world'} />
       <ElevenLabs text={transcript} voice="ava" />
       <div className="flex items-center justify-start">
         <Whisper
@@ -103,10 +106,14 @@ function App() {
               setAvaListening(false);
               return;
             }
+            if (t.toLowerCase() === 'take notes' && avaListening) {
+              setCurrentState('notes');
+              toast('Taking notes');
+            }
             if (!avaListening) return;
-            const response = await recognitionRouter({ state: currentState, transcript: t });
-            console.log(response);
-            setTranscript(response as string);
+            // const response = await recognitionRouter({ state: currentState, transcript: t });
+            // console.log(response);
+            // setTranscript(response as string);
             // if (!response || !response.ok) {
             //   throw new Error('Network response was not ok');
             // }
