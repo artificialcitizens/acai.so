@@ -67,7 +67,7 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({ isOn, audioContext }) => 
 
   return (
     <div
-      className="rounded-full w-[150px] h-[150px] transition-opacity duration-500"
+      className=" w-[150px] h-[150px] transition-opacity duration-500 bg-dark"
       style={{
         position: 'absolute',
         bottom: '0',
