@@ -7,6 +7,7 @@ import './Chat.css';
 import Dropzone from '../Dropzone/Dropzone';
 import { toast } from 'react-toastify';
 import { toastifyError, toastifySuccess } from '../Toast';
+import NoticationCenter from '../NotificationCenter';
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
   onSubmitHandler: (message: string, chatHistory: string) => Promise<string>;
@@ -23,6 +24,7 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
   const [messages, setMessages] = useState<MessageModel[]>([]);
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const ref = useClickAway(() => {
     setVisible(false);
   });
@@ -52,6 +54,10 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
     },
     [setMessages],
   );
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   const handleSend = useCallback(
     async (message: string) => {
@@ -110,23 +116,18 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
         reader.readAsText(file);
     }
   };
-
-  return !visible ? (
-    <button onClick={handleClick} className="absolute bottom-8 right-8 rounded-full py-2 px-2">
-      👐
-    </button>
-  ) : (
+  return (
     <Dropzone onFileDrop={handleFileDrop}>
       <div
         ref={ref}
-        className="absolute bottom-8 right-8 pt-2 rounded-xl overflow-hidden border-2 border-solid border-gray-300 w-[600px]"
+        className="chat-container"
         style={{
-          height: height || '500px',
+          height: height || '550px',
         }}
       >
-        <ChatContainer className="bg-transparent">
+        <ChatContainer className="bg-dark chat-container">
           <MessageList
-            className="bg-transparent"
+            className="bg-dark"
             typingIndicator={loading && <TypingIndicator content={`${name} is thinking`} />}
           >
             {messages.map((message) => (
@@ -144,6 +145,7 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
             ))}
           </MessageList>
           <MessageInput
+            className="bg-dark border-default"
             style={{ backgroundColor: 'transparent', padding: '0.5rem' }}
             onSend={handleSend}
             onChange={setMsgInputValue}

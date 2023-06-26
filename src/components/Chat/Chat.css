@@ -1,13 +1,13 @@
 .cs-message-input__content-editor,
 .cs-message-input__content-editor-wrapper {
-  background-color: #565656 !important;
+  background-color: #565656;
   color: white;
 }
 
 .cs-message__content {
   font-size: 1rem;
   background-color: #121212 !important;
-  border: 1px solid white !important;
+  border: 1px solid #565656;
   margin-bottom: 0.5rem;
 }
 
@@ -16,24 +16,29 @@
   color: white;
 }
 
+.cs-message__custom-content .cs-message--incoming .cs-message__content {
+  background-color: #565656 !important;
+  color: #8c8c8c;
+}
+
 .cs-message--outgoing .cs-message__content {
   background-color: #565656 !important;
-  color: white;
+  color: #8c8c8c;
 }
 
 .cs-message-input__tools > button {
-  color: white;
+  color: #8c8c8c;
 }
 
 .cs-typing-indicator {
-  background-color: transparent !important;
+  background-color: #121212 !important;
   margin-left: 1.5rem;
 }
 
 .cs-typing-indicator > * {
-  color: white !important;
+  color: white;
 }
 
 .cs-typing-indicator__dot {
-  background-color: white !important;
+  background-color: white;
 }
