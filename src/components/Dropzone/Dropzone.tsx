@@ -31,7 +31,7 @@ const Dropzone: React.FC<DropzoneProps> = ({ children, onFileDrop }) => {
   }, []);
 
   return (
-    <div onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}>
+    <div className="h-full" onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}>
       {children}
     </div>
   );
