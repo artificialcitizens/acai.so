@@ -24,7 +24,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ notificationFil
       <div className="bg-dark p-2 flex justify-between items-center text-white"></div>
       <div className="h-96 w-96 p-3 bg-dark rounded overflow-y-auto w-full">
         {(!filteredNotifications.length || (unreadCount === 0 && showUnreadOnly)) && (
-          <h4>
+          <h4 className="text-white">
             Your queue is empty! You are all set{' '}
             <span role="img" aria-label="dunno what to put">
               🎉
