@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import './TipTap.css';
 import { TextSelection } from '@tiptap/pm/state';
 import Highlight from '@tiptap/extension-highlight';
+import { marked } from 'marked';
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -185,11 +186,20 @@ interface TipTapProps {
   onClickHandler: (message: string) => Promise<string>;
   label: string;
 }
+const md = `## Hello world
+- one
+- two
+- three
 
+\`\`\`js
+const hello = 'world';
+\`\`\`
+`;
+const htmlString = marked(md);
 const TipTap: React.FC<TipTapProps> = ({ startingValue, onClickHandler, label }) => {
   const editor = useEditor({
     extensions: [StarterKit, Highlight.configure({ multicolor: true })],
-    content: startingValue,
+    content: htmlString,
   });
 
   return (
