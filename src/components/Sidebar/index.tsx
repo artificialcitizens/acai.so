@@ -4,6 +4,7 @@ import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import NotificationCenter from '../NotificationCenter';
 import Chat from '../Chat/Chat';
 import { avaChat } from '../Chat/chat-routes';
+import SBSearch from '../Search';
 
 export interface SBSidebarProps {
   children: React.ReactNode;
@@ -18,6 +19,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
 
   return (
     <Sidebar position="right">
+      <SBSearch />
       <ExpansionPanel title="Notifications">
         <NotificationCenter />
       </ExpansionPanel>
