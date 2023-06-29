@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef, useCallback, useId } from 'react';
 import { ChatContainer, MessageList, Message, MessageInput, TypingIndicator } from '@chatscope/chat-ui-kit-react';
-import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import { useClickAway } from '@uidotdev/usehooks';
-import ReactMarkdown from 'react-markdown';
 import './Chat.css';
 import Dropzone from '../Dropzone/Dropzone';
 import { toast } from 'react-toastify';
 import { toastifyError, toastifySuccess } from '../Toast';
 import NoticationCenter from '../NotificationCenter';
+import { marked } from 'marked';
+
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
   onSubmitHandler: (message: string, chatHistory: string) => Promise<string>;
@@ -138,9 +138,7 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
                   position: message.position,
                 }}
               >
-                <Message.CustomContent>
-                  <ReactMarkdown>{message.message}</ReactMarkdown>
-                </Message.CustomContent>
+                <Message.HtmlContent html={marked(message.message)} />
               </Message>
             ))}
           </MessageList>
