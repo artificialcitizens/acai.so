@@ -1,11 +1,9 @@
 import React, { useEffect, useState, useRef, useCallback, useId } from 'react';
 import { ChatContainer, MessageList, Message, MessageInput, TypingIndicator } from '@chatscope/chat-ui-kit-react';
-import { useClickAway } from '@uidotdev/usehooks';
 import './Chat.css';
 import Dropzone from '../Dropzone/Dropzone';
 import { toast } from 'react-toastify';
 import { toastifyError, toastifySuccess } from '../Toast';
-import NoticationCenter from '../NotificationCenter';
 import { marked } from 'marked';
 
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
@@ -19,25 +17,15 @@ interface ChatProps {
 }
 const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, name = 'Ava' }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const chatRef = useRef<HTMLDivElement>(null);
   const [msgInputValue, setMsgInputValue] = useState(startingValue);
   const [messages, setMessages] = useState<MessageModel[]>([]);
   const [loading, setLoading] = useState(false);
-  const [visible, setVisible] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const ref = useClickAway(() => {
-    setVisible(false);
-  });
 
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, [ref]);
-
-  const handleClick = () => {
-    setVisible(!visible);
-  };
+  }, []);
 
   const addMessage = useCallback(
     (message: string, sender: string, direction: 'incoming' | 'outgoing') => {
@@ -54,10 +42,6 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
     },
     [setMessages],
   );
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
 
   const handleSend = useCallback(
     async (message: string) => {
@@ -118,14 +102,8 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
   };
   return (
     <Dropzone onFileDrop={handleFileDrop}>
-      <div
-        ref={ref}
-        className="chat-container"
-        style={{
-          height: height || '550px',
-        }}
-      >
-        <ChatContainer className="bg-dark chat-container">
+      <div className="chat-container w-full h-full rounded-lg overflow-hidden">
+        <ChatContainer className="bg-dark chat-container min-h-[100%] max-h-full">
           <MessageList
             className="bg-dark"
             typingIndicator={loading && <TypingIndicator content={`${name} is thinking`} />}

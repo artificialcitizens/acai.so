@@ -13,3 +13,7 @@
 .chat-sidebar.open {
   transform: translateX(0);
 }
+
+.cs-expansion-panel__content {
+  height: 100%;
+}

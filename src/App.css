@@ -1,7 +1,14 @@
 #root {
-  /* margin: 0 auto; */
+  margin: 0 auto;
   padding: 0rem;
   /* overflow: hidden; */
+  height: 100vh;
+  width: 100vw;
+}
+
+#root > div {
+  height: 100%;
+  width: 100%;
 }
 /* 
 

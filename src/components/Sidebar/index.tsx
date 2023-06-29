@@ -5,6 +5,7 @@ import NotificationCenter from '../NotificationCenter';
 import Chat from '../Chat/Chat';
 import { avaChat } from '../Chat/chat-routes';
 import SBSearch from '../Search';
+import './Sidebar.css';
 
 export interface SBSidebarProps {
   children: React.ReactNode;
@@ -18,13 +19,15 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
   };
 
   return (
-    <Sidebar position="right">
+    <Sidebar position="right" className="max-h-full">
       <SBSearch />
+      <ExpansionPanel title="Settings">
+        <ExpansionPanel title="Stuff"></ExpansionPanel>
+      </ExpansionPanel>
       <ExpansionPanel title="Notifications">
         <NotificationCenter />
       </ExpansionPanel>
-      <ExpansionPanel title="Options"></ExpansionPanel>
-      <ExpansionPanel title="Chat" isOpened={chatOpen} onChange={toggleChat}>
+      <ExpansionPanel className="flex-grow" title="Chat" isOpened={chatOpen} onChange={toggleChat}>
         <Chat name="Ava" avatar=".." onSubmitHandler={async (message) => avaChat(message)} />
       </ExpansionPanel>
     </Sidebar>
