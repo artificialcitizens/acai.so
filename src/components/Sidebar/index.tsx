@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
-import './Sidebar.css';
+import { ExpansionPanel, Sidebar } from '@chatscope/chat-ui-kit-react';
+import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
+import NotificationCenter from '../NotificationCenter';
+import Chat from '../Chat/Chat';
+import { avaChat } from '../Chat/chat-routes';
 
-interface SidebarProps {
+export interface SBSidebarProps {
   children: React.ReactNode;
 }
-const Sidebar: React.FC<SidebarProps> = ({ children }) => {
+
+const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const toggleSidebar = () => {
@@ -12,16 +17,16 @@ const Sidebar: React.FC<SidebarProps> = ({ children }) => {
   };
 
   return (
-    <>
-      {/* <button onClick={toggleSidebar} className={`absolute top-6 ${'right-8'} rounded-full py-2 px-3 z-[1000]`}>
-        {isSidebarOpen ? '🙈' : '👐'}
-      </button> */}
-
-      <div className={`chat-sidebar border-l-2 border-solid border-default ${isSidebarOpen ? 'open' : ''}`}>
-        {children}
-      </div>
-    </>
+    <Sidebar position="right">
+      <ExpansionPanel title="Notifications">
+        <NotificationCenter />
+      </ExpansionPanel>
+      <ExpansionPanel title="Options"></ExpansionPanel>
+      <ExpansionPanel title="Chat" isOpened>
+        <Chat name="Ava" avatar=".." onSubmitHandler={async (message) => avaChat(message)} />
+      </ExpansionPanel>
+    </Sidebar>
   );
 };
 
-export default Sidebar;
+export default SBSidebar;
