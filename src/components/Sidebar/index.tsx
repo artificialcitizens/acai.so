@@ -10,10 +10,10 @@ export interface SBSidebarProps {
 }
 
 const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [chatOpen, setChatOpen] = useState(true);
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+  const toggleChat = () => {
+    setChatOpen(!chatOpen);
   };
 
   return (
@@ -22,7 +22,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
         <NotificationCenter />
       </ExpansionPanel>
       <ExpansionPanel title="Options"></ExpansionPanel>
-      <ExpansionPanel title="Chat" isOpened>
+      <ExpansionPanel title="Chat" isOpened={chatOpen} onChange={toggleChat}>
         <Chat name="Ava" avatar=".." onSubmitHandler={async (message) => avaChat(message)} />
       </ExpansionPanel>
     </Sidebar>
