@@ -6,7 +6,6 @@ export const toastifySuccess = (msg: string) => {
   return toast.success(msg, {
     className: 'success-toast',
     position: 'top-right',
-    autoClose: false,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,
@@ -32,7 +31,6 @@ export const toastifyInfo = (msg: string) => {
   return toast.info(msg, {
     className: 'info-toast',
     position: 'top-right',
-    autoClose: false,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,
@@ -45,7 +43,6 @@ export const toastifyWarning = (msg: string) => {
   return toast.warn(msg, {
     className: 'warning-toast',
     position: 'top-right',
-    autoClose: false,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,
