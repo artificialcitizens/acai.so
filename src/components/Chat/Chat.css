@@ -19,11 +19,13 @@
 .cs-message__custom-content .cs-message--incoming .cs-message__content {
   background-color: #565656 !important;
   color: #8c8c8c;
+  margin: 0 !important;
 }
 
 .cs-message--outgoing .cs-message__content {
   background-color: #565656 !important;
   color: #8c8c8c;
+  margin: 0 !important;
 }
 
 .cs-message-input__tools > button {
@@ -41,4 +43,9 @@
 
 .cs-typing-indicator__dot {
   background-color: white;
+}
+
+.cs-message-list__scroll-wrapper > .cs-message {
+  max-width: 90%;
+  margin: 0.5rem 0;
 }

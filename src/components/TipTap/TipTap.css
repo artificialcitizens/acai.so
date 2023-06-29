@@ -6,9 +6,9 @@
 .ProseMirror {
   border: 1px solid white;
   border-radius: 0.5rem;
-  width: calc(66% - 1rem);
+  width: 100%;
   padding: 1rem;
-  min-height: calc(100vh - 8rem);
+  height: 100%;
   > * + * {
     margin-top: 0.75em;
   }
