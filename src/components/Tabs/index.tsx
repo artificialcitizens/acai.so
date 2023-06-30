@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import TipTap from '../TipTap/TipTap';
 import 'react-tabs/style/react-tabs.css';
+import './tabs.css';
 
 interface TabProps {
   id: number;
@@ -55,14 +56,12 @@ const TabManager: React.FC = () => {
       </TabList>
       {tabs.map((tab) => (
         <TabPanel key={tab.id}>
-          <div className="bg-lighter text-default">
-            <TipTap
-              startingValue={tab.content}
-              onClickHandler={(newContent) => handleContentChange(tab.id, newContent)}
-              label={tab.name}
-              id={tab.id}
-            />
-          </div>
+          <TipTap
+            startingValue={tab.content}
+            onClickHandler={(newContent) => handleContentChange(tab.id, newContent)}
+            label={tab.name}
+            id={tab.id}
+          />
         </TabPanel>
       ))}
     </Tabs>

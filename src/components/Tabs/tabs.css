@@ -1,0 +1,7 @@
+.react-tabs__tab--selected {
+  @apply bg-transparent text-light !important;
+}
+
+.react-tabs__tab:focus:after {
+  @apply bg-transparent !important;
+}

@@ -4,7 +4,6 @@
 }
 /* Basic editor styles */
 .ProseMirror {
-  @apply border-lighter border border-solid;
   border-radius: 0.5rem;
   width: 100%;
   padding: 1rem;
@@ -62,4 +61,8 @@
     border-top: 2px solid rgba(#0d0d0d, 0.1);
     margin: 2rem 0;
   }
+}
+
+.ProseMirror:focus {
+  @apply outline-dark;
 }

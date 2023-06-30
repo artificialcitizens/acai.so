@@ -22,6 +22,11 @@ export default {
         default: '#ffffff',
         dark: '#a8a8a8',
       },
+      outlineColor: {
+        light: '#e0e0e0',
+        default: '#ffffff',
+        dark: '#a8a8a8',
+      },
     },
   },
   plugins: [],
