@@ -20,6 +20,7 @@ import TipTap from './components/TipTap/TipTap';
 import SBSidebar from './components/Sidebar';
 import { MainContainer } from '@chatscope/chat-ui-kit-react';
 import { Header } from './components/Header/Header';
+import TabManager from './components/Tabs';
 
 export type State = 'strahl' | 'chat' | 'ava' | 'notes';
 
@@ -83,7 +84,7 @@ function App() {
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="w-full flex-grow max-h-screen p-3">
-          <TipTap label="test" onClickHandler={async () => 'hello world'} />
+          <TabManager />
           <SBSidebar>
             <p></p>
           </SBSidebar>

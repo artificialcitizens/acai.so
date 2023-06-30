@@ -5,6 +5,7 @@ import './TipTap.css';
 import { TextSelection } from '@tiptap/pm/state';
 import Highlight from '@tiptap/extension-highlight';
 import { marked } from 'marked';
+import { makeIssue } from 'zod';
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -183,54 +184,35 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, onClickHandler, label }) => {
 };
 interface TipTapProps {
   startingValue?: string;
-  onClickHandler: (message: string) => Promise<string>;
+  onClickHandler: (message: string | null) => Promise<string>;
   label: string;
+  id: number;
 }
-const md = `## Hello world
-- one
-- two
-- three
 
-\`\`\`js
-const hello = 'world';
-\`\`\`
-`;
-const htmlString = marked(md);
-const TipTap: React.FC<TipTapProps> = ({ startingValue, onClickHandler, label }) => {
+const TipTap: React.FC<TipTapProps> = ({ startingValue, onClickHandler, label, id }) => {
   const editor = useEditor({
     extensions: [StarterKit, Highlight.configure({ multicolor: true })],
-    content: htmlString,
+    content: startingValue,
   });
+
+  const handleBlur = () => {
+    if (editor) {
+      const html = editor.getHTML();
+      if (editor.isEmpty && id !== 1) {
+        onClickHandler(null);
+      } else {
+        onClickHandler(html);
+      }
+    }
+  };
 
   return (
     editor && (
-      <div className="flex-grow-[4] m-2 bg-darker">
-        {/* <MenuBar onClickHandler={onClickHandler} editor={editor} label={label} /> */}
+      <div key={label} className="flex-grow-[4] m-2 bg-darker">
         <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
-          <button
-            onClick={() => {
-              const text = editor.view.state.doc.textContent;
-              console.log(editor.getJSON());
-              console.log(editor.getHTML());
-            }}
-            className={editor.isActive('bold') ? 'is-active' : ''}
-          >
-            inspect
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleHighlight({ color: '#19414d' }).run()}
-            className={editor.isActive('italic') ? 'is-active' : ''}
-          >
-            highlight
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleStrike().run()}
-            className={editor.isActive('strike') ? 'is-active' : ''}
-          >
-            strike
-          </button>
+          {/* Other buttons */}
         </BubbleMenu>
-        <EditorContent className="h-full" editor={editor} />
+        <EditorContent className="h-full" editor={editor} onBlur={handleBlur} />
       </div>
     )
   );
