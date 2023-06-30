@@ -81,7 +81,7 @@ function App() {
     <>
       <ToastManager />
       <div className="flex flex-col min-h-screen">
-        {/* <Header /> */}
+        <Header />
         <main className="w-full flex-grow max-h-screen p-3">
           <TipTap label="test" onClickHandler={async () => 'hello world'} />
           <SBSidebar>

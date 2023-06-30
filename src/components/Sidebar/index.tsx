@@ -13,22 +13,30 @@ export interface SBSidebarProps {
 
 const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
   const [chatOpen, setChatOpen] = useState(true);
+  const [notificationsOpen, setNotificationsOpen] = useState(true);
 
   const toggleChat = () => {
     setChatOpen(!chatOpen);
   };
 
+  const toggleNotifications = () => {
+    setNotificationsOpen(!notificationsOpen);
+  };
+
   return (
     <Sidebar position="right" className="w-[33vw] rounded-lg overflow-hidden">
-      <ExpansionPanel title="Settings">
-        <ExpansionPanel title="Stuff"></ExpansionPanel>
+      <ExpansionPanel title="Search">
+        <SBSearch />
       </ExpansionPanel>
-      <ExpansionPanel title="Notifications">
+      <ExpansionPanel title="Notifications" isOpened={notificationsOpen} onChange={toggleNotifications}>
         <NotificationCenter />
       </ExpansionPanel>
       <ExpansionPanel className="flex-grow" title="Chat" isOpened={chatOpen} onChange={toggleChat}>
         <Chat name="Ava" avatar=".." onSubmitHandler={async (message) => avaChat(message)} />
       </ExpansionPanel>
+      {/* <ExpansionPanel title="Settings">
+        <ExpansionPanel title="Stuff"></ExpansionPanel>
+      </ExpansionPanel> */}
     </Sidebar>
   );
 };

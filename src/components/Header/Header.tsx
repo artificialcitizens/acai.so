@@ -1,6 +1,3 @@
-import React from 'react';
-import { Button } from '../Button/Button';
-import SBSearch from '../Search';
 import './header.css';
 
 type User = {
@@ -20,9 +17,7 @@ export const Header = ({ user, onLogin, onLogout, onCreateAccount }: HeaderProps
       <div>
         <h1 className="text-light">🧠 Second Brain</h1>
       </div>
-      <div>
-        <SBSearch />
-      </div>
+      <div>{/* <SBSearch /> */}</div>
     </div>
   </header>
 );
