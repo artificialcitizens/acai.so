@@ -1,3 +1,3 @@
 .cs-search__input {
-  @apply bg-lighter text-dark !important;
+  @apply bg-transparent text-light !important;
 }

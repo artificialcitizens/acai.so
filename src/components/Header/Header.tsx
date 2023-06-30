@@ -18,7 +18,7 @@ export const Header = ({ user, onLogin, onLogout, onCreateAccount }: HeaderProps
   <header className="max-w-[100vw]">
     <div className="storybook-header">
       <div>
-        <h1>🧠 Second Brain</h1>
+        <h1 className="text-light">🧠 Second Brain</h1>
       </div>
       <div>
         <SBSearch />

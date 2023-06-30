@@ -20,22 +20,19 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ notificationFil
     : notifications;
 
   return (
-    <div className=" pt-2 border-b-2 border-solid border-default w-full">
-      <div className="bg-dark p-2 flex justify-between items-center text-white"></div>
-      <div className="h-96 w-96 p-3 bg-dark rounded overflow-y-auto w-full">
+    <div className=" pt-2 border-b-2 border-solid border-lighter w-full">
+      {/* <div className="bg-base p-2 flex justify-between items-center text-white"></div> */}
+      <div className="h-56 p-3 bg-base rounded overflow-y-auto w-full">
         {(!filteredNotifications.length || (unreadCount === 0 && showUnreadOnly)) && (
-          <h4 className="text-white">
-            Your queue is empty! You are all set{' '}
-            <span role="img" aria-label="dunno what to put">
-              🎉
-            </span>
-          </h4>
+          <h4 className="text-light">Nothing to see here 👀 </h4>
         )}
         {(showUnreadOnly ? filteredNotifications.filter((v) => !v.read) : filteredNotifications).map((notification) => {
           return (
             <div
               key={notification.id}
-              className={`alert alert-${notification.type || 'info'} flex justify-between items-center`}
+              className={`alert alert-${
+                notification.type || 'info'
+              } flex justify-between items-center text-light mb-2 py-2 border-b border-solid border-light`}
             >
               <span>{notification.content}</span>
               {notification.read ? '✅' : <span onClick={() => markAsRead(notification.id)}>📬</span>}

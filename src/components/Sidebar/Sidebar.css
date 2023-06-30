@@ -1,15 +1,3 @@
-.chat-sidebar {
-  position: fixed;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 600px;
-  transform: translateX(100%);
-  transition: transform 0.3s ease-in-out;
-  border-left: solid 2px #565656;
-  z-index: 5;
-}
-
 .chat-sidebar.open {
   transform: translateX(0);
 }
@@ -21,12 +9,17 @@
 .cs-expansion-panel,
 .cs-expansion-panel--open,
 .cs-expansion-panel__header {
-  @apply bg-light text-light !important;
+  @apply bg-light text-light border-dark m-0 !important;
 }
 
 .cs-expansion-panel__content {
-  @apply bg-light !important;
+  @apply bg-light border-lighter !important;
 }
 
 .cs-search svg {
+  @apply text-light;
+}
+
+.cs-search {
+  @apply border-dark;
 }

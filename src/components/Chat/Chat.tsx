@@ -102,8 +102,8 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
   };
   return (
     <Dropzone onFileDrop={handleFileDrop}>
-      <div className="chat-container h-full rounded-lg overflow-hidden w-[31vw]">
-        <ChatContainer className="bg-dark chat-container min-h-[100%] max-h-full">
+      <div className="rounded-lg overflow-hidden w-full max-h-[75vh]">
+        <ChatContainer className="bg-dark">
           <MessageList
             className="bg-dark"
             typingIndicator={loading && <TypingIndicator content={`${name} is thinking`} />}
@@ -121,7 +121,7 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
             ))}
           </MessageList>
           <MessageInput
-            className="bg-dark border-default"
+            className="bg-dark border-dark"
             style={{ backgroundColor: 'transparent', padding: '0.5rem' }}
             onSend={handleSend}
             onChange={setMsgInputValue}

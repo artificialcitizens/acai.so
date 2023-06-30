@@ -4,7 +4,7 @@
 }
 /* Basic editor styles */
 .ProseMirror {
-  border: 1px solid white;
+  @apply border-lighter border border-solid;
   border-radius: 0.5rem;
   width: 100%;
   padding: 1rem;
@@ -28,12 +28,12 @@
   }
 
   code {
-    background-color: rgba(#616161, 0.1);
+    @apply bg-base text-light;
     color: #616161;
   }
 
   pre {
-    background: #0d0d0d;
+    @apply bg-base text-light;
     color: #fff;
     font-family: 'JetBrainsMono', monospace;
     padding: 0.75rem 1rem;

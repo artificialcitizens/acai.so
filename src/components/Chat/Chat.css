@@ -1,27 +1,27 @@
 .cs-message-input__content-editor,
 .cs-message-input__content-editor-wrapper {
-  @apply bg-lighter text-dark !important;
+  @apply bg-base text-dark !important;
 }
-
+.cs-expansion-panel--open .cs-expansion-panel__content {
+  @apply flex flex-grow;
+}
 .cs-message__content {
-  font-size: 1rem;
-  background-color: #121212 !important;
+  @apply bg-base !important;
+  font-size: 0.9rem;
   border: 1px solid #565656;
-  margin-bottom: 0.5rem;
 }
 
 .cs-message__html-content,
 .cs-message__custom-content {
-  color: white;
+  @apply text-light !important;
 }
-
 .cs-message__custom-content .cs-message--incoming .cs-message__content {
-  @apply bg-lighter text-light !important;
+  @apply bg-user text-light !important;
   margin: 0 !important;
 }
 
 .cs-message--outgoing .cs-message__content {
-  @apply bg-lighter text-light !important;
+  @apply bg-user text-light !important;
   margin: 0 !important;
 }
 
@@ -30,7 +30,7 @@
 }
 
 .cs-typing-indicator {
-  @apply bg-dark !important;
+  @apply bg-base !important;
   margin-left: 1.5rem;
 }
 
@@ -45,4 +45,8 @@
 .cs-message-list__scroll-wrapper > .cs-message {
   max-width: 90%;
   margin: 0.5rem 0;
+}
+
+.scrollbar-container {
+  @apply bg-base;
 }
