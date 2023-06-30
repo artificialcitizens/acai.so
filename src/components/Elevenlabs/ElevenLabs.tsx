@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/media-has-caption */
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 
@@ -53,15 +54,15 @@ const ElevenLabs: React.FC<ElevenLabsProps> = ({ text, voice }) => {
 
   return (
     <>
-      <div className="max-w-min rounded-lg p-4 my-2 flex border-2 border-solid border-default items-center flex-col">
+      <div className="rounded-lg mb-2 flex items-center justify-between flex-col">
         <div className="w-full flex items-center mb-4">
-          <span className="mr-2">Elevenlabs</span>
+          <span className="mr-2 text-light">Elevenlabs</span>
           <button
             className={active ? 'p-0 w-6 h-6 rounded-full bg-red-500' : 'rounded-full p-0 w-6 h-6 bg-slate-400'}
             onClick={() => setActive(!active)}
           />
         </div>
-        <audio controls src={audioSrc} autoPlay />
+        {audioSrc && <audio controls src={audioSrc} autoPlay />}
       </div>
     </>
   );

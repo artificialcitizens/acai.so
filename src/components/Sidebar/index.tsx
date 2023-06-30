@@ -25,6 +25,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
 
   return (
     <Sidebar position="right" className="w-[33vw] rounded-lg overflow-hidden flex-shrink-0">
+      <ExpansionPanel title="Settings">{children}</ExpansionPanel>
       <ExpansionPanel title="Search">
         <SBSearch />
       </ExpansionPanel>
@@ -34,9 +35,6 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
       <ExpansionPanel className="flex-grow" title="Chat" isOpened={chatOpen} onChange={toggleChat}>
         <Chat name="Ava" avatar=".." onSubmitHandler={async (message) => avaChat(message)} />
       </ExpansionPanel>
-      {/* <ExpansionPanel title="Settings">
-        <ExpansionPanel title="Stuff"></ExpansionPanel>
-      </ExpansionPanel> */}
     </Sidebar>
   );
 };

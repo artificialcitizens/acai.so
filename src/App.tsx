@@ -9,7 +9,7 @@ import SpeechRecognition from './components/SpeechRecognition/SpeechRecognition'
 import { recognitionRouter } from './components/SpeechRecognition/recognition-manager';
 import { avaChat } from './components/Chat/chat-routes';
 import ChromeNotification from './utils/ChromeNotification';
-import ToastManager from './components/Toast';
+import ToastManager, { toastifyDefault, toastifyInfo } from './components/Toast';
 import { toast } from 'react-toastify';
 import TodoList from './components/Todo';
 import NotificationCenter from './components/NotificationCenter';
@@ -79,23 +79,63 @@ function App() {
   };
   // Example usage:
   return (
-    <>
+    <div onClick={handleWindowClick}>
+      <AudioWaveform isOn={avaListening} audioContext={audioContext} />
       <ToastManager />
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="w-full flex-grow max-h-screen p-3">
           <TabManager />
           <SBSidebar>
-            <p></p>
+            <div>
+              <SpeechRecognition
+                active={speechRecognition}
+                onClick={() => {
+                  setSpeechRecognition(!speechRecognition);
+                }}
+                onTranscriptionComplete={async (t) => {
+                  console.log('speech', t);
+                  if (!t) return;
+                  if (t === 'Ava' || (t === 'ava' && !avaListening)) {
+                    setAvaListening(true);
+                  } else if (t.toLowerCase() === 'cancel' && avaListening) {
+                    setAvaListening(false);
+                    return;
+                  }
+                  if (t.toLowerCase() === 'take notes' && avaListening) {
+                    setCurrentState('notes');
+                    toastifyInfo('Taking notes');
+                  }
+                  if (!avaListening) return;
+                  // const response = await recognitionRouter({ state: currentState, transcript: t });
+                  // console.log(response);
+                  // setTranscript(response as string);
+                  // if (!response || !response.ok) {
+                  //   throw new Error('Network response was not ok');
+                  // }
+                  // const result = await response.json();
+                  // const resp = result.response;
+                  // setTranscript(resp);
+                  // console.log(resp);
+                }}
+              />
+              <ElevenLabs text={transcript} voice="ava" />
+              <Whisper
+                onRecordingComplete={(blob) => console.log(blob)}
+                onTranscriptionComplete={async (t) => {
+                  console.log('Whisper Server Response', t);
+                }}
+              />
+            </div>
           </SBSidebar>
         </main>
       </div>
-    </>
+    </div>
     // <div className="w-[99vw] h-[99vh] p-2" onClick={handleWindowClick}>
     //   <AudioWaveform isOn={avaListening} audioContext={audioContext} />
     //   {/* <TodoList /> */}
-    //   <ElevenLabs text={transcript} voice="ava" />
     //   <div className="flex items-center justify-start">
+    //   <ElevenLabs text={transcript} voice="ava" />
     //     <Whisper
     //       onRecordingComplete={(blob) => console.log(blob)}
     //       onTranscriptionComplete={async (t) => {
