@@ -1,7 +1,6 @@
 .cs-message-input__content-editor,
 .cs-message-input__content-editor-wrapper {
-  background-color: #565656;
-  color: white;
+  @apply bg-lighter text-dark !important;
 }
 
 .cs-message__content {
@@ -17,23 +16,21 @@
 }
 
 .cs-message__custom-content .cs-message--incoming .cs-message__content {
-  background-color: #565656 !important;
-  color: #8c8c8c;
+  @apply bg-lighter text-light !important;
   margin: 0 !important;
 }
 
 .cs-message--outgoing .cs-message__content {
-  background-color: #565656 !important;
-  color: #8c8c8c;
+  @apply bg-lighter text-light !important;
   margin: 0 !important;
 }
 
 .cs-message-input__tools > button {
-  color: #8c8c8c;
+  @apply text-dark !important;
 }
 
 .cs-typing-indicator {
-  background-color: #121212 !important;
+  @apply bg-dark !important;
   margin-left: 1.5rem;
 }
 

@@ -19,8 +19,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
   };
 
   return (
-    <Sidebar position="right" className="max-h-full w-[33vw]">
-      <SBSearch />
+    <Sidebar position="right" className="max-h-full w-[33vw] rounded-lg overflow-hidden">
       <ExpansionPanel title="Settings">
         <ExpansionPanel title="Stuff"></ExpansionPanel>
       </ExpansionPanel>

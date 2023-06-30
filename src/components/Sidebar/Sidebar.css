@@ -17,3 +17,16 @@
 .cs-expansion-panel__content {
   height: 100%;
 }
+
+.cs-expansion-panel,
+.cs-expansion-panel--open,
+.cs-expansion-panel__header {
+  @apply bg-light text-light !important;
+}
+
+.cs-expansion-panel__content {
+  @apply bg-light !important;
+}
+
+.cs-search svg {
+}

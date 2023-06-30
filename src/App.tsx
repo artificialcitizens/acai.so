@@ -19,6 +19,7 @@ import Sidebar from './components/Sidebar';
 import TipTap from './components/TipTap/TipTap';
 import SBSidebar from './components/Sidebar';
 import { MainContainer } from '@chatscope/chat-ui-kit-react';
+import { Header } from './components/Header/Header';
 
 export type State = 'strahl' | 'chat' | 'ava' | 'notes';
 
@@ -79,10 +80,15 @@ function App() {
   return (
     <>
       <ToastManager />
-      <TipTap label="test" onClickHandler={async () => 'hello world'} />
-      <SBSidebar>
-        <p></p>
-      </SBSidebar>
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="w-full flex-grow">
+          <TipTap label="test" onClickHandler={async () => 'hello world'} />
+          <SBSidebar>
+            <p></p>
+          </SBSidebar>
+        </main>
+      </div>
     </>
     // <div className="w-[99vw] h-[99vh] p-2" onClick={handleWindowClick}>
     //   <AudioWaveform isOn={avaListening} audioContext={audioContext} />
