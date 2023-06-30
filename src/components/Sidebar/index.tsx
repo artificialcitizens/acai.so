@@ -24,7 +24,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
   };
 
   return (
-    <Sidebar position="right" className="w-[33vw] rounded-lg overflow-hidden">
+    <Sidebar position="right" className="w-[33vw] rounded-lg overflow-hidden flex-shrink-0">
       <ExpansionPanel title="Search">
         <SBSearch />
       </ExpansionPanel>
