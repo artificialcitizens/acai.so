@@ -3,7 +3,7 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import TipTap from '../TipTap/TipTap';
 import 'react-tabs/style/react-tabs.css';
 import './tabs.css';
-import useLocalStorage from '../../hooks/use-local-storage';
+import { useLocalStorage, useLocalStorageString } from '../../hooks/use-local-storage';
 
 interface TabProps {
   id: number;
@@ -13,21 +13,16 @@ interface TabProps {
 
 const TabManager: React.FC = () => {
   const [tabs, setTabs] = useState<TabProps[]>([]);
-  const [activeTab, setActiveTab] = useState<number>(-1);
-  const [content, setContent, deleteContent, updateContent, getContent] = useLocalStorage('tiptap', {
-    ['welcome']: {
-      title: 'Welcome',
-      content: 'Welcome to your Second Brain!',
-    },
-  });
+  const [content, setContent, deleteContent, updateContent, getContent] = useLocalStorage('tiptap', {});
+  const [activeTab, setActiveTab] = useLocalStorageString('active-tab', '0');
 
-  const createTab = () => {
-    const title = window.prompt('Please enter the title for the new tab');
-    if (title) {
+  const createTab = (title?: string) => {
+    const newTabTitle = title || window.prompt('Please enter the title for the new tab');
+    if (newTabTitle) {
       const newTab: TabProps = {
         id: Date.now(),
-        name: title,
-        content: `Content for ${title}`,
+        name: newTabTitle,
+        content: '',
       };
       updateContent(newTab.id.toString(), {
         title: newTab.name,
@@ -35,31 +30,22 @@ const TabManager: React.FC = () => {
       });
       setTabs((prevTabsState) => {
         const newTabs = [...prevTabsState, newTab];
-        setActiveTab(newTabs.length - 1); // Set active tab to the last one
+        setActiveTab((newTabs.length - 1).toString()); // Set active tab to new tab
         return newTabs;
       });
     }
   };
 
   const deleteTab = (id: number) => {
-    const newTabs = tabs.filter((tab) => tab.id !== id);
-    if (newTabs.length > 0) {
-      setActiveTab(0);
-    } else {
-      setActiveTab(-1);
-    }
-    setTabs(newTabs);
+    deleteContent(id.toString());
+    setTabs(tabs.filter((tab) => tab.id !== id));
   };
-
-  useEffect(() => {
-    setActiveTab(0);
-  }, []);
 
   useEffect(() => {
     const initialTabs: TabProps[] = Object.keys(content).map((key) => {
       const tabContent = content[key];
       return {
-        id: parseInt(key, 10), // assuming the keys in local storage are the ids
+        id: parseInt(key, 10),
         name: tabContent.title,
         content: tabContent.content,
       };
@@ -68,22 +54,28 @@ const TabManager: React.FC = () => {
   }, [content]);
 
   return (
-    <Tabs className="flex-grow" selectedIndex={activeTab} onSelect={(index) => setActiveTab(index)}>
+    <Tabs
+      className="flex-grow"
+      selectedIndex={parseInt(activeTab, 10)} // Convert activeTab to a number
+      onSelect={(index) => {
+        if (parseInt(activeTab, 10) !== index) {
+          const currentTab = tabs[parseInt(activeTab, 10)];
+          if (currentTab && !currentTab.content.trim()) {
+            deleteTab(currentTab.id);
+          }
+        }
+        setActiveTab(index.toString()); // Convert index to a string and save in localStorage
+      }}
+    >
       <TabList>
         {tabs.map((tab) => (
           <Tab key={tab.id}>{tab.name}</Tab>
         ))}
-        <Tab onClick={createTab}>+</Tab>
+        <Tab onClick={() => createTab()}>+</Tab>
       </TabList>
       {tabs.map((tab) => (
         <TabPanel key={tab.id}>
-          <TipTap
-            // onClickHandler={(newContent) => handleContentChange(tab.id, newContent)}
-            id={tab.id.toString()}
-            title={tab.name}
-            content={tab.content}
-            updateContent={updateContent}
-          />
+          <TipTap id={tab.id.toString()} title={tab.name} content={tab.content} updateContent={updateContent} />
         </TabPanel>
       ))}
       <TabPanel></TabPanel>

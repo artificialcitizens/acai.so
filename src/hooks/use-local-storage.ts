@@ -4,7 +4,7 @@ interface ILocalStorageObject {
   [key: string]: any;
 }
 
-const useLocalStorage = (
+export const useLocalStorage = (
   key: string,
   initialValue: ILocalStorageObject,
 ): [
@@ -51,4 +51,20 @@ const useLocalStorage = (
   return [storedValue, setValue, deleteValue, updateValue, getValue];
 };
 
-export default useLocalStorage;
+export const useLocalStorageString = (key: string, initialValue: string): [string, (value: string) => void] => {
+  const [storedValue, setStoredValue] = useState(initialValue);
+
+  useEffect(() => {
+    const item = window.localStorage.getItem(key);
+    if (item) {
+      setStoredValue(item);
+    }
+  }, [key]);
+
+  const setValue = (value: string) => {
+    setStoredValue(value);
+    window.localStorage.setItem(key, value);
+  };
+
+  return [storedValue, setValue];
+};
