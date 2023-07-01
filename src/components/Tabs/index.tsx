@@ -3,6 +3,8 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import TipTap from '../TipTap/TipTap';
 import 'react-tabs/style/react-tabs.css';
 import './tabs.css';
+import useLocalStorage from '../../hooks/use-local-storage';
+import DEFAULT_EDITOR_CONTENT from './default-content';
 
 interface TabProps {
   id: number;
@@ -13,17 +15,29 @@ interface TabProps {
 const TabManager: React.FC = () => {
   const [tabs, setTabs] = useState<TabProps[]>([]);
   const [activeTab, setActiveTab] = useState<number>(0);
+  const [content, setContent, deleteContent, updateContent, getContent] = useLocalStorage('tiptap', {
+    ['welcome']: {
+      title: 'Welcome',
+      content: DEFAULT_EDITOR_CONTENT,
+    },
+  });
 
   const createTab = () => {
-    const newTab: TabProps = {
-      id: tabs.length + 1,
-      name: `Tab ${tabs.length + 1}`,
-      content: `Content for Tab ${tabs.length + 1}`,
-    };
-    setTabs([...tabs, newTab]);
-    setActiveTab(newTab.id);
+    const title = window.prompt('Please enter the title for the new tab');
+    if (title) {
+      const newTab: TabProps = {
+        id: Math.floor(Math.random() * 1000000),
+        name: title,
+        content: `Content for ${title}`,
+      };
+      updateContent(newTab.id.toString(), {
+        title: newTab.name,
+        content: newTab.content,
+      });
+      setTabs([...tabs, newTab]);
+      setActiveTab(newTab.id);
+    }
   };
-
   const deleteTab = (id: number) => {
     const newTabs = tabs.filter((tab) => tab.id !== id);
     setTabs(newTabs);
@@ -41,10 +55,19 @@ const TabManager: React.FC = () => {
   };
 
   useEffect(() => {
-    const initialTabs: TabProps[] = [{ id: 1, name: 'Tab 1', content: 'Content for Tab 1' }];
+    const initialTabs: TabProps[] = Object.keys(content).map((key) => {
+      const tabContent = content[key];
+      return {
+        id: parseInt(key, 10), // assuming the keys in local storage are the ids
+        name: tabContent.title,
+        content: tabContent.content,
+      };
+    });
     setTabs(initialTabs);
-    setActiveTab(initialTabs[0].id);
-  }, []);
+    if (initialTabs.length > 0) {
+      setActiveTab(initialTabs[0].id);
+    }
+  }, [content]);
 
   return (
     <Tabs className="flex-grow" selectedIndex={activeTab - 1} onSelect={(index) => setActiveTab(index + 1)}>
@@ -57,13 +80,15 @@ const TabManager: React.FC = () => {
       {tabs.map((tab) => (
         <TabPanel key={tab.id}>
           <TipTap
-            startingValue={tab.content}
-            onClickHandler={(newContent) => handleContentChange(tab.id, newContent)}
-            label={tab.name}
-            id={tab.id}
+            // onClickHandler={(newContent) => handleContentChange(tab.id, newContent)}
+            id={tab.id.toString()}
+            title={tab.name}
+            content={tab.content}
+            updateContent={updateContent}
           />
         </TabPanel>
       ))}
+      <TabPanel></TabPanel>
     </Tabs>
   );
 };

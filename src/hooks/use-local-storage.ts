@@ -1,27 +1,54 @@
 import { useEffect, useState } from 'react';
 
-const useLocalStorage = <T>(
+interface ILocalStorageObject {
+  [key: string]: any;
+}
+
+const useLocalStorage = (
   key: string,
-  initialValue: T,
-  // eslint-disable-next-line no-unused-vars
-): [T, (value: T) => void] => {
+  initialValue: ILocalStorageObject,
+): [
+  ILocalStorageObject,
+  (value: ILocalStorageObject) => void,
+  (id: string) => void,
+  (id: string, newValue: any) => void,
+  (id: string) => any,
+] => {
   const [storedValue, setStoredValue] = useState(initialValue);
 
   useEffect(() => {
-    // Retrieve from localStorage
     const item = window.localStorage.getItem(key);
     if (item) {
       setStoredValue(JSON.parse(item));
     }
   }, [key]);
 
-  const setValue = (value: T) => {
-    // Save state
+  const setValue = (value: ILocalStorageObject) => {
     setStoredValue(value);
-    // Save to localStorage
     window.localStorage.setItem(key, JSON.stringify(value));
   };
-  return [storedValue, setValue];
+
+  const deleteValue = (id: string) => {
+    const updatedValue = { ...storedValue };
+    delete updatedValue[id];
+    setStoredValue(updatedValue);
+    window.localStorage.setItem(key, JSON.stringify(updatedValue));
+  };
+
+  const updateValue = (id: string, newValue: { title: string; content: string }) => {
+    const updatedValue = { ...storedValue, [id]: newValue };
+    setStoredValue(updatedValue);
+    window.localStorage.setItem(key, JSON.stringify(updatedValue));
+  };
+
+  const getValue = (id: string) => {
+    if (!storedValue[id]) {
+      return null;
+    }
+    return storedValue[id];
+  };
+
+  return [storedValue, setValue, deleteValue, updateValue, getValue];
 };
 
 export default useLocalStorage;

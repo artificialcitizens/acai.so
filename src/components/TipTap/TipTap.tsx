@@ -1,25 +1,35 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
+import { Editor } from '@tiptap/core';
 import { TiptapEditorProps } from './props';
 import { TiptapExtensions } from './extensions';
 import useLocalStorage from '../../hooks/use-local-storage';
 import { useDebouncedCallback } from 'use-debounce';
 import { useCompletion } from 'ai/react';
-import DEFAULT_EDITOR_CONTENT from './default-content';
 
 import { EditorBubbleMenu } from './components';
 import { toastifyError } from '../Toast';
+import { marked } from 'marked';
 
-export default function Editor() {
-  const [content, setContent] = useLocalStorage('content', DEFAULT_EDITOR_CONTENT);
+interface EditorProps {
+  id: string;
+  title: string;
+  content: string;
+  updateContent: (id: string, content: { title: string; content: string }) => void;
+}
+
+const Tiptap: React.FC<EditorProps> = ({ id, title, content, updateContent }) => {
   const [saveStatus, setSaveStatus] = useState('Saved');
 
   const [hydrated, setHydrated] = useState(false);
 
   const debouncedUpdates = useDebouncedCallback(async ({ editor }) => {
-    const json = editor.getJSON();
+    const content = editor.getText();
     setSaveStatus('Saving...');
-    setContent(json);
+    updateContent(id, {
+      title,
+      content,
+    });
     // Simulate a delay in saving.
     setTimeout(() => {
       setSaveStatus('Saved');
@@ -39,7 +49,6 @@ export default function Editor() {
           to: selection.from,
         });
         // we're using this for now until we can figure out a way to stream markdown text with proper formatting: https://github.com/steven-tey/novel/discussions/7
-        console.log(e.editor.getText());
         complete(e.editor.getText(), {
           body: {
             prompt: e.editor.getText(),
@@ -81,7 +90,6 @@ export default function Editor() {
   // Insert chunks of the generated text
   useEffect(() => {
     const diff = completion.slice(prev.current.length);
-    console.log(completion);
     prev.current = completion;
     editor?.commands.insertContent(diff);
   }, [isLoading, editor, completion]);
@@ -125,7 +133,8 @@ export default function Editor() {
   // Hydrate the editor with the content from localStorage.
   useEffect(() => {
     if (editor && content && !hydrated) {
-      editor.commands.setContent(content);
+      console.log(content);
+      editor.commands.setContent(marked(content));
       setHydrated(true);
     }
   }, [editor, content, hydrated]);
@@ -145,4 +154,6 @@ export default function Editor() {
       <EditorContent editor={editor} />
     </div>
   );
-}
+};
+
+export default Tiptap;

@@ -37,6 +37,7 @@
     "@tiptap/react": "^2.0.3",
     "@tiptap/starter-kit": "^2.0.3",
     "@tiptap/suggestion": "^2.0.3",
+    "@types/uuid": "^9.0.2",
     "@uidotdev/usehooks": "^2.0.1",
     "@xstate/react": "^3.2.2",
     "ai": "^2.1.8",
@@ -64,6 +65,7 @@
     "tippy.js": "^6.3.7",
     "tiptap-markdown": "^0.8.1",
     "use-debounce": "^9.0.3",
+    "uuid": "^9.0.0",
     "xstate": "^4.37.2",
     "zod": "^3.21.4"
   },
