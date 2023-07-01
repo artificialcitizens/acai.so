@@ -55,7 +55,7 @@ const TabManager: React.FC = () => {
 
   return (
     <Tabs
-      className="flex-grow"
+      className="flex-grow pr-2"
       selectedIndex={parseInt(activeTab, 10)} // Convert activeTab to a number
       onSelect={(index) => {
         if (parseInt(activeTab, 10) !== index) {
