@@ -14,11 +14,11 @@ interface TabProps {
 
 const TabManager: React.FC = () => {
   const [tabs, setTabs] = useState<TabProps[]>([]);
-  const [activeTab, setActiveTab] = useState<number>(0);
+  const [activeTab, setActiveTab] = useState<number>(-1);
   const [content, setContent, deleteContent, updateContent, getContent] = useLocalStorage('tiptap', {
     ['welcome']: {
       title: 'Welcome',
-      content: DEFAULT_EDITOR_CONTENT,
+      content: 'Welcome to your Second Brain!',
     },
   });
 
@@ -26,7 +26,7 @@ const TabManager: React.FC = () => {
     const title = window.prompt('Please enter the title for the new tab');
     if (title) {
       const newTab: TabProps = {
-        id: Math.floor(Math.random() * 1000000),
+        id: Date.now(),
         name: title,
         content: `Content for ${title}`,
       };
@@ -34,15 +34,24 @@ const TabManager: React.FC = () => {
         title: newTab.name,
         content: newTab.content,
       });
-      setTabs([...tabs, newTab]);
-      setActiveTab(newTab.id);
+      setTabs((prevTabsState) => {
+        const newTabs = [...prevTabsState, newTab];
+        setActiveTab(newTabs.length - 1); // Set active tab to the last one
+        return newTabs;
+      });
     }
   };
+
   const deleteTab = (id: number) => {
     const newTabs = tabs.filter((tab) => tab.id !== id);
     setTabs(newTabs);
     if (newTabs.length > 0) {
-      setActiveTab(newTabs[0].id);
+      setTabs(newTabs);
+      if (newTabs.length > 0) {
+        setActiveTab(0);
+      } else {
+        setActiveTab(-1);
+      }
     }
   };
 
@@ -65,12 +74,14 @@ const TabManager: React.FC = () => {
     });
     setTabs(initialTabs);
     if (initialTabs.length > 0) {
-      setActiveTab(initialTabs[0].id);
+      setActiveTab(0);
+    } else {
+      setActiveTab(-1);
     }
   }, [content]);
 
   return (
-    <Tabs className="flex-grow" selectedIndex={activeTab - 1} onSelect={(index) => setActiveTab(index + 1)}>
+    <Tabs className="flex-grow" selectedIndex={activeTab} onSelect={(index) => setActiveTab(index)}>
       <TabList>
         {tabs.map((tab) => (
           <Tab key={tab.id}>{tab.name}</Tab>
