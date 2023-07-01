@@ -4,7 +4,6 @@ import TipTap from '../TipTap/TipTap';
 import 'react-tabs/style/react-tabs.css';
 import './tabs.css';
 import useLocalStorage from '../../hooks/use-local-storage';
-import DEFAULT_EDITOR_CONTENT from './default-content';
 
 interface TabProps {
   id: number;
@@ -44,24 +43,17 @@ const TabManager: React.FC = () => {
 
   const deleteTab = (id: number) => {
     const newTabs = tabs.filter((tab) => tab.id !== id);
-    setTabs(newTabs);
     if (newTabs.length > 0) {
-      setTabs(newTabs);
-      if (newTabs.length > 0) {
-        setActiveTab(0);
-      } else {
-        setActiveTab(-1);
-      }
+      setActiveTab(0);
+    } else {
+      setActiveTab(-1);
     }
+    setTabs(newTabs);
   };
 
-  const handleContentChange = (id: number, newContent: string | null) => {
-    if (newContent === null) {
-      deleteTab(id);
-    } else {
-      setTabs(tabs.map((tab) => (tab.id === id ? { ...tab, content: newContent } : tab)));
-    }
-  };
+  useEffect(() => {
+    setActiveTab(0);
+  }, []);
 
   useEffect(() => {
     const initialTabs: TabProps[] = Object.keys(content).map((key) => {
@@ -73,11 +65,6 @@ const TabManager: React.FC = () => {
       };
     });
     setTabs(initialTabs);
-    if (initialTabs.length > 0) {
-      setActiveTab(0);
-    } else {
-      setActiveTab(-1);
-    }
   }, [content]);
 
   return (
