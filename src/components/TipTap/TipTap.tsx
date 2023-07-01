@@ -1,221 +1,148 @@
-import { BubbleMenu, Editor, EditorContent, useEditor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import React, { useEffect, useRef } from 'react';
-import './TipTap.css';
-import { TextSelection } from '@tiptap/pm/state';
-import Highlight from '@tiptap/extension-highlight';
-import { marked } from 'marked';
-import { makeIssue } from 'zod';
+import { useEffect, useRef, useState } from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import { TiptapEditorProps } from './props';
+import { TiptapExtensions } from './extensions';
+import useLocalStorage from '../../hooks/use-local-storage';
+import { useDebouncedCallback } from 'use-debounce';
+import { useCompletion } from 'ai/react';
+import DEFAULT_EDITOR_CONTENT from './default-content';
 
-interface MenuBarProps {
-  editor: Editor | null;
-  onClickHandler: (message: string) => Promise<string>;
-  label: string;
-}
+import { EditorBubbleMenu } from './components';
+import { toastifyError } from '../Toast';
 
-const runAutocomplete = (editor: Editor) => {
-  const text = editor.getText();
-  editor.commands.focus();
-  const cursorPosition = editor.view.state.selection.from;
-  // Insert the text after the cursor position with a background color mark
-  const newText = 'hello world';
-  const transaction = editor.view.state.tr
-    .insertText(newText, cursorPosition)
-    .addMark(
-      cursorPosition,
-      cursorPosition + newText.length,
-      editor.view.state.schema.marks.highlight.create({ color: '#777' }),
-    );
-  editor.view.dispatch(transaction);
-  const newPosition = TextSelection.create(editor.view.state.doc, cursorPosition);
-  editor.view.dispatch(editor.view.state.tr.setSelection(newPosition));
-  // const response = await onClickHandler(text);
-  // editor.commands.setContent(response);
-};
+export default function Editor() {
+  const [content, setContent] = useLocalStorage('content', DEFAULT_EDITOR_CONTENT);
+  const [saveStatus, setSaveStatus] = useState('Saved');
 
-const onTypingStart = (editor: Editor) => {
-  let timer: NodeJS.Timeout;
+  const [hydrated, setHydrated] = useState(false);
 
-  function onTyping(event: KeyboardEvent) {
-    if (!editor.view.hasFocus()) {
-      return;
-    }
+  const debouncedUpdates = useDebouncedCallback(async ({ editor }) => {
+    const json = editor.getJSON();
+    setSaveStatus('Saving...');
+    setContent(json);
+    // Simulate a delay in saving.
+    setTimeout(() => {
+      setSaveStatus('Saved');
+    }, 500);
+  }, 750);
 
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      // Get the current position of the cursor.
-      const cursorPosition = editor.view.state.selection.from;
-      const text = 'Hello, World!';
-
-      // Insert the text after the cursor position with a background color mark
-      const transaction = editor.view.state.tr
-        .insertText(text, cursorPosition)
-        .addMark(
-          cursorPosition,
-          cursorPosition + text.length,
-          editor.view.state.schema.marks.highlight.create({ color: '#777' }),
-        );
-      editor.view.dispatch(transaction);
-      const newPosition = TextSelection.create(editor.view.state.doc, cursorPosition);
-      editor.view.dispatch(editor.view.state.tr.setSelection(newPosition));
-
-      const handleAutocompleteKeyPress = (event: KeyboardEvent) => {
-        if (event.key === 'Enter') {
-          event.preventDefault();
-          // Remove the highlight mark from the text and move the cursor to the end of the text
-          const newText = editor.view.state.doc.textContent;
-          editor.commands.setContent(newText);
-
-          editor.chain().focus().unsetHighlight().run();
-        } else {
-          // Remove the suggested text
-          const newText = editor.view.state.doc.textContent.replace(text, '');
-          // Check if the pressed key is a valid character
-          if (event.key.length === 1 && event.keyCode >= 32 && event.keyCode <= 126) {
-            // Add the last keystroke to the editor so the user can continue typing
-            editor.commands.setContent(newText + event.key);
-          } else {
-            // Set the content without adding the pressed key
-            editor.commands.setContent(newText);
-          }
-        }
-      };
-
-      function handleMouseDown() {
-        // Remove the suggested text
-        const newText = editor.view.state.doc.textContent.replace(text, '');
-        editor.commands.setContent(newText);
-
-        // Remove the event listeners
-        editor.view.dom.removeEventListener('keydown', handleAutocompleteKeyPress);
-        editor.view.dom.removeEventListener('mousedown', handleMouseDown);
-      }
-
-      // If user presses any key other than enter, then remove the suggestion
-      // If user presses enter, then remove the .preview-suggestion span and replace with just the text
-      editor.view.dom.addEventListener('keydown', handleAutocompleteKeyPress);
-
-      // If user clicks the mouse, then remove the suggestion
-      editor.view.dom.addEventListener('mousedown', handleMouseDown);
-    }, 1500);
-  }
-
-  function onMouseDown() {
-    clearTimeout(timer);
-  }
-
-  // Add the 'keyup' event listener
-  editor.view.dom.addEventListener('keyup', onTyping);
-
-  // Add the 'mousedown' event listener
-  editor.view.dom.addEventListener('mousedown', onMouseDown);
-
-  return function () {
-    // Remove the 'keyup' event listener
-    editor.view.dom.removeEventListener('keyup', onTyping);
-
-    // Remove the 'mousedown' event listener
-    editor.view.dom.removeEventListener('mousedown', onMouseDown);
-  };
-};
-
-// @todo refresh button
-const MenuBar: React.FC<MenuBarProps> = ({ editor, onClickHandler, label }) => {
-  const [loading, setLoading] = React.useState(false);
-  const [autocomplete, setAutocomplete] = React.useState(false);
-  const [messages, setMessages] = React.useState<string[]>([]);
-
-  // useEffect(() => {
-  //   if (!editor) return;
-
-  //   const unsubscribe = onTypingStart(editor);
-  //   return () => {
-  //     unsubscribe();
-  //   };
-  // }, [editor]);
-
-  if (!editor) {
-    return null;
-  }
-
-  return (
-    <div className="tiptap-menu">
-      <button
-        onClick={async () => {
-          setLoading(true);
-          try {
-            const text = editor.getText();
-            if (!text) {
-              return;
-            }
-            const prompt = `Respond to the following query using basic markdown: 
-            query: ${text}}`;
-            const query = encodeURIComponent(prompt);
-            const response = await fetch(`http://localhost:3000/query?query=${query}`);
-            if (!response.ok) {
-              throw new Error('Network response was not ok');
-            }
-            // console.log(response.body);
-            // response.body?.pipeTo(new WritableStream());
-            const result = await response.text();
-            editor.commands.setContent(result);
-          } catch (e) {
-            console.log(e);
-          } finally {
-            setLoading(false);
-          }
-        }}
-        disabled={loading}
-        className={editor.isActive('bold') ? 'is-active' : ''}
-      >
-        Query
-      </button>
-      <button
-        onClick={async () => {
-          runAutocomplete(editor);
-        }}
-        disabled={!editor.can().chain().focus().toggleBold().run()}
-        className={editor.isActive('bold') ? 'is-active' : ''}
-      >
-        Autocomplete
-      </button>
-    </div>
-  );
-};
-interface TipTapProps {
-  startingValue?: string;
-  onClickHandler: (message: string | null) => Promise<string>;
-  label: string;
-  id: number;
-}
-
-const TipTap: React.FC<TipTapProps> = ({ startingValue, onClickHandler, label, id }) => {
   const editor = useEditor({
-    extensions: [StarterKit, Highlight.configure({ multicolor: true })],
-    content: startingValue,
+    extensions: TiptapExtensions,
+    editorProps: TiptapEditorProps,
+    onUpdate: (e) => {
+      setSaveStatus('Unsaved');
+      const selection = e.editor.state.selection;
+      const lastTwo = e.editor.state.doc.textBetween(selection.from - 2, selection.from, '\n');
+      if (lastTwo === '++' && !isLoading) {
+        e.editor.commands.deleteRange({
+          from: selection.from - 2,
+          to: selection.from,
+        });
+        // we're using this for now until we can figure out a way to stream markdown text with proper formatting: https://github.com/steven-tey/novel/discussions/7
+        console.log(e.editor.getText());
+        complete(e.editor.getText(), {
+          body: {
+            prompt: e.editor.getText(),
+          },
+        });
+        // complete(e.editor.storage.markdown.getMarkdown());
+      } else {
+        debouncedUpdates(e);
+      }
+    },
+    autofocus: 'end',
   });
 
-  const handleBlur = () => {
-    if (editor) {
-      const html = editor.getHTML();
-      if (editor.isEmpty && id !== 1) {
-        onClickHandler(null);
-      } else {
-        onClickHandler(html);
+  const { complete, completion, isLoading, stop } = useCompletion({
+    id: 'novel',
+    api: 'http://192.168.4.74:3000/autocomplete',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    onResponse: (response) => {
+      if (response.status === 429) {
+        toastifyError('You have reached your request limit for the day.');
+        return;
       }
+    },
+    onFinish: (_prompt, completion) => {
+      editor?.commands.setTextSelection({
+        from: editor.state.selection.from - completion.length,
+        to: editor.state.selection.from,
+      });
+    },
+    onError: () => {
+      toastifyError('Something went wrong.');
+    },
+  });
+
+  const prev = useRef('');
+
+  // Insert chunks of the generated text
+  useEffect(() => {
+    const diff = completion.slice(prev.current.length);
+    console.log(completion);
+    prev.current = completion;
+    editor?.commands.insertContent(diff);
+  }, [isLoading, editor, completion]);
+
+  useEffect(() => {
+    // if user presses escape or cmd + z and it's loading,
+    // stop the request, delete the completion, and insert back the "++"
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' || (e.metaKey && e.key === 'z')) {
+        stop();
+        if (e.key === 'Escape') {
+          editor?.commands.deleteRange({
+            from: editor.state.selection.from - completion.length,
+            to: editor.state.selection.from,
+          });
+        }
+        editor?.commands.insertContent('++');
+      }
+    };
+    const mousedownHandler = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      stop();
+      if (window.confirm('AI writing paused. Continue?')) {
+        complete(editor?.getText() || '');
+      }
+    };
+    if (isLoading) {
+      document.addEventListener('keydown', onKeyDown);
+      window.addEventListener('mousedown', mousedownHandler);
+    } else {
+      document.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('mousedown', mousedownHandler);
     }
-  };
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('mousedown', mousedownHandler);
+    };
+  }, [stop, isLoading, editor, complete, completion.length]);
+
+  // Hydrate the editor with the content from localStorage.
+  useEffect(() => {
+    if (editor && content && !hydrated) {
+      editor.commands.setContent(content);
+      setHydrated(true);
+    }
+  }, [editor, content, hydrated]);
 
   return (
-    editor && (
-      <div key={label} className="flex-grow-[4] m-2 bg-darker">
-        <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
-          {/* Other buttons */}
-        </BubbleMenu>
-        <EditorContent className="h-full" editor={editor} onBlur={handleBlur} />
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+    <div
+      onClick={() => {
+        editor?.chain().focus().run();
+      }}
+      className="relative min-h-[500px] w-full max-w-screen-lg border-stone-200 p-12 px-8 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:px-12 sm:shadow-lg"
+    >
+      <div className="absolute right-5 top-5 mb-5 rounded-lg bg-stone-100 px-2 py-1 text-sm text-stone-400">
+        {saveStatus}
       </div>
-    )
+      {editor && <EditorBubbleMenu editor={editor} />}
+      <EditorContent editor={editor} />
+    </div>
   );
-};
-
-export default TipTap;
+}

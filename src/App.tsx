@@ -1,6 +1,5 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import './App.css';
 import React, { useState, useEffect, useContext } from 'react';
 import Whisper from './components/Whisper';
 import Chat from './components/Chat/Chat';
@@ -94,7 +93,7 @@ function App() {
                 onTranscriptionComplete={async (t) => {
                   console.log('speech', t);
                   if (!t) return;
-                  if (t === 'Ava' || (t === 'ava' && !avaListening)) {
+                  if ((t === 'Ava' || t === 'ava') && !avaListening) {
                     setAvaListening(true);
                   } else if (t.toLowerCase() === 'cancel' && avaListening) {
                     setAvaListening(false);
