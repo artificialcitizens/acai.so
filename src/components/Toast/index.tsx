@@ -70,6 +70,7 @@ export const toastifyAgentThought = (msg: string) => {
     className: 'toast-agent-thought',
     position: 'top-right',
     data: { type: 'agent-thought' },
+    toastId: `agent-thought-${Date.now()}`,
   });
 };
 
