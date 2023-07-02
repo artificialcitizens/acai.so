@@ -1,10 +1,18 @@
 import React, { useEffect, useState, useRef, useCallback, useId } from 'react';
-import { ChatContainer, MessageList, Message, MessageInput, TypingIndicator } from '@chatscope/chat-ui-kit-react';
+import {
+  ChatContainer,
+  MessageList,
+  Message,
+  MessageInput,
+  TypingIndicator,
+  MessageModel,
+} from '@chatscope/chat-ui-kit-react';
 import './Chat.css';
 import Dropzone from '../Dropzone/Dropzone';
 import { toast } from 'react-toastify';
 import { toastifyError, toastifySuccess } from '../Toast';
 import { marked } from 'marked';
+import { useLocalStorage, useLocalStorageString } from '../../hooks/use-local-storage';
 
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
@@ -102,7 +110,7 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
   };
   return (
     <Dropzone onFileDrop={handleFileDrop}>
-      <div className="rounded-lg overflow-hidden w-full max-h-[75vh]">
+      <div className="rounded-lg overflow-hidden w-full max-h-[50vh]">
         <ChatContainer className="bg-dark">
           <MessageList
             className="bg-dark"
