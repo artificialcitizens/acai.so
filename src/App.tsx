@@ -1,6 +1,5 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import './App.css';
 import React, { useState, useEffect, useContext } from 'react';
 import Whisper from './components/Whisper';
 import Chat from './components/Chat/Chat';
@@ -19,7 +18,7 @@ import SBSidebar from './components/Sidebar';
 import { MainContainer } from '@chatscope/chat-ui-kit-react';
 import { Header } from './components/Header/Header';
 import TabManager from './components/Tabs';
-
+import StorageMeter from './components/StorageMeter/StorageMeter';
 export type State = 'strahl' | 'chat' | 'ava' | 'notes';
 
 if ('geolocation' in navigator) {
@@ -94,7 +93,7 @@ function App() {
                 onTranscriptionComplete={async (t) => {
                   console.log('speech', t);
                   if (!t) return;
-                  if (t === 'Ava' || (t === 'ava' && !avaListening)) {
+                  if ((t === 'Ava' || t === 'ava') && !avaListening) {
                     setAvaListening(true);
                   } else if (t.toLowerCase() === 'cancel' && avaListening) {
                     setAvaListening(false);
@@ -124,6 +123,7 @@ function App() {
                   console.log('Whisper Server Response', t);
                 }}
               />
+              <StorageMeter />
             </div>
           </SBSidebar>
         </main>
