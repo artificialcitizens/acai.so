@@ -78,7 +78,9 @@ const TabManager: React.FC = () => {
           <TipTap id={tab.id.toString()} title={tab.name} content={tab.content} updateContent={updateContent} />
         </TabPanel>
       ))}
-      <TabPanel></TabPanel>
+      <TabPanel>
+        <p>You real sunuva bish</p>
+      </TabPanel>
     </Tabs>
   );
 };

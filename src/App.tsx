@@ -116,7 +116,6 @@ function App() {
                 }}
                 onTranscriptionComplete={async (t) => {
                   console.log('speech', t);
-                  if (!t) return;
                   if ((t === 'Ava' || t === 'ava') && !avaListening) {
                     setAvaListening(true);
                   } else if (t.toLowerCase() === 'cancel' && avaListening) {
@@ -124,7 +123,7 @@ function App() {
                     return;
                   }
 
-                  if (!avaListening) return;
+                  if (t.split(' ').length < 3 || !avaListening) return;
 
                   if (t.toLowerCase() === 'take notes' && avaListening) {
                     setCurrentState('notes');
