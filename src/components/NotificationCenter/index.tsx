@@ -5,10 +5,15 @@ import { useNotificationCenter } from 'react-toastify/addons/use-notification-ce
 
 export interface NotificationCenterProps {
   notificationFilter?: string[];
-  secondaryFilter?: string[];
+  secondaryFilter?: string;
+  placeholder?: string;
 }
 
-const NotificationCenter: React.FC<NotificationCenterProps> = ({ notificationFilter, secondaryFilter }) => {
+const NotificationCenter: React.FC<NotificationCenterProps> = ({
+  notificationFilter,
+  secondaryFilter,
+  placeholder,
+}) => {
   const { notifications, clear, markAllAsRead, markAsRead, unreadCount } = useNotificationCenter();
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
 
@@ -17,15 +22,15 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ notificationFil
   };
 
   const filteredNotifications = notificationFilter
-    ? notifications.filter((notification) => notificationFilter.includes(notification.className || ''))
-    : notifications;
+    ? notifications.filter((notification) => notificationFilter.includes(notification.type || ''))
+    : notifications.filter((notification) => notification.data?.type === secondaryFilter);
 
   return (
     <div className=" pt-2 border-b-2 border-solid border-lighter w-full">
       {/* <div className="bg-base p-2 flex justify-between items-center text-white"></div> */}
       <div className="h-56 p-3 bg-base rounded overflow-y-auto w-full">
         {(!filteredNotifications.length || (unreadCount === 0 && showUnreadOnly)) && (
-          <h4 className="text-light">Nothing to see here 👀 </h4>
+          <h4 className="text-light">{placeholder}</h4>
         )}
         {(showUnreadOnly ? filteredNotifications.filter((v) => !v.read) : filteredNotifications).map((notification) => {
           return (
@@ -36,7 +41,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ notificationFil
               } flex justify-between items-center text-light mb-2 py-2 border-b border-solid border-light`}
             >
               <span>{notification.content}</span>
-              {notification.read ? '✅' : <span onClick={() => markAsRead(notification.id)}>📬</span>}
+              {/* {notification.read ? '✅' : <span onClick={() => markAsRead(notification.id)}>📬</span>} */}
             </div>
           );
         })}
