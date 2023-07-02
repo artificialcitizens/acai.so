@@ -30,6 +30,12 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({ isOn, audioContext }) => 
           .angle((d, i) => i * ((2 * Math.PI) / bufferLength))
           .radius((d) => (1 - d / 255) * radius);
 
+        const gradient = svg.append('defs').append('radialGradient').attr('id', 'radial-gradient');
+
+        gradient.append('stop').attr('offset', '0%').attr('stop-color', '#9370DB');
+
+        gradient.append('stop').attr('offset', '100%').attr('stop-color', 'white');
+
         function renderFrame() {
           requestAnimationFrame(renderFrame);
 
@@ -39,10 +45,15 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({ isOn, audioContext }) => 
             .selectAll('path')
             .data([dataArray])
             .join('path')
+            .transition() // Add transition
+            .duration(100) // Adjust duration to match data update rate
+            .ease(d3.easeLinear) // Use linear easing for smooth transition
             .attr('transform', `translate(${width / 2}, ${height / 2})`)
             .attr('d', radialLine)
-            .attr('stroke', 'steelblue')
-            .attr('fill', 'none');
+            .attr('stroke', 'white')
+            .attr('stroke-width', 2)
+            .attr('fill', 'url(#radial-gradient)')
+            .attr('opacity', 0.5);
         }
 
         renderFrame();
@@ -67,9 +78,9 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({ isOn, audioContext }) => 
 
   return (
     <div
-      className=" w-[150px] h-[150px] transition-opacity duration-500 bg-dark"
+      className=" w-[150px] h-[150px] transition-opacity duration-500"
       style={{
-        position: 'absolute',
+        position: 'fixed',
         bottom: '0',
         left: '0',
         zIndex: 100,
