@@ -14,7 +14,7 @@ export interface SBSidebarProps {
 
 const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
   const [chatOpen, setChatOpen] = useState(true);
-  const [notificationsOpen, setNotificationsOpen] = useState(true);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [agentThoughtsOpen, setAgentThoughtsOpen] = useState(true);
 
   const toggleChat = () => {

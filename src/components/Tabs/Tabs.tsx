@@ -25,7 +25,7 @@ const TabManager: React.FC = () => {
         {tabs.map((tab) => (
           <Tab key={tab.id}>{tab.name}</Tab>
         ))}
-        <Tab onClick={() => createTab({})}>+</Tab>
+        <Tab onClick={() => createTab({ id: Date.now() })}>+</Tab>
       </TabList>
       {tabs.map((tab) => (
         <TabPanel key={tab.id}>

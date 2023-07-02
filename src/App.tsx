@@ -59,47 +59,45 @@ function App() {
   };
   useEffect(() => {
     if (!socket) return;
-    socket.on('connect', () => {
-      console.log(`Connected: ${socket.id}`);
-    });
 
-    socket.on('message', (message: string) => {
-      console.log(message);
-    });
-
-    socket.on('disconnect', () => {
-      console.log(`Disconnected: ${socket.id}`);
-    });
-
-    socket.on('create-tab', (args) => {
-      console.log(args);
+    const handleConnect = () => console.log(`Connected: ${socket.id}`);
+    const handleMessage = (message: string) => console.log(message);
+    const handleDisconnect = () => console.log(`Disconnected: ${socket.id}`);
+    const handleCreateTab = (args) => {
+      console.log('creating-tab from socket');
       const id = Date.now();
       createTab({ id, title: args.title, content: args.content });
-    });
-
-    // HERE IS HOW TO USE TOOLS VIA SOCKET BY HAVING THE TOOL SEND THE ACTION THROUGH SOCKET
-    // socket.on('agent-action', (action: string) => {
-    //   console.log('agent-action', action);
-    //   if (action === 'start-listening') {
-    //     setAvaListening(true);
-    //   } else if (action === 'stop-listening') {
-    //     setAvaListening(false);
-    //   }
-    // });
-
-    socket.on('agent-action', (action: { log: string; action: string; tool: string; toolName: string }) => {
+    };
+    const handleAgentAction = (action: { log: string; action: string; tool: string; toolName: string }) => {
       console.log('agent-action', action);
       const thought = action.log.split('Action:')[0].trim();
       toastifyAgentThought(thought);
-    });
-
-    // Clean up on unmount
-    return () => {
-      socket.off('connect');
-      socket.off('message');
-      socket.off('disconnect');
     };
-  }, [socket]);
+
+    socket.on('connect', handleConnect);
+    socket.on('message', handleMessage);
+    socket.on('disconnect', handleDisconnect);
+    socket.on('create-tab', handleCreateTab);
+    socket.on('agent-action', handleAgentAction);
+
+    return () => {
+      socket.off('connect', handleConnect);
+      socket.off('message', handleMessage);
+      socket.off('disconnect', handleDisconnect);
+      socket.off('create-tab', handleCreateTab);
+      socket.off('agent-action', handleAgentAction);
+    };
+  }, [socket, createTab]); // specify the dependencies here
+
+  // HERE IS HOW TO USE TOOLS VIA SOCKET BY HAVING THE TOOL SEND THE ACTION THROUGH SOCKET
+  // socket.on('agent-action', (action: string) => {
+  //   console.log('agent-action', action);
+  //   if (action === 'start-listening') {
+  //     setAvaListening(true);
+  //   } else if (action === 'stop-listening') {
+  //     setAvaListening(false);
+  //   }
+  // });
 
   const handleWindowClick = () => {
     if (!audioContext) {
@@ -140,72 +138,21 @@ function App() {
                   const response = await recognitionRouter({ state: currentState, transcript: t });
                   console.log(response);
                   setTranscript(response as string);
-                  // if (!response || !response.ok) {
-                  //   throw new Error('Network response was not ok');
-                  // }
-                  // const result = await response.json();
-                  // const resp = result.response;
-                  // setTranscript(resp);
-                  // console.log(resp);
                 }}
               />
               <ElevenLabs text={transcript} voice="ava" />
-              {/* <Whisper
+              <Whisper
                 onRecordingComplete={(blob) => console.log(blob)}
                 onTranscriptionComplete={async (t) => {
                   console.log('Whisper Server Response', t);
                 }}
-              /> */}
+              />
               <StorageMeter />
             </div>
           </SBSidebar>
         </main>
       </div>
     </div>
-    // <div className="w-[99vw] h-[99vh] p-2" onClick={handleWindowClick}>
-    //   <AudioWaveform isOn={avaListening} audioContext={audioContext} />
-    //   {/* <TodoList /> */}
-    //   <div className="flex items-center justify-start">
-    //   <ElevenLabs text={transcript} voice="ava" />
-    //     <Whisper
-    //       onRecordingComplete={(blob) => console.log(blob)}
-    //       onTranscriptionComplete={async (t) => {
-    //         console.log('Whisper Server Response', t);
-    //       }}
-    //     />
-    //     <SpeechRecognition
-    //       active={speechRecognition}
-    //       onClick={() => {
-    //         setSpeechRecognition(!speechRecognition);
-    //       }}
-    //       onTranscriptionComplete={async (t) => {
-    //         console.log('speech', t);
-    //         if (!t) return;
-    //         if (t === 'Ava' || (t === 'ava' && !avaListening)) {
-    //           setAvaListening(true);
-    //         } else if (t.toLowerCase() === 'cancel' && avaListening) {
-    //           setAvaListening(false);
-    //           return;
-    //         }
-    //         if (t.toLowerCase() === 'take notes' && avaListening) {
-    //           setCurrentState('notes');
-    //           toast('Taking notes');
-    //         }
-    //         if (!avaListening) return;
-    //         // const response = await recognitionRouter({ state: currentState, transcript: t });
-    //         // console.log(response);
-    //         // setTranscript(response as string);
-    //         // if (!response || !response.ok) {
-    //         //   throw new Error('Network response was not ok');
-    //         // }
-    //         // const result = await response.json();
-    //         // const resp = result.response;
-    //         // setTranscript(resp);
-    //         // console.log(resp);
-    //       }}
-    //     />
-    //   </div>
-    // </div>
   );
 }
 

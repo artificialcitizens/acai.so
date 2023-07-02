@@ -13,6 +13,7 @@ import { toast } from 'react-toastify';
 import { toastifyError, toastifySuccess } from '../Toast';
 import { marked } from 'marked';
 import { useLocalStorage, useLocalStorageString } from '../../hooks/use-local-storage';
+import Linkify from 'react-linkify';
 
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
@@ -118,13 +119,23 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
           >
             {messages.map((message) => (
               <Message
-                key={message.sentTime + message.message}
+                key={message.sentTime}
                 model={{
                   direction: message.direction,
                   position: message.position,
                 }}
               >
-                <Message.HtmlContent html={marked(message.message)} />
+                <Message.CustomContent>
+                  <Linkify
+                    componentDecorator={(decoratedHref: string, decoratedText: string, key: React.Key) => (
+                      <a target="blank" rel="noopener" href={decoratedHref} key={key}>
+                        {decoratedText}
+                      </a>
+                    )}
+                  >
+                    {message.message}
+                  </Linkify>
+                </Message.CustomContent>
               </Message>
             ))}
           </MessageList>
