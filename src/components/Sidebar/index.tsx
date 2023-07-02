@@ -15,6 +15,7 @@ export interface SBSidebarProps {
 const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
   const [chatOpen, setChatOpen] = useState(true);
   const [notificationsOpen, setNotificationsOpen] = useState(true);
+  const [agentThoughtsOpen, setAgentThoughtsOpen] = useState(true);
 
   const toggleChat = () => {
     setChatOpen(!chatOpen);
@@ -22,6 +23,10 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
 
   const toggleNotifications = () => {
     setNotificationsOpen(!notificationsOpen);
+  };
+
+  const toggleAgentThoughts = () => {
+    setAgentThoughtsOpen(!agentThoughtsOpen);
   };
 
   return (
@@ -34,7 +39,10 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
         <ScratchPad id="Notes" />
       </ExpansionPanel>
       <ExpansionPanel title="Notifications" isOpened={notificationsOpen} onChange={toggleNotifications}>
-        <NotificationCenter />
+        <NotificationCenter placeholder="Nothing to see here 👀" />
+      </ExpansionPanel>
+      <ExpansionPanel title="Agent Thoughts" isOpened={agentThoughtsOpen} onChange={toggleAgentThoughts}>
+        <NotificationCenter placeholder="A place for AI to ponder" secondaryFilter="agent-thought" />
       </ExpansionPanel>
       <ExpansionPanel className="flex-grow" title="Chat" isOpened={chatOpen} onChange={toggleChat}>
         <Chat name="Ava" avatar=".." onSubmitHandler={async (message) => avaChat(message)} />
