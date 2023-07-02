@@ -41,7 +41,7 @@ const textToSpeech = async (inputText: string, voice: string) => {
 
 const ElevenLabs: React.FC<ElevenLabsProps> = ({ text, voice }) => {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
-  const [active, setActive] = useState<boolean>(false);
+  const [active, setActive] = useState<boolean>(true);
 
   useEffect(() => {
     if (!text || !active) return;

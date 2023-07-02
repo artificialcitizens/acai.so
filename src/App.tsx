@@ -19,28 +19,36 @@ import { MainContainer } from '@chatscope/chat-ui-kit-react';
 import { Header } from './components/Header/Header';
 import TabManager from './components/Tabs';
 import StorageMeter from './components/StorageMeter/StorageMeter';
-export type State = 'strahl' | 'chat' | 'ava' | 'notes';
 
-if ('geolocation' in navigator) {
-  navigator.geolocation.getCurrentPosition(
-    function success(position) {
-      console.log('latitude', position.coords.latitude, 'longitude', position.coords.longitude);
-    },
-    function error(error_message) {
-      console.log('An error has occured while retrieving location', error_message);
-    },
-  );
-} else {
-  console.log('geolocation is not enabled on this browser');
-}
+export type State = 'ava' | 'notes';
 
+// const getGeolocation = () => {
+//   if ('geolocation' in navigator) {
+//     navigator.geolocation.getCurrentPosition(
+//       function success(position) {
+//         console.log('latitude', position.coords.latitude, 'longitude', position.coords.longitude);
+//       },
+//       function error(error_message) {
+//         console.log('An error has occured while retrieving location', error_message);
+//       },
+//     );
+//   } else {
+//     console.log('geolocation is not enabled on this browser');
+//   }
+// };
 function App() {
   const [transcript, setTranscript] = useState<string>('');
-  const [voice2voice, setVoice2voice] = useState<boolean>(false);
+  // const [voice2voice, setVoice2voice] = useState<boolean>(false);
   const [speechRecognition, setSpeechRecognition] = useState<boolean>(true);
   const [currentState, setCurrentState] = useState<string>('ava');
   const [avaListening, setAvaListening] = useState<boolean>(false);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const [userLocation, setUserLocation] = useState<string>('Portland, OR');
+
+  // useEffect(() => {
+  //   getGeolocation();
+  // }, []);
+
   const socket = useContext(SocketContext);
 
   const activateAudioContext = () => {
@@ -61,7 +69,7 @@ function App() {
       console.log(`Disconnected: ${socket.id}`);
     });
 
-    // HERE IS HOW TO USE TOOLS VIA SOCKET
+    // HERE IS HOW TO USE TOOLS VIA SOCKET BY HAVING THE TOOL SEND THE ACTION THROUGH SOCKET
     // socket.on('agent-action', (action: string) => {
     //   console.log('agent-action', action);
     //   if (action === 'start-listening') {
@@ -115,14 +123,16 @@ function App() {
                     setAvaListening(false);
                     return;
                   }
+
+                  if (!avaListening) return;
+
                   if (t.toLowerCase() === 'take notes' && avaListening) {
                     setCurrentState('notes');
                     toastifyInfo('Taking notes');
                   }
-                  if (!avaListening) return;
-                  // const response = await recognitionRouter({ state: currentState, transcript: t });
-                  // console.log(response);
-                  // setTranscript(response as string);
+                  const response = await recognitionRouter({ state: currentState, transcript: t });
+                  console.log(response);
+                  setTranscript(response as string);
                   // if (!response || !response.ok) {
                   //   throw new Error('Network response was not ok');
                   // }
@@ -133,12 +143,12 @@ function App() {
                 }}
               />
               <ElevenLabs text={transcript} voice="ava" />
-              <Whisper
+              {/* <Whisper
                 onRecordingComplete={(blob) => console.log(blob)}
                 onTranscriptionComplete={async (t) => {
                   console.log('Whisper Server Response', t);
                 }}
-              />
+              /> */}
               <StorageMeter />
             </div>
           </SBSidebar>
