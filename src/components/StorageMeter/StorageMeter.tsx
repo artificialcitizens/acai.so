@@ -25,8 +25,7 @@ const StorageMeter: React.FC = () => {
   const storagePercentage = (storage.used / storage.total) * 100;
 
   return (
-    <div>
-      <h2>Local Storage Usage</h2>
+    <div className="text-light">
       <meter value={storage.used} max={storage.total}></meter>
       <p>{storagePercentage.toFixed(2)}% used</p>
     </div>

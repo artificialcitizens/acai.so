@@ -5,6 +5,7 @@ import NotificationCenter from '../NotificationCenter';
 import Chat from '../Chat/Chat';
 import { avaChat } from '../Chat/chat-routes';
 import SBSearch from '../Search';
+import ScratchPad from '../ScratchPad/ScratchPad';
 import './Sidebar.css';
 
 export interface SBSidebarProps {
@@ -28,6 +29,9 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
       <ExpansionPanel title="Settings">{children}</ExpansionPanel>
       <ExpansionPanel title="Search">
         <SBSearch />
+      </ExpansionPanel>
+      <ExpansionPanel title="Notes">
+        <ScratchPad id="Notes" />
       </ExpansionPanel>
       <ExpansionPanel title="Notifications" isOpened={notificationsOpen} onChange={toggleNotifications}>
         <NotificationCenter />

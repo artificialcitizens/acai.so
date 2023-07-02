@@ -19,7 +19,6 @@ import { MainContainer } from '@chatscope/chat-ui-kit-react';
 import { Header } from './components/Header/Header';
 import TabManager from './components/Tabs';
 import StorageMeter from './components/StorageMeter/StorageMeter';
-
 export type State = 'strahl' | 'chat' | 'ava' | 'notes';
 
 if ('geolocation' in navigator) {
