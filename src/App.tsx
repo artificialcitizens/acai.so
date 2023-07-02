@@ -19,6 +19,7 @@ import { MainContainer } from '@chatscope/chat-ui-kit-react';
 import { Header } from './components/Header/Header';
 import TabManager from './components/Tabs';
 import StorageMeter from './components/StorageMeter/StorageMeter';
+import { useTabs } from './hooks/use-tabs';
 
 export type State = 'ava' | 'notes';
 
@@ -44,6 +45,7 @@ function App() {
   const [avaListening, setAvaListening] = useState<boolean>(false);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [userLocation, setUserLocation] = useState<string>('Portland, OR');
+  const { tabs, activeTab, createTab, deleteTab, updateContent, setActiveTab } = useTabs();
 
   // useEffect(() => {
   //   getGeolocation();
@@ -67,6 +69,12 @@ function App() {
 
     socket.on('disconnect', () => {
       console.log(`Disconnected: ${socket.id}`);
+    });
+
+    socket.on('create-tab', (args) => {
+      console.log(args);
+      const id = Date.now();
+      createTab({ id, title: args.title, content: args.content });
     });
 
     // HERE IS HOW TO USE TOOLS VIA SOCKET BY HAVING THE TOOL SEND THE ACTION THROUGH SOCKET

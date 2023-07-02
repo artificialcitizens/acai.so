@@ -24,23 +24,29 @@ export const useLocalStorage = (
   }, [key]);
 
   const setValue = (value: ILocalStorageObject) => {
-    setStoredValue(value);
-    window.localStorage.setItem(key, JSON.stringify(value));
+    setStoredValue((prevValue) => {
+      const newValue = { ...prevValue, ...value };
+      window.localStorage.setItem(key, JSON.stringify(newValue));
+      return newValue;
+    });
   };
 
   const deleteValue = (id: string) => {
-    const updatedValue = { ...storedValue };
-    delete updatedValue[id];
-    setStoredValue(updatedValue);
-    window.localStorage.setItem(key, JSON.stringify(updatedValue));
+    setStoredValue((prevValue) => {
+      const newValue = { ...prevValue };
+      delete newValue[id];
+      window.localStorage.setItem(key, JSON.stringify(newValue));
+      return newValue;
+    });
   };
 
   const updateValue = (id: string, newValue: { title: string; content: string }) => {
-    const updatedValue = { ...storedValue, [id]: newValue };
-    setStoredValue(updatedValue);
-    window.localStorage.setItem(key, JSON.stringify(updatedValue));
+    setStoredValue((prevValue) => {
+      const updatedValue = { ...prevValue, [id]: newValue };
+      window.localStorage.setItem(key, JSON.stringify(updatedValue));
+      return updatedValue;
+    });
   };
-
   const getValue = (id: string) => {
     if (!storedValue[id]) {
       return null;
