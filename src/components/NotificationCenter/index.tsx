@@ -1,13 +1,14 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNotificationCenter } from 'react-toastify/addons/use-notification-center';
 
 export interface NotificationCenterProps {
   notificationFilter?: string[];
+  secondaryFilter?: string[];
 }
 
-const NotificationCenter: React.FC<NotificationCenterProps> = ({ notificationFilter }) => {
+const NotificationCenter: React.FC<NotificationCenterProps> = ({ notificationFilter, secondaryFilter }) => {
   const { notifications, clear, markAllAsRead, markAsRead, unreadCount } = useNotificationCenter();
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
 
@@ -16,7 +17,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ notificationFil
   };
 
   const filteredNotifications = notificationFilter
-    ? notifications.filter((notification) => notificationFilter.includes(notification.type || ''))
+    ? notifications.filter((notification) => notificationFilter.includes(notification.className || ''))
     : notifications;
 
   return (

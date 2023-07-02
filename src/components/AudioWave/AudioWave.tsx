@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 
@@ -5,7 +7,9 @@ interface AudioWaveformProps {
   isOn: boolean;
   audioContext: AudioContext | null;
 }
-
+// @TODO: Creata a state that manages if the user or assistant is speaking
+// @TODO: Update to fill in and change color when it's assistants turn to speak
+// @TODO: Update to use mic or audio from the application
 const AudioWaveform: React.FC<AudioWaveformProps> = ({ isOn, audioContext }) => {
   const ref = useRef<SVGSVGElement>(null);
 
@@ -41,7 +45,7 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({ isOn, audioContext }) => 
             .join('path')
             .attr('transform', `translate(${width / 2}, ${height / 2})`)
             .attr('d', radialLine)
-            .attr('stroke', 'white')
+            .attr('stroke', '#e0e0e0')
             .attr('stroke-width', 5)
             .attr('fill', 'none');
         }

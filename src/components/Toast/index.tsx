@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './toast.css';
 
 export const toastifySuccess = (msg: string) => {
   return toast.success(msg, {
@@ -61,6 +62,14 @@ export const toastifyDefault = (msg: string) => {
     pauseOnHover: true,
     draggable: true,
     theme: 'dark',
+  });
+};
+
+export const toastifyAgentThought = (msg: string) => {
+  return toast(msg, {
+    className: 'toast-agent-thought',
+    position: 'top-right',
+    data: { type: 'agent-thought' },
   });
 };
 
