@@ -8,7 +8,7 @@ import SpeechRecognition from './components/SpeechRecognition/SpeechRecognition'
 import { recognitionRouter } from './components/SpeechRecognition/recognition-manager';
 import { avaChat } from './components/Chat/chat-routes';
 import ChromeNotification from './utils/ChromeNotification';
-import ToastManager, { toastifyDefault, toastifyInfo } from './components/Toast';
+import ToastManager, { toastifyAgentThought, toastifyDefault, toastifyInfo } from './components/Toast';
 import { toast } from 'react-toastify';
 import SocketContext from './context/SocketContext';
 import AudioWaveform from './components/AudioWave/AudioWave';
@@ -59,6 +59,22 @@ function App() {
 
     socket.on('disconnect', () => {
       console.log(`Disconnected: ${socket.id}`);
+    });
+
+    // HERE IS HOW TO USE TOOLS VIA SOCKET
+    // socket.on('agent-action', (action: string) => {
+    //   console.log('agent-action', action);
+    //   if (action === 'start-listening') {
+    //     setAvaListening(true);
+    //   } else if (action === 'stop-listening') {
+    //     setAvaListening(false);
+    //   }
+    // });
+
+    socket.on('agent-action', (action: { log: string; action: string; tool: string; toolName: string }) => {
+      console.log('agent-action', action);
+      const thought = action.log.split('Action:')[0].trim();
+      toastifyAgentThought(thought);
     });
 
     // Clean up on unmount
