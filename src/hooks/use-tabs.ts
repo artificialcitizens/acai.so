@@ -29,7 +29,7 @@ export const useTabs = () => {
         content: content || '',
       };
       updateContent(newTab.id.toString(), { title: newTab.name, content: newTab.content });
-      setActiveTab(tabs.length.toString()); // Set active tab to new tab
+      setActiveTab(newTab.id.toString()); // Set active tab to new tab
     }
   };
 

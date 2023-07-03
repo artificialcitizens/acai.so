@@ -2,20 +2,13 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useState, useEffect, useContext } from 'react';
 import Whisper from './components/Whisper';
-import Chat from './components/Chat/Chat';
 import ElevenLabs from './components/Elevenlabs/ElevenLabs';
 import SpeechRecognition from './components/SpeechRecognition/SpeechRecognition';
 import { recognitionRouter } from './components/SpeechRecognition/recognition-manager';
-import { avaChat } from './components/Chat/chat-routes';
-import ChromeNotification from './utils/ChromeNotification';
-import ToastManager, { toastifyAgentThought, toastifyDefault, toastifyInfo } from './components/Toast';
-import { toast } from 'react-toastify';
+import ToastManager, { toastifyAgentThought, toastifyInfo } from './components/Toast';
 import SocketContext from './context/SocketContext';
 import AudioWaveform from './components/AudioWave/AudioWave';
-import Sidebar from './components/Sidebar';
-import TipTap from './components/TipTap/TipTap';
 import SBSidebar from './components/Sidebar';
-import { MainContainer } from '@chatscope/chat-ui-kit-react';
 import { Header } from './components/Header/Header';
 import TabManager from './components/Tabs';
 import StorageMeter from './components/StorageMeter/StorageMeter';
@@ -65,14 +58,13 @@ function App() {
     const handleDisconnect = () => console.log(`Disconnected: ${socket.id}`);
     const handleCreateTab = async (args) => {
       console.log('creating-tab from socket');
-      const id = Date.now();
-      if (!tabs.find((tab) => tab.id === id)) {
-        createTab({
-          id,
-          title: args.title,
-          content: args.content,
-        });
-      }
+      const id = Date.now().toString();
+      updateContent(id, {
+        title: args.title,
+        content: args.content,
+      });
+      const index = tabs.length;
+      setActiveTab(index.toString());
     };
     const handleAgentAction = (action: { log: string; action: string; tool: string; toolName: string }) => {
       console.log('agent-action', action);
@@ -93,7 +85,7 @@ function App() {
       socket.off('create-tab', handleCreateTab);
       socket.off('agent-action', handleAgentAction);
     };
-  }, [socket, createTab, tabs]); // specify the dependencies here
+  }, [socket, createTab, tabs, updateContent, setActiveTab]); // specify the dependencies here
 
   // HERE IS HOW TO USE TOOLS VIA SOCKET BY HAVING THE TOOL SEND THE ACTION THROUGH SOCKET
   // socket.on('agent-action', (action: string) => {
@@ -118,7 +110,14 @@ function App() {
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="w-full flex-grow max-h-screen p-3">
-          <TabManager />
+          <TabManager
+            tabs={tabs}
+            activeTab={activeTab}
+            createTab={createTab}
+            deleteTab={deleteTab}
+            updateContent={updateContent}
+            setActiveTab={setActiveTab}
+          />
           <SBSidebar>
             <div>
               <SpeechRecognition
