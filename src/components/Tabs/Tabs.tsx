@@ -47,7 +47,7 @@ const TabManager: React.FC<TabManagerProps> = ({
         </TabPanel>
       ))}
       <TabPanel>
-        <p>You real sunuva bish</p>
+        <p>Create a new panel by selecting the + button</p>
       </TabPanel>
     </Tabs>
   );
