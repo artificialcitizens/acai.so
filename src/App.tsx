@@ -4,7 +4,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import Whisper from './components/Whisper';
 import ElevenLabs from './components/Elevenlabs/ElevenLabs';
 import SpeechRecognition from './components/SpeechRecognition/SpeechRecognition';
-import { recognitionRouter } from './components/SpeechRecognition/recognition-manager';
+import { recognitionRouter, takeNotesRoute } from './components/SpeechRecognition/recognition-manager';
 import ToastManager, { toastifyAgentObservation, toastifyAgentThought, toastifyInfo } from './components/Toast';
 import SocketContext from './context/SocketContext';
 import AudioWaveform from './components/AudioWave/AudioWave';
@@ -38,16 +38,16 @@ export type State = 'idle' | 'passive' | 'ava' | 'notes';
 //   }
 // };
 function App() {
-  const [transcript, setTranscript] = useState<string>('');
+  const [agentTranscript, setAgentTranscript] = useState<string>('');
+  const [userTranscript, setUserTranscript] = useState<string>('');
   // const [voice2voice, setVoice2voice] = useState<boolean>(false);
   const [speechRecognition, setSpeechRecognition] = useState<boolean>(true);
   const [currentState, setCurrentState] = useState<string>('passive');
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const { tabs, activeTab, createTab, deleteTab, updateContent, setActiveTab } = useTabs();
-  const [currentTool, setCurrentTool] = useState<string>('');
   const [chatOpen, setChatOpen] = useState(true);
   const [agentThoughtsOpen, setAgentThoughtsOpen] = useState(true);
-
+  const delay = 5000;
   const toggleChat = () => {
     setChatOpen(!chatOpen);
   };
@@ -59,12 +59,67 @@ function App() {
   //   getGeolocation();
   // }, []);
 
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+
+    if (currentState === 'passive') {
+      intervalId = setInterval(() => {
+        console.log('passive', userTranscript);
+      }, delay);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [currentState, delay, userTranscript]);
+
+  const handleTranscription = async (t: string) => {
+    if ((t === 'Ava' || t === 'ava') && currentState !== 'ava') {
+      setCurrentState('ava');
+    } else if (t.toLowerCase() === 'cancel') {
+      setCurrentState('idle');
+      toastifyInfo('Going Idle');
+      return;
+    } else if (t.toLowerCase() === 'listen linda') {
+      setCurrentState('passive');
+      toastifyInfo('Passively listening');
+    } else if (t.toLowerCase() === 'take notes') {
+      setUserTranscript('');
+      setCurrentState('notes');
+      toastifyInfo('Taking notes');
+    } else if (t.toLowerCase() === 'ready') {
+      if (currentState === 'notes') {
+        setCurrentState('idle');
+        const notes = await takeNotesRoute(userTranscript);
+        setUserTranscript('');
+        createTab({ id: Date.now(), title: 'Notes', content: notes });
+        setActiveTab(tabs.length.toString());
+        toastifyInfo('Notes sent');
+
+        return;
+      }
+    } else {
+      const newTranscript = userTranscript + '\n' + t;
+      setUserTranscript(newTranscript);
+    }
+    if (t.split(' ').length < 3 || currentState === 'idle') return;
+
+    const response = await recognitionRouter({ state: currentState, transcript: t });
+
+    console.log(response);
+
+    setAgentTranscript(response as string);
+  };
+
   const socket = useContext(SocketContext);
 
   const activateAudioContext = () => {
     const newAudioContext = new AudioContext();
     setAudioContext(newAudioContext);
   };
+
   useEffect(() => {
     if (!socket) return;
 
@@ -80,10 +135,15 @@ function App() {
       const index = tabs.length;
       setActiveTab(index.toString());
     };
-    const handleAgentAction = (action: { log: string; action: string; tool: string; toolName: string }) => {
-      console.log('agent-action', action);
+    const handleAgentAction = (action: { log: string; action: string; tool: string }) => {
       const thought = action.log.split('Action:')[0].trim();
       toastifyAgentThought(thought);
+    };
+
+    const handleAgentObservation = (observation: { content: string }) => {
+      // setCurrentTool(observation.content);
+      // const thought = observation.log.split('Observation:')[0].trim();
+      toastifyAgentObservation(observation.content);
     };
 
     socket.on('connect', handleConnect);
@@ -91,6 +151,7 @@ function App() {
     socket.on('disconnect', handleDisconnect);
     socket.on('create-tab', handleCreateTab);
     socket.on('agent-action', handleAgentAction);
+    socket.on('agent-observation', handleAgentObservation);
 
     return () => {
       socket.off('connect', handleConnect);
@@ -98,6 +159,7 @@ function App() {
       socket.off('disconnect', handleDisconnect);
       socket.off('create-tab', handleCreateTab);
       socket.off('agent-action', handleAgentAction);
+      socket.off('agent-observation', handleAgentObservation);
     };
   }, [socket, createTab, tabs, updateContent, setActiveTab]); // specify the dependencies here
 
@@ -141,27 +203,9 @@ function App() {
                   onClick={() => {
                     setSpeechRecognition(!speechRecognition);
                   }}
-                  onTranscriptionComplete={async (t) => {
-                    console.log('speech', t);
-                    if ((t === 'Ava' || t === 'ava') && currentState !== 'ava') {
-                      setCurrentState('ava');
-                    } else if (t.toLowerCase() === 'cancel') {
-                      setCurrentState('passive');
-                      return;
-                    } else if (t.toLowerCase() === 'take notes') {
-                      setCurrentState('notes');
-                      toastifyInfo('Taking notes');
-                    }
-                    if (t.split(' ').length < 3 || currentState === 'passive') return;
-
-                    const response = await recognitionRouter({ state: currentState, transcript: t });
-
-                    console.log(response);
-
-                    setTranscript(response as string);
-                  }}
+                  onTranscriptionComplete={handleTranscription}
                 />
-                <ElevenLabs text={transcript} voice="ava" />
+                {/* <ElevenLabs text={agentTranscript} voice="ava" /> */}
                 {/* <Whisper
                 onRecordingComplete={(blob) => console.log(blob)}
                 onTranscriptionComplete={async (t) => {
@@ -178,10 +222,10 @@ function App() {
               <ScratchPad id="Notes" />
             </ExpansionPanel>
             <ExpansionPanel title="Observations">
-              <NotificationCenter placeholder="Nothing to see here 👀" secondaryFilter="agent-observations" />
+              <NotificationCenter placeholder="Always listening 👂" secondaryFilter="agent-observation" />
             </ExpansionPanel>
             <ExpansionPanel title="Agent" isOpened={agentThoughtsOpen} onChange={toggleAgentThoughts}>
-              <NotificationCenter placeholder="A place for AI to ponder" secondaryFilter="agent-thought" />
+              <NotificationCenter placeholder="A place for AI to ponder 🤔" secondaryFilter="agent-thought" />
             </ExpansionPanel>
             <ExpansionPanel className="flex-grow" title="Chat" isOpened={chatOpen} onChange={toggleChat}>
               <Chat name="Ava" avatar=".." onSubmitHandler={async (message) => avaChat(message)} />

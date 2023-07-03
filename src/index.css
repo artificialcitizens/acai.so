@@ -126,7 +126,7 @@ ul[data-type='taskList'] li[data-checked='true'] > div > p {
     display: none;
   }
 }
-/*
+
 a {
   font-weight: 500;
   color: #646cff;
@@ -182,4 +182,4 @@ p {
   button {
     background-color: #f9f9f9;
   }
-} */
+}

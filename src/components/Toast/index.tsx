@@ -74,6 +74,15 @@ export const toastifyAgentThought = (msg: string) => {
   });
 };
 
+export const toastifyAgentObservation = (msg: string) => {
+  return toast(msg, {
+    className: 'toast-agent-thought',
+    position: 'top-right',
+    data: { type: 'agent-observation' },
+    toastId: `agent-observation-${Date.now()}`,
+  });
+};
+
 const ToastManager = () => {
   return (
     <ToastContainer
