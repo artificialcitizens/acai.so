@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import TipTap from '../TipTap/TipTap';
 import 'react-tabs/style/react-tabs.css';
@@ -7,6 +7,13 @@ import { useTabs } from '../../hooks/use-tabs';
 
 const TabManager: React.FC = () => {
   const { tabs, activeTab, createTab, deleteTab, updateContent, setActiveTab } = useTabs();
+  const tabsRef = useRef(tabs); // Add a ref
+
+  useEffect(() => {
+    console.log('tabs manager changed');
+    tabsRef.current = tabs;
+  }, [tabs]);
+
   return (
     <Tabs
       className="flex-grow pr-2"

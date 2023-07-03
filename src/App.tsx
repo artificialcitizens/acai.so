@@ -63,10 +63,16 @@ function App() {
     const handleConnect = () => console.log(`Connected: ${socket.id}`);
     const handleMessage = (message: string) => console.log(message);
     const handleDisconnect = () => console.log(`Disconnected: ${socket.id}`);
-    const handleCreateTab = (args) => {
+    const handleCreateTab = async (args) => {
       console.log('creating-tab from socket');
       const id = Date.now();
-      createTab({ id, title: args.title, content: args.content });
+      if (!tabs.find((tab) => tab.id === id)) {
+        createTab({
+          id,
+          title: args.title,
+          content: args.content,
+        });
+      }
     };
     const handleAgentAction = (action: { log: string; action: string; tool: string; toolName: string }) => {
       console.log('agent-action', action);
@@ -87,7 +93,7 @@ function App() {
       socket.off('create-tab', handleCreateTab);
       socket.off('agent-action', handleAgentAction);
     };
-  }, [socket, createTab]); // specify the dependencies here
+  }, [socket, createTab, tabs]); // specify the dependencies here
 
   // HERE IS HOW TO USE TOOLS VIA SOCKET BY HAVING THE TOOL SEND THE ACTION THROUGH SOCKET
   // socket.on('agent-action', (action: string) => {

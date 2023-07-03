@@ -32,9 +32,12 @@ export const useLocalStorage = (
   };
 
   const deleteValue = (id: string) => {
-    const updatedValue = { ...storedValue };
-    delete updatedValue[id];
-    window.localStorage.setItem(key, JSON.stringify(updatedValue));
+    setStoredValue((prevValue) => {
+      const updatedValue = { ...prevValue };
+      delete updatedValue[id];
+      window.localStorage.setItem(key, JSON.stringify(updatedValue));
+      return updatedValue;
+    });
   };
 
   const updateValue = (id: string, newValue: { title: string; content: string }) => {
