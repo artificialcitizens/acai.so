@@ -1,16 +1,17 @@
 .cs-message-input__content-editor,
 .cs-message-input__content-editor-wrapper {
-  @apply bg-base text-dark !important;
+  @apply bg-base text-dark text-sm !important;
 }
 .cs-expansion-panel--open .cs-expansion-panel__content {
-  @apply flex flex-grow;
+  @apply flex flex-grow max-h-[calc(54vh)] !important;
 }
 .cs-message__content {
   @apply bg-base !important;
-  font-size: 0.9rem;
+  font-size: 14px;
   border: 1px solid #565656;
 }
-
+.cs-message-input__content-editor {
+}
 .cs-message__html-content,
 .cs-message__custom-content {
   @apply text-light !important;

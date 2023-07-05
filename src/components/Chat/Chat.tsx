@@ -111,7 +111,7 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
   };
   return (
     <Dropzone onFileDrop={handleFileDrop}>
-      <div className="rounded-lg overflow-hidden w-full max-h-[50vh]">
+      <div className="rounded-lg overflow-hidden w-full">
         <ChatContainer className="bg-dark">
           <MessageList
             className="bg-dark"

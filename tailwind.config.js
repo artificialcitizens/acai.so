@@ -9,7 +9,7 @@ export default {
         dark: '#15191d',
         darker: '#121212',
         base: '#0d0d0d',
-        user: '#423d33',
+        user: '#373737',
       },
       borderColor: {
         lighter: '#626262',

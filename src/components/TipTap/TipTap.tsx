@@ -144,7 +144,7 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, updateContent }) =>
       onClick={() => {
         editor?.chain().focus().run();
       }}
-      className="relative min-h-full w-full max-w-screen-lg p-12 px-8 sm:mb-[calc(20vh)] border-none sm:rounded-lg sm:border sm:px-12"
+      className="relative max-h-[95vh] min-h-full  overflow-scroll w-full max-w-screen-lg p-12 px-8 sm:mb-[calc(20vh)] border-none sm:rounded-lg sm:border sm:px-12"
     >
       <div className="absolute flex right-5 top-5 mb-5 rounded-lg bg-base px-2 py-1 text-sm text-light">
         {saveStatus}

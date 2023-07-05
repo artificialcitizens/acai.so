@@ -47,6 +47,7 @@ function App() {
   const { tabs, activeTab, createTab, deleteTab, updateContent, setActiveTab } = useTabs();
   const [chatOpen, setChatOpen] = useState(true);
   const [agentThoughtsOpen, setAgentThoughtsOpen] = useState(true);
+
   const delay = 5000;
   const toggleChat = () => {
     setChatOpen(!chatOpen);
@@ -182,7 +183,7 @@ function App() {
     <div onClick={handleWindowClick}>
       <AudioWaveform isOn={currentState === 'ava'} audioContext={audioContext} />
       <ToastManager />
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen w-screen">
         <Header />
         <main className="w-full flex-grow max-h-screen p-3">
           <TabManager

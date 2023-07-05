@@ -5,3 +5,11 @@
 .react-tabs__tab:focus:after {
   @apply bg-transparent !important;
 }
+
+.react-tabs__tab {
+  @apply text-sm border-light border-solid border;
+}
+
+.react-tabs__tab--selected {
+  @apply border-[#e1e1e1] border-solid border !important;
+}

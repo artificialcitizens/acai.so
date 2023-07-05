@@ -74,18 +74,18 @@ export const TiptapExtensions = [
     },
   }).configure({
     HTMLAttributes: {
-      class: 'mt-4 mb-6 border-t border-stone-300',
+      class: 'mt-4 mb-6 border-t border-light',
     },
   }),
   TiptapLink.configure({
     HTMLAttributes: {
-      class: 'text-stone-400 underline underline-offset-[3px] hover:text-stone-600 transition-colors cursor-pointer',
+      class: 'text-light underline underline-offset-[3px] hover:text-stone-600 transition-colors cursor-pointer',
     },
   }),
   TiptapImage.configure({
     allowBase64: true,
     HTMLAttributes: {
-      class: 'rounded-lg border border-stone-200',
+      class: 'rounded-lg border border-light',
     },
   }),
   Placeholder.configure({

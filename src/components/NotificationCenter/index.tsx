@@ -36,7 +36,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
       {/* <div className="bg-base p-2 flex justify-between items-center text-white"></div> */}
       <div className="h-56 p-3 bg-base rounded overflow-y-auto w-full" ref={notificationsRef}>
         {(!filteredNotifications.length || (unreadCount === 0 && showUnreadOnly)) && (
-          <h4 className="text-light">{placeholder}</h4>
+          <p className="text-light">{placeholder}</p>
         )}
         {(showUnreadOnly ? filteredNotifications.filter((v) => !v.read) : filteredNotifications)
           .reverse()

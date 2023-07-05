@@ -114,7 +114,7 @@ ul[data-type='taskList'] li[data-checked='true'] > div > p {
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
+  @apply text-light;
   background-color: #121212;
 
   font-synthesis: none;
@@ -127,13 +127,10 @@ ul[data-type='taskList'] li[data-checked='true'] > div > p {
   }
 }
 
-a {
+p > a {
+  @apply text-blue-300 hover:text-blue-400 !important;
   font-weight: 500;
-  color: #646cff;
   text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
 }
 
 body {
@@ -167,8 +164,53 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 0.5em;
+}
+
+h1 {
+  font-size: 2.5em;
+}
+
+h2 {
+  font-size: 2em;
+}
+
+h3 {
+  font-size: 1.75em;
+}
+
+h4 {
+  font-size: 1.5em;
+}
+
+h5 {
+  font-size: 1.25em;
+}
+
+h6 {
+  font-size: 1em;
+}
+
+p {
+  margin: 0;
+  margin-bottom: 1em;
+}
+
 p {
   @apply text-light;
+}
+
+pre,
+code {
+  @apply bg-base text-light !important;
 }
 
 @media (prefers-color-scheme: light) {
