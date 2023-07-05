@@ -29,11 +29,10 @@ export const toastifyError = (msg: string) => {
 };
 
 export const toastifyInfo = (msg: string) => {
-  return toast.info(msg, {
+  return toast(msg, {
     className: 'info-toast',
     position: 'top-right',
-    hideProgressBar: false,
-    closeOnClick: true,
+    hideProgressBar: true,
     pauseOnHover: true,
     draggable: true,
     theme: 'dark',

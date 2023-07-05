@@ -20,7 +20,7 @@ export const recognitionRouter = async ({ state, transcript }: { state: string; 
   }
 };
 
-export const takeNotesRoute = async (transcript: string) => {
-  const notes = await takeNotes(transcript);
+export const takeNotesRoute = async (transcript: string, priorList?: string) => {
+  const notes = await takeNotes(transcript, priorList);
   return notes;
 };

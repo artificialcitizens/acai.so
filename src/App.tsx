@@ -92,6 +92,7 @@ function App() {
       toastifyInfo('Taking notes');
     } else if (t.toLowerCase() === 'ready') {
       if (currentState === 'notes') {
+        toastifyInfo('Preparing notes');
         setCurrentState('idle');
         const notes = await takeNotesRoute(userTranscript);
         setUserTranscript('');
@@ -206,7 +207,7 @@ function App() {
                   }}
                   onTranscriptionComplete={handleTranscription}
                 />
-                {/* <ElevenLabs text={agentTranscript} voice="ava" /> */}
+                <ElevenLabs text={agentTranscript} voice="ava" />
                 {/* <Whisper
                 onRecordingComplete={(blob) => console.log(blob)}
                 onTranscriptionComplete={async (t) => {
