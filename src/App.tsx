@@ -19,7 +19,8 @@ import { avaChat } from './components/Chat/chat-routes';
 import SBSearch from './components/Search';
 import ScratchPad from './components/ScratchPad/ScratchPad';
 import { useTabs } from './hooks/use-tabs';
-
+import { queryPinecone } from './endpoints';
+import { marked } from 'marked';
 export type State = 'idle' | 'passive' | 'ava' | 'notes';
 
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
@@ -218,7 +219,14 @@ function App() {
               </div>
             </ExpansionPanel>
             <ExpansionPanel title="Search">
-              <SBSearch />
+              <SBSearch
+                onSubmit={async (val) => {
+                  const response = await queryPinecone(val);
+                  createTab({ id: Date.now(), title: val, content: `\`\`\`${response}\`\`\`` });
+                  setActiveTab(tabs.length.toString());
+                  console.log(response);
+                }}
+              />
             </ExpansionPanel>
             <ExpansionPanel title="Notes">
               <ScratchPad id="Notes" />
