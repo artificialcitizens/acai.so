@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@chatscope/chat-ui-kit-react':
     specifier: ^1.10.1
@@ -94,6 +98,9 @@ dependencies:
   express:
     specifier: ^4.18.2
     version: 4.18.2
+  js-yaml:
+    specifier: ^4.1.0
+    version: 4.1.0
   langchain:
     specifier: ^0.0.91
     version: 0.0.91(@pinecone-database/pinecone@0.1.5)(axios@1.4.0)(cheerio@1.0.0-rc.12)
@@ -180,6 +187,9 @@ devDependencies:
   '@types/express':
     specifier: ^4.17.17
     version: 4.17.17
+  '@types/js-yaml':
+    specifier: ^4.0.5
+    version: 4.0.5
   '@types/marked':
     specifier: ^5.0.0
     version: 5.0.0
@@ -4802,6 +4812,10 @@ packages:
       '@types/istanbul-lib-report': 3.0.0
     dev: true
 
+  /@types/js-yaml@4.0.5:
+    resolution: {integrity: sha512-FhpRzf927MNQdRZP0J5DLIdTXhjLYzeUTmLAu69mnVksLH9CJY3IuSeEgbKUki7GQZm0WqDkGzyxju2EZGD2wA==}
+    dev: true
+
   /@types/json-schema@7.0.12:
     resolution: {integrity: sha512-Hr5Jfhc9eYOQNPYO5WLDq/n4jqijdHNlDXjuAQkkt+mWdQR+XJToOHrsD4cPaMXpn6KO7y2+wM8AZEs8VpBLVA==}
     dev: true
@@ -8681,7 +8695,6 @@ packages:
     hasBin: true
     dependencies:
       argparse: 2.0.1
-    dev: true
 
   /js2xmlparser@4.0.2:
     resolution: {integrity: sha512-6n4D8gLlLf1n5mNLQPRfViYzu9RATblzPEtm1SthMX1Pjao0r9YI9nw7ZIfRxQMERS87mcswrg+r/OYrPRX6jA==}
