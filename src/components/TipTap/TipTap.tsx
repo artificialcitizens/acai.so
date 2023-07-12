@@ -23,7 +23,7 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, updateContent }) =>
   const [hydrated, setHydrated] = useState(false);
 
   const debouncedUpdates = useDebouncedCallback(async ({ editor }) => {
-    const content = editor.getText();
+    const content = editor.getJSON();
     setSaveStatus('Saving...');
     updateContent(id, {
       title,
@@ -132,8 +132,7 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, updateContent }) =>
   // Hydrate the editor with the content from localStorage.
   useEffect(() => {
     if (editor && content && !hydrated) {
-      console.log(content);
-      editor.commands.setContent(marked(content));
+      editor.commands.setContent(content);
       setHydrated(true);
     }
   }, [editor, content, hydrated]);

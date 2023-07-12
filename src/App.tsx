@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import Whisper from './components/Whisper';
 import ElevenLabs from './components/Elevenlabs/ElevenLabs';
 import SpeechRecognition from './components/SpeechRecognition/SpeechRecognition';
@@ -19,9 +19,14 @@ import { avaChat } from './components/Chat/chat-routes';
 import SBSearch from './components/Search';
 import ScratchPad from './components/ScratchPad/ScratchPad';
 import { useTabs } from './hooks/use-tabs';
-import { queryPinecone } from './endpoints';
+import { makeObservations, queryPinecone } from './endpoints';
 import { marked } from 'marked';
 export type State = 'idle' | 'passive' | 'ava' | 'notes';
+import { appStateMachine } from './machines/app.xstate';
+import { useInterpret } from '@xstate/react';
+import { useLocalStorage } from './hooks/use-local-storage';
+import TokenManager from './components/TokenManager/token-manager';
+import { WorkspaceManager } from './components/WorkspaceManager/workspace-manager';
 
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 // const getGeolocation = () => {
@@ -43,13 +48,41 @@ function App() {
   const [userTranscript, setUserTranscript] = useState<string>('');
   // const [voice2voice, setVoice2voice] = useState<boolean>(false);
   const [speechRecognition, setSpeechRecognition] = useState<boolean>(true);
-  const [currentState, setCurrentState] = useState<string>('passive');
+  const [currentState, setCurrentState] = useState<string>('idle');
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const { tabs, activeTab, createTab, deleteTab, updateContent, setActiveTab } = useTabs();
   const [chatOpen, setChatOpen] = useState(true);
   const [agentThoughtsOpen, setAgentThoughtsOpen] = useState(true);
+  const [observations, setObservations] = useState<string>('');
+  const service = useInterpret(appStateMachine);
+  const [storedValue, setValue] = useLocalStorage('appState', {});
+  const contextRef = useRef(service.context);
+  const setValueRef = useRef(setValue);
 
-  const delay = 5000;
+  useEffect(() => {
+    setValueRef.current = setValue;
+  }, [setValue]);
+
+  useEffect(() => {
+    // Send an event when the component mounts
+    service.send({ type: 'UPDATE_NAME', userName: 'New Name' });
+  }, [service]);
+
+  useEffect(() => {
+    const subscription = service.subscribe((state) => {
+      console.log('state', state);
+      if (state?.changed) {
+        contextRef.current = state.context;
+        console.log('contextRef.current', contextRef.current);
+        setValueRef.current(state.context);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [service]);
+
   const toggleChat = () => {
     setChatOpen(!chatOpen);
   };
@@ -61,21 +94,23 @@ function App() {
   //   getGeolocation();
   // }, []);
 
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout | null = null;
+  // const delay = 100000;
+  // useEffect(() => {
+  //   let intervalId: NodeJS.Timeout | null = null;
 
-    if (currentState === 'passive') {
-      intervalId = setInterval(() => {
-        console.log('passive', userTranscript);
-      }, delay);
-    }
+  //   if (currentState === 'passive') {
+  //     intervalId = setInterval(async () => {
+  //       const newObservations = await makeObservations(userTranscript, observations);
+  //       setObservations(newObservations);
+  //     }, delay);
+  //   }
 
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [currentState, delay, userTranscript]);
+  //   return () => {
+  //     if (intervalId) {
+  //       clearInterval(intervalId);
+  //     }
+  //   };
+  // }, [currentState, delay, userTranscript, observations]);
 
   const handleTranscription = async (t: string) => {
     if ((t === 'Ava' || t === 'ava') && currentState !== 'ava') {
@@ -188,6 +223,7 @@ function App() {
       <div className="flex flex-col min-h-screen w-screen">
         <Header />
         <main className="w-full flex-grow max-h-screen p-3">
+          {contextRef.current && <WorkspaceManager context={contextRef.current} send={service.send} />}
           <TabManager
             tabs={tabs}
             activeTab={activeTab}
@@ -208,13 +244,14 @@ function App() {
                   }}
                   onTranscriptionComplete={handleTranscription}
                 />
-                <ElevenLabs text={agentTranscript} voice="ava" />
+                {/* <ElevenLabs text={agentTranscript} voice="ava" /> */}
                 {/* <Whisper
                 onRecordingComplete={(blob) => console.log(blob)}
                 onTranscriptionComplete={async (t) => {
                   console.log('Whisper Server Response', t);
                 }}
               /> */}
+                <TokenManager />
                 <StorageMeter />
               </div>
             </ExpansionPanel>
@@ -231,9 +268,9 @@ function App() {
             <ExpansionPanel title="Notes">
               <ScratchPad id="Notes" />
             </ExpansionPanel>
-            <ExpansionPanel title="Observations">
+            {/* <ExpansionPanel title="Observations">
               <NotificationCenter placeholder="Always listening 👂" secondaryFilter="agent-observation" />
-            </ExpansionPanel>
+            </ExpansionPanel> */}
             <ExpansionPanel title="Agent" isOpened={agentThoughtsOpen} onChange={toggleAgentThoughts}>
               <NotificationCenter placeholder="A place for AI to ponder 🤔" secondaryFilter="agent-thought" />
             </ExpansionPanel>
