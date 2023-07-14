@@ -8,8 +8,10 @@ import { useDebouncedCallback } from 'use-debounce';
 import { useCompletion } from 'ai/react';
 
 import { EditorBubbleMenu } from './components';
-import { toastifyError } from '../Toast';
+import { toastifyDefault, toastifyError } from '../Toast';
 import { marked } from 'marked';
+import { useInterpret } from '@xstate/react';
+import { appStateMachine } from '../../machines';
 
 interface EditorProps {
   id: string;
@@ -19,17 +21,32 @@ interface EditorProps {
 }
 
 const Tiptap: React.FC<EditorProps> = ({ id, title, content, updateContent }) => {
-  const [saveStatus, setSaveStatus] = useState('Saved');
+  const service = useInterpret(appStateMachine);
   const [hydrated, setHydrated] = useState(false);
+  const [saveStatus, setSaveStatus] = useState('Saved');
+  const [currentWorkspace, setCurrentWorkspace] = useState(null);
+  const [tab, setTab] = useState(null);
 
-  const debouncedUpdates = useDebouncedCallback(async ({ editor }) => {
-    const content = editor.getJSON();
-    setSaveStatus('Saving...');
-    updateContent(id, {
-      title,
-      content,
+  useEffect(() => {
+    service.onTransition((state) => {
+      if (state.context.workspaces) {
+        setCurrentWorkspace(
+          state.context.workspaces.find((workspace) => workspace.id === state.context.activeWorkspaceId),
+        );
+      }
     });
-    // Simulate a delay in saving.
+  }, [service]);
+
+  useEffect(() => {
+    if (currentWorkspace) {
+      setTab(currentWorkspace.data.tiptap.tabs.find((tab) => tab.id === id));
+    }
+  }, [currentWorkspace, id]);
+
+  const debouncedUpdates = useDebouncedCallback((editor) => {
+    const content = editor.getText();
+    setSaveStatus('Saving...');
+    service.send({ type: 'UPDATE_TAB_CONTENT', id, content, workspaceId: currentWorkspace.id });
     setTimeout(() => {
       setSaveStatus('Saved');
     }, 100);
@@ -55,11 +72,19 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, updateContent }) =>
         });
         // complete(e.editor.storage.markdown.getMarkdown());
       } else {
-        debouncedUpdates(e);
+        debouncedUpdates(e.editor);
       }
     },
     autofocus: 'end',
   });
+
+  useEffect(() => {
+    if (editor && tab && !hydrated) {
+      console.log(tab);
+      editor.commands.setContent(marked(tab.content));
+      setHydrated(true);
+    }
+  }, [editor, tab, hydrated]);
 
   const { complete, completion, isLoading, stop } = useCompletion({
     id: 'novel',
@@ -132,7 +157,7 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, updateContent }) =>
   // Hydrate the editor with the content from localStorage.
   useEffect(() => {
     if (editor && content && !hydrated) {
-      editor.commands.setContent(content);
+      editor.commands.setContent(marked(content));
       setHydrated(true);
     }
   }, [editor, content, hydrated]);

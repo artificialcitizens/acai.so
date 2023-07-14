@@ -9,18 +9,18 @@ import * as MemoryStories from './memory.stories';
 of our models. This allows us to create an ongoing interaction with the user.
 
 ## Basic Memory
+
 Ultimately we are just keeping track of the conversation and sending all of the history to the model as one query.
 
 Lets take a look at this simple chat component that shows how this can be managed without a memory wrapper
 
 ```js
-import { OpenAI } from "langchain/llms/openai";
+import { OpenAI } from 'langchain/llms/openai';
 
 const model = new OpenAI();
-chatHistory = "";
+chatHistory = '';
 
 const chat = async (input: string, chatHistory: string) => {
-  console.log('chat_history', chatHistory);
   const response = model.call(chatHistory + `\n` + input + '\n');
   return response;
 };
@@ -40,14 +40,13 @@ Check your dev console to see the full chat history
 The BufferWindowMemory is a simple wrapper that allows us to keep track of the last N interactions
 
 ```ts
-import { OpenAI } from "langchain/llms/openai";
-import { BufferWindowMemory } from "langchain/memory";
-import { ConversationChain } from "langchain/chains";
+import { OpenAI } from 'langchain/llms/openai';
+import { BufferWindowMemory } from 'langchain/memory';
+import { ConversationChain } from 'langchain/chains';
 
 const model = new OpenAI({});
 const memory = new BufferWindowMemory({ k: 5 });
 const chain = new ConversationChain({ llm: model, memory: memory });
 const res1 = await chain.call({ input: "Hi! I'm Jim." });
 console.log({ res1 });
-
 ```

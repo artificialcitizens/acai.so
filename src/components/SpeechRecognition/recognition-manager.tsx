@@ -17,6 +17,8 @@ export const recognitionRouter = async ({ state, transcript }: { state: string; 
       const observations = [];
       // return 'hello world';
       break;
+    case 'idle':
+      break;
     default:
       console.log('no match');
       break;

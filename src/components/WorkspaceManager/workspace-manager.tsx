@@ -13,18 +13,19 @@ export const WorkspaceManager: React.FC<WorkspaceManagerProps> = () => {
   const [selectedWorkspace, setSelectedWorkspace] = useState<string>();
   const [newWorkspaceName, setNewWorkspaceName] = useState('');
 
+  const activeWorkspaceId = service.getSnapshot().context.activeWorkspaceId;
+
   useEffect(() => {
     const currentContext = service.getSnapshot().context;
     if (currentContext.workspaces) {
-      const ws = getWorkspaceById(currentContext.workspaces, currentContext.activeWorkspaceId);
+      const ws = getWorkspaceById(currentContext.workspaces, activeWorkspaceId);
       if (ws) {
         setSelectedWorkspace(ws.id);
       }
     }
-  }, [service]);
+  }, [service, activeWorkspaceId]);
 
   const handleSelectWorkspace = (id: string) => {
-    console.log('handleSelectWorkspace:', id);
     service.send({ type: 'SET_ACTIVE_WORKSPACE', id });
     setSelectedWorkspace(id);
   };
@@ -44,7 +45,7 @@ export const WorkspaceManager: React.FC<WorkspaceManagerProps> = () => {
   //   });
   // };
 
-  const handleAddWorkspace = (event) => {
+  const handleAddWorkspace = (event: { preventDefault: () => void }) => {
     event.preventDefault();
 
     const newWorkspace: Workspace = {

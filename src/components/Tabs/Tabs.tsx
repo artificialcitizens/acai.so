@@ -1,66 +1,68 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import { useInterpret } from '@xstate/react';
 import TipTap from '../TipTap/TipTap';
 import 'react-tabs/style/react-tabs.css';
 import './tabs.css';
-import { appStateMachine } from '../../machines/app.xstate'; // Import your state machine
+import { appStateMachine } from '../../machines/app.xstate';
 
 interface TabManagerProps {
-  tabs: any[];
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+  activeWorkspaceId: string;
+  activeTab: number;
+  setActiveTab: (activeTab: number) => void;
 }
 
-const TabManager: React.FC<TabManagerProps> = ({ tabs, activeTab, setActiveTab }) => {
+const TabManager: React.FC<TabManagerProps> = ({ activeWorkspaceId, activeTab, setActiveTab }) => {
   const service = useInterpret(appStateMachine);
-  const [currentWorkspace, setCurrentWorkspace] = useState(null);
 
-  useEffect(() => {
-    service.onTransition((state) => {
-      if (state.context.workspaces) {
-        setCurrentWorkspace(state.context.workspaces.find((workspace) => workspace.id === 'UUIDxyz'));
-      }
-    });
-  }, [service]);
-  console.log('currentWorkspace', currentWorkspace);
   const handleCreateTab = () => {
-    const newTab = { id: Date.now(), name: 'New Tab', content: '' };
-    service.send({ type: 'ADD_TAB', tab: newTab }); // Replace with your actual event type and payload
+    // notify the user with alert and prompt
+    const name = prompt('Enter a name for the new tab');
+    const newTab = {
+      id: Date.now().toString(),
+      name: name,
+      content: '',
+      workspaceId: activeWorkspaceId,
+    };
+    service.send({ type: 'ADD_TAB', tab: newTab });
   };
 
-  const handleDeleteTab = (id: number) => {
-    service.send({ type: 'DELETE_TAB', id }); // Replace with your actual event type and payload
-  };
+  // const handleDeleteTab = (id: string) => {
+  //   service.send({ type: 'DELETE_TAB', id });
+  // };
 
-  const handleUpdateContent = (id: string, content: any) => {
-    service.send({ type: 'UPDATE_TAB_CONTENT', id, content }); // Replace with your actual event type and payload
-  };
+  // const handleUpdateContent = (id: string, content: any) => {
+  //   const updatedTab = { id, content, workspaceId: activeWorkspaceId };
+  //   service.send({ type: 'UPDATE_TAB_CONTENT', ...updatedTab });
+  // };
+
+  const workspace = service.getSnapshot().context.workspaces.filter((ws) => ws.id === activeWorkspaceId)[0];
 
   return (
-    currentWorkspace && (
+    activeWorkspaceId && (
       <Tabs
+        key={activeWorkspaceId}
         className="flex-grow pr-2"
-        selectedIndex={parseInt(activeTab, 10)}
+        selectedIndex={activeTab}
         onSelect={(index) => {
-          if (parseInt(activeTab, 10) !== index) {
-            const currentTab = tabs[parseInt(activeTab, 10)];
-            if (currentTab && !currentTab.content.trim()) {
-              handleDeleteTab(currentTab.id);
-            }
+          if (activeTab !== index) {
+            const currentTab = workspace.data.tiptap.tabs[activeTab];
+            // if (currentTab) {
+            //   handleDeleteTab(currentTab.id);
+            // }
           }
-          setActiveTab(index.toString());
+          setActiveTab(index);
         }}
       >
         <TabList>
-          {currentWorkspace.data.tiptap.tabs.map((tab) => (
+          {workspace.data.tiptap.tabs.map((tab) => (
             <Tab key={tab.id}>{tab.name}</Tab>
           ))}
           <Tab onClick={handleCreateTab}>+</Tab>
         </TabList>
-        {currentWorkspace.data.tiptap.tabs.map((tab) => (
+        {workspace.data.tiptap.tabs.map((tab) => (
           <TabPanel key={tab.id}>
-            <TipTap id={tab.id.toString()} title={tab.name} content={tab.content} updateContent={handleUpdateContent} />
+            <TipTap id={tab.id.toString()} title={tab.name} content={tab.content} updateContent={() => console.log()} />
           </TabPanel>
         ))}
         <TabPanel>

@@ -22,12 +22,12 @@ import { useTabs } from './hooks/use-tabs';
 import { makeObservations, queryPinecone } from './endpoints';
 import { marked } from 'marked';
 export type State = 'idle' | 'passive' | 'ava' | 'notes' | 'strahl' | 'chat';
-import { appStateMachine } from './machines/app.xstate';
+import { appStateMachine, loadState, saveState } from './machines/app.xstate';
 import { useInterpret } from '@xstate/react';
 import { useLocalStorage } from './hooks/use-local-storage';
 import TokenManager from './components/TokenManager/token-manager';
 import { WorkspaceManager } from './components/WorkspaceManager/workspace-manager';
-
+import { useMachine } from '@xstate/react';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 // const getGeolocation = () => {
 //   if ('geolocation' in navigator) {
@@ -50,38 +50,16 @@ function App() {
   const [speechRecognition, setSpeechRecognition] = useState<boolean>(true);
   const [currentState, setCurrentState] = useState<State>('idle');
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
-  const { tabs, activeTab, createTab, deleteTab, updateContent, setActiveTab } = useTabs();
   const [chatOpen, setChatOpen] = useState(true);
   const [agentThoughtsOpen, setAgentThoughtsOpen] = useState(true);
   const [observations, setObservations] = useState<string>('');
-  const service = useInterpret(appStateMachine);
-  const [storedValue, setValue] = useLocalStorage('appState', {});
-  const contextRef = useRef(service.context);
-  const setValueRef = useRef(setValue);
+  const [activeTab, setActiveTab] = useState(0);
+  const [state, send] = useMachine(appStateMachine);
 
   useEffect(() => {
-    setValueRef.current = setValue;
-  }, [setValue]);
-
-  useEffect(() => {
-    // Send an event when the component mounts
-    service.send({ type: 'UPDATE_NAME', userName: 'New Name' });
-  }, [service]);
-
-  useEffect(() => {
-    const subscription = service.subscribe((state) => {
-      console.log('state', state);
-      if (state?.changed) {
-        contextRef.current = state.context;
-        console.log('contextRef.current', contextRef.current);
-        setValueRef.current(state.context);
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [service]);
+    // Save state to localStorage whenever it changes
+    saveState(state.context);
+  }, [state.context]);
 
   const toggleChat = () => {
     setChatOpen(!chatOpen);
@@ -98,19 +76,17 @@ function App() {
   // useEffect(() => {
   //   let intervalId: NodeJS.Timeout;
 
-    //   if (currentState === 'passive') {
-    //     intervalId = setInterval(async () => {
-    //       const newObservations = await makeObservations(userTranscript, observations);
-    //       setObservations(newObservations);
-    //     }, delay);
-    //   }
+  //     if (currentState === 'passive') {
+  //       intervalId = setInterval(async () => {
+  //         const newObservations = await makeObservations(userTranscript, observations);
+  //         setObservations(newObservations);
+  //       }, delay);
+  //     }
 
-    return () => {
-      //if (intervalId) {
-      clearInterval(intervalId);
-      //}
-    };
-  }, [currentState, delay, userTranscript]);
+  //   return () => {
+  //     clearInterval(intervalId);
+  //   };
+  // }, [currentState, delay, userTranscript]);
 
   const handleTranscription = async (t: string) => {
     if ((t === 'Ava' || t === 'ava') && currentState !== 'ava') {
@@ -134,10 +110,14 @@ function App() {
         setCurrentState('idle');
         const notes = await takeNotesRoute(userTranscript);
         setUserTranscript('');
-        createTab({ id: Date.now(), title: 'Notes', content: notes });
-        setActiveTab(tabs.length.toString());
         toastifyInfo('Notes sent');
-
+        const newTab = {
+          id: Date.now().toString(),
+          name: 'Notes',
+          content: notes,
+          workspaceId: state.context.activeWorkspaceId,
+        };
+        send({ type: 'ADD_TAB', tab: newTab });
         return;
       }
     } else {
@@ -147,8 +127,6 @@ function App() {
     if (t.split(' ').length < 3 || currentState === 'idle') return;
 
     const response = await recognitionRouter({ state: currentState, transcript: t });
-
-    console.log(response);
 
     setAgentTranscript(response as string);
   };
@@ -167,13 +145,13 @@ function App() {
     const handleMessage = (message: string) => console.log(message);
     const handleDisconnect = () => console.log(`Disconnected: ${socket.id}`);
     const handleCreateTab = async (args: { title: string; content: string }) => {
-      const id = Date.now().toString();
-      updateContent(id, {
-        title: args.title,
+      const newTab = {
+        id: Date.now().toString(),
+        name: args.title,
         content: args.content,
-      });
-      const index = tabs.length;
-      setActiveTab(index.toString());
+        workspaceId: state.context.activeWorkspaceId,
+      };
+      send({ type: 'ADD_TAB', tab: newTab });
     };
     const handleAgentAction = (action: { log: string; action: string; tool: string }) => {
       const thought = action.log.split('Action:')[0].trim();
@@ -201,7 +179,7 @@ function App() {
       socket.off('agent-action', handleAgentAction);
       socket.off('agent-observation', handleAgentObservation);
     };
-  }, [socket, createTab, tabs, updateContent, setActiveTab]); // specify the dependencies here
+  }, [send, socket, state.context.activeWorkspaceId]); // specify the dependencies here
 
   // HERE IS HOW TO USE TOOLS VIA SOCKET BY HAVING THE TOOL SEND THE ACTION THROUGH SOCKET
   // socket.on('agent-action', (action: string) => {
@@ -225,14 +203,12 @@ function App() {
       <div className="flex flex-col min-h-screen w-screen">
         <Header />
         <main className="w-full flex-grow max-h-screen p-3">
-          {contextRef.current && <WorkspaceManager context={contextRef.current} send={service.send} />}
+          <WorkspaceManager workspaceId={state.context.activeWorkspaceId} />
           <TabManager
-            tabs={tabs}
-            activeTab={activeTab}
-            createTab={createTab}
-            deleteTab={deleteTab}
-            updateContent={updateContent}
-            setActiveTab={setActiveTab}
+            key={state.context.activeWorkspaceId}
+            activeWorkspaceId={state.context.activeWorkspaceId}
+            activeTab={activeTab} // Pass activeTab as a prop
+            setActiveTab={setActiveTab} // Pass setActiveTab as a prop
           />
           <SBSidebar>
             {' '}
@@ -265,9 +241,13 @@ function App() {
               <SBSearch
                 onSubmit={async (val) => {
                   const response = await queryPinecone(val);
-                  createTab({ id: Date.now(), title: val, content: `\`\`\`${response}\`\`\`` });
-                  setActiveTab(tabs.length.toString());
-                  console.log(response);
+                  const newTab = {
+                    id: Date.now().toString(),
+                    name: val,
+                    content: `\`\`\`${response}\`\`\``,
+                    workspaceId: state.context.activeWorkspaceId,
+                  };
+                  send({ type: 'ADD_TAB', tab: newTab });
                 }}
               />
             </ExpansionPanel>
