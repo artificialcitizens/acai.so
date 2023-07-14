@@ -80,6 +80,7 @@
     "@storybook/testing-library": "^0.0.14-next.2",
     "@types/express": "^4.17.17",
     "@types/js-yaml": "^4.0.5",
+    "@types/lodash.isequal": "^4.5.6",
     "@types/marked": "^5.0.0",
     "@types/node": "^20.1.4",
     "@types/react": "^18.0.28",
