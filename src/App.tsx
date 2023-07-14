@@ -28,6 +28,7 @@ import { useLocalStorage } from './hooks/use-local-storage';
 import TokenManager from './components/TokenManager/token-manager';
 import { WorkspaceManager } from './components/WorkspaceManager/workspace-manager';
 import { useMachine } from '@xstate/react';
+import RoomManager from './components/RoomManager/RoomManager';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 // const getGeolocation = () => {
 //   if ('geolocation' in navigator) {
@@ -241,6 +242,7 @@ function App() {
               /> */}
                 <TokenManager />
                 <StorageMeter />
+                <RoomManager />
               </div>
             </ExpansionPanel>
             <ExpansionPanel title="Search">
