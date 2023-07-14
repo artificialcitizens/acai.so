@@ -1,2 +1,1 @@
-export * from './todo.xstate';
-export * from './demo.xstate';
+export * from './app.xstate';
