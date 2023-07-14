@@ -63,21 +63,34 @@ const RoomManager: React.FC = () => {
     <div>
       {!roomId ? (
         <>
-          <button onClick={createRoom}>Create Room</button>
+          <button className="text-light" onClick={createRoom}>
+            Create Room
+          </button>
           <form onSubmit={joinRoom}>
-            <label>
+            <label className="text-light">
               Room ID:
-              <input type="text" value={joinRoomId} onChange={(e) => setJoinRoomId(e.target.value)} />
+              <input
+                className="text-light ml-2"
+                type="text"
+                value={joinRoomId}
+                onChange={(e) => setJoinRoomId(e.target.value)}
+              />
             </label>
-            <button type="submit">Join Room</button>
+            <button className="text-light" type="submit">
+              Join Room
+            </button>
           </form>
         </>
       ) : (
         <>
-          <h2>Your Room ID: {roomId}</h2>
-          <button onClick={sendData}>Send Data</button>
-          <p>Received data: {data}</p>
-          <button onClick={leaveRoom}>Leave Room</button>
+          <h2 className="text-light">Your Room ID: {roomId}</h2>
+          <button className="text-light" onClick={sendData}>
+            Send Data
+          </button>
+          <p className="text-light">Received data: {data}</p>
+          <button className="text-light" onClick={leaveRoom}>
+            Leave Room
+          </button>
         </>
       )}
     </div>

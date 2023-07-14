@@ -18,11 +18,11 @@ const TokenManager: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <label>
+      <label className="text-light">
         OpenAI API Key:
         <input type="password" value={formKey} onChange={(e) => setFormKey(e.target.value)} />
       </label>
-      <input type="submit" value="Submit" />
+      <input className="text-light" type="submit" value="Submit" />
     </form>
   );
 };
