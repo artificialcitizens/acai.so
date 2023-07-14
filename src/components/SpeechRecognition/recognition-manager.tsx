@@ -5,15 +5,18 @@ export const recognitionRouter = async ({ state, transcript }: { state: string; 
   switch (state) {
     case 'strahl':
       const response = await fetch(`http://192.168.4.74:3000/strahl?query=${transcript}`);
-      return response;
+      const json = await response.json();
+      return json.response;
     case 'ava':
       const answer = await avaChat(transcript);
       return answer;
     case 'chat':
-      return 'hello world';
+      // return 'hello world';
+      break;
     case 'passive':
       const observations = [];
-      return 'hello world';
+      // return 'hello world';
+      break;
     default:
       console.log('no match');
       break;

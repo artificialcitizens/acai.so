@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 interface ElevenLabsProps {
   text: string;
   voice: keyof typeof voices;
+  active: boolean;
 }
 
 const voices = {
@@ -39,9 +40,9 @@ const textToSpeech = async (inputText: string, voice: string) => {
   return speechDetails.data;
 };
 
-const ElevenLabs: React.FC<ElevenLabsProps> = ({ text, voice }) => {
+const ElevenLabs: React.FC<ElevenLabsProps> = ({ text, voice, active }) => {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
-  const [active, setActive] = useState<boolean>(true);
+  // const [active, setActive] = useState<boolean>(active);
 
   useEffect(() => {
     if (!text || !active) return;
@@ -59,7 +60,7 @@ const ElevenLabs: React.FC<ElevenLabsProps> = ({ text, voice }) => {
           <span className="mr-2 text-light">Elevenlabs</span>
           <button
             className={active ? 'p-0 w-6 h-6 rounded-full bg-red-500' : 'rounded-full p-0 w-6 h-6 bg-slate-400'}
-            onClick={() => setActive(!active)}
+            onClick={() => (active = !active)}
           />
         </div>
         {audioSrc && <audio controls src={audioSrc} autoPlay />}

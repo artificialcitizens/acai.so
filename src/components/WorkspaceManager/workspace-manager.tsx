@@ -1,51 +1,54 @@
-import { useState } from 'react';
-import { EventObject } from 'xstate';
-import { Workspace } from '../../machines';
+import { useEffect, useState } from 'react';
+import { Workspace, appStateMachine, getWorkspaceById } from '../../machines';
+import { useInterpret } from '@xstate/react';
+import { v4 as uuidv4 } from 'uuid';
 
-interface Context {
-  workspaces: Workspace[];
+interface WorkspaceManagerProps {
+  workspaceId: string;
 }
 
-interface Send {
-  (event: EventObject): void;
-}
+export const WorkspaceManager: React.FC<WorkspaceManagerProps> = () => {
+  const service = useInterpret(appStateMachine);
 
-interface Props {
-  context: Context;
-  send: Send;
-}
-
-export const WorkspaceManager = ({ context, send }: Props) => {
-  const [selectedWorkspace, setSelectedWorkspace] = useState(context.workspaces[0].id);
+  const [selectedWorkspace, setSelectedWorkspace] = useState<string>();
   const [newWorkspaceName, setNewWorkspaceName] = useState('');
+
+  useEffect(() => {
+    const currentContext = service.getSnapshot().context;
+    if (currentContext.workspaces) {
+      const ws = getWorkspaceById(currentContext.workspaces, currentContext.activeWorkspaceId);
+      if (ws) {
+        setSelectedWorkspace(ws.id);
+      }
+    }
+  }, [service]);
+
   const handleSelectWorkspace = (id: string) => {
+    console.log('handleSelectWorkspace:', id);
+    service.send({ type: 'SET_ACTIVE_WORKSPACE', id });
     setSelectedWorkspace(id);
   };
 
-  const generateId = () => {
-    return Math.random().toString(36).substr(2, 9);
-  };
+  // const handleUpdateWorkspace = (id: string, updates: Partial<Workspace>) => {
+  //   service.send({
+  //     type: 'UPDATE_WORKSPACE',
+  //     id,
+  //     workspace: updates,
+  //   });
+  // };
 
-  const handleUpdateWorkspace = (id: string, updates: Partial<Workspace>) => {
-    send({
-      type: 'UPDATE_WORKSPACE',
-      id,
-      workspace: updates,
-    });
-  };
-
-  const handleDeleteWorkspace = (id: string) => {
-    send({
-      type: 'DELETE_WORKSPACE',
-      id,
-    });
-  };
+  // const handleDeleteWorkspace = (id: string) => {
+  //   service.send({
+  //     type: 'DELETE_WORKSPACE',
+  //     id,
+  //   });
+  // };
 
   const handleAddWorkspace = (event) => {
     event.preventDefault();
 
     const newWorkspace: Workspace = {
-      id: generateId(),
+      id: uuidv4(),
       name: newWorkspaceName,
       currentTab: 0,
       createdAt: new Date().toString(),
@@ -60,12 +63,9 @@ export const WorkspaceManager = ({ context, send }: Props) => {
         tiptap: {
           tabs: [
             {
-              id: generateId(),
-              name: 'New Tab',
-              content: {
-                type: 'doc',
-                content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Welcome to the new workspace!' }] }],
-              },
+              id: uuidv4(),
+              name: 'Hello',
+              content: 'Welcome to the new workspace!',
             },
           ],
         },
@@ -85,9 +85,7 @@ export const WorkspaceManager = ({ context, send }: Props) => {
       },
     };
 
-    console.log('Sending ADD_WORKSPACE event', newWorkspace);
-
-    send({
+    service.send({
       type: 'ADD_WORKSPACE',
       workspace: newWorkspace,
     });
@@ -95,10 +93,14 @@ export const WorkspaceManager = ({ context, send }: Props) => {
     setNewWorkspaceName('');
   };
 
+  if (!service.getSnapshot().context.workspaces) {
+    return null;
+  }
+
   return (
     <div>
       <select value={selectedWorkspace} onChange={(e) => handleSelectWorkspace(e.target.value)}>
-        {context.workspaces.map((w) => (
+        {service.getSnapshot().context.workspaces.map((w) => (
           <option key={w.id} value={w.id}>
             {w.name}
           </option>
@@ -113,12 +115,12 @@ export const WorkspaceManager = ({ context, send }: Props) => {
           placeholder="Workspace name"
           required
         />
-        <button type="submit">Add Workspace</button>
+        <button type="submit">+</button>
       </form>
 
-      <button onClick={() => handleUpdateWorkspace(selectedWorkspace, { name: 'New Name' })}>Update Workspace</button>
+      {/* <button onClick={() => handleUpdateWorkspace(selectedWorkspace, { name: 'New Name' })}>Update Workspace</button>
 
-      <button onClick={() => handleDeleteWorkspace(selectedWorkspace)}>Delete Workspace</button>
+      <button onClick={() => handleDeleteWorkspace(selectedWorkspace)}>Delete Workspace</button> */}
     </div>
   );
 };

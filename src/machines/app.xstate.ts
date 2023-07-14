@@ -46,7 +46,7 @@ interface IContext {
 }
 
 // Define events
-type UpdateNameEvent = { type: 'UPDATE_NAME'; userName: string };
+//type UpdateNameEvent = { type: 'UPDATE_NAME'; userName: string };
 type UpdateLocationEvent = { type: 'UPDATE_LOCATION'; currentLocation: string };
 type UpdateTimeEvent = { type: 'UPDATE_TIME'; localTime: string };
 type AddWorkspaceEvent = { type: 'ADD_WORKSPACE'; workspace: Workspace };
@@ -57,7 +57,7 @@ type DeleteTabEvent = { type: 'DELETE_TAB'; id: string };
 type UpdateTabContentEvent = { type: 'UPDATE_TAB_CONTENT'; id: string; content: any };
 
 type Event =
-  | UpdateNameEvent
+  | { type: 'UPDATE_NAME'; userName: string }
   | UpdateLocationEvent
   | UpdateTimeEvent
   | AddWorkspaceEvent
@@ -133,7 +133,7 @@ export const appStateMachine = createMachine<IContext, Event>({
     idle: {
       on: {
         UPDATE_NAME: {
-          actions: assign((context, event) => ({ ...context, userName: (event as UpdateNameEvent).userName })),
+          actions: assign((context, event) => ({ ...context, userName: event.userName })),
         },
         UPDATE_LOCATION: {
           actions: assign((context, event) => ({

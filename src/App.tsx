@@ -21,7 +21,7 @@ import ScratchPad from './components/ScratchPad/ScratchPad';
 import { useTabs } from './hooks/use-tabs';
 import { makeObservations, queryPinecone } from './endpoints';
 import { marked } from 'marked';
-export type State = 'idle' | 'passive' | 'ava' | 'notes';
+export type State = 'idle' | 'passive' | 'ava' | 'notes' | 'strahl' | 'chat';
 import { appStateMachine } from './machines/app.xstate';
 import { useInterpret } from '@xstate/react';
 import { useLocalStorage } from './hooks/use-local-storage';
@@ -48,7 +48,7 @@ function App() {
   const [userTranscript, setUserTranscript] = useState<string>('');
   // const [voice2voice, setVoice2voice] = useState<boolean>(false);
   const [speechRecognition, setSpeechRecognition] = useState<boolean>(true);
-  const [currentState, setCurrentState] = useState<string>('idle');
+  const [currentState, setCurrentState] = useState<State>('idle');
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const { tabs, activeTab, createTab, deleteTab, updateContent, setActiveTab } = useTabs();
   const [chatOpen, setChatOpen] = useState(true);
@@ -96,25 +96,27 @@ function App() {
 
   // const delay = 100000;
   // useEffect(() => {
-  //   let intervalId: NodeJS.Timeout | null = null;
+  //   let intervalId: NodeJS.Timeout;
 
-  //   if (currentState === 'passive') {
-  //     intervalId = setInterval(async () => {
-  //       const newObservations = await makeObservations(userTranscript, observations);
-  //       setObservations(newObservations);
-  //     }, delay);
-  //   }
+    //   if (currentState === 'passive') {
+    //     intervalId = setInterval(async () => {
+    //       const newObservations = await makeObservations(userTranscript, observations);
+    //       setObservations(newObservations);
+    //     }, delay);
+    //   }
 
-  //   return () => {
-  //     if (intervalId) {
-  //       clearInterval(intervalId);
-  //     }
-  //   };
-  // }, [currentState, delay, userTranscript, observations]);
+    return () => {
+      //if (intervalId) {
+      clearInterval(intervalId);
+      //}
+    };
+  }, [currentState, delay, userTranscript]);
 
   const handleTranscription = async (t: string) => {
     if ((t === 'Ava' || t === 'ava') && currentState !== 'ava') {
       setCurrentState('ava');
+    } else if (t.toLowerCase() === 'chris') {
+      setCurrentState('strahl');
     } else if (t.toLowerCase() === 'cancel') {
       setCurrentState('idle');
       toastifyInfo('Going Idle');
@@ -218,7 +220,7 @@ function App() {
   };
   return (
     <div onClick={handleWindowClick}>
-      <AudioWaveform isOn={currentState === 'ava'} audioContext={audioContext} />
+      <AudioWaveform isOn={currentState === 'ava' || currentState === 'strahl'} audioContext={audioContext} />
       <ToastManager />
       <div className="flex flex-col min-h-screen w-screen">
         <Header />
@@ -244,7 +246,11 @@ function App() {
                   }}
                   onTranscriptionComplete={handleTranscription}
                 />
-                {/* <ElevenLabs text={agentTranscript} voice="ava" /> */}
+                <ElevenLabs
+                  active={currentState === 'ava' || currentState === 'strahl'}
+                  text={agentTranscript}
+                  voice={currentState === 'ava' ? 'ava' : 'strahl'}
+                />
                 {/* <Whisper
                 onRecordingComplete={(blob) => console.log(blob)}
                 onTranscriptionComplete={async (t) => {
