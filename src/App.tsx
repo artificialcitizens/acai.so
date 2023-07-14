@@ -15,7 +15,6 @@ import StorageMeter from './components/StorageMeter/StorageMeter';
 import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
 import NotificationCenter from './components/NotificationCenter';
 import Chat from './components/Chat/Chat';
-import { avaChat } from './components/Chat/chat-routes';
 import SBSearch from './components/Search';
 import ScratchPad from './components/ScratchPad/ScratchPad';
 import { useTabs } from './hooks/use-tabs';
@@ -29,6 +28,8 @@ import TokenManager from './components/TokenManager/token-manager';
 import { WorkspaceManager } from './components/WorkspaceManager/workspace-manager';
 import { useMachine } from '@xstate/react';
 import RoomManager from './components/RoomManager/RoomManager';
+import { avaChat } from './utils/sb-langchain/agents/ava';
+import useCookieStorage from './hooks/use-cookie-storage';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 // const getGeolocation = () => {
 //   if ('geolocation' in navigator) {
@@ -57,7 +58,7 @@ function App() {
   const [activeTab, setActiveTab] = useState(0);
   const [state, send] = useMachine(appStateMachine);
   const [workspace, setWorkspace] = useState<Workspace>(state.context.workspaces[0]);
-
+  const [openAIKey, setOpenAIKey] = useCookieStorage('OPENAI_KEY');
   useEffect(() => {
     // Save state to localStorage whenever it changes
     saveState(state.context);
@@ -73,6 +74,26 @@ function App() {
 
   const toggleAgentThoughts = () => {
     setAgentThoughtsOpen(!agentThoughtsOpen);
+  };
+
+  /**
+   *  Handles sending notes to the to the notes chain
+   */
+  const handleSendNotes = async (openAIKey: string) => {
+    toastifyInfo('Preparing notes');
+    setCurrentState('idle');
+    const notes = await takeNotesRoute(userTranscript, openAIKey);
+    setUserTranscript('');
+    toastifyInfo('Notes sent');
+
+    const newTab = {
+      id: Date.now().toString(),
+      name: 'Notes',
+      content: notes,
+      workspaceId: workspace.id,
+    };
+
+    send({ type: 'ADD_TAB', tab: newTab });
   };
   // useEffect(() => {
   //   getGeolocation();
@@ -95,44 +116,32 @@ function App() {
   // }, [currentState, delay, userTranscript]);
 
   const handleTranscription = async (t: string) => {
+    if (!openAIKey) {
+      toastifyInfo('Please set your OpenAI key in the settings');
+      return;
+    }
     if ((t === 'Ava' || t === 'ava') && currentState !== 'ava') {
       setCurrentState('ava');
-    } else if (t.toLowerCase() === 'chris') {
-      setCurrentState('strahl');
     } else if (t.toLowerCase() === 'cancel') {
       setCurrentState('idle');
       toastifyInfo('Going Idle');
       return;
-    } else if (t.toLowerCase() === 'listen linda') {
-      setCurrentState('passive');
-      toastifyInfo('Passively listening');
     } else if (t.toLowerCase() === 'take notes') {
       setUserTranscript('');
       setCurrentState('notes');
       toastifyInfo('Taking notes');
-    } else if (t.toLowerCase() === 'ready') {
-      if (currentState === 'notes') {
-        toastifyInfo('Preparing notes');
-        setCurrentState('idle');
-        const notes = await takeNotesRoute(userTranscript);
-        setUserTranscript('');
-        toastifyInfo('Notes sent');
-        const newTab = {
-          id: Date.now().toString(),
-          name: 'Notes',
-          content: notes,
-          workspaceId: workspace.id,
-        };
-        send({ type: 'ADD_TAB', tab: newTab });
-        return;
-      }
+    } else if (t.toLowerCase() === 'ready' && currentState === 'notes') {
+      handleSendNotes(openAIKey);
+      return;
     } else {
       const newTranscript = userTranscript + '\n' + t;
       setUserTranscript(newTranscript);
     }
     if (t.split(' ').length < 3 || currentState === 'idle') return;
 
-    const response = await recognitionRouter({ state: currentState, transcript: t });
+    if (!socket) return;
+
+    const response = await recognitionRouter({ state: currentState, transcript: t, openAIKey, callbacks });
 
     setAgentTranscript(response as string);
   };
@@ -201,6 +210,26 @@ function App() {
     if (!audioContext) {
       activateAudioContext();
     }
+  };
+
+  const callbacks = {
+    handleCreateDocument: (data: any) => {
+      console.log('creating document');
+      console.log(data);
+      const title = data.split('Title: ')[1].split(', Content:')[0].replace(/"/g, '');
+      const content = data.split(', Content: ')[1].replace(/"/g, '');
+      const newTab = {
+        id: Date.now().toString(),
+        name: title,
+        content: content,
+        workspaceId: workspace.id,
+      };
+      send({ type: 'ADD_TAB', tab: newTab });
+    },
+    handleAgentAction: (action: any) => {
+      const thought = action.log.split('Action:')[0].trim();
+      toastifyAgentThought(thought);
+    },
   };
   return (
     <div onClick={handleWindowClick}>
@@ -275,7 +304,15 @@ function App() {
               <NotificationCenter placeholder="A place for AI to ponder 🤔" secondaryFilter="agent-thought" />
             </ExpansionPanel>
             <ExpansionPanel className="flex-grow" title="Chat" isOpened={chatOpen} onChange={toggleChat}>
-              <Chat name="Ava" avatar=".." onSubmitHandler={async (message) => avaChat(message)} />
+              {openAIKey && (
+                <Chat
+                  name="Ava"
+                  avatar=".."
+                  onSubmitHandler={async (message) =>
+                    await avaChat({ input: message, openAIApiKey: openAIKey, callbacks })
+                  }
+                />
+              )}
             </ExpansionPanel>
           </SBSidebar>
         </main>

@@ -1,14 +1,27 @@
 /* eslint-disable no-case-declarations */
-import { avaChat, takeNotes } from '../Chat/chat-routes';
+// import { takeNotes } from '../Chat/chat-routes';
+import { avaChat } from '../../utils/sb-langchain/agents/ava';
+import { noteChain } from '../../utils/sb-langchain/chains/notes-chain';
 
-export const recognitionRouter = async ({ state, transcript }: { state: string; transcript: string }) => {
+export const recognitionRouter = async ({
+  state,
+  transcript,
+  openAIKey,
+  callbacks,
+}: {
+  state: string;
+  transcript: string;
+  openAIKey: string;
+  callbacks: any;
+}) => {
+  console.log(openAIKey);
   switch (state) {
-    case 'strahl':
-      const response = await fetch(`http://192.168.4.74:3000/strahl?query=${transcript}`);
-      const json = await response.json();
-      return json.response;
+    // case 'strahl':
+    //   const response = await fetch(`http://192.168.4.74:3000/strahl?query=${transcript}`);
+    //   const json = await response.json();
+    //   return json.response;
     case 'ava':
-      const answer = await avaChat(transcript);
+      const answer = await avaChat({ input: transcript, openAIApiKey: openAIKey, callbacks });
       return answer;
     case 'chat':
       // return 'hello world';
@@ -25,7 +38,7 @@ export const recognitionRouter = async ({ state, transcript }: { state: string; 
   }
 };
 
-export const takeNotesRoute = async (transcript: string, priorList?: string) => {
-  const notes = await takeNotes(transcript, priorList);
+export const takeNotesRoute = async (transcript: string, openAIKey: string, priorList?: string) => {
+  const notes = await noteChain(transcript, openAIKey, priorList);
   return notes;
 };

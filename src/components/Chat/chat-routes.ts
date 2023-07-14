@@ -6,14 +6,14 @@ export const hermesChat = async (query: string) => {
   return response.text();
 };
 
-export const avaChat = async (query: string) => {
-  const response = await fetch(`http://192.168.4.74:3000/ava?query=${query}`);
-  return response.text();
-};
+// export const avaChat = async (query: string) => {
+//   const resp = await avaChat(query);
+//   return response.text();
+// };
 
-export const takeNotes = async (query: string, priorList?: string) => {
-  const encodedQuery = baseEncode(query);
-  const response = await fetch(`http://192.168.4.74:3000/notes?query=${encodedQuery}priorList=${priorList}`);
-  const text = await response.text();
-  return text;
-};
+// export const takeNotes = async (query: string, priorList?: string) => {
+//   const encodedQuery = baseEncode(query);
+//   const response = await fetch(`http://192.168.4.74:3000/notes?query=${encodedQuery}priorList=${priorList}`);
+//   const text = await response.text();
+//   return text;
+// };
