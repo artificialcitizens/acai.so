@@ -206,9 +206,10 @@ function App() {
       <AudioWaveform isOn={currentState === 'ava' || currentState === 'strahl'} audioContext={audioContext} />
       <ToastManager />
       <div className="flex flex-col min-h-screen w-screen">
-        <Header />
-        <main className="w-full flex-grow max-h-screen p-3">
+        <Header>
           <WorkspaceManager workspaceId={state.context.activeWorkspaceId} />
+        </Header>
+        <main className="w-full flex-grow max-h-screen p-3">
           <TabManager
             key={state.context.activeWorkspaceId}
             activeWorkspaceId={state.context.activeWorkspaceId}

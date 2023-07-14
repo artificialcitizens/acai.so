@@ -1,24 +1,26 @@
 import './header.css';
 
-type User = {
-  name: string;
-};
-
 interface HeaderProps {
-  user?: User;
-  onLogin?: () => void;
-  onLogout?: () => void;
-  onCreateAccount?: () => void;
+  children?: React.ReactNode;
 }
 
-export const Header = ({ user, onLogin, onLogout, onCreateAccount }: HeaderProps) => (
+export const Header = ({ children }: HeaderProps) => (
   <header className="max-w-[100vw]">
     <div className="storybook-header">
-      <div>
-        <h1 className="text-light">🧠 Second Brain</h1>
+      <div className="flex">
+        <h1 className="text-light pr-8">🧠 Second Brain</h1>
+        {children}
       </div>
-      <div>
+      <div className="flex justify-between items-center">
         {/* Add the github logo that links to the current repo */}
+        <a
+          href="https://trello.com/b/TX8T7lWe/%F0%9F%A7%A0-second-brain"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-light font-bold hover:text-dark transition-colors duration-200 mr-4"
+        >
+          trello
+        </a>
         <a
           href="https://github.com/artificialcitizens/second-brain-client"
           target="_blank"
