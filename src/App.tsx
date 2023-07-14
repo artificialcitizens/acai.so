@@ -22,7 +22,7 @@ import { useTabs } from './hooks/use-tabs';
 import { makeObservations, queryPinecone } from './endpoints';
 import { marked } from 'marked';
 export type State = 'idle' | 'passive' | 'ava' | 'notes' | 'strahl' | 'chat';
-import { appStateMachine, loadState, saveState } from './machines/app.xstate';
+import { Workspace, appStateMachine, getWorkspaceById, loadState, saveState } from './machines/app.xstate';
 import { useInterpret } from '@xstate/react';
 import { useLocalStorage } from './hooks/use-local-storage';
 import TokenManager from './components/TokenManager/token-manager';
@@ -55,10 +55,15 @@ function App() {
   const [observations, setObservations] = useState<string>('');
   const [activeTab, setActiveTab] = useState(0);
   const [state, send] = useMachine(appStateMachine);
+  const [workspace, setWorkspace] = useState<Workspace>(state.context.workspaces[0]);
 
   useEffect(() => {
     // Save state to localStorage whenever it changes
     saveState(state.context);
+    const ws = getWorkspaceById(state.context.workspaces, state.context.activeWorkspaceId);
+    if (ws) {
+      setWorkspace(ws);
+    }
   }, [state.context]);
 
   const toggleChat = () => {
@@ -115,7 +120,7 @@ function App() {
           id: Date.now().toString(),
           name: 'Notes',
           content: notes,
-          workspaceId: state.context.activeWorkspaceId,
+          workspaceId: workspace.id,
         };
         send({ type: 'ADD_TAB', tab: newTab });
         return;
@@ -149,7 +154,7 @@ function App() {
         id: Date.now().toString(),
         name: args.title,
         content: args.content,
-        workspaceId: state.context.activeWorkspaceId,
+        workspaceId: workspace.id,
       };
       send({ type: 'ADD_TAB', tab: newTab });
     };
@@ -179,7 +184,7 @@ function App() {
       socket.off('agent-action', handleAgentAction);
       socket.off('agent-observation', handleAgentObservation);
     };
-  }, [send, socket, state.context.activeWorkspaceId]); // specify the dependencies here
+  }, [send, socket, workspace.id]); // specify the dependencies here
 
   // HERE IS HOW TO USE TOOLS VIA SOCKET BY HAVING THE TOOL SEND THE ACTION THROUGH SOCKET
   // socket.on('agent-action', (action: string) => {
@@ -245,14 +250,20 @@ function App() {
                     id: Date.now().toString(),
                     name: val,
                     content: `\`\`\`${response}\`\`\``,
-                    workspaceId: state.context.activeWorkspaceId,
+                    workspaceId: workspace.id,
                   };
                   send({ type: 'ADD_TAB', tab: newTab });
                 }}
               />
             </ExpansionPanel>
             <ExpansionPanel title="Notes">
-              <ScratchPad id="Notes" />
+              <ScratchPad
+                content={workspace.data.notes}
+                handleInputChange={(event) => {
+                  const newNotes = event.target.value;
+                  send({ type: 'UPDATE_NOTES', id: workspace.id, notes: newNotes });
+                }}
+              />
             </ExpansionPanel>
             {/* <ExpansionPanel title="Observations">
               <NotificationCenter placeholder="Always listening 👂" secondaryFilter="agent-observation" />

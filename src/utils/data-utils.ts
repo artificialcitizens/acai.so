@@ -36,6 +36,11 @@ export function timestampToHumanReadable(): string {
   return new Intl.DateTimeFormat('en-US', options).format(date);
 }
 
+export function baseEncode(text: string): string {
+  const base64 = btoa(unescape(encodeURIComponent(text)));
+  return encodeURIComponent(base64);
+}
+
 // const yamlStr = `
 // userName: Josh Mabry
 // currentLocation: Portland, Oregon

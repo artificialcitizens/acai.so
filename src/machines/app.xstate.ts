@@ -57,7 +57,8 @@ type Event =
   | { type: 'DELETE_TAB'; id: string }
   | { type: 'UPDATE_TAB_CONTENT'; id: string; content: any; workspaceId: string }
   | { type: 'SET_ACTIVE_WORKSPACE'; id: string }
-  | { type: 'SET_ACTIVE_TAB'; id: string; workspaceId: string };
+  | { type: 'SET_ACTIVE_TAB'; id: string; workspaceId: string }
+  | { type: 'UPDATE_NOTES'; id: string; notes: string };
 
 /**
  * Save state to local storage
@@ -278,6 +279,21 @@ export const appStateMachine = createMachine<IContext, Event>({
               console.log(event.id, context.activeWorkspaceId);
               context.activeWorkspaceId = event.id;
               return context;
+            }),
+            (context, event) => saveState(context),
+          ],
+        },
+        UPDATE_NOTES: {
+          actions: [
+            assign((context, event) => {
+              const { id, notes } = event;
+              // Find the workspace that the notes belong to
+              const workspace = context.workspaces.find((ws) => ws.id === id);
+              if (workspace) {
+                // Update the notes
+                workspace.data.notes = notes;
+              }
+              return { ...context };
             }),
             (context, event) => saveState(context),
           ],
