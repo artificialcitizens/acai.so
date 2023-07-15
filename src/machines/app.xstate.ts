@@ -300,3 +300,14 @@ export const appStateMachine = createMachine<IContext, Event>({
 export const getWorkspaceById = (workspaces: Workspace[], id: string): Workspace | undefined => {
   return workspaces.find((workspace) => workspace.id === id);
 };
+
+export const handleCreateTab = async (args: { title: string; content: string }, workspaceId, send) => {
+  console.log('handleCreateTab', args, workspaceId);
+  const newTab = {
+    id: Date.now().toString(),
+    name: args.title,
+    content: args.content,
+    workspaceId,
+  };
+  send({ type: 'ADD_TAB', tab: newTab });
+};
