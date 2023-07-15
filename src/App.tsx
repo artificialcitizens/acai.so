@@ -31,8 +31,6 @@ import { useMachine } from '@xstate/react';
 import RoomManager from './components/RoomManager/RoomManager';
 import { avaChat } from './utils/sb-langchain/agents/ava';
 import useCookieStorage from './hooks/use-cookie-storage';
-import { createDocumentsFromText } from './utils/sb-langchain/text-splitters';
-import { initializeMemoryVectorStore } from './utils/sb-langchain/vector-store/in-memory';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
 import { VectorStoreContext } from './context/VectorStoreContext';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
@@ -64,6 +62,8 @@ function App() {
   const [state, send] = useMachine(appStateMachine);
   const [workspace, setWorkspace] = useState<Workspace>(state.context.workspaces[0]);
   const [openAIApiKey, setOpenAIKey] = useCookieStorage('OPENAI_KEY');
+  const [googleApiKey, setGoogleApiKey] = useCookieStorage('GOOGLE_API_KEY');
+  const [googleCSEId, setGoogleCSEId] = useCookieStorage('GOOGLE_CSE_ID');
   const { vectorstore, addDocuments, similaritySearchWithScore } = useMemoryVectorStore(
     workspace.data.tiptap.tabs.map((tab) => tab.content).join('\n'),
   );
@@ -195,31 +195,31 @@ function App() {
       };
       send({ type: 'ADD_TAB', tab: newTab });
     };
-    const handleAgentAction = (action: { log: string; action: string; tool: string }) => {
-      const thought = action.log.split('Action:')[0].trim();
-      toastifyAgentThought(thought);
-    };
+    // const handleAgentAction = (action: { log: string; action: string; tool: string }) => {
+    //   const thought = action.log.split('Action:')[0].trim();
+    //   toastifyAgentThought(thought);
+    // };
 
-    const handleAgentObservation = (observation: { content: string }) => {
-      // setCurrentTool(observation.content);
-      // const thought = observation.log.split('Observation:')[0].trim();
-      toastifyAgentObservation(observation.content);
-    };
+    // const handleAgentObservation = (observation: { content: string }) => {
+    //   // setCurrentTool(observation.content);
+    //   // const thought = observation.log.split('Observation:')[0].trim();
+    //   toastifyAgentObservation(observation.content);
+    // };
 
     socket.on('connect', handleConnect);
     socket.on('message', handleMessage);
     socket.on('disconnect', handleDisconnect);
     socket.on('create-tab', handleCreateTab);
-    socket.on('agent-action', handleAgentAction);
-    socket.on('agent-observation', handleAgentObservation);
+    // socket.on('agent-action', handleAgentAction);
+    // socket.on('agent-observation', handleAgentObservation);
 
     return () => {
       socket.off('connect', handleConnect);
       socket.off('message', handleMessage);
       socket.off('disconnect', handleDisconnect);
       socket.off('create-tab', handleCreateTab);
-      socket.off('agent-action', handleAgentAction);
-      socket.off('agent-observation', handleAgentObservation);
+      // socket.off('agent-action', handleAgentAction);
+      // socket.off('agent-observation', handleAgentObservation);
     };
   }, [send, socket, workspace.id]); // specify the dependencies here
 
@@ -317,7 +317,7 @@ function App() {
                     }}
                   />
                 </ExpansionPanel>
-                <ExpansionPanel title="Notes">
+                <ExpansionPanel title="System Notes">
                   <ScratchPad
                     content={workspace.data.notes}
                     handleInputChange={(event) => {
@@ -337,9 +337,23 @@ function App() {
                     <Chat
                       name="Ava"
                       avatar=".."
-                      onSubmitHandler={async (message) =>
-                        await avaChat({ input: message, openAIApiKey: openAIApiKey, callbacks })
-                      }
+                      onSubmitHandler={async (message) => {
+                        const ws = getWorkspaceById(state.context.workspaces, workspace.id);
+                        if (!ws) return console.log('no workspace');
+                        const systemMessage = ws.data.notes;
+                        const response = await avaChat({
+                          input: message,
+                          systemMessage,
+                          openAIApiKey: openAIApiKey,
+                          tokens: {
+                            openAIApiKey,
+                            googleApiKey,
+                            googleCSEId,
+                          },
+                          callbacks,
+                        });
+                        return response;
+                      }}
                     />
                   )}
                 </ExpansionPanel>

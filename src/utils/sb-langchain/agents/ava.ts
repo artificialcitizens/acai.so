@@ -41,7 +41,12 @@ Observation: the result of the action
 ... (this Thought/Action/Action Input/Observation can repeat N times)
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question`;
-const SUFFIX = `Relevant pieces of previous conversation:
+const SUFFIX = `
+---------------
+Additional rules to conform to:
+{system_message}
+----------------
+Relevant pieces of previous conversation:
 {history}
 
 (You do not need to use these pieces of information if not relevant)
@@ -52,10 +57,12 @@ Thought:{agent_scratchpad}`;
 
 class CustomPromptTemplate extends BaseChatPromptTemplate {
   tools: Tool[];
+  systemMessage: string;
 
-  constructor(args: { tools: Tool[]; inputVariables: string[] }) {
+  constructor(args: { tools: Tool[]; inputVariables: string[]; systemMessage?: string }) {
     super({ inputVariables: args.inputVariables });
     this.tools = args.tools;
+    this.systemMessage = args.systemMessage || '';
   }
 
   _getPromptType(): string {
@@ -63,6 +70,7 @@ class CustomPromptTemplate extends BaseChatPromptTemplate {
   }
 
   async formatMessages(values: InputValues): Promise<BaseChatMessage[]> {
+    console.log('Formatting messages', values);
     /** Construct the final template */
     const toolStrings = this.tools.map((tool) => `${tool.name}: ${tool.description}`).join('\n');
     const toolNames = this.tools.map((tool) => tool.name).join('\n');
@@ -75,9 +83,10 @@ class CustomPromptTemplate extends BaseChatPromptTemplate {
         thoughts + [action.log, `\nObservation: ${observation}`, 'Thought:'].join('\n'),
       '',
     );
-    const newInput = { agent_scratchpad: agentScratchpad, ...values };
+    const newInput = { agent_scratchpad: agentScratchpad, system_message: this.systemMessage, ...values };
     /** Format the template. */
     const formatted = renderTemplate(template, 'f-string', newInput);
+    console.log({ formatted });
     return [new HumanChatMessage(formatted)];
   }
 
@@ -137,15 +146,9 @@ const createModels = (apiKey: string) => {
   });
   return { chatModel, embeddings };
 };
-const google = new GoogleCustomSearch({
-  apiKey: '',
-  googleCSEId: '',
-});
-google.description =
-  'For when you need to find or search information for Josh, you can use this to search Google for the results. Input is query to search for and output is results.';
+
 const tools = [
   new Calculator(),
-  google,
   new DynamicTool({
     name: 'Talk to Josh',
     description:
@@ -182,7 +185,7 @@ const createDocumentTool = (callback: any) => {
   });
 };
 
-const createLlmChain = (model: any) => {
+const createLlmChain = (model: any, systemMessage?: string) => {
   const memory = new BufferWindowMemory({
     memoryKey: 'history',
     inputKey: 'input',
@@ -191,7 +194,8 @@ const createLlmChain = (model: any) => {
   const llmChain = new LLMChain({
     prompt: new CustomPromptTemplate({
       tools,
-      inputVariables: ['input', 'agent_scratchpad'],
+      inputVariables: ['input', 'agent_scratchpad', 'system_message'],
+      systemMessage,
     }),
     llm: model,
     memory,
@@ -209,22 +213,37 @@ const createLlmChain = (model: any) => {
 
 export const avaChat = async ({
   input,
-  openAIApiKey,
+  systemMessage,
+  tokens,
   callbacks,
 }: {
   input: string;
   openAIApiKey: string;
+  systemMessage?: string;
+  tokens: {
+    openAIApiKey: string;
+    googleApiKey: string;
+    googleCSEId: string;
+  };
   callbacks: {
     handleCreateDocument: (arg0: string) => void;
     handleAgentAction: (arg0: AgentAction) => void;
   };
 }) => {
+  const { openAIApiKey, googleApiKey, googleCSEId } = tokens;
   const { chatModel, embeddings } = createModels(openAIApiKey);
-  const agent = createLlmChain(chatModel);
+  const agent = createLlmChain(chatModel, systemMessage);
   const browser = new WebBrowser({
     model: chatModel,
     embeddings,
   });
+
+  const google = new GoogleCustomSearch({
+    apiKey: googleApiKey,
+    googleCSEId: googleCSEId,
+  });
+  google.description =
+    'For when you need to find or search information for Josh, you can use this to search Google for the results. Input is query to search for and output is results.';
 
   const search = async (url: string) => {
     const targetUrl = encodeURIComponent(url);
