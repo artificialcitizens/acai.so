@@ -14,7 +14,7 @@ const createNewMemoryRetriever = async () => {
   const vectorStore = new MemoryVectorStore(new OpenAIEmbeddings());
   const retriever = new TimeWeightedVectorStoreRetriever({
     vectorStore,
-    otherScoreKeys: ["importance"],
+    otherScoreKeys: ['importance'],
     k: 15,
   });
   return retriever;
@@ -83,16 +83,14 @@ export const interviewAgent = async (
 //   return agent.chain(prompt);
 // };
 
-export const computeAgentSummary = (
-  agent: GenerativeAgent
-): Promise<string> => {
+export const computeAgentSummary = (agent: GenerativeAgent): Promise<string> => {
   return agent.computeAgentSummary();
 };
 
 export const generateDialogueResponse = (
   agent: GenerativeAgent,
   observation: string,
-  now?: Date
+  now?: Date,
 ): Promise<[boolean, string]> => {
   return agent.generateDialogueResponse(observation, now);
 };
@@ -100,37 +98,24 @@ export const generateDialogueResponse = (
 export const generateReaction = (
   agent: GenerativeAgent,
   observation: string,
-  now?: Date
+  now?: Date,
 ): Promise<[boolean, string]> => {
   return agent.generateReaction(observation, now);
 };
 
-export const getEntityAction = (
-  agent: GenerativeAgent,
-  observation: string,
-  entityName: string
-): Promise<string> => {
+export const getEntityAction = (agent: GenerativeAgent, observation: string, entityName: string): Promise<string> => {
   return agent.getEntityAction(observation, entityName);
 };
 
-export const getEntityFromObservations = (
-  agent: GenerativeAgent,
-  observation: string
-): Promise<string> => {
+export const getEntityFromObservations = (agent: GenerativeAgent, observation: string): Promise<string> => {
   return agent.getEntityFromObservations(observation);
 };
 
-export const getFullHeader = (
-  agent: GenerativeAgent,
-  config: object = {}
-): string => {
+export const getFullHeader = (agent: GenerativeAgent, config: object = {}): string => {
   return agent.getFullHeader(config);
 };
 
-export const getSummary = (
-  agent: GenerativeAgent,
-  config: object = {}
-): Promise<string> => {
+export const getSummary = (agent: GenerativeAgent, config: object = {}): Promise<string> => {
   return agent.getSummary(config);
 };
 
@@ -138,23 +123,20 @@ export const parseList = (agent: GenerativeAgent, text: string): string[] => {
   return agent.parseList(text);
 };
 
-export const summarizeRelatedMemories = (
-  agent: GenerativeAgent,
-  observation: string
-): Promise<string> => {
+export const summarizeRelatedMemories = (agent: GenerativeAgent, observation: string): Promise<string> => {
   return agent.summarizeRelatedMemories(observation);
 };
 
 export type CallFunctionInput =
-  | "computeAgentSummary"
-  | "generateDialogueResponse"
-  | "generateReaction"
-  | "getEntityAction"
-  | "getEntityFromObservations"
-  | "getFullHeader"
-  | "getSummary"
-  | "parseList"
-  | "summarizeRelatedMemories";
+  | 'computeAgentSummary'
+  | 'generateDialogueResponse'
+  | 'generateReaction'
+  | 'getEntityAction'
+  | 'getEntityFromObservations'
+  | 'getFullHeader'
+  | 'getSummary'
+  | 'parseList'
+  | 'summarizeRelatedMemories';
 
 export const callAgentFunction = (params: {
   agent: GenerativeAgent;
