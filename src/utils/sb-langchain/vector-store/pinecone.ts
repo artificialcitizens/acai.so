@@ -1,25 +1,19 @@
-import { PineconeClient, QueryRequest } from "@pinecone-database/pinecone";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { PineconeStore } from "langchain/vectorstores/pinecone";
+import { PineconeClient, QueryRequest } from '@pinecone-database/pinecone';
+import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
+import { PineconeStore } from 'langchain/vectorstores/pinecone';
 
 const client = new PineconeClient();
 const embeddingModel = new OpenAIEmbeddings({
-  openAIApiKey: process.env.OPENAI_API_KEY,
+  openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY as string,
 });
 let vectorStore: PineconeStore;
 
-const initializePinecone = async (
-  apiKey?: string,
-  env?: string,
-  indexName?: string
-) => {
+const initializePinecone = async (apiKey?: string, env?: string, indexName?: string) => {
   await client.init({
-    apiKey: apiKey || process.env.KS_PINECONE_API_KEY,
-    environment: env || process.env.KS_PINECONE_ENV,
+    apiKey: apiKey || (import.meta.env.VITE_PINECONE_API_KEY as string),
+    environment: env || (import.meta.env.VITE_PINECONE_ENV as string),
   });
-  const pineconeIndex = client.Index(
-    indexName || process.env.KS_PINECONE_INDEX_NAME
-  );
+  const pineconeIndex = client.Index(indexName || (import.meta.env.VITE_PINECONE_INDEX_NAME as string));
 
   if (!vectorStore) {
     vectorStore = await PineconeStore.fromExistingIndex(embeddingModel, {
@@ -46,16 +40,14 @@ const formatData = (data: any, similarityThreshold: number) => {
     `;
     yamlArr.push(str);
   });
-  return yamlArr.length > 0 ? yamlArr.join("\n") : "";
+  return yamlArr.length > 0 ? yamlArr.join('\n') : '';
 };
 
 export const queryPinecone = async (query: string, indexName?: string) => {
   const vector = await embeddingModel.embedQuery(query);
   await initializePinecone();
 
-  const pineconeIndex = client.Index(
-    indexName || process.env.KS_PINECONE_INDEX_NAME
-  );
+  const pineconeIndex = client.Index(indexName || (import.meta.env.VITE_PINECONE_INDEX_NAME as string));
   const queryRequest: QueryRequest = {
     topK: 5,
     vector,

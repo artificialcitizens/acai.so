@@ -137,9 +137,16 @@ const createModels = (apiKey: string) => {
   });
   return { chatModel, embeddings };
 };
-
+//@@@DO NOT MERGE, DONT MERGE! */
+const google = new GoogleCustomSearch({
+  apiKey: 'AIzaSyBQ46M25iaVvWCdhGseBoXlMOOW3b7SsFQ',
+  googleCSEId: 'a20a2a7a0ed184029',
+});
+google.description =
+  'For when you need to find or search information for Josh, you can use this to search Google for the results. Input is query to search for and output is results.';
 const tools = [
   new Calculator(),
+  google,
   new DynamicTool({
     name: 'Talk to Josh',
     description:
@@ -157,9 +164,6 @@ const tools = [
     Input is your thought and self-critique and output is the processed thought.`,
     func: processThought,
   }),
-
-  // I've found that sometimes the agent just needs a dumping ground to rework its thoughts
-  // this seems to help minimize LLM parsing errors
   new DynamicTool({
     name: 'Human Feedback',
     description: `Use this tool for when you need a specific piece of information from a human that only that human would know. 
@@ -204,6 +208,20 @@ const createLlmChain = (model: any) => {
   return agent;
 };
 
+const createBrowser = (model: any, embeddings: any) => {
+  const browser = new WebBrowser({
+    model,
+    embeddings,
+  });
+  return browser;
+};
+
+// const browsePage = async (browser: any, url: string) => {
+//   const result = await browser.call(url);
+
+//   return result;
+// };
+
 export const avaChat = async ({
   input,
   openAIApiKey,
@@ -216,16 +234,34 @@ export const avaChat = async ({
     handleAgentAction: (arg0: AgentAction) => void;
   };
 }) => {
-  console.log({ input, openAIApiKey, callbacks });
   const { chatModel, embeddings } = createModels(openAIApiKey);
   const agent = createLlmChain(chatModel);
-  // const browser = new WebBrowser({ model: chatModel, embeddings });
+  const browser = new WebBrowser({
+    model: chatModel,
+    embeddings,
+  });
+
+  const search = async (url: string) => {
+    const targetUrl = encodeURIComponent(url);
+    const result = await browser.call(`http://localhost:3000/proxy?url=${targetUrl}`);
+    return result;
+  };
   const documentTool = createDocumentTool((input: string) => {
     callbacks.handleCreateDocument(input);
   });
 
+  const searchTool = new DynamicTool({
+    name: 'Website Browser',
+    description: `Use this tool to search a website for information. 
+    Input is the full url of the website you want to search.
+    for example: https://www.google.com/
+    Output is a summary and relevant links.
+    `,
+    func: search,
+  });
+
   tools.push(documentTool);
-  // tools.push(browser);
+  tools.push(searchTool);
   const executor = new AgentExecutor({
     agent,
     tools,
