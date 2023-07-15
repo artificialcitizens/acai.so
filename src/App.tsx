@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Whisper from './components/Whisper';
 import ElevenLabs from './components/Elevenlabs/ElevenLabs';
 import SpeechRecognition from './components/SpeechRecognition/SpeechRecognition';
@@ -11,8 +11,10 @@ import ToastManager, {
   toastifyError,
   toastifyInfo,
 } from './components/Toast';
-import SocketContext from './context/SocketContext';
+import RoomManager from './components/RoomManager/RoomManager';
+import { avaChat } from './utils/sb-langchain/agents/ava';
 import AudioWaveform from './components/AudioWave/AudioWave';
+import SocketContext from './context/SocketContext';
 import SBSidebar from './components/Sidebar';
 import { Header } from './components/Header/Header';
 import TabManager from './components/Tabs';
@@ -24,19 +26,10 @@ import SBSearch from './components/Search';
 import ScratchPad from './components/ScratchPad/ScratchPad';
 import { makeObservations, queryPinecone } from './endpoints';
 export type State = 'idle' | 'passive' | 'ava' | 'notes' | 'strahl' | 'chat';
-import {
-  Workspace,
-  appStateMachine,
-  getWorkspaceById,
-  loadState,
-  saveState,
-  handleCreateTab,
-} from './machines/app.xstate';
+import { Workspace, appStateMachine, getWorkspaceById, saveState, handleCreateTab } from './machines/app.xstate';
 import TokenManager from './components/TokenManager/token-manager';
 import { WorkspaceManager } from './components/WorkspaceManager/workspace-manager';
 import { useMachine } from '@xstate/react';
-import RoomManager from './components/RoomManager/RoomManager';
-import { avaChat } from './utils/sb-langchain/agents/ava';
 import useCookieStorage from './hooks/use-cookie-storage';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
 import { VectorStoreContext } from './context/VectorStoreContext';
@@ -57,21 +50,19 @@ import { useAva } from './hooks/use-ava';
 //   }
 // };
 function App() {
-  const [agentTranscript, setAgentTranscript] = useState<string>('');
-  const [userTranscript, setUserTranscript] = useState<string>('');
+  // const [agentTranscript, setAgentTranscript] = useState<string>('');
   // const [voice2voice, setVoice2voice] = useState<boolean>(false);
-  const [speechRecognition, setSpeechRecognition] = useState<boolean>(true);
-  const [currentState, setCurrentState] = useState<State>('idle');
+  // const [speechRecognition, setSpeechRecognition] = useState<boolean>(true);
+  // const [userTranscript, setUserTranscript] = useState<string>('');
+  // const [currentState, setCurrentState] = useState<State>('idle');
+  // const [observations, setObservations] = useState<string>('');
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [chatOpen, setChatOpen] = useState(true);
   const [agentThoughtsOpen, setAgentThoughtsOpen] = useState(true);
-  const [observations, setObservations] = useState<string>('');
   const [activeTab, setActiveTab] = useState(0);
   const [state, send] = useMachine(appStateMachine);
   const [workspace, setWorkspace] = useState<Workspace>(state.context.workspaces[0]);
-  const [openAIApiKey, setOpenAIKey] = useCookieStorage('OPENAI_KEY');
-  const [googleApiKey, setGoogleApiKey] = useCookieStorage('GOOGLE_API_KEY');
-  const [googleCSEId, setGoogleCSEId] = useCookieStorage('GOOGLE_CSE_ID');
+  const [openAIApiKey] = useCookieStorage('OPENAI_KEY');
   const { vectorstore, addDocuments, similaritySearchWithScore } = useMemoryVectorStore(
     workspace.data.tiptap.tabs.map((tab) => tab.content).join('\n'),
   );
@@ -100,22 +91,22 @@ function App() {
   /**
    *  Handles sending notes to the to the notes chain
    */
-  const handleSendNotes = async (openAIKey: string) => {
-    toastifyInfo('Preparing notes');
-    setCurrentState('idle');
-    const notes = await takeNotesRoute(userTranscript, openAIKey);
-    setUserTranscript('');
-    toastifyInfo('Notes sent');
+  // const handleSendNotes = async (openAIKey: string) => {
+  //   toastifyInfo('Preparing notes');
+  //   setCurrentState('idle');
+  //   const notes = await takeNotesRoute(userTranscript, openAIKey);
+  //   setUserTranscript('');
+  //   toastifyInfo('Notes sent');
 
-    const newTab = {
-      id: Date.now().toString(),
-      name: 'Notes',
-      content: notes,
-      workspaceId: workspace.id,
-    };
+  //   const newTab = {
+  //     id: Date.now().toString(),
+  //     name: 'Notes',
+  //     content: notes,
+  //     workspaceId: workspace.id,
+  //   };
 
-    send({ type: 'ADD_TAB', tab: newTab });
-  };
+  //   send({ type: 'ADD_TAB', tab: newTab });
+  // };
   // useEffect(() => {
   //   getGeolocation();
   // }, []);
@@ -224,7 +215,7 @@ function App() {
     vectorstore && (
       <VectorStoreContext.Provider value={{ vectorstore, addDocuments, similaritySearchWithScore }}>
         <div onClick={handleWindowClick}>
-          <AudioWaveform isOn={currentState === 'ava'} audioContext={audioContext} />
+          {/* <AudioWaveform isOn={currentState === 'ava'} audioContext={audioContext} /> */}
           <ToastManager />
           <div className="flex flex-col min-h-screen w-screen">
             <Header>
