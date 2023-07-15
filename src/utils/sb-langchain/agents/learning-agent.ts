@@ -135,25 +135,57 @@ export const callAgentFunction = (params: {
   switch (input) {
     // case "chain":
     //   return chain(agent, input);
-    case "computeAgentSummary":
+    case 'computeAgentSummary':
       return computeAgentSummary(agent);
-    case "generateDialogueResponse":
+    case 'generateDialogueResponse':
       return generateDialogueResponse(agent, observation, date);
-    case "generateReaction":
+    case 'generateReaction':
       return generateReaction(agent, observation, date);
-    case "getEntityAction":
+    case 'getEntityAction':
       return getEntityAction(agent, observation, entityName);
-    case "getEntityFromObservations":
+    case 'getEntityFromObservations':
       return getEntityFromObservations(agent, observation);
-    case "getFullHeader":
+    case 'getFullHeader':
       return getFullHeader(agent);
-    case "getSummary":
+    case 'getSummary':
       return getSummary(agent);
-    case "parseList":
+    case 'parseList':
       return parseList(agent, observation);
-    case "summarizeRelatedMemories":
+    case 'summarizeRelatedMemories':
       return summarizeRelatedMemories(agent, observation);
     default:
       throw new Error(`Invalid input: ${input}`);
   }
 };
+
+// Generative Agent Functions
+// This file provides utility functions for interacting with a GenerativeAgent from the LangChain library.
+
+// Agent Setup
+// loadAgent - Creates and initializes a new GenerativeAgent instance. Takes an array of initial observations.
+// addObservations - Adds observations to an existing agent's memory.
+// Agent Interaction
+// interviewAgent - Generates a dialogue response from the agent based on a provided message.
+// computeAgentSummary - Generates a summary of the agent.
+// generateDialogueResponse - Generates a dialogue response from the agent based on an observation and optional timestamp. Returns whether memory was used.
+// generateReaction - Generates a reaction from the agent based on an observation and optional timestamp. Returns whether memory was used.
+// getEntityAction - Gets a suggested action related to an entity extracted from an observation.
+// getEntityFromObservations - Extracts an entity from an observation using the agent's memory.
+// getFullHeader - Gets the full context header for the agent.
+// getSummary - Generates a summary of the agent's memory and traits.
+// parseList - Parses a string into a list, useful for initializing memories.
+// summarizeRelatedMemories - Summarizes memories related to an observation.
+// Usage
+// The callAgentFunction utility allows dynamically calling any of the above functions by passing in the name and required parameters.
+
+// Example:
+
+// Copy code
+
+// const response = await callAgentFunction({
+//   agent,
+//   input: "generateDialogueResponse",
+//   observation: "Hello my name is Sarah",
+//   date: new Date()
+// })
+// This provides a flexible way to interact with a GenerativeAgent instance.
