@@ -64,7 +64,9 @@ function App() {
   const [workspace, setWorkspace] = useState<Workspace>(state.context.workspaces[0]);
   const [openAIApiKey] = useCookieStorage('OPENAI_KEY');
   const { vectorstore, addDocuments, similaritySearchWithScore } = useMemoryVectorStore(
-    workspace.data.tiptap.tabs.map((tab) => tab.content).join('\n'),
+    // add only tabs that are set to be included in the context of the language model
+    // @TODO: add a tool for Ava to see what the user is working on
+    workspace.data.tiptap.tabs.map((tab) => tab.isContext && tab.content).join('\n'),
   );
   const [fetchResponse, avaLoading] = useAva();
 

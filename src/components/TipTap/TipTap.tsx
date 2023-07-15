@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useContext, useEffect, useId, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { Editor } from '@tiptap/core';
@@ -14,11 +16,13 @@ import useCookieStorage from '../../hooks/use-cookie-storage';
 import { semanticSearchQuery } from '../../utils/sb-langchain/chains/semantic-search-query-chain';
 import { autoComplete } from '../../utils/sb-langchain/chains/autocomplete-chain';
 import Bottleneck from 'bottleneck';
+import { MenuBar } from './MenuBar';
 
 interface EditorProps {
   id: string;
   title: string;
   content: string;
+  systemNote: string;
   updateContent: (id: string, content: { title: string; content: string }) => void;
 }
 
@@ -36,7 +40,7 @@ const type = (text) => {
 
 const wrappedType = limiter.wrap(type);
 
-const Tiptap: React.FC<EditorProps> = ({ id, title, content, updateContent }) => {
+const Tiptap: React.FC<EditorProps> = ({ id, title, content, systemNote, updateContent }) => {
   const service = useInterpret(appStateMachine);
   const [hydrated, setHydrated] = useState(false);
   const [saveStatus, setSaveStatus] = useState('Saved');
@@ -234,19 +238,23 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, updateContent }) =>
   }, [editor, content, hydrated]);
 
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-    <div
-      onClick={() => {
-        editor?.chain().focus().run();
-      }}
-      className="relative max-h-[95vh] min-h-full  overflow-scroll w-full max-w-screen-lg p-12 px-8 sm:mb-[calc(20vh)] border-none sm:rounded-lg sm:border sm:px-12"
-    >
-      <div className="absolute flex right-5 top-5 mb-5 rounded-lg bg-base px-2 py-1 text-sm text-light">
-        {saveStatus}
-      </div>
-      {editor && <EditorBubbleMenu editor={editor} />}
-      <EditorContent editor={editor} />
-    </div>
+    currentWorkspace && (
+      <>
+        <MenuBar editor={editor} tipTapEditorId={id} systemNote={systemNote} />
+        <div
+          onClick={() => {
+            editor?.chain().focus().run();
+          }}
+          className="relative max-h-[95vh] min-h-full  overflow-scroll w-full max-w-screen-lg p-12 px-8 sm:mb-[calc(20vh)] border-none sm:rounded-lg sm:border sm:px-12"
+        >
+          <div className="absolute flex right-5 top-5 mb-5 rounded-lg bg-base px-2 py-1 text-sm text-light">
+            {saveStatus}
+          </div>
+          {editor && <EditorBubbleMenu editor={editor} />}
+          <EditorContent editor={editor} />
+        </div>
+      </>
+    )
   );
 };
 
