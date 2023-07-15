@@ -19,6 +19,8 @@ export interface Workspace {
         id: string;
         name: string;
         content: any;
+        isContext: boolean;
+        systemNote: string;
       }[];
     };
     chat: any;
@@ -58,7 +60,9 @@ type Event =
   | { type: 'UPDATE_TAB_CONTENT'; id: string; content: any; workspaceId: string }
   | { type: 'SET_ACTIVE_WORKSPACE'; id: string }
   | { type: 'SET_ACTIVE_TAB'; id: string; workspaceId: string }
-  | { type: 'UPDATE_NOTES'; id: string; notes: string };
+  | { type: 'UPDATE_NOTES'; id: string; notes: string }
+  | { type: 'TOGGLE_CONTEXT'; id: string; workspaceId: string }
+  | { type: 'UPDATE_TAB_SYSTEM_NOTE'; id: string; systemNote: string; workspaceId: string };
 
 /**
  * Save state to local storage
@@ -106,6 +110,8 @@ export const appStateMachine = createMachine<IContext, Event>({
                 id: 'UUIDabc',
                 name: 'Home',
                 content: 'Hello World!',
+                isContext: false,
+                systemNote: '',
               },
             ],
           },
@@ -162,8 +168,6 @@ export const appStateMachine = createMachine<IContext, Event>({
             assign((context, event) => {
               const newWorkspace = event.workspace;
               const newContext = { ...context, workspaces: [...context.workspaces, newWorkspace] };
-              console.log('Current context', context);
-              console.log('New context', newContext);
               return newContext;
             }),
             (context, event) => saveState(context),
@@ -292,6 +296,49 @@ export const appStateMachine = createMachine<IContext, Event>({
             (context, event) => saveState(context),
           ],
         },
+        TOGGLE_CONTEXT: {
+          actions: [
+            assign((context, event) => {
+              const { id, workspaceId } = event;
+              console.log('TOGGLE_CONTEXT', id, workspaceId);
+              // Find the workspace that the updated tab belongs to
+              const workspace = context.workspaces.find((ws) => ws.id === workspaceId);
+              if (workspace) {
+                // Find the tab and update its content
+                const tab = workspace.data.tiptap.tabs.find((tab) => tab.id === id);
+                if (tab) {
+                  console.log(tab.isContext);
+                  const context = !tab.isContext;
+                  console.log({
+                    context,
+                  });
+                  tab.isContext = context;
+                }
+              }
+              return context;
+            }),
+            (context, event) => saveState(context),
+          ],
+        },
+        UPDATE_TAB_SYSTEM_NOTE: {
+          actions: [
+            assign((context, event) => {
+              const { id, systemNote, workspaceId } = event;
+              // Find the workspace that the updated tab belongs to
+              const ws = getWorkspaceById(context.workspaces, workspaceId);
+              if (ws) {
+                // Find the tab and update its content
+                const tab = ws.data.tiptap.tabs.find((tab) => tab.id === id);
+                console.log('tab', tab);
+                if (tab) {
+                  tab.systemNote = systemNote;
+                }
+              }
+              return { ...context };
+            }),
+            (context, event) => saveState(context),
+          ],
+        },
       },
     },
   },
@@ -301,7 +348,7 @@ export const getWorkspaceById = (workspaces: Workspace[], id: string): Workspace
   return workspaces.find((workspace) => workspace.id === id);
 };
 
-export const handleCreateTab = async (args: { title: string; content: string }, workspaceId, send) => {
+export const handleCreateTab = async (args: { title: string; content: string }, workspaceId: string, send: any) => {
   console.log('handleCreateTab', args, workspaceId);
   const newTab = {
     id: Date.now().toString(),

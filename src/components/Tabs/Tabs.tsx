@@ -62,7 +62,13 @@ const TabManager: React.FC<TabManagerProps> = ({ activeWorkspaceId, activeTab, s
         </TabList>
         {workspace.data.tiptap.tabs.map((tab) => (
           <TabPanel key={tab.id}>
-            <TipTap id={tab.id.toString()} title={tab.name} content={tab.content} updateContent={() => console.log()} />
+            <TipTap
+              id={tab.id.toString()}
+              title={tab.name}
+              systemNote={tab.systemNote}
+              content={tab.content}
+              updateContent={() => console.log()}
+            />
           </TabPanel>
         ))}
         <TabPanel>
