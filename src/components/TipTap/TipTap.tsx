@@ -43,7 +43,7 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, updateContent }) =>
   const [currentWorkspace, setCurrentWorkspace] = useState(null);
   const [tab, setTab] = useState(null);
   const { vectorstore, addDocuments, similaritySearchWithScore } = useContext(VectorStoreContext);
-  const [openAIApiKey, setOpenAIKey] = useCookieStorage('OPENAI_KEY');
+  const [openAIApiKey] = useCookieStorage('OPENAI_KEY');
   const [completion, setCompletion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [currentContext, setCurrentContext] = useState('');
@@ -66,7 +66,7 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, updateContent }) =>
     // @TODO: we can set a dropdown with the 3 most relevant autofills suggestions based on the results of the semantic search queries
     console.log(results[0] + ' ' + results[1] + ' ' + results[2]);
     const queryResults = await similaritySearchWithScore(`${results[0]} ${results[1]} ${results[2]}`);
-    const pageContent = queryResults.map((result) => {
+    const pageContent = queryResults.map((result: any) => {
       // @TODO: filter by score
       if (result.score < 0.75) return;
       return result[0].pageContent;
