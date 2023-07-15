@@ -262,7 +262,7 @@ function App() {
               /> */}
                     <TokenManager />
                     <StorageMeter />
-                    <RoomManager />
+                    {/* <RoomManager /> */}
                   </div>
                 </ExpansionPanel>
                 <ExpansionPanel title="Search">
