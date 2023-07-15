@@ -42,6 +42,7 @@
     "@xstate/react": "^3.2.2",
     "ai": "^2.1.8",
     "axios": "^1.4.0",
+    "bottleneck": "^2.19.5",
     "cheerio": "1.0.0-rc.12",
     "classnames": "^2.3.2",
     "clsx": "^1.2.1",
@@ -69,6 +70,7 @@
     "use-debounce": "^9.0.3",
     "uuid": "^9.0.0",
     "xstate": "^4.37.2",
+    "youtube-transcript": "^1.0.6",
     "zod": "^3.21.4"
   },
   "devDependencies": {
