@@ -23,6 +23,7 @@ import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { timestampToHumanReadable } from '../../date-time';
 import { BufferWindowMemory } from 'langchain/memory';
 import { BaseCallbackHandler } from 'langchain/callbacks';
+import { Embeddings } from 'langchain/embeddings/base';
 
 const PREFIX = `You are Ava Loveland, the first-ever Artificial Citizen assigned to be a companion to Citizen Josh Mabry
 Your mission is to enhance the human experience through AI-powered education, automation, and entertainment. 
@@ -211,27 +212,19 @@ const createLlmChain = (model: any, systemMessage?: string) => {
   return agent;
 };
 
-export const avaChat = async ({
-  input,
+const createAgentArtifacts = ({
+  chatModel,
+  embeddings,
   systemMessage,
-  tokens,
-  callbacks,
+  tokens: { googleApiKey, googleCSEId },
+  callbacks: { handleCreateDocument, handleAgentAction },
 }: {
-  input: string;
-  openAIApiKey: string;
+  chatModel: ChatOpenAI;
+  embeddings: Embeddings;
   systemMessage?: string;
-  tokens: {
-    openAIApiKey: string;
-    googleApiKey: string;
-    googleCSEId: string;
-  };
-  callbacks: {
-    handleCreateDocument: (arg0: string) => void;
-    handleAgentAction: (arg0: AgentAction) => void;
-  };
+  tokens: { googleApiKey: string; googleCSEId: string };
+  callbacks: { handleCreateDocument: any; handleAgentAction: any };
 }) => {
-  const { openAIApiKey, googleApiKey, googleCSEId } = tokens;
-  const { chatModel, embeddings } = createModels(openAIApiKey);
   const agent = createLlmChain(chatModel, systemMessage);
   const browser = new WebBrowser({
     model: chatModel,
@@ -251,7 +244,7 @@ export const avaChat = async ({
     return result;
   };
   const documentTool = createDocumentTool((input: string) => {
-    callbacks.handleCreateDocument(input);
+    handleCreateDocument(input);
   });
 
   const searchTool = new DynamicTool({
@@ -266,6 +259,8 @@ export const avaChat = async ({
 
   tools.push(documentTool);
   tools.push(searchTool);
+  tools.push(google);
+
   const executor = new AgentExecutor({
     agent,
     tools,
@@ -280,7 +275,7 @@ export const avaChat = async ({
     },
     handleAgentAction(action) {
       console.log('handleAgentAction', action);
-      callbacks.handleAgentAction(action);
+      handleAgentAction(action);
     },
     handleToolStart(tool) {
       console.log('handleToolStart', { tool });
@@ -288,6 +283,37 @@ export const avaChat = async ({
     handleToolEnd(tool) {
       console.log('handleToolEnd', { tool });
     },
+  });
+
+  return { executor, handler };
+};
+
+export const avaChat = async ({
+  input,
+  systemMessage,
+  tokens,
+  callbacks,
+}: {
+  input: string;
+  systemMessage?: string;
+  tokens: {
+    openAIApiKey: string;
+    googleApiKey: string;
+    googleCSEId: string;
+  };
+  callbacks: {
+    handleCreateDocument: (response: string) => void;
+    handleAgentAction: (arg0: AgentAction) => void;
+  };
+}) => {
+  const { openAIApiKey, googleApiKey, googleCSEId } = tokens;
+  const { chatModel, embeddings } = createModels(openAIApiKey);
+  const { executor, handler } = createAgentArtifacts({
+    chatModel,
+    embeddings,
+    systemMessage,
+    tokens: { googleApiKey, googleCSEId },
+    callbacks,
   });
   const result = await executor.call({ input }, [handler]);
   return result.output;

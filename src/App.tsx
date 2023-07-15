@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
 import Whisper from './components/Whisper';
 import ElevenLabs from './components/Elevenlabs/ElevenLabs';
 import SpeechRecognition from './components/SpeechRecognition/SpeechRecognition';
@@ -24,7 +24,14 @@ import SBSearch from './components/Search';
 import ScratchPad from './components/ScratchPad/ScratchPad';
 import { makeObservations, queryPinecone } from './endpoints';
 export type State = 'idle' | 'passive' | 'ava' | 'notes' | 'strahl' | 'chat';
-import { Workspace, appStateMachine, getWorkspaceById, loadState, saveState } from './machines/app.xstate';
+import {
+  Workspace,
+  appStateMachine,
+  getWorkspaceById,
+  loadState,
+  saveState,
+  handleCreateTab,
+} from './machines/app.xstate';
 import TokenManager from './components/TokenManager/token-manager';
 import { WorkspaceManager } from './components/WorkspaceManager/workspace-manager';
 import { useMachine } from '@xstate/react';
@@ -33,6 +40,7 @@ import { avaChat } from './utils/sb-langchain/agents/ava';
 import useCookieStorage from './hooks/use-cookie-storage';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
 import { VectorStoreContext } from './context/VectorStoreContext';
+import { useAva } from './hooks/use-ava';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 // const getGeolocation = () => {
 //   if ('geolocation' in navigator) {
@@ -67,21 +75,7 @@ function App() {
   const { vectorstore, addDocuments, similaritySearchWithScore } = useMemoryVectorStore(
     workspace.data.tiptap.tabs.map((tab) => tab.content).join('\n'),
   );
-
-  // useEffect(() => {
-  //   if (!openAIApiKey) {
-  //     toastifyError('Please set your OpenAI API key in the settings menu');
-  //     return;
-  //   }
-  //   semanticSearchQuery(
-  //     '- Design tokens are a way to abstract and manage the visual design elements of a user interface, such as colors, typography, spacing, and other visual properties. They are essentially a set of values that represent design decisions, which can be reused and referenced throughout a project, allowing for consistency in the design across different platforms and devices.',
-  //     openAIApiKey,
-  //   ).then((res) => console.log(res));
-  //   // similaritySearchWithScore('what is knapsack?', 4).then((res) => console.log(res));
-  //   return () => {
-  //     // cleanup
-  //   };
-  // }, [openAIApiKey]); // Add openAIApiKey as a dependency
+  const [fetchResponse, avaLoading] = useAva();
 
   useEffect(() => {
     // Save state to localStorage whenever it changes
@@ -186,19 +180,6 @@ function App() {
     const handleConnect = () => console.log(`Connected: ${socket.id}`);
     const handleMessage = (message: string) => console.log(message);
     const handleDisconnect = () => console.log(`Disconnected: ${socket.id}`);
-    const handleCreateTab = async (args: { title: string; content: string }) => {
-      const newTab = {
-        id: Date.now().toString(),
-        name: args.title,
-        content: args.content,
-        workspaceId: workspace.id,
-      };
-      send({ type: 'ADD_TAB', tab: newTab });
-    };
-    // const handleAgentAction = (action: { log: string; action: string; tool: string }) => {
-    //   const thought = action.log.split('Action:')[0].trim();
-    //   toastifyAgentThought(thought);
-    // };
 
     // const handleAgentObservation = (observation: { content: string }) => {
     //   // setCurrentTool(observation.content);
@@ -209,29 +190,29 @@ function App() {
     socket.on('connect', handleConnect);
     socket.on('message', handleMessage);
     socket.on('disconnect', handleDisconnect);
-    socket.on('create-tab', handleCreateTab);
-    // socket.on('agent-action', handleAgentAction);
-    // socket.on('agent-observation', handleAgentObservation);
+    socket.on('create-tab', (data) =>
+      handleCreateTab({ title: data.title, content: data.content }, send, workspace.id),
+    );
 
     return () => {
       socket.off('connect', handleConnect);
       socket.off('message', handleMessage);
       socket.off('disconnect', handleDisconnect);
-      socket.off('create-tab', handleCreateTab);
-      // socket.off('agent-action', handleAgentAction);
-      // socket.off('agent-observation', handleAgentObservation);
+      socket.off('create-tab', (data) =>
+        handleCreateTab({ title: data.title, content: data.content }, send, workspace.id),
+      );
     };
-  }, [send, socket, workspace.id]); // specify the dependencies here
 
-  // HERE IS HOW TO USE TOOLS VIA SOCKET BY HAVING THE TOOL SEND THE ACTION THROUGH SOCKET
-  // socket.on('agent-action', (action: string) => {
-  //   console.log('agent-action', action);
-  //   if (action === 'start-listening') {
-  //     setAvaListening(true);
-  //   } else if (action === 'stop-listening') {
-  //     setAvaListening(false);
-  //   }
-  // });
+    // HERE IS HOW TO USE TOOLS VIA SOCKET BY HAVING THE TOOL SEND THE ACTION THROUGH SOCKET
+    // socket.on('agent-action', (action: string) => {
+    //   console.log('agent-action', action);
+    //   if (action === 'start-listening') {
+    //     setAvaListening(true);
+    //   } else if (action === 'stop-listening') {
+    //     setAvaListening(false);
+    //   }
+    // });
+  }, [send, socket, workspace.id]); // specify the dependencies here
 
   const handleWindowClick = () => {
     if (!audioContext) {
@@ -239,30 +220,11 @@ function App() {
     }
   };
 
-  const callbacks = {
-    handleCreateDocument: (data: any) => {
-      console.log('creating document');
-      console.log(data);
-      const title = data.split('Title: ')[1].split(', Content:')[0].replace(/"/g, '');
-      const content = data.split(', Content: ')[1].replace(/"/g, '');
-      const newTab = {
-        id: Date.now().toString(),
-        name: title,
-        content: content,
-        workspaceId: workspace.id,
-      };
-      send({ type: 'ADD_TAB', tab: newTab });
-    },
-    handleAgentAction: (action: any) => {
-      const thought = action.log.split('Action:')[0].trim();
-      toastifyAgentThought(thought);
-    },
-  };
   return (
     vectorstore && (
       <VectorStoreContext.Provider value={{ vectorstore, addDocuments, similaritySearchWithScore }}>
         <div onClick={handleWindowClick}>
-          <AudioWaveform isOn={currentState === 'ava' || currentState === 'strahl'} audioContext={audioContext} />
+          <AudioWaveform isOn={currentState === 'ava'} audioContext={audioContext} />
           <ToastManager />
           <div className="flex flex-col min-h-screen w-screen">
             <Header>
@@ -310,7 +272,7 @@ function App() {
                       const newTab = {
                         id: Date.now().toString(),
                         name: val,
-                        content: `\`\`\`${response}\`\`\``,
+                        content: response,
                         workspaceId: workspace.id,
                       };
                       send({ type: 'ADD_TAB', tab: newTab });
@@ -341,17 +303,7 @@ function App() {
                         const ws = getWorkspaceById(state.context.workspaces, workspace.id);
                         if (!ws) return console.log('no workspace');
                         const systemMessage = ws.data.notes;
-                        const response = await avaChat({
-                          input: message,
-                          systemMessage,
-                          openAIApiKey: openAIApiKey,
-                          tokens: {
-                            openAIApiKey,
-                            googleApiKey,
-                            googleCSEId,
-                          },
-                          callbacks,
-                        });
+                        const response = await fetchResponse(message, systemMessage);
                         return response;
                       }}
                     />
