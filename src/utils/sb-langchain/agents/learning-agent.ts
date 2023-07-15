@@ -1,12 +1,9 @@
-import { OpenAI } from "langchain/llms/openai";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
-import { TimeWeightedVectorStoreRetriever } from "langchain/retrievers/time_weighted";
-import {
-  GenerativeAgentMemory,
-  GenerativeAgent,
-} from "langchain/experimental/generative_agents";
-import dotenv from "dotenv";
+import { OpenAI } from 'langchain/llms/openai';
+import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
+import { MemoryVectorStore } from 'langchain/vectorstores/memory';
+import { TimeWeightedVectorStoreRetriever } from 'langchain/retrievers/time_weighted';
+import { GenerativeAgentMemory, GenerativeAgent } from 'langchain/experimental/generative_agents';
+import dotenv from 'dotenv';
 dotenv.config();
 const createNewMemoryRetriever = async () => {
   // Create a new, demo in-memory vector store retriever unique to the agent.
@@ -30,17 +27,11 @@ const createAgentMemory = async () => {
   // fix this
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  const memory = new GenerativeAgentMemory(
-    llm,
-    await createNewMemoryRetriever(),
-    { reflectionThreshold: 8 }
-  );
+  const memory = new GenerativeAgentMemory(llm, await createNewMemoryRetriever(), { reflectionThreshold: 8 });
   return memory;
 };
 
-export const loadAgent = async (
-  initialObservations: string[]
-): Promise<GenerativeAgent> => {
+export const loadAgent = async (initialObservations: string[]): Promise<GenerativeAgent> => {
   // console.log('Loading agent...');
   const agentMemory = await createAgentMemory();
   // const { name, createdAt, traits, status, recentObservations } = agents.data.find((agent) => agent.id === id);
@@ -48,29 +39,23 @@ export const loadAgent = async (
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const initializedAgent = new GenerativeAgent(llm, agentMemory, {
-    name: "Josh",
+    name: 'Josh',
     age: 38,
-    traits: "friendly, loves ai, loves to code",
-    status: "writing a blogpost about prompting AI and context",
+    traits: 'friendly, loves ai, loves to code',
+    status: 'writing a blogpost about prompting AI and context',
     verbose: true,
   });
   await addObservations(initialObservations, initializedAgent);
   return initializedAgent;
 };
 
-export const addObservations = async (
-  observations: string[],
-  agent: GenerativeAgent
-) => {
+export const addObservations = async (observations: string[], agent: GenerativeAgent) => {
   observations.forEach((observation) => {
     agent.memory.addMemory(observation, new Date());
   });
 };
 
-export const interviewAgent = async (
-  message: string,
-  agent: GenerativeAgent
-) => {
+export const interviewAgent = async (message: string, agent: GenerativeAgent) => {
   // Simple wrapper helping the user interact with the agent
   const response = await agent.generateDialogueResponse(message);
   return response[1];

@@ -208,20 +208,6 @@ const createLlmChain = (model: any) => {
   return agent;
 };
 
-const createBrowser = (model: any, embeddings: any) => {
-  const browser = new WebBrowser({
-    model,
-    embeddings,
-  });
-  return browser;
-};
-
-// const browsePage = async (browser: any, url: string) => {
-//   const result = await browser.call(url);
-
-//   return result;
-// };
-
 export const avaChat = async ({
   input,
   openAIApiKey,
