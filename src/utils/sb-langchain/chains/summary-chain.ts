@@ -6,6 +6,7 @@ import { PromptTemplate } from 'langchain/prompts';
 import { StructuredOutputParser, OutputFixingParser } from 'langchain/output_parsers';
 import { z } from 'zod';
 import { loadSummarizationChain } from 'langchain/chains';
+import { Document } from 'langchain/document';
 
 export type PartialContentResult = {
   id: number;
@@ -35,18 +36,20 @@ export const summarySplitter = new TokenTextSplitter({
   chunkOverlap: 300,
 });
 
-const smartModel = new ChatOpenAI({
-  modelName: 'gpt-4',
-  temperature: 0.25,
-});
-
-const quickModel = new ChatOpenAI({
-  temperature: 0,
-});
-
-export const getSummaries = async (docs: any[]): Promise<PartialContentResult[]> => {
+export const getSummaries = async ({
+  docs,
+  openAIApiKey,
+}: {
+  docs: Document[];
+  openAIApiKey: string;
+}): Promise<PartialContentResult[]> => {
   const summaries: PartialContentResult[] = [];
   console.log(`Generating Partial Summaries for ${docs.length} chunks of text`);
+
+  const quickModel = new ChatOpenAI({
+    openAIApiKey,
+    temperature: 0,
+  });
   const summaryPromises = docs.map(async (doc, index) => {
     const formattedSummaryPrompt = await summaryPrompt.format({
       text: doc.pageContent,
@@ -69,7 +72,19 @@ export const getSummaries = async (docs: any[]): Promise<PartialContentResult[]>
   return summaries;
 };
 
-export const getMainSummary = async (summary: string): Promise<string> => {
+export const getMainSummary = async ({
+  summary,
+  openAIApiKey,
+}: {
+  summary: string;
+  openAIApiKey: string;
+}): Promise<string> => {
+  const smartModel = new ChatOpenAI({
+    openAIApiKey,
+    modelName: 'gpt-4',
+    temperature: 0.25,
+  });
+
   const formattedPrompt = await summaryPrompt.format({
     text: summary,
   });

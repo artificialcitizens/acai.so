@@ -1,17 +1,19 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useContext, useEffect, useId, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { Editor } from '@tiptap/core';
 import { TiptapEditorProps } from './props';
 import { TiptapExtensions } from './extensions';
-import useLocalStorage from '../../hooks/use-local-storage';
 import { useDebouncedCallback } from 'use-debounce';
-import { useCompletion } from 'ai/react';
-
 import { EditorBubbleMenu } from './components';
 import { toastifyDefault, toastifyError } from '../Toast';
 import { marked } from 'marked';
 import { useInterpret } from '@xstate/react';
 import { appStateMachine } from '../../machines';
+import { VectorStoreContext } from '../../context/VectorStoreContext';
+import useCookieStorage from '../../hooks/use-cookie-storage';
+import { semanticSearchQuery } from '../../utils/sb-langchain/chains/semantic-search-query-chain';
+import { autoComplete } from '../../utils/sb-langchain/chains/autocomplete-chain';
+import Bottleneck from 'bottleneck';
 
 interface EditorProps {
   id: string;
@@ -20,12 +22,72 @@ interface EditorProps {
   updateContent: (id: string, content: { title: string; content: string }) => void;
 }
 
+// Limits our stream
+const limiter = new Bottleneck({
+  maxConcurrent: 1,
+  minTime: 100,
+});
+
+const type = (text) => {
+  return new Promise((resolve) => {
+    resolve(text);
+  });
+};
+
+const wrappedType = limiter.wrap(type);
+
 const Tiptap: React.FC<EditorProps> = ({ id, title, content, updateContent }) => {
   const service = useInterpret(appStateMachine);
   const [hydrated, setHydrated] = useState(false);
   const [saveStatus, setSaveStatus] = useState('Saved');
   const [currentWorkspace, setCurrentWorkspace] = useState(null);
   const [tab, setTab] = useState(null);
+  const { vectorstore, addDocuments, similaritySearchWithScore } = useContext(VectorStoreContext);
+  const [openAIApiKey, setOpenAIKey] = useCookieStorage('OPENAI_KEY');
+  const [completion, setCompletion] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentContext, setCurrentContext] = useState('');
+
+  const saveContent = (editor: Editor, workspaceId: string) => {
+    const content = editor.getText();
+    setSaveStatus('Saving...');
+    service.send({ type: 'UPDATE_TAB_CONTENT', id, content, workspaceId });
+    setTimeout(() => {
+      setSaveStatus('Saved');
+    }, 100);
+  };
+
+  const setContext = async (editor: Editor) => {
+    const context = editor.getText();
+    // if the context is too short we'll just genarate results based on the current context
+    // @TODO: first conditional
+    // we generate results based on the context
+    const results: string[] = await semanticSearchQuery(context, openAIApiKey!);
+    // @TODO: we can set a dropdown with the 3 most relevant autofills suggestions based on the results of the semantic search queries
+    console.log(results[0] + ' ' + results[1] + ' ' + results[2]);
+    const queryResults = await similaritySearchWithScore(`${results[0]} ${results[1]} ${results[2]}`);
+    const pageContent = queryResults.map((result) => {
+      // @TODO: filter by score
+      if (result.score < 0.75) return;
+      return result[0].pageContent;
+    });
+
+    setCurrentContext(pageContent.join('\n'));
+  };
+  // useEffect(() => {
+  //   if (!openAIApiKey) {
+  //     toastifyError('Please set your OpenAI API key in the settings menu');
+  //     return;
+  //   }
+  //   semanticSearchQuery(
+  //     '- Design tokens are a way to abstract and manage the visual design elements of a user interface, such as colors, typography, spacing, and other visual properties. They are essentially a set of values that represent design decisions, which can be reused and referenced throughout a project, allowing for consistency in the design across different platforms and devices.',
+  //     openAIApiKey,
+  //   ).then((res) => console.log(res));
+  //   // similaritySearchWithScore('what is knapsack?', 4).then((res) => console.log(res));
+  //   return () => {
+  //     // cleanup
+  //   };
+  // }, [openAIApiKey]); // Add openAIApiKey as a dependency
 
   useEffect(() => {
     service.onTransition((state) => {
@@ -43,14 +105,24 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, updateContent }) =>
     }
   }, [currentWorkspace, id]);
 
-  const debouncedUpdates = useDebouncedCallback((editor) => {
-    const content = editor.getText();
-    setSaveStatus('Saving...');
-    service.send({ type: 'UPDATE_TAB_CONTENT', id, content, workspaceId: currentWorkspace.id });
-    setTimeout(() => {
-      setSaveStatus('Saved');
-    }, 100);
-  }, 750);
+  const debouncedUpdates = useDebouncedCallback(async (editor: Editor) => {
+    if (!currentWorkspace) return;
+    saveContent(editor, currentWorkspace.id);
+    await setContext(editor);
+  }, 1000);
+
+  const tokens: string[] = [];
+  let isProcessing = false;
+
+  const processTokens = async () => {
+    isProcessing = true;
+    while (tokens.length > 0) {
+      const token = tokens.shift();
+      await wrappedType(token);
+      setCompletion((prevCompletion) => prevCompletion + token);
+    }
+    isProcessing = false;
+  };
 
   const editor = useEditor({
     extensions: TiptapExtensions,
@@ -64,13 +136,35 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, updateContent }) =>
           from: selection.from - 2,
           to: selection.from,
         });
-        // we're using this for now until we can figure out a way to stream markdown text with proper formatting: https://github.com/steven-tey/novel/discussions/7
-        complete(e.editor.getText(), {
-          body: {
-            prompt: e.editor.getText(),
+
+        autoComplete({
+          context: e.editor.getText(),
+          relatedInfo: currentContext || '',
+          openAIApiKey,
+          callbacks: {
+            onMessageStart: () => setIsLoading(true),
+            onMessageError: (error: string) => {
+              console.log(error);
+              setIsLoading(false);
+            },
+            onMessageStream: (token: string) => {
+              tokens.push(token);
+              if (!isProcessing) {
+                processTokens();
+              }
+            },
+            onMessageComplete: (message: string) => {
+              // setIsLoading(false);
+            },
           },
-        });
-        // complete(e.editor.storage.markdown.getMarkdown());
+        }).then((res) => setIsLoading(false));
+        // // we're using this for now until we can figure out a way to stream markdown text with proper formatting: https://github.com/steven-tey/novel/discussions/7
+        // complete(e.editor.getText(), {
+        //   body: {
+        //     prompt: e.editor.getText(),
+        //   },
+        // });
+        // // complete(e.editor.storage.markdown.getMarkdown());
       } else {
         debouncedUpdates(e.editor);
       }
@@ -86,34 +180,11 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, updateContent }) =>
     }
   }, [editor, tab, hydrated]);
 
-  const { complete, completion, isLoading, stop } = useCompletion({
-    id: 'novel',
-    api: 'http://192.168.4.74:3000/autocomplete',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    onResponse: (response) => {
-      if (response.status === 429) {
-        toastifyError('You have reached your request limit for the day.');
-        return;
-      }
-    },
-    onFinish: (_prompt, completion) => {
-      editor?.commands.setTextSelection({
-        from: editor.state.selection.from - completion.length,
-        to: editor.state.selection.from,
-      });
-    },
-    onError: () => {
-      toastifyError('Something went wrong.');
-    },
-  });
-
   const prev = useRef('');
 
   // Insert chunks of the generated text
   useEffect(() => {
-    const diff = completion.slice(prev.current.length);
+    const diff = prev.current && completion ? completion.slice(prev.current.length) : '';
     prev.current = completion;
     editor?.commands.insertContent(diff);
   }, [isLoading, editor, completion]);
@@ -134,12 +205,12 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, updateContent }) =>
       }
     };
     const mousedownHandler = (e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      stop();
-      if (window.confirm('AI writing paused. Continue?')) {
-        complete(editor?.getText() || '');
-      }
+      // e.preventDefault();
+      // e.stopPropagation();
+      // stop();
+      // if (window.confirm('AI writing paused. Continue?')) {
+      //   complete(editor?.getText() || '');
+      // }
     };
     if (isLoading) {
       document.addEventListener('keydown', onKeyDown);
@@ -152,7 +223,7 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, updateContent }) =>
       document.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('mousedown', mousedownHandler);
     };
-  }, [stop, isLoading, editor, complete, completion.length]);
+  }, [isLoading, editor, completion]);
 
   // Hydrate the editor with the content from localStorage.
   useEffect(() => {

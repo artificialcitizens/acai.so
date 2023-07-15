@@ -5,7 +5,12 @@ import Whisper from './components/Whisper';
 import ElevenLabs from './components/Elevenlabs/ElevenLabs';
 import SpeechRecognition from './components/SpeechRecognition/SpeechRecognition';
 import { recognitionRouter, takeNotesRoute } from './components/SpeechRecognition/recognition-manager';
-import ToastManager, { toastifyAgentObservation, toastifyAgentThought, toastifyInfo } from './components/Toast';
+import ToastManager, {
+  toastifyAgentObservation,
+  toastifyAgentThought,
+  toastifyError,
+  toastifyInfo,
+} from './components/Toast';
 import SocketContext from './context/SocketContext';
 import AudioWaveform from './components/AudioWave/AudioWave';
 import SBSidebar from './components/Sidebar';
@@ -17,19 +22,19 @@ import NotificationCenter from './components/NotificationCenter';
 import Chat from './components/Chat/Chat';
 import SBSearch from './components/Search';
 import ScratchPad from './components/ScratchPad/ScratchPad';
-import { useTabs } from './hooks/use-tabs';
 import { makeObservations, queryPinecone } from './endpoints';
-import { marked } from 'marked';
 export type State = 'idle' | 'passive' | 'ava' | 'notes' | 'strahl' | 'chat';
 import { Workspace, appStateMachine, getWorkspaceById, loadState, saveState } from './machines/app.xstate';
-import { useInterpret } from '@xstate/react';
-import { useLocalStorage } from './hooks/use-local-storage';
 import TokenManager from './components/TokenManager/token-manager';
 import { WorkspaceManager } from './components/WorkspaceManager/workspace-manager';
 import { useMachine } from '@xstate/react';
 import RoomManager from './components/RoomManager/RoomManager';
 import { avaChat } from './utils/sb-langchain/agents/ava';
 import useCookieStorage from './hooks/use-cookie-storage';
+import { createDocumentsFromText } from './utils/sb-langchain/text-splitters';
+import { initializeMemoryVectorStore } from './utils/sb-langchain/vector-store/in-memory';
+import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
+import { VectorStoreContext } from './context/VectorStoreContext';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 // const getGeolocation = () => {
 //   if ('geolocation' in navigator) {
@@ -58,7 +63,26 @@ function App() {
   const [activeTab, setActiveTab] = useState(0);
   const [state, send] = useMachine(appStateMachine);
   const [workspace, setWorkspace] = useState<Workspace>(state.context.workspaces[0]);
-  const [openAIKey, setOpenAIKey] = useCookieStorage('OPENAI_KEY');
+  const [openAIApiKey, setOpenAIKey] = useCookieStorage('OPENAI_KEY');
+  const { vectorstore, addDocuments, similaritySearchWithScore } = useMemoryVectorStore(
+    workspace.data.tiptap.tabs.map((tab) => tab.content).join('\n'),
+  );
+
+  // useEffect(() => {
+  //   if (!openAIApiKey) {
+  //     toastifyError('Please set your OpenAI API key in the settings menu');
+  //     return;
+  //   }
+  //   semanticSearchQuery(
+  //     '- Design tokens are a way to abstract and manage the visual design elements of a user interface, such as colors, typography, spacing, and other visual properties. They are essentially a set of values that represent design decisions, which can be reused and referenced throughout a project, allowing for consistency in the design across different platforms and devices.',
+  //     openAIApiKey,
+  //   ).then((res) => console.log(res));
+  //   // similaritySearchWithScore('what is knapsack?', 4).then((res) => console.log(res));
+  //   return () => {
+  //     // cleanup
+  //   };
+  // }, [openAIApiKey]); // Add openAIApiKey as a dependency
+
   useEffect(() => {
     // Save state to localStorage whenever it changes
     saveState(state.context);
@@ -66,6 +90,9 @@ function App() {
     if (ws) {
       setWorkspace(ws);
     }
+    return () => {
+      // Cleanup
+    };
   }, [state.context]);
 
   const toggleChat = () => {
@@ -115,36 +142,36 @@ function App() {
   //   };
   // }, [currentState, delay, userTranscript]);
 
-  const handleTranscription = async (t: string) => {
-    if (!openAIKey) {
-      toastifyInfo('Please set your OpenAI key in the settings');
-      return;
-    }
-    if ((t === 'Ava' || t === 'ava') && currentState !== 'ava') {
-      setCurrentState('ava');
-    } else if (t.toLowerCase() === 'cancel') {
-      setCurrentState('idle');
-      toastifyInfo('Going Idle');
-      return;
-    } else if (t.toLowerCase() === 'take notes') {
-      setUserTranscript('');
-      setCurrentState('notes');
-      toastifyInfo('Taking notes');
-    } else if (t.toLowerCase() === 'ready' && currentState === 'notes') {
-      handleSendNotes(openAIKey);
-      return;
-    } else {
-      const newTranscript = userTranscript + '\n' + t;
-      setUserTranscript(newTranscript);
-    }
-    if (t.split(' ').length < 3 || currentState === 'idle') return;
+  // const handleTranscription = async (t: string) => {
+  //   if (!openAIKey) {
+  //     toastifyInfo('Please set your OpenAI key in the settings');
+  //     return;
+  //   }
+  //   if ((t === 'Ava' || t === 'ava') && currentState !== 'ava') {
+  //     setCurrentState('ava');
+  //   } else if (t.toLowerCase() === 'cancel') {
+  //     setCurrentState('idle');
+  //     toastifyInfo('Going Idle');
+  //     return;
+  //   } else if (t.toLowerCase() === 'take notes') {
+  //     setUserTranscript('');
+  //     setCurrentState('notes');
+  //     toastifyInfo('Taking notes');
+  //   } else if (t.toLowerCase() === 'ready' && currentState === 'notes') {
+  //     handleSendNotes(openAIKey);
+  //     return;
+  //   } else {
+  //     const newTranscript = userTranscript + '\n' + t;
+  //     setUserTranscript(newTranscript);
+  //   }
+  //   if (t.split(' ').length < 3 || currentState === 'idle') return;
 
-    if (!socket) return;
+  //   if (!socket) return;
 
-    const response = await recognitionRouter({ state: currentState, transcript: t, openAIKey, callbacks });
+  //   const response = await recognitionRouter({ state: currentState, transcript: t, openAIKey, callbacks });
 
-    setAgentTranscript(response as string);
-  };
+  //   setAgentTranscript(response as string);
+  // };
 
   const socket = useContext(SocketContext);
 
@@ -232,92 +259,96 @@ function App() {
     },
   };
   return (
-    <div onClick={handleWindowClick}>
-      <AudioWaveform isOn={currentState === 'ava' || currentState === 'strahl'} audioContext={audioContext} />
-      <ToastManager />
-      <div className="flex flex-col min-h-screen w-screen">
-        <Header>
-          <WorkspaceManager workspaceId={state.context.activeWorkspaceId} />
-        </Header>
-        <main className="w-full flex-grow max-h-screen p-3">
-          <TabManager
-            key={state.context.activeWorkspaceId}
-            activeWorkspaceId={state.context.activeWorkspaceId}
-            activeTab={activeTab} // Pass activeTab as a prop
-            setActiveTab={setActiveTab} // Pass setActiveTab as a prop
-          />
-          <SBSidebar>
-            {' '}
-            <ExpansionPanel title="Settings">
-              {' '}
-              <div>
-                <SpeechRecognition
+    vectorstore && (
+      <VectorStoreContext.Provider value={{ vectorstore, addDocuments, similaritySearchWithScore }}>
+        <div onClick={handleWindowClick}>
+          <AudioWaveform isOn={currentState === 'ava' || currentState === 'strahl'} audioContext={audioContext} />
+          <ToastManager />
+          <div className="flex flex-col min-h-screen w-screen">
+            <Header>
+              <WorkspaceManager workspaceId={state.context.activeWorkspaceId} />
+            </Header>
+            <main className="w-full flex-grow max-h-screen p-3">
+              <TabManager
+                key={state.context.activeWorkspaceId}
+                activeWorkspaceId={state.context.activeWorkspaceId}
+                activeTab={activeTab} // Pass activeTab as a prop
+                setActiveTab={setActiveTab} // Pass setActiveTab as a prop
+              />
+              <SBSidebar>
+                {' '}
+                <ExpansionPanel title="Settings">
+                  {' '}
+                  <div>
+                    {/* <SpeechRecognition
                   active={speechRecognition}
                   onClick={() => {
                     setSpeechRecognition(!speechRecognition);
                   }}
                   onTranscriptionComplete={handleTranscription}
-                />
-                <ElevenLabs
+                /> */}
+                    {/* <ElevenLabs
                   active={currentState === 'ava' || currentState === 'strahl'}
                   text={agentTranscript}
                   voice={currentState === 'ava' ? 'ava' : 'strahl'}
-                />
-                {/* <Whisper
+                /> */}
+                    {/* <Whisper
                 onRecordingComplete={(blob) => console.log(blob)}
                 onTranscriptionComplete={async (t) => {
                   console.log('Whisper Server Response', t);
                 }}
               /> */}
-                <TokenManager />
-                <StorageMeter />
-                <RoomManager />
-              </div>
-            </ExpansionPanel>
-            <ExpansionPanel title="Search">
-              <SBSearch
-                onSubmit={async (val) => {
-                  const response = await queryPinecone(val);
-                  const newTab = {
-                    id: Date.now().toString(),
-                    name: val,
-                    content: `\`\`\`${response}\`\`\``,
-                    workspaceId: workspace.id,
-                  };
-                  send({ type: 'ADD_TAB', tab: newTab });
-                }}
-              />
-            </ExpansionPanel>
-            <ExpansionPanel title="Notes">
-              <ScratchPad
-                content={workspace.data.notes}
-                handleInputChange={(event) => {
-                  const newNotes = event.target.value;
-                  send({ type: 'UPDATE_NOTES', id: workspace.id, notes: newNotes });
-                }}
-              />
-            </ExpansionPanel>
-            {/* <ExpansionPanel title="Observations">
+                    <TokenManager />
+                    <StorageMeter />
+                    <RoomManager />
+                  </div>
+                </ExpansionPanel>
+                <ExpansionPanel title="Search">
+                  <SBSearch
+                    onSubmit={async (val) => {
+                      const response = await queryPinecone(val);
+                      const newTab = {
+                        id: Date.now().toString(),
+                        name: val,
+                        content: `\`\`\`${response}\`\`\``,
+                        workspaceId: workspace.id,
+                      };
+                      send({ type: 'ADD_TAB', tab: newTab });
+                    }}
+                  />
+                </ExpansionPanel>
+                <ExpansionPanel title="Notes">
+                  <ScratchPad
+                    content={workspace.data.notes}
+                    handleInputChange={(event) => {
+                      const newNotes = event.target.value;
+                      send({ type: 'UPDATE_NOTES', id: workspace.id, notes: newNotes });
+                    }}
+                  />
+                </ExpansionPanel>
+                {/* <ExpansionPanel title="Observations">
               <NotificationCenter placeholder="Always listening 👂" secondaryFilter="agent-observation" />
             </ExpansionPanel> */}
-            <ExpansionPanel title="Agent" isOpened={agentThoughtsOpen} onChange={toggleAgentThoughts}>
-              <NotificationCenter placeholder="A place for AI to ponder 🤔" secondaryFilter="agent-thought" />
-            </ExpansionPanel>
-            <ExpansionPanel className="flex-grow" title="Chat" isOpened={chatOpen} onChange={toggleChat}>
-              {openAIKey && (
-                <Chat
-                  name="Ava"
-                  avatar=".."
-                  onSubmitHandler={async (message) =>
-                    await avaChat({ input: message, openAIApiKey: openAIKey, callbacks })
-                  }
-                />
-              )}
-            </ExpansionPanel>
-          </SBSidebar>
-        </main>
-      </div>
-    </div>
+                <ExpansionPanel title="Agent" isOpened={agentThoughtsOpen} onChange={toggleAgentThoughts}>
+                  <NotificationCenter placeholder="A place for AI to ponder 🤔" secondaryFilter="agent-thought" />
+                </ExpansionPanel>
+                <ExpansionPanel className="flex-grow" title="Chat" isOpened={chatOpen} onChange={toggleChat}>
+                  {openAIApiKey && (
+                    <Chat
+                      name="Ava"
+                      avatar=".."
+                      onSubmitHandler={async (message) =>
+                        await avaChat({ input: message, openAIApiKey: openAIApiKey, callbacks })
+                      }
+                    />
+                  )}
+                </ExpansionPanel>
+              </SBSidebar>
+            </main>
+          </div>
+        </div>
+      </VectorStoreContext.Provider>
+    )
   );
 }
 

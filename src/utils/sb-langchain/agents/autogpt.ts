@@ -1,44 +1,28 @@
-import { AutoGPT } from "langchain/experimental/autogpt";
-import {
-  ReadFileTool,
-  WriteFileTool,
-  GoogleCustomSearch,
-} from "langchain/tools";
-import { NodeFileStore } from "langchain/stores/file/node";
-import { HNSWLib } from "langchain/vectorstores/hnswlib";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { Calculator } from "langchain/tools/calculator";
-import { OpenAI } from "langchain/llms/openai";
+import { AutoGPT } from 'langchain/experimental/autogpt';
+import { ReadFileTool, WriteFileTool, SerpAPI } from 'langchain/tools';
+import { InMemoryFileStore } from 'langchain/stores/file/in_memory';
+import { MemoryVectorStore } from 'langchain/vectorstores/memory';
+import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
+import { ChatOpenAI } from 'langchain/chat_models/openai';
 
-const store = new NodeFileStore();
+const store = new InMemoryFileStore();
 
 const tools = [
-  new GoogleCustomSearch(),
   new ReadFileTool({ store }),
   new WriteFileTool({ store }),
-  new Calculator(),
+  new SerpAPI(process.env.SERPAPI_API_KEY, {
+    location: 'San Francisco,California,United States',
+    hl: 'en',
+    gl: 'us',
+  }),
 ];
 
-const vectorStore = new HNSWLib(new OpenAIEmbeddings(), {
-  space: "cosine",
-  numDimensions: 1536,
-});
+const vectorStore = new MemoryVectorStore(new OpenAIEmbeddings());
 
-const model = new ChatOpenAI({});
-
-const autogpt = AutoGPT.fromLLMAndTools(model, tools, {
+const autogpt = AutoGPT.fromLLMAndTools(new ChatOpenAI({ temperature: 0 }), tools, {
   memory: vectorStore.asRetriever(),
-  aiName: "Ava",
-  aiRole: "Assistant",
+  aiName: 'Tom',
+  aiRole: 'Assistant',
 });
 
-export const taskCreator = async (input: string) => {
-  const res = await autogpt.taskCreator(input);
-  return res;
-};
-
-export const autogptRun = async (input: string) => {
-  const res = await autogpt.run([input]);
-  return res;
-};
+await autogpt.run(['write a weather report for SF today']);

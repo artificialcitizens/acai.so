@@ -137,10 +137,9 @@ const createModels = (apiKey: string) => {
   });
   return { chatModel, embeddings };
 };
-//@@@DO NOT MERGE, DONT MERGE! */
 const google = new GoogleCustomSearch({
-  apiKey: 'AIzaSyBQ46M25iaVvWCdhGseBoXlMOOW3b7SsFQ',
-  googleCSEId: 'a20a2a7a0ed184029',
+  apiKey: '',
+  googleCSEId: '',
 });
 google.description =
   'For when you need to find or search information for Josh, you can use this to search Google for the results. Input is query to search for and output is results.';
@@ -207,20 +206,6 @@ const createLlmChain = (model: any) => {
 
   return agent;
 };
-
-const createBrowser = (model: any, embeddings: any) => {
-  const browser = new WebBrowser({
-    model,
-    embeddings,
-  });
-  return browser;
-};
-
-// const browsePage = async (browser: any, url: string) => {
-//   const result = await browser.call(url);
-
-//   return result;
-// };
 
 export const avaChat = async ({
   input,

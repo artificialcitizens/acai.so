@@ -227,12 +227,6 @@ export const appStateMachine = createMachine<IContext, Event>({
               const { id, content, workspaceId } = event;
               // Find the workspace that the updated tab belongs to
               const workspace = context.workspaces.find((ws) => ws.id === workspaceId);
-              console.log({
-                id,
-                content,
-                workspaceId,
-                workspace,
-              });
               if (workspace) {
                 // Find the tab and update its content
                 const tab = workspace.data.tiptap.tabs.find((tab) => tab.id === id);
