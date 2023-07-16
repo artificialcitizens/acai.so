@@ -27,42 +27,44 @@ const TabManager: React.FC<TabManagerProps> = ({ activeWorkspaceId, activeTab, s
   };
 
   const workspace = service.getSnapshot().context.workspaces[activeWorkspaceId];
-
+  if (!activeWorkspaceId) return null;
   return (
-    activeWorkspaceId && (
-      <Tabs
-        key={activeWorkspaceId}
-        className="flex-grow pr-2"
-        selectedIndex={activeTab}
-        onSelect={(index) => {
-          if (activeTab !== index) {
-            const currentTab = workspace.data.tiptap.tabs[activeTab];
-          }
-          setActiveTab(index);
-        }}
-      >
-        <TabList>
-          {workspace.data.tiptap.tabs.map((tab) => (
-            <Tab key={tab.id}>{tab.title}</Tab>
-          ))}
-          <Tab onClick={handleCreateTab}>+</Tab>
-        </TabList>
+    <Tabs
+      key={activeWorkspaceId}
+      className="flex-grow"
+      selectedIndex={activeTab}
+      onSelect={(index) => {
+        if (activeTab !== index) {
+          const currentTab = workspace.data.tiptap.tabs[activeTab];
+        }
+        setActiveTab(index);
+      }}
+    >
+      <TabList>
         {workspace.data.tiptap.tabs.map((tab) => (
-          <TabPanel key={tab.id}>
-            <TipTap
-              id={tab.id.toString()}
-              title={tab.title}
-              systemNote={tab.systemNote}
-              content={tab.content}
-              updateContent={() => console.log()}
-            />
-          </TabPanel>
+          <Tab className="cursor-pointer p-2 border truncate max-w-[25%] self-center h-full" key={tab.id}>
+            {tab.title}
+          </Tab>
         ))}
-        <TabPanel>
-          <p>Create a new panel by selecting the + button</p>
+        <Tab className="cursor-pointer border-none p-2 px-4 text-center" onClick={handleCreateTab}>
+          +
+        </Tab>
+      </TabList>
+      {workspace.data.tiptap.tabs.map((tab) => (
+        <TabPanel key={tab.id}>
+          <TipTap
+            id={tab.id.toString()}
+            title={tab.title}
+            systemNote={tab.systemNote}
+            content={tab.content}
+            updateContent={() => console.log()}
+          />
         </TabPanel>
-      </Tabs>
-    )
+      ))}
+      <TabPanel>
+        <p>Create a new panel by selecting the + button</p>
+      </TabPanel>
+    </Tabs>
   );
 };
 

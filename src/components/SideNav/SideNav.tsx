@@ -92,7 +92,7 @@ export const SideNav: React.FC<SideNavProps> = ({ isToggled, handleToggle }) => 
 
   return (
     <nav
-      className="fixed left-0 top-0 z-[1035] h-screen w-60 -translate-x-full overflow-hidden bg-white shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] data-[te-sidenav-hidden='false']:translate-x-0 dark:bg-zinc-800"
+      className="fixed left-0 top-0 z-[1035] h-screen w-60 -translate-x-full overflow-hidden bg-dark shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] data-[te-sidenav-hidden='false']:translate-x-0 dark:bg-zinc-800"
       data-te-sidenav-init
       data-te-sidenav-hidden={!navVisible}
       data-te-sidenav-mode="push"
@@ -101,15 +101,17 @@ export const SideNav: React.FC<SideNavProps> = ({ isToggled, handleToggle }) => 
     >
       <ul className="relative m-0 list-none px-[0.2rem]" data-te-sidenav-menu-ref>
         {Object.values(workspaces).map((workspace) => (
-          <li className="relative" key={workspace.id}>
+          <li className="relative pb-2 border-b border-solid border-lighter !important" key={workspace.id}>
             <Link
-              className="flex h-12 cursor-pointer items-center truncate rounded-[5px] px-6 py-4 text-[0.875rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none dark:text-gray-300 dark:hover:bg-white/10 dark:focus:bg-white/10 dark:active:bg-white/10"
+              className="flex h-12 cursor-pointer items-center truncate rounded-[5px] px-6 py-4 text-[0.875rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none "
               to={`/${workspace.id}`}
               data-te-sidenav-link-ref
             >
-              <span>{workspace.name}</span>
+              <span className="font-bold">{workspace.name}</span>
             </Link>
-            <button onClick={() => createTab(workspace.id)}>+</button>
+            <button className="w-full" onClick={() => createTab(workspace.id)}>
+              +
+            </button>
             <ul
               className="!visible relative m-0 hidden list-none p-0 data-[te-collapse-show]:block "
               data-te-sidenav-collapse-ref
@@ -118,7 +120,7 @@ export const SideNav: React.FC<SideNavProps> = ({ isToggled, handleToggle }) => 
               {workspace.data.tiptap.tabs.map((tab) => (
                 <li className="relative" key={tab.id}>
                   <Link
-                    className="flex h-6 cursor-pointer items-center truncate rounded-[5px] py-4 pl-[3.4rem] pr-6 text-[0.78rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-slate-50 hover:text-inherit hover:outline-none focus:bg-slate-50 focus:text-inherit focus:outline-none active:bg-slate-50 active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none dark:text-gray-300 dark:hover:bg-white/10 dark:focus:bg-white/10 dark:active:bg-white/10"
+                    className="flex h-6 cursor-pointer items-center truncate rounded-[5px] py-4 pl-[3.4rem] pr-6 text-[0.78rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
                     to={`/${workspace.id}/${tab.id}`}
                     data-te-sidenav-link-ref
                   >
@@ -129,7 +131,9 @@ export const SideNav: React.FC<SideNavProps> = ({ isToggled, handleToggle }) => 
             </ul>
           </li>
         ))}
-        <button onClick={createWorkspace}>+</button>
+        <button className="w-full" onClick={createWorkspace}>
+          +
+        </button>
       </ul>
     </nav>
   );

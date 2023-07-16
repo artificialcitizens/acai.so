@@ -34,6 +34,8 @@ import useCookieStorage from './hooks/use-cookie-storage';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
 import { VectorStoreContext } from './context/VectorStoreContext';
 import { useAva } from './hooks/use-ava';
+import { SideNav } from './components/SideNav/SideNav';
+import { FloatingButton } from './components/FloatingButton/FloatingButton';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 // const getGeolocation = () => {
 //   if ('geolocation' in navigator) {
@@ -70,6 +72,7 @@ function App() {
     workspace ? workspace.data.tiptap.tabs.map((tab) => tab.isContext && tab.content).join('\n') : '',
   );
   const [fetchResponse, avaLoading] = useAva();
+  const [sideNavHidden, setSideNavHidden] = useState(true);
 
   useEffect(() => {
     // Save state to localStorage whenever it changes
@@ -218,12 +221,23 @@ function App() {
   return (
     vectorstore && (
       <VectorStoreContext.Provider value={{ vectorstore, addDocuments, similaritySearchWithScore }}>
+        {/* <SideNav
+          isToggled={sideNavHidden}
+          handleToggle={() => {
+            setSideNavHidden(!sideNavHidden);
+          }}
+        />
+        <FloatingButton
+          handleClick={() => {
+            setSideNavHidden(!sideNavHidden);
+          }}
+        /> */}
         <div onClick={handleWindowClick}>
           {/* <AudioWaveform isOn={currentState === 'ava'} audioContext={audioContext} /> */}
           <ToastManager />
           <div className="flex flex-col min-h-screen w-screen">
             <Header>
-              <WorkspaceManager workspaceId={state.context.activeWorkspaceId} />
+              <WorkspaceManager />
             </Header>
             <main className="w-full flex-grow max-h-screen p-3">
               <TabManager

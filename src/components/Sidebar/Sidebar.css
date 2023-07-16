@@ -23,3 +23,7 @@
 .cs-search {
   @apply border-dark;
 }
+
+.scrollbar-container {
+  @apply h-[95vh];
+}

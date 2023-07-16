@@ -9,7 +9,7 @@ export interface SBSidebarProps {
 
 const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
   return (
-    <Sidebar position="right" className="w-[33vw] rounded-lg max-h-screen  flex-shrink-0">
+    <Sidebar position="right" className="w-[30vw] rounded-lg max-h-screen  flex-shrink-0">
       {children}
     </Sidebar>
   );

@@ -10,7 +10,7 @@ interface FloatingButtonProps {
 export const FloatingButton: React.FC<FloatingButtonProps> = ({ variant, size, label, handleClick }) => {
   return (
     <button
-      className="absolute top-2 left-2 mt-10 inline-block rounded px-6 py-2.5 text-xs font-medium uppercase leading-tight text-white z-index-10"
+      className="z-10 absolute top-0 left-0 inline-block rounded px-6 py-2.5 text-xs font-medium uppercase leading-tight text-white z-index-10"
       data-te-sidenav-toggle-ref
       data-te-target="#sidenav-1"
       aria-controls="#sidenav-1"
