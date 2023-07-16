@@ -1,6 +1,9 @@
+import plugin from 'tw-elements-react/dist/plugin.cjs';
+
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./src/**/*.{js,jsx,ts,tsx}', './src/**/*.css'],
+  content: ['./src/**/*.{js,jsx,ts,tsx}', './src/**/*.css', '"./node_modules/tw-elements-react/dist/js/**/*.js"'],
+
   theme: {
     extend: {
       backgroundColor: {
@@ -29,5 +32,6 @@ export default {
       },
     },
   },
-  plugins: [],
+  darkMode: 'class',
+  plugins: [plugin],
 };
