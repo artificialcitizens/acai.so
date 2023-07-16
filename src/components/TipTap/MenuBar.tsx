@@ -1,7 +1,7 @@
 import { Editor } from '@tiptap/react';
 import React, { useState, useEffect } from 'react';
 import { useInterpret } from '@xstate/react';
-import { appStateMachine, getWorkspaceById } from '../../machines';
+import { appStateMachine } from '../../machines';
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -16,10 +16,12 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId, system
 
   useEffect(() => {
     const subscription = service.subscribe((state) => {
-      const ws = getWorkspaceById(state.context.workspaces, state.context.activeWorkspaceId);
+      const ws = state.context.workspaces[state.context.activeWorkspaceId];
       const tab = ws?.data.tiptap.tabs.find((tab) => tab.id === tipTapEditorId);
-      tab?.isContext && setIsContext(tab?.isContext);
-      tab?.systemNote && setSystemNoteState(tab?.systemNote); // Update systemNote state
+      if (tab) {
+        setIsContext(tab.isContext);
+        setSystemNoteState(tab.systemNote); // Update systemNote state
+      }
     });
 
     return () => {
@@ -57,6 +59,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId, system
           service.send({
             type: 'DELETE_TAB',
             id: tipTapEditorId,
+            workspaceId: service.getSnapshot().context.activeWorkspaceId,
           });
         }}
       >
