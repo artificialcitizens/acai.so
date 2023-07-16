@@ -26,7 +26,7 @@ import SBSearch from './components/Search';
 import ScratchPad from './components/ScratchPad/ScratchPad';
 import { makeObservations, queryPinecone } from './endpoints';
 export type State = 'idle' | 'passive' | 'ava' | 'notes' | 'strahl' | 'chat';
-import { Workspace, appStateMachine, getWorkspaceById, saveState, handleCreateTab } from './machines/app.xstate';
+import { Workspace, appStateMachine, saveState, handleCreateTab } from './machines/app.xstate';
 import TokenManager from './components/TokenManager/token-manager';
 import { WorkspaceManager } from './components/WorkspaceManager/workspace-manager';
 import { useMachine } from '@xstate/react';
@@ -66,14 +66,16 @@ function App() {
   const { vectorstore, addDocuments, similaritySearchWithScore } = useMemoryVectorStore(
     // add only tabs that are set to be included in the context of the language model
     // @TODO: add a tool for Ava to see what the user is working on
-    workspace.data.tiptap.tabs.map((tab) => tab.isContext && tab.content).join('\n'),
+
+    workspace ? workspace.data.tiptap.tabs.map((tab) => tab.isContext && tab.content).join('\n') : '',
   );
   const [fetchResponse, avaLoading] = useAva();
 
   useEffect(() => {
     // Save state to localStorage whenever it changes
     saveState(state.context);
-    const ws = getWorkspaceById(state.context.workspaces, state.context.activeWorkspaceId);
+    const activeWorkspace = state.context.activeWorkspaceId;
+    const ws = state.context.workspaces[activeWorkspace] || state.context.workspaces[0];
     if (ws) {
       setWorkspace(ws);
     }
@@ -102,7 +104,7 @@ function App() {
 
   //   const newTab = {
   //     id: Date.now().toString(),
-  //     name: 'Notes',
+  //     title: 'Notes',
   //     content: notes,
   //     workspaceId: workspace.id,
   //   };
@@ -205,7 +207,7 @@ function App() {
     //     setAvaListening(false);
     //   }
     // });
-  }, [send, socket, workspace.id]); // specify the dependencies here
+  }, [send, socket, workspace]); // specify the dependencies here
 
   const handleWindowClick = () => {
     if (!audioContext) {
@@ -264,7 +266,7 @@ function App() {
                       const response = await queryPinecone(val);
                       const newTab = {
                         id: Date.now().toString(),
-                        name: val,
+                        title: val,
                         content: response,
                         workspaceId: workspace.id,
                       };
@@ -293,7 +295,7 @@ function App() {
                       name="Ava"
                       avatar=".."
                       onSubmitHandler={async (message) => {
-                        const ws = getWorkspaceById(state.context.workspaces, workspace.id);
+                        const ws = workspace;
                         if (!ws) return console.log('no workspace');
                         const systemMessage = ws.data.notes;
                         const response = await fetchResponse(message, systemMessage);

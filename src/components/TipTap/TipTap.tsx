@@ -96,9 +96,7 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, systemNote, updateC
   useEffect(() => {
     service.onTransition((state) => {
       if (state.context.workspaces) {
-        setCurrentWorkspace(
-          state.context.workspaces.find((workspace) => workspace.id === state.context.activeWorkspaceId),
-        );
+        setCurrentWorkspace(state.context.workspaces[state.context.activeWorkspaceId]);
       }
     });
   }, [service]);

@@ -331,7 +331,7 @@ export const handleCreateTab = async (args: { title: string; content: string }, 
   console.log('handleCreateTab', args, workspaceId);
   const newTab = {
     id: Date.now().toString(),
-    name: args.title,
+    title: args.title,
     content: args.content,
     workspaceId,
   };

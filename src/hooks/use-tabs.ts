@@ -3,7 +3,7 @@ import { useLocalStorage, useLocalStorageString } from './use-local-storage';
 
 interface TabProps {
   id: number;
-  name: string;
+  title: string;
   content: string;
 }
 
@@ -25,7 +25,7 @@ export const useTabs = () => {
     if (newTabTitle) {
       const newTab: TabProps = {
         id: id || Date.now(),
-        name: newTabTitle,
+        title: newTabTitle,
         content: content || '',
       };
       updateContent(newTab.id.toString(), { title: newTab.name, content: newTab.content });

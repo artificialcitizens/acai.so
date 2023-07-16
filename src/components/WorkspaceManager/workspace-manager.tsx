@@ -1,13 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Workspace, appStateMachine, getWorkspaceById } from '../../machines';
+import { Workspace, appStateMachine } from '../../machines';
 import { useInterpret } from '@xstate/react';
 import { v4 as uuidv4 } from 'uuid';
 
-interface WorkspaceManagerProps {
-  workspaceId: string;
-}
-
-export const WorkspaceManager: React.FC<WorkspaceManagerProps> = () => {
+export const WorkspaceManager: React.FC = () => {
   const service = useInterpret(appStateMachine);
 
   const [selectedWorkspace, setSelectedWorkspace] = useState<string>();
@@ -18,7 +14,7 @@ export const WorkspaceManager: React.FC<WorkspaceManagerProps> = () => {
   useEffect(() => {
     const currentContext = service.getSnapshot().context;
     if (currentContext.workspaces) {
-      const ws = getWorkspaceById(currentContext.workspaces, activeWorkspaceId);
+      const ws = currentContext.workspaces[currentContext.activeWorkspaceId];
       if (ws) {
         setSelectedWorkspace(ws.id);
       }
@@ -47,11 +43,10 @@ export const WorkspaceManager: React.FC<WorkspaceManagerProps> = () => {
 
   const handleAddWorkspace = (event: { preventDefault: () => void }) => {
     event.preventDefault();
-
+    const id = uuidv4();
     const newWorkspace: Workspace = {
-      id: uuidv4(),
+      id,
       name: newWorkspaceName,
-      currentTab: 0,
       createdAt: new Date().toString(),
       lastUpdated: new Date().toString(),
       private: true,
@@ -65,8 +60,15 @@ export const WorkspaceManager: React.FC<WorkspaceManagerProps> = () => {
           tabs: [
             {
               id: uuidv4(),
-              name: 'Hello',
+              title: 'Hello',
               content: 'Welcome to the new workspace!',
+              systemNote: '',
+
+              createdAt: new Date().toString(),
+              lastUpdated: new Date().toString(),
+              workspaceId: id,
+              filetype: 'markdown',
+              isContext: false,
             },
           ],
         },
@@ -101,7 +103,7 @@ export const WorkspaceManager: React.FC<WorkspaceManagerProps> = () => {
   return (
     <div>
       <select value={selectedWorkspace} onChange={(e) => handleSelectWorkspace(e.target.value)}>
-        {service.getSnapshot().context.workspaces.map((w) => (
+        {Object.values(service.getSnapshot().context.workspaces).map((w) => (
           <option key={w.id} value={w.id}>
             {w.name}
           </option>
