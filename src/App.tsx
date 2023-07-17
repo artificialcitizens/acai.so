@@ -26,7 +26,7 @@ import SBSearch from './components/Search';
 import ScratchPad from './components/ScratchPad/ScratchPad';
 import { makeObservations, queryPinecone } from './endpoints';
 export type State = 'idle' | 'passive' | 'ava' | 'notes' | 'strahl' | 'chat';
-import { Workspace, appStateMachine, saveState, handleCreateTab } from './machines/app.xstate';
+import { Workspace, appStateMachine, saveState, handleCreateTab } from './state/app.xstate';
 import TokenManager from './components/TokenManager/token-manager';
 import { WorkspaceManager } from './components/WorkspaceManager/workspace-manager';
 import { useInterpret, useMachine, useSelector } from '@xstate/react';
@@ -76,9 +76,10 @@ function App() {
   const [chatOpen, setChatOpen] = useState(true);
   const [agentThoughtsOpen, setAgentThoughtsOpen] = useState(true);
   const globalServices = useContext(GlobalStateContext);
-  // const service = useInterpret(appStateMachine);
+  const service = useInterpret(appStateMachine);
   const [workspaceId, setWorkspaceId] = useState<string>('');
   const [tabId, setTabId] = useState<string>('');
+  const workspace = service.getSnapshot().context.workspaces[workspaceId];
   const [openAIApiKey] = useCookieStorage('OPENAI_KEY');
   const { vectorstore, addDocuments, similaritySearchWithScore } = useMemoryVectorStore(
     '',
@@ -152,7 +153,7 @@ function App() {
           {/* <AudioWaveform isOn={currentState === 'ava'} audioContext={audioContext} /> */}
           <main className="w-full flex flex-grow">
             <div className="w-full flex flex-col">
-              <div className="h-12 ml-16"></div>
+              <div className="h-12 ml-16">{workspace && <h1 className="m-0 text-lg">{workspace.name}</h1>}</div>
               <TabManager key={workspaceId} activeWorkspaceId={workspaceId} activeTabId={tabId} />
             </div>
             <SBSidebar>

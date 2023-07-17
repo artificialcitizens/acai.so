@@ -1,7 +1,7 @@
 import { Editor } from '@tiptap/react';
 import React, { useState, useEffect } from 'react';
 import { useInterpret } from '@xstate/react';
-import { appStateMachine } from '../../machines';
+import { appStateMachine } from '../../state';
 import { FloatingButton } from '../FloatingButton/FloatingButton';
 
 interface MenuBarProps {

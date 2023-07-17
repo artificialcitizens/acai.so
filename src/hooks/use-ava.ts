@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import useCookieStorage from './use-cookie-storage';
 import { avaChat } from '../utils/sb-langchain/agents/ava';
 import { toastifyAgentThought, toastifyError } from '../components/Toast';
-import { appStateMachine, handleCreateTab } from '../machines';
+import { appStateMachine, handleCreateTab } from '../state';
 import { useInterpret } from '@xstate/react';
 // export const useAva = () => {
 export const useAva = (): [

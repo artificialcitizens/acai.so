@@ -4,7 +4,7 @@ import { Sidenav, initTE } from 'tw-elements';
 import { useClickAway } from '@uidotdev/usehooks';
 import { Link, useNavigate } from 'react-router-dom';
 import { useInterpret } from '@xstate/react';
-import { Workspace, appStateMachine, handleCreateTab } from '../../machines';
+import { Workspace, appStateMachine, handleCreateTab } from '../../state';
 import { v4 as uuidv4 } from 'uuid';
 
 interface SideNavProps {

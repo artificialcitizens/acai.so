@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Workspace, appStateMachine } from '../../machines';
+import { Workspace, appStateMachine } from '../../state';
 import { useInterpret, useSelector } from '@xstate/react';
 import { v4 as uuidv4 } from 'uuid';
 

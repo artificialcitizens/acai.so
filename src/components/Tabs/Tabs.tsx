@@ -4,7 +4,7 @@ import { useInterpret } from '@xstate/react';
 import TipTap from '../TipTap/TipTap';
 import 'react-tabs/style/react-tabs.css';
 import './tabs.css';
-import { appStateMachine } from '../../machines/app.xstate';
+import { appStateMachine } from '../../state/app.xstate';
 import { v4 as uuidv4 } from 'uuid';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -41,6 +41,7 @@ const TabManager: React.FC<TabManagerProps> = ({ activeWorkspaceId, activeTabId 
 
   // Find the current active tab
   const activeTab = workspace?.data.tiptap.tabs.find((tab) => tab.id === tabId);
+  //@TODO: Add a home tab to take you to the workspace overview
   return (
     workspace && (
       <Tabs key={activeWorkspaceId} className="flex-grow">

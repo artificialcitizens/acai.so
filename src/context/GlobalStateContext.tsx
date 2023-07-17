@@ -1,7 +1,7 @@
 import React, { createContext } from 'react';
 import { useInterpret } from '@xstate/react';
 
-import { appStateMachine } from '../machines';
+import { appStateMachine } from '../state';
 import { InterpreterFrom } from 'xstate/lib/types';
 
 createContext({ appStateService: {} as InterpreterFrom<typeof appStateMachine> });

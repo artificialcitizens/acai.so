@@ -10,7 +10,7 @@ import { EditorBubbleMenu } from './components';
 import { toastifyDefault, toastifyError } from '../Toast';
 import { marked } from 'marked';
 import { useInterpret, useSelector } from '@xstate/react';
-import { Tab, appStateMachine } from '../../machines';
+import { Tab, appStateMachine } from '../../state';
 import { VectorStoreContext } from '../../context/VectorStoreContext';
 import useCookieStorage from '../../hooks/use-cookie-storage';
 import { semanticSearchQuery } from '../../utils/sb-langchain/chains/semantic-search-query-chain';
