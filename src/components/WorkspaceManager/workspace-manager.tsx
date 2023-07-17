@@ -1,49 +1,34 @@
 import { useEffect, useState } from 'react';
 import { Workspace, appStateMachine } from '../../machines';
-import { useInterpret } from '@xstate/react';
+import { useInterpret, useSelector } from '@xstate/react';
 import { v4 as uuidv4 } from 'uuid';
+
+const selectWorkspace = (state) => state.context.workspaces;
+const selectActiveWorkspaceId = (state) => state.context.activeWorkspaceId;
 
 export const WorkspaceManager: React.FC = () => {
   const service = useInterpret(appStateMachine);
 
+  const workspaces = useSelector(service, selectWorkspace);
+  const activeWorkspaceId = useSelector(service, selectActiveWorkspaceId);
   const [selectedWorkspace, setSelectedWorkspace] = useState<string>();
   const [newWorkspaceName, setNewWorkspaceName] = useState('');
-
-  const activeWorkspaceId = service.getSnapshot().context.activeWorkspaceId;
-
   useEffect(() => {
-    const currentContext = service.getSnapshot().context;
-    if (currentContext.workspaces) {
-      const ws = currentContext.workspaces[currentContext.activeWorkspaceId];
+    if (workspaces) {
+      const ws = workspaces[activeWorkspaceId];
       if (ws) {
-        setSelectedWorkspace(ws.id);
+        service.send({ type: 'SET_ACTIVE_WORKSPACE', workspaceId: ws.id });
       }
     }
-  }, [service, activeWorkspaceId]);
+  }, [service, workspaces, activeWorkspaceId]);
 
   const handleSelectWorkspace = (id: string) => {
-    service.send({ type: 'SET_ACTIVE_WORKSPACE', id });
-    setSelectedWorkspace(id);
+    service.send({ type: 'SET_ACTIVE_WORKSPACE', workspaceId: id });
   };
-
-  // const handleUpdateWorkspace = (id: string, updates: Partial<Workspace>) => {
-  //   service.send({
-  //     type: 'UPDATE_WORKSPACE',
-  //     id,
-  //     workspace: updates,
-  //   });
-  // };
-
-  // const handleDeleteWorkspace = (id: string) => {
-  //   service.send({
-  //     type: 'DELETE_WORKSPACE',
-  //     id,
-  //   });
-  // };
 
   const handleAddWorkspace = (event: { preventDefault: () => void }) => {
     event.preventDefault();
-    const id = uuidv4();
+    const id = uuidv4().split('-')[0];
     const newWorkspace: Workspace = {
       id,
       name: newWorkspaceName,
@@ -59,7 +44,7 @@ export const WorkspaceManager: React.FC = () => {
         tiptap: {
           tabs: [
             {
-              id: uuidv4(),
+              id: uuidv4().split('-')[0],
               title: 'Hello',
               content: 'Welcome to the new workspace!',
               systemNote: '',
@@ -92,17 +77,19 @@ export const WorkspaceManager: React.FC = () => {
       type: 'ADD_WORKSPACE',
       workspace: newWorkspace,
     });
-
-    setNewWorkspaceName('');
   };
 
-  if (!service.getSnapshot().context.workspaces) {
+  if (!workspaces) {
     return null;
   }
 
   return (
-    <div>
-      <select value={selectedWorkspace} onChange={(e) => handleSelectWorkspace(e.target.value)}>
+    <div className="flex justify-between items-center">
+      <select
+        className="p-[0.125rem]"
+        value={selectedWorkspace}
+        onChange={(e) => handleSelectWorkspace(e.target.value)}
+      >
         {Object.values(service.getSnapshot().context.workspaces).map((w) => (
           <option key={w.id} value={w.id}>
             {w.name}
@@ -110,15 +97,18 @@ export const WorkspaceManager: React.FC = () => {
         ))}
       </select>
 
-      <form onSubmit={handleAddWorkspace}>
+      <form onSubmit={handleAddWorkspace} className="ml-4">
         <input
+          className="px-[0.25rem]"
           type="text"
           value={newWorkspaceName}
           onChange={(e) => setNewWorkspaceName(e.target.value)}
-          placeholder="Workspace name"
+          placeholder="New Workspace Name"
           required
         />
-        <button type="submit">+</button>
+        <button className="px-2" type="submit">
+          +
+        </button>
       </form>
 
       {/* <button onClick={() => handleUpdateWorkspace(selectedWorkspace, { name: 'New Name' })}>Update Workspace</button>

@@ -8,6 +8,7 @@ import SocketContext from './context/SocketContext';
 import { HotKeys } from 'react-hotkeys';
 import { VectorStoreContext } from './context/VectorStoreContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { GlobalStateProvider } from './context/GlobalStateContext';
 
 const socket = client('http://localhost:3000', {
   auth: {
@@ -22,9 +23,11 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <HotKeys keyMap={keyMap}>
       <SocketContext.Provider value={socket}>
-        <Router>
-          <App />
-        </Router>
+        <GlobalStateProvider>
+          <Router>
+            <App />
+          </Router>
+        </GlobalStateProvider>
       </SocketContext.Provider>
     </HotKeys>
   </React.StrictMode>,

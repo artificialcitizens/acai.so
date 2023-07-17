@@ -1,5 +1,6 @@
 import { createMachine, assign } from 'xstate';
 import { timestampToHumanReadable } from '../utils/data-utils';
+import { v4 as uuidv4 } from 'uuid';
 
 export type Tab = {
   id: string;
@@ -63,14 +64,14 @@ type Event =
   | { type: 'UPDATE_TIME'; localTime: string }
   | { type: 'ADD_WORKSPACE'; workspace: Workspace }
   | { type: 'UPDATE_WORKSPACE'; id: string; workspace: Partial<Workspace> }
-  | { type: 'DELETE_WORKSPACE'; id: string }
+  | { type: 'DELETE_WORKSPACE'; id: string; workspaceId: string }
   | { type: 'ADD_TAB'; tab: any }
   | { type: 'DELETE_TAB'; id: string; workspaceId: string }
   | { type: 'UPDATE_TAB_CONTENT'; id: string; content: any; workspaceId: string }
-  | { type: 'SET_ACTIVE_WORKSPACE'; id: string }
+  | { type: 'SET_ACTIVE_WORKSPACE'; workspaceId: string }
   | {
       type: 'SET_ACTIVE_TAB';
-      tab: Tab;
+      tabId: string;
     }
   | { type: 'UPDATE_NOTES'; id: string; notes: string }
   | { type: 'TOGGLE_CONTEXT'; id: string; workspaceId: string }
@@ -201,29 +202,48 @@ export const appStateMachine = createMachine<IContext, Event>({
         DELETE_WORKSPACE: {
           actions: [
             assign((context, event) => {
-              const id = event.id;
-              const updatedWorkspaces = { ...context.workspaces };
-              delete updatedWorkspaces[id];
-              return { ...context, workspaces: updatedWorkspaces };
+              const workspaceId = event.workspaceId;
+              const tabId = event.id;
+              const workspace = context.workspaces[workspaceId];
+              if (workspace) {
+                // Remove the tab from the tabs array
+                workspace.data.tiptap.tabs = workspace.data.tiptap.tabs.filter((tab) => tab.id !== tabId);
+                // Create a new workspace object with the updated tabs
+                const newWorkspace = {
+                  ...workspace,
+                  data: { ...workspace.data, tiptap: { ...workspace.data.tiptap, tabs: workspace.data.tiptap.tabs } },
+                };
+                // Create a new workspaces object with the updated workspace
+                const newWorkspaces = { ...context.workspaces, [workspaceId]: newWorkspace };
+                return { ...context, workspaces: newWorkspaces };
+              }
+              return context;
             }),
             (context, event) => saveState(context),
           ],
         },
-
         ADD_TAB: {
           actions: [
             assign((context, event) => {
               const newTab = event.tab;
               const workspace = context.workspaces[newTab.workspaceId];
               if (workspace) {
-                workspace.data.tiptap.tabs.push(newTab);
+                // Create a new array with the new tab
+                workspace.data.tiptap.tabs = [...workspace.data.tiptap.tabs, newTab];
+                // Create a new workspace object with the updated tabs
+                const newWorkspace = {
+                  ...workspace,
+                  data: { ...workspace.data, tiptap: { ...workspace.data.tiptap, tabs: workspace.data.tiptap.tabs } },
+                };
+                // Create a new workspaces object with the updated workspace
+                const newWorkspaces = { ...context.workspaces, [newTab.workspaceId]: newWorkspace };
+                return { ...context, workspaces: newWorkspaces };
               }
-              return { ...context };
+              return context;
             }),
             (context, event) => saveState(context),
           ],
         },
-
         DELETE_TAB: {
           actions: [
             assign((context, event) => {
@@ -256,10 +276,8 @@ export const appStateMachine = createMachine<IContext, Event>({
 
         SET_ACTIVE_TAB: {
           actions: [
-            assign((context, event) => {
-              const { tab } = event;
-              context.activeTabId = tab.id;
-              return context;
+            assign({
+              activeTabId: (context, event) => event.tabId,
             }),
             (context, event) => saveState(context),
           ],
@@ -267,11 +285,13 @@ export const appStateMachine = createMachine<IContext, Event>({
 
         SET_ACTIVE_WORKSPACE: {
           actions: [
-            assign((context, event) => {
-              context.activeWorkspaceId = event.id;
-              return context;
+            assign({
+              activeWorkspaceId: (context, event) => event.workspaceId,
             }),
-            (context, event) => saveState(context),
+            (context, event) => {
+              console.log('set active workspace', context, event);
+              saveState(context);
+            },
           ],
         },
 
@@ -327,13 +347,18 @@ export const appStateMachine = createMachine<IContext, Event>({
   },
 });
 
-export const handleCreateTab = async (args: { title: string; content: string }, workspaceId: string, send: any) => {
+export const handleCreateTab = async (
+  args: { title: string; content: string },
+  workspaceId: string,
+  send: any,
+): Promise<Partial<Tab>> => {
   console.log('handleCreateTab', args, workspaceId);
   const newTab = {
-    id: Date.now().toString(),
+    id: uuidv4().split('-')[0],
     title: args.title,
     content: args.content,
     workspaceId,
   };
   send({ type: 'ADD_TAB', tab: newTab });
+  return newTab;
 };

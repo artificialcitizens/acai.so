@@ -2,20 +2,22 @@
 import React, { useEffect, useState } from 'react';
 import { Sidenav, initTE } from 'tw-elements';
 import { useClickAway } from '@uidotdev/usehooks';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useInterpret } from '@xstate/react';
 import { Workspace, appStateMachine, handleCreateTab } from '../../machines';
+import { v4 as uuidv4 } from 'uuid';
 
 interface SideNavProps {
   isToggled: boolean;
   handleToggle: () => void;
+  children?: React.ReactNode;
 }
 
-export const SideNav: React.FC<SideNavProps> = ({ isToggled, handleToggle }) => {
+export const SideNav: React.FC<SideNavProps> = ({ isToggled, handleToggle, children }) => {
   const service = useInterpret(appStateMachine);
   const [navVisible, setNavVisible] = useState(isToggled);
   const [workspaces, setWorkspaces] = useState<{ [id: string]: Workspace }>({}); // Update state to match new data model
-
+  const navigate = useNavigate();
   const ref = useClickAway(() => {
     handleToggle();
   });
@@ -40,11 +42,13 @@ export const SideNav: React.FC<SideNavProps> = ({ isToggled, handleToggle }) => 
 
   const createWorkspace = () => {
     const id = Math.random().toString(36).substring(7);
+    const name = prompt('Enter a name for your new workspace');
+    if (!name) return;
     const newWorkspace: Workspace = {
       id,
-      name: prompt('Enter a name for your new workspace') || 'New Workspace',
-      createdAt: new Date().toISOString(),
-      lastUpdated: new Date().toISOString(),
+      name,
+      createdAt: new Date().toString(),
+      lastUpdated: new Date().toString(),
       private: false,
       settings: {
         webSpeechRecognition: false,
@@ -55,14 +59,14 @@ export const SideNav: React.FC<SideNavProps> = ({ isToggled, handleToggle }) => 
         tiptap: {
           tabs: [
             {
-              id: Date.now().toString(),
+              id: uuidv4().split('-')[0],
               title: 'New Tab',
               content: '',
               isContext: false,
               systemNote: '',
               workspaceId: id,
-              createdAt: new Date().toISOString(),
-              lastUpdated: new Date().toISOString(),
+              createdAt: new Date().toString(),
+              lastUpdated: new Date().toString(),
               filetype: 'markdown',
             },
           ],
@@ -86,8 +90,12 @@ export const SideNav: React.FC<SideNavProps> = ({ isToggled, handleToggle }) => 
   };
 
   // Function to create a new tab
-  const createTab = (workspaceId) => {
-    handleCreateTab({ title: 'New Tab', content: '' }, workspaceId, service.send);
+  const createTab = async (workspaceId: string) => {
+    const title = prompt('Enter a name for your new tab');
+    if (!title) return;
+    const { id } = await handleCreateTab({ title, content: '' }, workspaceId, service.send);
+    navigate(`/${workspaceId}/${id}`);
+    handleToggle();
   };
 
   return (
@@ -106,6 +114,7 @@ export const SideNav: React.FC<SideNavProps> = ({ isToggled, handleToggle }) => 
               className="flex h-12 cursor-pointer items-center truncate rounded-[5px] px-6 py-4 text-[0.875rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none "
               to={`/${workspace.id}`}
               data-te-sidenav-link-ref
+              onClick={() => handleToggle()}
             >
               <span className="font-bold">{workspace.name}</span>
             </Link>
@@ -123,6 +132,7 @@ export const SideNav: React.FC<SideNavProps> = ({ isToggled, handleToggle }) => 
                     className="flex h-6 cursor-pointer items-center truncate rounded-[5px] py-4 pl-[3.4rem] pr-6 text-[0.78rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
                     to={`/${workspace.id}/${tab.id}`}
                     data-te-sidenav-link-ref
+                    onClick={() => handleToggle()}
                   >
                     <span>{tab.title}</span>
                   </Link>
@@ -135,6 +145,11 @@ export const SideNav: React.FC<SideNavProps> = ({ isToggled, handleToggle }) => 
           +
         </button>
       </ul>
+      {children && (
+        <div className="flex flex-col flex-1 overflow-hidden" id="content">
+          {children}
+        </div>
+      )}
     </nav>
   );
 };
