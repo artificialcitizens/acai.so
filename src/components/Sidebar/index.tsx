@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Sidebar } from '@chatscope/chat-ui-kit-react';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import './Sidebar.css';
@@ -9,7 +9,7 @@ export interface SBSidebarProps {
 
 const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
   return (
-    <Sidebar position="right" className="w-[30vw] rounded-lg max-h-screen  flex-shrink-0">
+    <Sidebar position="right" className="w-[30vw] rounded-lg h-screen flex-shrink-0">
       {children}
     </Sidebar>
   );

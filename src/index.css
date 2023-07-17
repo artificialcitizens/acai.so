@@ -2,14 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-#root {
-}
-
-main {
-  display: flex;
-  max-height: 100vh;
-}
-
+/* #root { @apply w-screen h-screen; } */
 .ProseMirror .is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;

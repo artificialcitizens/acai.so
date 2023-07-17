@@ -3,7 +3,7 @@
   @apply bg-base text-dark text-sm !important;
 }
 .cs-expansion-panel--open .cs-expansion-panel__content {
-  @apply flex flex-grow max-h-[calc(54vh)] !important;
+  @apply flex flex-grow;
 }
 .cs-message__content {
   @apply bg-base !important;
