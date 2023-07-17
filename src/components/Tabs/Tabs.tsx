@@ -49,12 +49,12 @@ const TabManager: React.FC<TabManagerProps> = ({ activeWorkspaceId, activeTabId 
             <Link
               key={tab.id}
               className={`cursor-pointer p-2 border truncate max-w-[25%] self-center h-full ${
-                tab.id === activeTabId ? 'bg-light' : ''
+                tab.id === activeTabId ? 'bg-base' : ''
               }`}
               to={`/${workspace.id}/${tab.id}`}
               data-te-sidenav-link-ref
             >
-              <Tab className="">{tab.title}</Tab>
+              <Tab className={`${tab.id === activeTabId ? 'underline' : ''}`}>{tab.title}</Tab>
             </Link>
           ))}
           <Tab className="cursor-pointer border-none p-2 px-4 text-center" onClick={handleCreateTab}>
