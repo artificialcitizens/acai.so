@@ -41,7 +41,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
 
   const [hydrated, setHydrated] = useState(false);
   const [saveStatus, setSaveStatus] = useState('Saved');
-  const { similaritySearchWithScore } = useContext(VectorStoreContext);
+  const { similaritySearchWithScore } = useContext<any>(VectorStoreContext);
   const [openAIApiKey] = useCookieStorage('OPENAI_KEY');
   const [completion, setCompletion] = useState('');
   const [isLoading, setIsLoading] = useState(false);

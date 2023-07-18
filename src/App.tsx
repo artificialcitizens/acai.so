@@ -35,7 +35,7 @@ import { VectorStoreContext } from './context/VectorStoreContext';
 import { useAva } from './hooks/use-ava';
 import { SideNav } from './components/SideNav/SideNav';
 import { FloatingButton } from './components/FloatingButton/FloatingButton';
-import { GlobalStateContext } from './context/GlobalStateContext';
+import { GlobalStateContext, GlobalStateContextValue } from './context/GlobalStateContext';
 import { useLocation } from 'react-router-dom';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 // const getGeolocation = () => {
@@ -52,18 +52,6 @@ import { useLocation } from 'react-router-dom';
 //     console.log('geolocation is not enabled on this browser');
 //   }
 // };
-const activeWorkspaceSelector = (state) => {
-  if (state.context && state.context.activeWorkspaceId) {
-    console.log('you did it!');
-    return true;
-  }
-  if (state.context && state.context.activeTabId) {
-    console.log('you did it!');
-    return true;
-  }
-
-  return false;
-};
 function App() {
   // const [agentTranscript, setAgentTranscript] = useState<string>('');
   // const [voice2voice, setVoice2voice] = useState<boolean>(false);
@@ -74,7 +62,7 @@ function App() {
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [chatOpen, setChatOpen] = useState(true);
   const [agentThoughtsOpen, setAgentThoughtsOpen] = useState(true);
-  const globalServices = useContext(GlobalStateContext);
+  const globalServices: GlobalStateContextValue = useContext(GlobalStateContext);
   const service = useInterpret(appStateMachine);
   const [workspaceId, setWorkspaceId] = useState<string>('');
   const [tabId, setTabId] = useState<string>('');
@@ -124,7 +112,7 @@ function App() {
   };
 
   // update the state on handleInputChange
-  const handleSystemNoteUpdate = (event) => {
+  const handleSystemNoteUpdate = (event: { target: { value: any } }) => {
     const newNotes = event.target.value;
     setScratchpadContent(newNotes);
     globalServices.appStateService.send({ type: 'UPDATE_NOTES', id: workspaceId, notes: newNotes });
@@ -160,11 +148,9 @@ function App() {
               <ExpansionPanel title="Junk Drawer">
                 <div className="w-full">
                   <ProjectLinks />
-
                   <SBSearch
                     onSubmit={async (val) => {
                       const response = await queryPinecone(val);
-                      console.log('response', response);
                       const newTab = {
                         id: Date.now().toString(),
                         title: val,
