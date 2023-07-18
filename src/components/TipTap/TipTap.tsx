@@ -49,15 +49,13 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   const [currentTab, setCurrentTab] = useState<Tab>(tab);
 
   useEffect(() => {
-    console.log('setting current tab');
-    console.log(tab);
     setCurrentTab(tab);
     setHydrated(false);
   }, [tab]);
 
-  const saveContent = (editor: Editor, workspaceId: string) => {
+  const saveContent = (editor: Editor, workspaceId: string, extraContent = '') => {
     if (!currentTab) return;
-    const content = editor.getText();
+    const content = editor.getJSON();
     setSaveStatus('Saving...');
     service.send({ type: 'UPDATE_TAB_CONTENT', id: currentTab.id, content, workspaceId });
     setTimeout(() => {
@@ -65,36 +63,39 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     }, 100);
   };
 
-  const setAutocompleteContext = async (editor: Editor) => {
-    const context = editor.getText();
-    // if the context is too short we'll just genarate results based on the current context
-    // @TODO: first conditional
-    // we generate results based on the context
-    const results: string[] = await semanticSearchQuery(context, openAIApiKey!);
-    // @TODO: we can set a dropdown with the 3 most relevant autofills suggestions based on the results of the semantic search queries
-    console.log(results[0] + ' ' + results[1] + ' ' + results[2]);
-    const queryResults = await similaritySearchWithScore(`${results[0]} ${results[1]} ${results[2]}`);
-    const pageContent = queryResults.map((result: any) => {
-      if (result.score < 0.75) return;
-      return result[0].pageContent;
-    });
+  // /**
+  //  * Creates context for the autocomplete vector search to inform autocomplete
+  //  */
+  // const setAutocompleteContext = async (editor: Editor) => {
+  //   const context = editor.getText();
+  //   // if the context is too short we'll just genarate results based on the current context
+  //   // @TODO: first conditional
+  //   // we generate results based on the context
+  //   const results: string[] = await semanticSearchQuery(context, openAIApiKey!);
+  //   // @TODO: we can set a dropdown with the 3 most relevant autofills suggestions based on the results of the semantic search queries
+  //   // console.log(results[0] + ' ' + results[1] + ' ' + results[2]);
+  //   const queryResults = await similaritySearchWithScore(`${results[0]} ${results[1]} ${results[2]}`);
+  //   const pageContent = queryResults.map((result: any) => {
+  //     if (result.score < 0.75) return;
+  //     return result[0].pageContent;
+  //   });
 
-    setCurrentContext(pageContent.join('\n'));
-  };
+  //   setCurrentContext(pageContent.join('\n'));
+  // };
 
   const debouncedUpdates = useDebouncedCallback(async (editor: Editor) => {
     saveContent(editor, currentTab.workspaceId);
-    await setAutocompleteContext(editor);
+    // await setAutocompleteContext(editor);
   }, 1000);
 
-  const tokens: string[] = [];
+  const tokenQueue: string[] = [];
   let isProcessing = false;
 
   const processTokens = async () => {
     isProcessing = true;
-    while (tokens.length > 0) {
-      const token = tokens.shift();
-      if (!token) return;
+    while (tokenQueue.length > 0) {
+      const token = tokenQueue.shift();
+      if (!token) break;
       await wrappedType(token);
       setCompletion((prevCompletion) => prevCompletion + token);
     }
@@ -118,7 +119,11 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
           return;
         }
         autoComplete({
-          context: e.editor.getText(),
+          context: e.editor.state.doc.textBetween(
+            Math.max(0, e.editor.state.selection.from - 5000),
+            e.editor.state.selection.from - 0,
+            '\n',
+          ),
           relatedInfo: currentContext || '',
           openAIApiKey,
           callbacks: {
@@ -128,7 +133,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
               setIsLoading(false);
             },
             onMessageStream: (token: string) => {
-              tokens.push(token);
+              tokenQueue.push(token);
               if (!isProcessing) {
                 processTokens();
               }
@@ -148,7 +153,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   useEffect(() => {
     if (!currentTab) return;
     if (editor && !hydrated) {
-      editor.commands.setContent(marked(currentTab.content));
+      editor.commands.setContent(currentTab.content);
       setHydrated(true);
     }
   }, [currentTab, editor, hydrated]);
@@ -201,8 +206,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   useEffect(() => {
     if (!currentTab) return;
     if (editor && !hydrated) {
-      editor.commands.setContent('Test content');
-      editor.commands.setContent(marked(currentTab.content));
+      editor.commands.setContent(currentTab.content);
       setHydrated(true);
     }
   }, [editor, hydrated, currentTab]);
