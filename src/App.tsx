@@ -133,14 +133,14 @@ function App() {
           }}
         />
         <div
-          className="w-screen h-screen flex flex-col sm:flex-row flex-wrap sm:flex-nowrap flex-grow p-2"
+          className="w-screen h-screen flex flex-col sm:flex-row flex-wrap sm:flex-nowrap flex-grow p-0"
           onClick={handleWindowClick}
         >
           <ToastManager />
           {/* <AudioWaveform isOn={currentState === 'ava'} audioContext={audioContext} /> */}
-          <main className="w-full flex flex-grow">
+          <main className="w-full flex flex-grow ">
             <div className="w-full flex flex-col">
-              <div className="h-12 ml-16">{workspace && <h1 className="m-0 text-lg">{workspace.name}</h1>}</div>
+              <div className="h-12 ml-16">{workspace && <h1 className="m-2 text-lg">{workspace.name}</h1>}</div>
               <TabManager key={workspaceId} activeWorkspaceId={workspaceId} activeTabId={tabId} />
             </div>
             <SBSidebar>
