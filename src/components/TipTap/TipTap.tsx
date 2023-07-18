@@ -55,7 +55,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
 
   const saveContent = (editor: Editor, workspaceId: string, extraContent = '') => {
     if (!currentTab) return;
-    const content = editor.getText() + extraContent;
+    const content = editor.getJSON();
     setSaveStatus('Saving...');
     service.send({ type: 'UPDATE_TAB_CONTENT', id: currentTab.id, content, workspaceId });
     setTimeout(() => {
@@ -119,7 +119,11 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
           return;
         }
         autoComplete({
-          context: e.editor.getText(),
+          context: e.editor.state.doc.textBetween(
+            Math.max(0, e.editor.state.selection.from - 5000),
+            e.editor.state.selection.from - 0,
+            '\n',
+          ),
           relatedInfo: currentContext || '',
           openAIApiKey,
           callbacks: {
@@ -149,7 +153,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   useEffect(() => {
     if (!currentTab) return;
     if (editor && !hydrated) {
-      editor.commands.setContent(marked(currentTab.content));
+      editor.commands.setContent(currentTab.content);
       setHydrated(true);
     }
   }, [currentTab, editor, hydrated]);
@@ -202,7 +206,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   useEffect(() => {
     if (!currentTab) return;
     if (editor && !hydrated) {
-      editor.commands.setContent(marked(currentTab.content));
+      editor.commands.setContent(currentTab.content);
       setHydrated(true);
     }
   }, [editor, hydrated, currentTab]);
