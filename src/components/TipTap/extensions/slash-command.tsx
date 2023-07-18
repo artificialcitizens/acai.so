@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, ReactNode, useRef, useLayoutEf
 import { Editor, Range, Extension } from '@tiptap/core';
 import Suggestion from '@tiptap/suggestion';
 import { ReactRenderer } from '@tiptap/react';
-import { useCompletion } from 'ai/react';
 import tippy from 'tippy.js';
 import {
   Heading1,
@@ -55,21 +54,21 @@ const Command = Extension.create({
 
 const getSuggestionItems = ({ query }: { query: string }) => {
   return [
-    {
-      title: 'Continue writing',
-      description: 'Use AI to expand your thoughts.',
-      searchTerms: ['gpt'],
-      icon: <Magic className="w-7 text-black" />,
-    },
-    {
-      title: 'Send Feedback',
-      description: 'Let us know how we can improve.',
-      icon: <MessageSquarePlus size={18} />,
-      command: ({ editor, range }: CommandProps) => {
-        editor.chain().focus().deleteRange(range).run();
-        window.open('/feedback', '_blank');
-      },
-    },
+    // {
+    //   title: 'Continue writing',
+    //   description: 'Use AI to expand your thoughts.',
+    //   searchTerms: ['gpt'],
+    //   icon: <Magic className="w-7 text-black" />,
+    // },
+    // {
+    //   title: 'Send Feedback',
+    //   description: 'Let us know how we can improve.',
+    //   icon: <MessageSquarePlus size={18} />,
+    //   command: ({ editor, range }: CommandProps) => {
+    //     editor.chain().focus().deleteRange(range).run();
+    //     window.open('/feedback', '_blank');
+    //   },
+    // },
     {
       title: 'Text',
       description: 'Just start typing with plain text.',
@@ -79,15 +78,16 @@ const getSuggestionItems = ({ query }: { query: string }) => {
         editor.chain().focus().deleteRange(range).toggleNode('paragraph', 'paragraph').run();
       },
     },
-    {
-      title: 'To-do List',
-      description: 'Track tasks with a to-do list.',
-      searchTerms: ['todo', 'task', 'list', 'check', 'checkbox'],
-      icon: <CheckSquare size={18} />,
-      command: ({ editor, range }: CommandProps) => {
-        editor.chain().focus().deleteRange(range).toggleTaskList().run();
-      },
-    },
+    // currently erroring out
+    // {
+    //   title: 'To-do List',
+    //   description: 'Track tasks with a to-do list.',
+    //   searchTerms: ['todo', 'task', 'list', 'check', 'checkbox'],
+    //   icon: <CheckSquare size={18} />,
+    //   command: ({ editor, range }: CommandProps) => {
+    //     editor.chain().focus().deleteRange(range).toggleTaskList().run();
+    //   },
+    // },
     {
       title: 'Heading 1',
       description: 'Big section heading.',
@@ -148,26 +148,6 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       icon: <Code size={18} />,
       command: ({ editor, range }: CommandProps) => editor.chain().focus().deleteRange(range).toggleCodeBlock().run(),
     },
-    {
-      title: 'Image',
-      description: 'Upload an image from your computer.',
-      searchTerms: ['photo', 'picture', 'media'],
-      icon: <ImageIcon size={18} />,
-      command: ({ editor, range }: CommandProps) => {
-        editor.chain().focus().deleteRange(range).run();
-        // upload image
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = async (event) => {
-          if (input.files?.length) {
-            const file = input.files[0];
-            return handleImageUpload(file, editor.view, event);
-          }
-        };
-        input.click();
-      },
-    },
   ].filter((item) => {
     if (typeof query === 'string' && query.length > 0) {
       const search = query.toLowerCase();
@@ -208,46 +188,43 @@ const CommandList = ({
 }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const { complete, isLoading } = useCompletion({
-    id: 'novel',
-    api: '/api/generate',
-    onResponse: (response) => {
-      if (response.status === 429) {
-        toast.error('You have reached your request limit for the day.');
-        va.track('Rate Limit Reached');
-        return;
-      }
-      editor.chain().focus().deleteRange(range).run();
-    },
-    onFinish: (_prompt, completion) => {
-      // highlight the generated text
-      editor.commands.setTextSelection({
-        from: range.from,
-        to: range.from + completion.length,
-      });
-    },
-    onError: () => {
-      toast.error('Something went wrong.');
-    },
-  });
+  // const { complete, isLoading } = useCompletion({
+  //   id: 'novel',
+  //   api: '/api/generate',
+  //   onResponse: (response) => {
+  //     if (response.status === 429) {
+  //       toast.error('You have reached your request limit for the day.');
+  //       va.track('Rate Limit Reached');
+  //       return;
+  //     }
+  //     editor.chain().focus().deleteRange(range).run();
+  //   },
+  //   onFinish: (_prompt, completion) => {
+  //     // highlight the generated text
+  //     editor.commands.setTextSelection({
+  //       from: range.from,
+  //       to: range.from + completion.length,
+  //     });
+  //   },
+  //   onError: () => {
+  //     toast.error('Something went wrong.');
+  //   },
+  // });
 
   const selectItem = useCallback(
     (index: number) => {
       const item = items[index];
-      va.track('Slash Command Used', {
-        command: item.title,
-      });
       if (item) {
         if (item.title === 'Continue writing') {
           // we're using this for now until we can figure out a way to stream markdown text with proper formatting: https://github.com/steven-tey/novel/discussions/7
-          complete(editor.getText());
+          // complete(editor.getText());
           // complete(editor.storage.markdown.getMarkdown());
         } else {
           command(item);
         }
       }
     },
-    [complete, command, editor, items],
+    [command, items],
   );
 
   useEffect(() => {
@@ -306,7 +283,7 @@ const CommandList = ({
             onClick={() => selectItem(index)}
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-md border border-lighter bg-dark">
-              {item.title === 'Continue writing' && isLoading ? <LoadingCircle /> : item.icon}
+              {item.icon}
             </div>
             <div>
               <p className="font-medium">{item.title}</p>

@@ -54,14 +54,8 @@ export const autoComplete = async ({
   Related information that can be used to help inform the brief autocomplete of the sentence and NO MORE THAN 50 CHARACTERS
   `;
 
-  console.log({
-    formattedInfo,
-    context,
-    systemPrompt,
-  });
-
   const response = await model.call([
-    new SystemChatMessage(`${systemPrompt} \n\n ${formattedInfo}`),
+    new SystemChatMessage(`${systemPrompt} \n\n ${relatedInfo && formattedInfo}`),
     new HumanChatMessage(context),
   ]);
   return response.text;
