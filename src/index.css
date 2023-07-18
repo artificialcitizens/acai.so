@@ -2,23 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-#root {
-  margin: 0 auto;
-  padding: 0rem;
-  /* overflow: hidden; */
-  /* height: 100vh;
-  width: 100vw; */
-  box-sizing: border-box;
-}
-
-#root > div {
-}
-
-main {
-  height: 100vh;
-  display: flex;
-}
-
+/* #root { @apply w-screen h-screen; } */
 .ProseMirror .is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;

@@ -4,72 +4,66 @@ import { useInterpret } from '@xstate/react';
 import TipTap from '../TipTap/TipTap';
 import 'react-tabs/style/react-tabs.css';
 import './tabs.css';
-import { appStateMachine } from '../../machines/app.xstate';
+import { appStateMachine } from '../../state/app.xstate';
+import { v4 as uuidv4 } from 'uuid';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface TabManagerProps {
   activeWorkspaceId: string;
-  activeTab: number;
-  setActiveTab: (activeTab: number) => void;
+  activeTabId: string;
 }
 
-const TabManager: React.FC<TabManagerProps> = ({ activeWorkspaceId, activeTab, setActiveTab }) => {
+const TabManager: React.FC<TabManagerProps> = ({ activeWorkspaceId, activeTabId }) => {
   const service = useInterpret(appStateMachine);
+  const [tabId, setTabId] = React.useState(activeTabId);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log('activeTabId', activeTabId);
+    setTabId(activeTabId);
+  }, [activeTabId]);
 
   const handleCreateTab = () => {
-    // notify the user with alert and prompt
-    const name = prompt('Enter a name for the new tab');
+    const title = prompt('Enter a title for the new tab');
     const newTab = {
-      id: Date.now().toString(),
-      name: name,
+      id: uuidv4().split('-')[0],
+      title: title || 'New Tab',
       content: '',
       workspaceId: activeWorkspaceId,
     };
     service.send({ type: 'ADD_TAB', tab: newTab });
+
+    // Update the URL to the new tab
+    navigate(`/${activeWorkspaceId}/${newTab.id}`);
   };
 
-  // const handleDeleteTab = (id: string) => {
-  //   service.send({ type: 'DELETE_TAB', id });
-  // };
+  const workspace = service.getSnapshot().context.workspaces[activeWorkspaceId];
 
-  // const handleUpdateContent = (id: string, content: any) => {
-  //   const updatedTab = { id, content, workspaceId: activeWorkspaceId };
-  //   service.send({ type: 'UPDATE_TAB_CONTENT', ...updatedTab });
-  // };
-
-  const workspace = service.getSnapshot().context.workspaces.filter((ws) => ws.id === activeWorkspaceId)[0];
-
+  // Find the current active tab
+  const activeTab = workspace?.data.tiptap.tabs.find((tab) => tab.id === tabId);
+  //@TODO: Add a home tab to take you to the workspace overview
   return (
-    activeWorkspaceId && (
-      <Tabs
-        key={activeWorkspaceId}
-        className="flex-grow pr-2"
-        selectedIndex={activeTab}
-        onSelect={(index) => {
-          if (activeTab !== index) {
-            const currentTab = workspace.data.tiptap.tabs[activeTab];
-            // if (currentTab) {
-            //   handleDeleteTab(currentTab.id);
-            // }
-          }
-          setActiveTab(index);
-        }}
-      >
+    workspace && (
+      <Tabs key={activeWorkspaceId} className="flex-grow">
         <TabList>
           {workspace.data.tiptap.tabs.map((tab) => (
-            <Tab key={tab.id}>{tab.name}</Tab>
+            <Link
+              key={tab.id}
+              className={`cursor-pointer p-2 border truncate max-w-[25%] self-center h-full ${
+                tab.id === activeTabId ? 'bg-base' : ''
+              }`}
+              to={`/${workspace.id}/${tab.id}`}
+              data-te-sidenav-link-ref
+            >
+              <Tab className={`${tab.id === activeTabId ? 'underline' : ''}`}>{tab.title}</Tab>
+            </Link>
           ))}
-          <Tab onClick={handleCreateTab}>+</Tab>
+          <Tab className="cursor-pointer border-none p-2 px-4 text-center" onClick={handleCreateTab}>
+            +
+          </Tab>
         </TabList>
         {workspace.data.tiptap.tabs.map((tab) => (
-          <TabPanel key={tab.id}>
-            <TipTap
-              id={tab.id.toString()}
-              title={tab.name}
-              systemNote={tab.systemNote}
-              content={tab.content}
-              updateContent={() => console.log()}
-            />
-          </TabPanel>
+          <TabPanel key={tab.id}>{activeTab && <TipTap tab={activeTab} />}</TabPanel>
         ))}
         <TabPanel>
           <p>Create a new panel by selecting the + button</p>

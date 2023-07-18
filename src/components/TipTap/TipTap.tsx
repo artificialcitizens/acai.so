@@ -9,8 +9,8 @@ import { useDebouncedCallback } from 'use-debounce';
 import { EditorBubbleMenu } from './components';
 import { toastifyDefault, toastifyError } from '../Toast';
 import { marked } from 'marked';
-import { useInterpret } from '@xstate/react';
-import { appStateMachine } from '../../machines';
+import { useInterpret, useSelector } from '@xstate/react';
+import { Tab, appStateMachine } from '../../state';
 import { VectorStoreContext } from '../../context/VectorStoreContext';
 import useCookieStorage from '../../hooks/use-cookie-storage';
 import { semanticSearchQuery } from '../../utils/sb-langchain/chains/semantic-search-query-chain';
@@ -19,11 +19,7 @@ import Bottleneck from 'bottleneck';
 import { MenuBar } from './MenuBar';
 
 interface EditorProps {
-  id: string;
-  title: string;
-  content: string;
-  systemNote: string;
-  updateContent: (id: string, content: { title: string; content: string }) => void;
+  tab: Tab;
 }
 
 // Limits our stream
@@ -32,7 +28,7 @@ const limiter = new Bottleneck({
   minTime: 100,
 });
 
-const type = (text) => {
+const type = (text: string) => {
   return new Promise((resolve) => {
     resolve(text);
   });
@@ -40,28 +36,36 @@ const type = (text) => {
 
 const wrappedType = limiter.wrap(type);
 
-const Tiptap: React.FC<EditorProps> = ({ id, title, content, systemNote, updateContent }) => {
+const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   const service = useInterpret(appStateMachine);
+
   const [hydrated, setHydrated] = useState(false);
   const [saveStatus, setSaveStatus] = useState('Saved');
-  const [currentWorkspace, setCurrentWorkspace] = useState(null);
-  const [tab, setTab] = useState(null);
-  const { vectorstore, addDocuments, similaritySearchWithScore } = useContext(VectorStoreContext);
+  const { similaritySearchWithScore } = useContext(VectorStoreContext);
   const [openAIApiKey] = useCookieStorage('OPENAI_KEY');
   const [completion, setCompletion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [currentContext, setCurrentContext] = useState('');
+  const [currentTab, setCurrentTab] = useState<Tab>(tab);
+
+  useEffect(() => {
+    console.log('setting current tab');
+    console.log(tab);
+    setCurrentTab(tab);
+    setHydrated(false);
+  }, [tab]);
 
   const saveContent = (editor: Editor, workspaceId: string) => {
+    if (!currentTab) return;
     const content = editor.getText();
     setSaveStatus('Saving...');
-    service.send({ type: 'UPDATE_TAB_CONTENT', id, content, workspaceId });
+    service.send({ type: 'UPDATE_TAB_CONTENT', id: currentTab.id, content, workspaceId });
     setTimeout(() => {
       setSaveStatus('Saved');
     }, 100);
   };
 
-  const setContext = async (editor: Editor) => {
+  const setAutocompleteContext = async (editor: Editor) => {
     const context = editor.getText();
     // if the context is too short we'll just genarate results based on the current context
     // @TODO: first conditional
@@ -71,48 +75,16 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, systemNote, updateC
     console.log(results[0] + ' ' + results[1] + ' ' + results[2]);
     const queryResults = await similaritySearchWithScore(`${results[0]} ${results[1]} ${results[2]}`);
     const pageContent = queryResults.map((result: any) => {
-      // @TODO: filter by score
       if (result.score < 0.75) return;
       return result[0].pageContent;
     });
 
     setCurrentContext(pageContent.join('\n'));
   };
-  // useEffect(() => {
-  //   if (!openAIApiKey) {
-  //     toastifyError('Please set your OpenAI API key in the settings menu');
-  //     return;
-  //   }
-  //   semanticSearchQuery(
-  //     '- Design tokens are a way to abstract and manage the visual design elements of a user interface, such as colors, typography, spacing, and other visual properties. They are essentially a set of values that represent design decisions, which can be reused and referenced throughout a project, allowing for consistency in the design across different platforms and devices.',
-  //     openAIApiKey,
-  //   ).then((res) => console.log(res));
-  //   // similaritySearchWithScore('what is knapsack?', 4).then((res) => console.log(res));
-  //   return () => {
-  //     // cleanup
-  //   };
-  // }, [openAIApiKey]); // Add openAIApiKey as a dependency
-
-  useEffect(() => {
-    service.onTransition((state) => {
-      if (state.context.workspaces) {
-        setCurrentWorkspace(
-          state.context.workspaces.find((workspace) => workspace.id === state.context.activeWorkspaceId),
-        );
-      }
-    });
-  }, [service]);
-
-  useEffect(() => {
-    if (currentWorkspace) {
-      setTab(currentWorkspace.data.tiptap.tabs.find((tab) => tab.id === id));
-    }
-  }, [currentWorkspace, id]);
 
   const debouncedUpdates = useDebouncedCallback(async (editor: Editor) => {
-    if (!currentWorkspace) return;
-    saveContent(editor, currentWorkspace.id);
-    await setContext(editor);
+    saveContent(editor, currentTab.workspaceId);
+    await setAutocompleteContext(editor);
   }, 1000);
 
   const tokens: string[] = [];
@@ -122,6 +94,7 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, systemNote, updateC
     isProcessing = true;
     while (tokens.length > 0) {
       const token = tokens.shift();
+      if (!token) return;
       await wrappedType(token);
       setCompletion((prevCompletion) => prevCompletion + token);
     }
@@ -140,7 +113,10 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, systemNote, updateC
           from: selection.from - 2,
           to: selection.from,
         });
-
+        if (!openAIApiKey) {
+          toastifyError('Please add your OpenAI API key in the settings');
+          return;
+        }
         autoComplete({
           context: e.editor.getText(),
           relatedInfo: currentContext || '',
@@ -162,13 +138,6 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, systemNote, updateC
             },
           },
         }).then((res) => setIsLoading(false));
-        // // we're using this for now until we can figure out a way to stream markdown text with proper formatting: https://github.com/steven-tey/novel/discussions/7
-        // complete(e.editor.getText(), {
-        //   body: {
-        //     prompt: e.editor.getText(),
-        //   },
-        // });
-        // // complete(e.editor.storage.markdown.getMarkdown());
       } else {
         debouncedUpdates(e.editor);
       }
@@ -177,12 +146,12 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, systemNote, updateC
   });
 
   useEffect(() => {
-    if (editor && tab && !hydrated) {
-      console.log(tab);
-      editor.commands.setContent(marked(tab.content));
+    if (!currentTab) return;
+    if (editor && !hydrated) {
+      editor.commands.setContent(marked(currentTab.content));
       setHydrated(true);
     }
-  }, [editor, tab, hydrated]);
+  }, [currentTab, editor, hydrated]);
 
   const prev = useRef('');
 
@@ -229,32 +198,33 @@ const Tiptap: React.FC<EditorProps> = ({ id, title, content, systemNote, updateC
     };
   }, [isLoading, editor, completion]);
 
-  // Hydrate the editor with the content from localStorage.
   useEffect(() => {
-    if (editor && content && !hydrated) {
-      editor.commands.setContent(marked(content));
+    if (!currentTab) return;
+    if (editor && !hydrated) {
+      editor.commands.setContent('Test content');
+      editor.commands.setContent(marked(currentTab.content));
       setHydrated(true);
     }
-  }, [editor, content, hydrated]);
+  }, [editor, hydrated, currentTab]);
+
+  if (!currentTab) return <p>nothing to see here</p>;
 
   return (
-    currentWorkspace && (
-      <>
-        <MenuBar editor={editor} tipTapEditorId={id} systemNote={systemNote} />
-        <div
-          onClick={() => {
-            editor?.chain().focus().run();
-          }}
-          className="relative max-h-[95vh] min-h-full  overflow-scroll w-full max-w-screen-lg p-12 px-8 sm:mb-[calc(20vh)] border-none sm:rounded-lg sm:border sm:px-12"
-        >
-          <div className="absolute flex right-5 top-5 mb-5 rounded-lg bg-base px-2 py-1 text-sm text-light">
-            {saveStatus}
-          </div>
-          {editor && <EditorBubbleMenu editor={editor} />}
-          <EditorContent editor={editor} />
+    <>
+      <MenuBar editor={editor} tipTapEditorId={currentTab.id} systemNote={currentTab.systemNote} />
+      <div
+        onClick={() => {
+          editor?.chain().focus().run();
+        }}
+        className="relative max-h-[75vh] min-h-full mt-12  overflow-scroll w-full max-w-screen-lg p-12 px-8 sm:mb-[calc(20vh)] border-none sm:rounded-lg sm:border sm:px-12"
+      >
+        <div className="absolute flex right-5 top-5 mb-5 rounded-lg bg-base px-2 py-1 text-sm text-light">
+          {saveStatus}
         </div>
-      </>
-    )
+        {editor && <EditorBubbleMenu editor={editor} />}
+        <EditorContent editor={editor} />
+      </div>
+    </>
   );
 };
 

@@ -9,11 +9,11 @@
 .cs-expansion-panel,
 .cs-expansion-panel--open,
 .cs-expansion-panel__header {
-  @apply bg-light text-light border-dark m-0 !important;
+  @apply bg-dark text-light border-dark m-0 !important;
 }
 
 .cs-expansion-panel__content {
-  @apply bg-light border-lighter !important;
+  @apply bg-dark border-lighter !important;
 }
 
 .cs-search svg {
