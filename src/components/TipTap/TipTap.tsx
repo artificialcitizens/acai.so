@@ -88,13 +88,13 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     // await setAutocompleteContext(editor);
   }, 1000);
 
-  const tokens: string[] = [];
+  const tokenQueue: string[] = [];
   let isProcessing = false;
 
   const processTokens = async () => {
     isProcessing = true;
-    while (tokens.length > 0) {
-      const token = tokens.shift();
+    while (tokenQueue.length > 0) {
+      const token = tokenQueue.shift();
       if (!token) break;
       await wrappedType(token);
       setCompletion((prevCompletion) => prevCompletion + token);
@@ -129,7 +129,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
               setIsLoading(false);
             },
             onMessageStream: (token: string) => {
-              tokens.push(token);
+              tokenQueue.push(token);
               if (!isProcessing) {
                 processTokens();
               }
