@@ -7,13 +7,13 @@
 }
 
 .react-tabs__tab {
-  @apply flex items-center text-sm border-light border-solid border max-w-[25%];
+  @apply flex items-center text-sm border-dark border-solid border max-w-[25%];
 }
 
 .react-tabs__tab-list {
-  @apply flex;
+  @apply flex m-2;
 }
 
 .react-tabs__ .react-tabs__tab--selected {
-  @apply flex items-center border-[#e1e1e1] border-solid border !important;
+  @apply flex items-center border-[#e1e1e1] border-solid border rounded !important;
 }

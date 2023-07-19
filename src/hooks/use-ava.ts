@@ -4,6 +4,7 @@ import { avaChat } from '../utils/sb-langchain/agents/ava';
 import { toastifyAgentThought, toastifyError } from '../components/Toast';
 import { appStateMachine, handleCreateTab } from '../state';
 import { useInterpret } from '@xstate/react';
+import { marked } from 'marked';
 // export const useAva = () => {
 export const useAva = (): [
   fetchResponse: (message: string, systemMessage: string) => Promise<string>,

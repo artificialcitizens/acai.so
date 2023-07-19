@@ -17,7 +17,7 @@ import { semanticSearchQuery } from '../../utils/sb-langchain/chains/semantic-se
 import { autoComplete } from '../../utils/sb-langchain/chains/autocomplete-chain';
 import Bottleneck from 'bottleneck';
 import { MenuBar } from './MenuBar';
-
+import './TipTap.css';
 interface EditorProps {
   tab: Tab;
 }
@@ -220,7 +220,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
         onClick={() => {
           editor?.chain().focus().run();
         }}
-        className="relative max-h-[75vh] min-h-full mt-12  overflow-scroll w-full p-12 px-8 sm:mb-[calc(20vh)] border-none sm:rounded-lg sm:border sm:px-12"
+        className="relative max-h-[75vh] min-h-full mt-12  overflow-scroll w-full max-w-[65vw] p-12 px-8 sm:mb-[calc(20vh)] border-none sm:rounded-lg sm:border sm:px-12"
       >
         <div className="absolute flex right-5 top-5 mb-5 rounded-lg bg-base px-2 py-1 text-sm text-light">
           {saveStatus}
