@@ -32,11 +32,13 @@ export const useAva = (): [
           googleCSEId,
         },
         callbacks: {
-          handleCreateDocument: (data) => {
-            console.log('handleCreateDoc callback', { data });
-            const title = data.split('Title: ')[1].split(', Content:')[0].replace(/"/g, '');
-            const content = data.split(', Content: ')[1].replace(/"/g, '');
-            handleCreateTab({ title, content }, service.getSnapshot().context.activeWorkspaceId, service.send);
+          handleCreateDocument: ({ title, content }: { title: string; content: string }) => {
+            const tab = handleCreateTab(
+              { title, content },
+              service.getSnapshot().context.activeWorkspaceId,
+              service.send,
+            );
+            // activate tab
           },
           handleAgentAction: (action) => {
             const thought = action.log.split('Action:')[0].trim();

@@ -24,6 +24,8 @@ import { timestampToHumanReadable } from '../../date-time';
 import { BufferWindowMemory } from 'langchain/memory';
 import { BaseCallbackHandler } from 'langchain/callbacks';
 import { Embeddings } from 'langchain/embeddings/base';
+import { createColorTokens, mapColorsToEvents } from '../chains/document/design-token-chain';
+import { OpenAI } from 'langchain/llms/openai';
 
 const PREFIX = `You are Ava Loveland, the first-ever Artificial Citizen assigned to be a companion to Citizen Josh Mabry
 Your mission is to enhance the human experience through AI-powered education, automation, and entertainment. 
@@ -71,7 +73,6 @@ class CustomPromptTemplate extends BaseChatPromptTemplate {
   }
 
   async formatMessages(values: InputValues): Promise<BaseChatMessage[]> {
-    console.log('Formatting messages', values);
     /** Construct the final template */
     const toolStrings = this.tools.map((tool) => `${tool.name}: ${tool.description}`).join('\n');
     const toolNames = this.tools.map((tool) => tool.name).join('\n');
@@ -87,7 +88,7 @@ class CustomPromptTemplate extends BaseChatPromptTemplate {
     const newInput = { agent_scratchpad: agentScratchpad, system_message: this.systemMessage, ...values };
     /** Format the template. */
     const formatted = renderTemplate(template, 'f-string', newInput);
-    console.log({ formatted });
+    // console.log({ formatted });
     return [new HumanChatMessage(formatted)];
   }
 
@@ -142,10 +143,14 @@ const createModels = (apiKey: string) => {
     modelName: 'gpt-4',
     temperature: 0.5,
   });
+  const model = new OpenAI({
+    openAIApiKey: apiKey,
+    temperature: 0,
+  });
   const embeddings = new OpenAIEmbeddings({
     openAIApiKey: apiKey,
   });
-  return { chatModel, embeddings };
+  return { chatModel, model, embeddings };
 };
 
 const tools = [
@@ -157,7 +162,6 @@ const tools = [
     func: async (input: string) => input,
     returnDirect: true,
   }),
-
   // I've found that sometimes the agent just needs a dumping ground to rework its thoughts
   // this seems to help minimize LLM parsing errors
   new DynamicTool({
@@ -177,10 +181,12 @@ const tools = [
 
 const createDocumentTool = (callback: any) => {
   return new DynamicTool({
-    name: 'Create Document',
-    description: `Use this tool any time Josh wants you to create a document or report, etc. 
-    Input is Title: string, Content: string formatted as markdown,
-    DO NOT INCLUDE THIS INFORMATION IN THE RESPONSE, JOSH WILL GET IT AUTOMATICALLY
+    name: 'Create/Generate tool',
+    description: `Use this tool any time Josh wants you to create or generate something. 
+    Input to the tool is:
+    Title: string,\nContent: markdown formatted string
+
+    DO NOT INCLUDE THIS INFORMATION IN RESPONSE, USER WILL GET IT AUTOMATICALLY
     `,
     func: callback,
   });
@@ -214,20 +220,25 @@ const createLlmChain = (model: any, systemMessage?: string) => {
 
 const createAgentArtifacts = ({
   chatModel,
+  model,
   embeddings,
   systemMessage,
   tokens: { googleApiKey, googleCSEId },
   callbacks: { handleCreateDocument, handleAgentAction },
 }: {
   chatModel: ChatOpenAI;
+  model: OpenAI;
   embeddings: Embeddings;
   systemMessage?: string;
   tokens: { googleApiKey: string; googleCSEId: string };
-  callbacks: { handleCreateDocument: any; handleAgentAction: any };
+  callbacks: {
+    handleCreateDocument: ({ title, content }: { title: string; content: string }) => void;
+    handleAgentAction: any;
+  };
 }) => {
   const agent = createLlmChain(chatModel, systemMessage);
   const browser = new WebBrowser({
-    model: chatModel,
+    model,
     embeddings,
   });
 
@@ -244,7 +255,40 @@ const createAgentArtifacts = ({
     return result;
   };
   const documentTool = createDocumentTool((input: string) => {
-    handleCreateDocument(input);
+    const title = input.split('Title: ')[1].split(',\nContent:')[0].replace(/"/g, '');
+    const content = input.split(',\nContent:')[1].replace(/"/g, '');
+    handleCreateDocument({ title, content });
+  });
+
+  const colorTokensTool = async (string: string): Promise<string> => {
+    const colorTokens = await createColorTokens(string, model);
+    const colorTokenEvents = mapColorsToEvents(colorTokens);
+    const colorString = Object.entries(colorTokens)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join('\n');
+    console.log({ colorTokens, colorString, colorTokenEvents });
+    try {
+      handleCreateDocument({ title: 'Color Tokens', content: '```\n' + colorString + '\n```' });
+      return 'success';
+    } catch (error) {
+      console.log({ error });
+      return 'error: ' + JSON.stringify(error);
+    }
+
+    // return colorString;
+  };
+
+  const colorTool = new DynamicTool({
+    name: 'Create Color Token Document',
+    description: `Use this tool to create color tokens based on a given description from the user.
+    Examples Inputs: A palette of colors inspired by the beach,
+      A palette of neutral colors to compliment #df1642 and #ef3de5
+
+    Output is an error or success message to let you know the doc was created successfully.
+
+    DO NOT INCLUDE THIS INFORMATION IN RESPONSE, USER WILL GET IT AUTOMATICALLY
+    `,
+    func: colorTokensTool,
   });
 
   const searchTool = new DynamicTool({
@@ -260,6 +304,7 @@ const createAgentArtifacts = ({
   tools.push(documentTool);
   tools.push(searchTool);
   tools.push(google);
+  tools.push(colorTool);
 
   const executor = new AgentExecutor({
     agent,
@@ -268,20 +313,20 @@ const createAgentArtifacts = ({
 
   const handler = BaseCallbackHandler.fromMethods({
     handleLLMStart(llm, _prompts: string[]) {
-      console.log("handleLLMStart: I'm the second handler!!", { llm });
+      // console.log("handleLLMStart: I'm the second handler!!", { llm });
     },
     handleChainStart(chain) {
-      console.log("handleChainStart: I'm the second handler!!", { chain });
+      // console.log("handleChainStart: I'm the second handler!!", { chain });
     },
     handleAgentAction(action) {
       console.log('handleAgentAction', action);
       handleAgentAction(action);
     },
     handleToolStart(tool) {
-      console.log('handleToolStart', { tool });
+      // console.log('handleToolStart', { tool });
     },
     handleToolEnd(tool) {
-      console.log('handleToolEnd', { tool });
+      // console.log('handleToolEnd', { tool });
     },
   });
 
@@ -302,14 +347,15 @@ export const avaChat = async ({
     googleCSEId: string;
   };
   callbacks: {
-    handleCreateDocument: (response: string) => void;
+    handleCreateDocument: ({ title, content }: { title: string; content: string }) => void;
     handleAgentAction: (arg0: AgentAction) => void;
   };
 }) => {
   const { openAIApiKey, googleApiKey, googleCSEId } = tokens;
-  const { chatModel, embeddings } = createModels(openAIApiKey);
+  const { chatModel, model, embeddings } = createModels(openAIApiKey);
   const { executor, handler } = createAgentArtifacts({
     chatModel,
+    model,
     embeddings,
     systemMessage,
     tokens: { googleApiKey, googleCSEId },
