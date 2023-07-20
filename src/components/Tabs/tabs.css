@@ -11,7 +11,7 @@
 }
 
 .react-tabs__tab-list {
-  @apply flex m-2;
+  @apply flex m-2 max-w-[69vw];
 }
 
 .react-tabs__ .react-tabs__tab--selected {
