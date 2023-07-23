@@ -138,14 +138,15 @@ async function humanFeedback(question: string) {
 }
 
 const createModels = (apiKey: string) => {
+  // @TODO create a smart and fast model
   const chatModel = new ChatOpenAI({
     openAIApiKey: apiKey,
-    modelName: 'gpt-4',
+    modelName: 'gpt-4-0314',
     temperature: 0.5,
   });
   const model = new OpenAI({
     openAIApiKey: apiKey,
-    temperature: 0,
+    temperature: 0.3,
   });
   const embeddings = new OpenAIEmbeddings({
     openAIApiKey: apiKey,
@@ -164,10 +165,11 @@ const tools = [
   }),
   // I've found that sometimes the agent just needs a dumping ground to rework its thoughts
   // this seems to help minimize LLM parsing errors
+  // @TODO: Log how many times this - and all - tools are used for analytics and verifying usefulness
   new DynamicTool({
     name: 'Thought Processing',
-    description: `This is useful for when you have a thought that you want to use in a task, 
-    but you want to make sure it's formatted correctly. 
+    description: `This is useful for when you have a thought that you want to use in a task,
+    but you want to make sure it's formatted correctly.
     Input is your thought and self-critique and output is the processed thought.`,
     func: processThought,
   }),
@@ -181,12 +183,10 @@ const tools = [
 
 const createDocumentTool = (callback: any) => {
   return new DynamicTool({
-    name: 'Create/Generate tool',
-    description: `Use this tool any time Josh wants you to create or generate something. 
-    Input to the tool is:
-    Title: string,\nContent: markdown formatted string
-
-    DO NOT INCLUDE THIS INFORMATION IN RESPONSE, USER WILL GET IT AUTOMATICALLY
+    name: 'Create Document',
+    description: `Use this tool any time Josh wants you to create a document or report, etc. 
+    Input is Title: string, Content: string formatted as markdown,
+    DO NOT INCLUDE THIS INFORMATION IN THE RESPONSE, JOSH WILL GET IT AUTOMATICALLY
     `,
     func: callback,
   });
@@ -262,11 +262,11 @@ const createAgentArtifacts = ({
 
   const colorTokensTool = async (string: string): Promise<string> => {
     const colorTokens = await createColorTokens(string, model);
-    const colorTokenEvents = mapColorsToEvents(colorTokens);
+    const colorTokenEvent = mapColorsToEvents(colorTokens);
     const colorString = Object.entries(colorTokens)
       .map(([key, value]) => `${key}: ${value}`)
       .join('\n');
-    console.log({ colorTokens, colorString, colorTokenEvents });
+    console.log('color tokens', { colorTokenEvent });
     try {
       handleCreateDocument({ title: 'Color Tokens', content: '```\n' + colorString + '\n```' });
       return 'success';
@@ -304,7 +304,7 @@ const createAgentArtifacts = ({
   tools.push(documentTool);
   tools.push(searchTool);
   tools.push(google);
-  tools.push(colorTool);
+  // tools.push(colorTool);
 
   const executor = new AgentExecutor({
     agent,
