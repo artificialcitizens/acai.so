@@ -1,6 +1,8 @@
+/* eslint-disable import/namespace */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useRef, useEffect } from 'react';
+// eslint-disable-next-line import/namespace
 import * as d3 from 'd3';
 
 interface AudioWaveformProps {
@@ -34,7 +36,7 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({ isOn, audioContext }) => 
           .angle((d, i) => i * ((2 * Math.PI) / bufferLength))
           .radius((d) => {
             // Normalize data between 0 and 1
-            const normalizedData = d / 100;
+            const normalizedData = (d as any) / 100;
             const minLimit = 0.1;
             const maxLimit = 0.2;
             // Scale data between minLimit and maxLimit
@@ -54,7 +56,7 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({ isOn, audioContext }) => 
             .data([dataArray])
             .join('path')
             .attr('transform', `translate(${width / 2}, ${height / 2})`)
-            .attr('d', radialLine)
+            .attr('d', radialLine as any)
             .attr('stroke', 'white')
             .attr('stroke-width', 6)
             .attr('fill', 'none');
@@ -74,7 +76,7 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({ isOn, audioContext }) => 
         .data([0])
         .join('path')
         .attr('transform', `translate(${width / 2}, ${height / 2})`)
-        .attr('d', radialLine)
+        .attr('d', radialLine as any)
         .attr('stroke', 'none')
         .attr('fill', 'none');
     }
