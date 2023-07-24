@@ -68,12 +68,12 @@ function App() {
   const globalServices: GlobalStateContextValue = useContext(GlobalStateContext);
   const location = useLocation();
   const workspaceId = location.pathname.split('/')[1];
-  const { vectorstore, addDocuments, similaritySearchWithScore } = useMemoryVectorStore(
-    '',
-    // add only tabs that are set to be included in the context of the language model
-    // @TODO: add a tool for Ava to see what the user is working on
-    // workspace ? workspace.data.tiptap.tabs.map((tab) => tab.isContext && tab.content).join('\n') : '',
-  );
+  // const { vectorstore, addDocuments, similaritySearchWithScore } = useMemoryVectorStore(
+  //   '',
+  //   // add only tabs that are set to be included in the context of the language model
+  //   // @TODO: add a tool for Ava to see what the user is working on
+  //   // workspace ? workspace.data.tiptap.tabs.map((tab) => tab.isContext && tab.content).join('\n') : '',
+  // );
   // const [elementPosition, updateElementSelector, elementName] = useElementPosition("[data-ava-element='audio-wave']");
   // const [agentCursorPos, setAgentCursorPos] = useState([{ x: elementPosition.x, y: elementPosition.y }]);
 
