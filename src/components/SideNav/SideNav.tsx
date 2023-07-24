@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { Sidenav, initTE } from 'tw-elements';
 import { useActor } from '@xstate/react';
 import { useClickAway } from '@uidotdev/usehooks';
@@ -129,7 +129,7 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
               {workspace.data.tiptap.tabs.map((tab) => (
                 <li className="relative" key={tab.id}>
                   <Link
-                    className="flex h-6 cursor-pointer items-center truncate rounded-[5px] py-4 pl-[3.4rem] pr-6 text-[0.78rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
+                    className="flex h-6 cursor-pointer items-center truncate rounded-[5px] py-4 pl-10 pr-6 text-[0.78rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
                     to={`/${workspace.id}/${tab.id}`}
                     data-te-sidenav-link-ref
                     onClick={() => {

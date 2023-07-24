@@ -36,7 +36,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
   return (
     <div className=" pt-2 border-b-2 border-solid border-lighter w-full">
       {/* <div className="bg-base p-2 flex justify-between items-center text-white"></div> */}
-      <div className="h-56 p-3 bg-base rounded overflow-y-auto w-full" ref={notificationsRef}>
+      <div className="h-36 p-3 bg-base rounded overflow-y-auto w-full" ref={notificationsRef}>
         {(!filteredNotifications.length || (unreadCount === 0 && showUnreadOnly)) && (
           <p className="text-light">{placeholder}</p>
         )}

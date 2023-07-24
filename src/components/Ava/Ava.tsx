@@ -75,25 +75,28 @@ export const Ava = () => {
         />
       </ExpansionPanel>
       <ExpansionPanel
+        className="pb-4"
         title="Agent"
         data-ava-element="TOGGLE_AGENT_THOUGHTS"
-        isOpened={uiStateService.getSnapshot().context.thoughtsOpen}
+        isOpened={true}
         onChange={toggleAgentThoughts}
         onClick={toggleAgentThoughts}
       >
         <NotificationCenter placeholder="A place for AI to ponder 🤔" secondaryFilter="agent-thought" />
       </ExpansionPanel>
-      {openAIApiKey && (
-        <Chat
-          name="Ava"
-          avatar=".."
-          onSubmitHandler={async (message) => {
-            const systemMessage = systemNotes;
-            const response = await fetchResponse(message, systemMessage);
-            return response;
-          }}
-        />
-      )}
+      <ExpansionPanel isOpened={true}>
+        {openAIApiKey && (
+          <Chat
+            name="Ava"
+            avatar=".."
+            onSubmitHandler={async (message) => {
+              const systemMessage = systemNotes;
+              const response = await fetchResponse(message, systemMessage);
+              return response;
+            }}
+          />
+        )}
+      </ExpansionPanel>
     </SBSidebar>
   );
 };

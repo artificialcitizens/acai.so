@@ -45,7 +45,7 @@
 
 .cs-message-list {
   @apply flex-grow flex-shrink overflow-auto;
-  max-height: calc(100vh - 10.5rem);
+  max-height: calc(100vh - 24.75rem);
 }
 
 .cs-message-list__scroll-wrapper > .cs-message {
