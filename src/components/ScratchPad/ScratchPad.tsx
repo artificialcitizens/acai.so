@@ -6,14 +6,21 @@ export interface MarkdownInputProps {
   handleInputChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   placeholder?: string;
   readonly?: boolean;
+  height?: string;
 }
 
-const MarkdownInput: React.FC<MarkdownInputProps> = ({ content, handleInputChange, placeholder, readonly = false }) => {
+const MarkdownInput: React.FC<MarkdownInputProps> = ({
+  content,
+  handleInputChange,
+  placeholder,
+  readonly = false,
+  height = '24px',
+}) => {
   return (
     <div className="pt-2 border-b-2 border-solid border-lighter w-full text-light">
       {!readonly ? (
         <textarea
-          className="h-56 p-3 bg-base rounded w-full"
+          className={`h-${height} p-3 bg-base rounded w-full`}
           placeholder={placeholder}
           value={content}
           onChange={handleInputChange}
