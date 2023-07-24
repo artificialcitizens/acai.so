@@ -32,7 +32,17 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({ isOn, audioContext }) => 
         const radialLine = d3
           .radialLine()
           .angle((d, i) => i * ((2 * Math.PI) / bufferLength))
-          .radius((d) => (1 - d / 255) * radius);
+          .radius((d) => {
+            // Normalize data between 0 and 1
+            const normalizedData = d / 100;
+            const minLimit = 0.1;
+            const maxLimit = 0.2;
+            // Scale data between minLimit and maxLimit
+            const scaledData = normalizedData * (maxLimit - minLimit) + minLimit;
+
+            // Return scaled data as radius
+            return scaledData * radius;
+          });
 
         function renderFrame() {
           requestAnimationFrame(renderFrame);
@@ -45,8 +55,8 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({ isOn, audioContext }) => 
             .join('path')
             .attr('transform', `translate(${width / 2}, ${height / 2})`)
             .attr('d', radialLine)
-            .attr('stroke', '#e0e0e0')
-            .attr('stroke-width', 5)
+            .attr('stroke', 'white')
+            .attr('stroke-width', 6)
             .attr('fill', 'none');
         }
 
@@ -73,6 +83,7 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({ isOn, audioContext }) => 
   return (
     <div
       className="fixed w-[150px] h-[150px] transition-opacity duration-500"
+      data-ava-element="audio-wave"
       style={{
         bottom: '0',
         left: '0',
