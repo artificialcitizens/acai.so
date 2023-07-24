@@ -45,18 +45,6 @@ export const similaritySearchInMemoryVectorStore = async (
 };
 
 /**
- * Deletes from the MemoryVectorStore.
- * @param vectorStore The MemoryVectorStore instance.
- * @param params The parameters for deletion.
- */
-export const deleteFromMemoryVectorStore = async (
-  vectorStore: MemoryVectorStore,
-  params?: Record<string, any>,
-): Promise<void> => {
-  await vectorStore.delete(params);
-};
-
-/**
  * Performs a similarity search in the MemoryVectorStore with scores.
  * @param vectorStore The MemoryVectorStore instance.
  * @param query The query string.

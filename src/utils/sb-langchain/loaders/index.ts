@@ -1,3 +1,2 @@
-export * from "./directory-loader";
-export * from "./text-loaders";
-export * from "./github-loader";
+export * from './directory-loader';
+export * from './github-loader';

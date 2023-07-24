@@ -28,8 +28,10 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
   };
 
   const filteredNotifications = notificationFilter
-    ? notifications.filter((notification) => notificationFilter.includes(notification.type || ''))
-    : notifications.filter((notification) => notification.data?.type === secondaryFilter);
+    ? notifications.filter((notification) => {
+        return notificationFilter.includes(notification.type || '');
+      })
+    : notifications.filter((notification: any) => notification.data?.type === secondaryFilter);
 
   return (
     <div className=" pt-2 border-b-2 border-solid border-lighter w-full">
