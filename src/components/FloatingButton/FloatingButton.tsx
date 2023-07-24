@@ -4,7 +4,7 @@ interface FloatingButtonProps {
   variant?: 'primary' | 'secondary';
   size?: 'small' | 'medium' | 'large';
   label?: string;
-  handleClick: () => void;
+  handleClick: (e: any) => void;
 }
 
 export const FloatingButton: React.FC<FloatingButtonProps> = ({ variant, size, label, handleClick }) => {
@@ -15,7 +15,7 @@ export const FloatingButton: React.FC<FloatingButtonProps> = ({ variant, size, l
       data-te-target="#sidenav-1"
       aria-controls="#sidenav-1"
       aria-haspopup="true"
-      onClick={handleClick}
+      onMouseDown={handleClick}
     >
       <span className="block [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-white">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
