@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import React, { useState, useEffect, useCallback, ReactNode, useRef, useLayoutEffect } from 'react';
+// eslint-disable-next-line import/named
 import { Editor, Range, Extension } from '@tiptap/core';
 import Suggestion from '@tiptap/suggestion';
 import { ReactRenderer } from '@tiptap/react';
+// eslint-disable-next-line import/no-unresolved
 import { useCompletion } from 'ai/react';
 import tippy from 'tippy.js';
 import {
@@ -19,6 +22,7 @@ import {
 } from 'lucide-react';
 import LoadingCircle from '../loading-circle';
 import Magic from '../magic';
+import { toastifyError } from '../../Toast';
 
 interface CommandItemProps {
   title: string;
@@ -148,26 +152,26 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       icon: <Code size={18} />,
       command: ({ editor, range }: CommandProps) => editor.chain().focus().deleteRange(range).toggleCodeBlock().run(),
     },
-    {
-      title: 'Image',
-      description: 'Upload an image from your computer.',
-      searchTerms: ['photo', 'picture', 'media'],
-      icon: <ImageIcon size={18} />,
-      command: ({ editor, range }: CommandProps) => {
-        editor.chain().focus().deleteRange(range).run();
-        // upload image
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = async (event) => {
-          if (input.files?.length) {
-            const file = input.files[0];
-            return handleImageUpload(file, editor.view, event);
-          }
-        };
-        input.click();
-      },
-    },
+    // {
+    //   title: 'Image',
+    //   description: 'Upload an image from your computer.',
+    //   searchTerms: ['photo', 'picture', 'media'],
+    //   icon: <ImageIcon size={18} />,
+    //   command: ({ editor, range }: CommandProps) => {
+    //     editor.chain().focus().deleteRange(range).run();
+    //     // upload image
+    //     const input = document.createElement('input');
+    //     input.type = 'file';
+    //     input.accept = 'image/*';
+    //     input.onchange = async (event) => {
+    //       if (input.files?.length) {
+    //         const file = input.files[0];
+    //         return handleImageUpload(file, editor.view, event);
+    //       }
+    //     };
+    //     input.click();
+    //   },
+    // },
   ].filter((item) => {
     if (typeof query === 'string' && query.length > 0) {
       const search = query.toLowerCase();
@@ -213,8 +217,7 @@ const CommandList = ({
     api: '/api/generate',
     onResponse: (response) => {
       if (response.status === 429) {
-        toast.error('You have reached your request limit for the day.');
-        va.track('Rate Limit Reached');
+        toastifyError('You have reached your request limit for the day.');
         return;
       }
       editor.chain().focus().deleteRange(range).run();
@@ -227,16 +230,14 @@ const CommandList = ({
       });
     },
     onError: () => {
-      toast.error('Something went wrong.');
+      toastifyError('Something went wrong.');
     },
   });
 
   const selectItem = useCallback(
     (index: number) => {
       const item = items[index];
-      va.track('Slash Command Used', {
-        command: item.title,
-      });
+
       if (item) {
         if (item.title === 'Continue writing') {
           // we're using this for now until we can figure out a way to stream markdown text with proper formatting: https://github.com/steven-tey/novel/discussions/7

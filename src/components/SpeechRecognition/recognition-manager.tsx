@@ -21,8 +21,9 @@ export const recognitionRouter = async ({
     //   const json = await response.json();
     //   return json.response;
     case 'ava':
-      const answer = await avaChat({ input: transcript, openAIApiKey: openAIKey, callbacks });
-      return answer;
+      // const answer = await avaChat({ input: transcript, openAIApiKey: openAIKey, callbacks });
+      // return answer;
+      return 'im ava';
     case 'chat':
       // return 'hello world';
       break;

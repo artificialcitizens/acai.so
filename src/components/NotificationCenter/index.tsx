@@ -48,7 +48,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   notification.type || 'info'
                 } flex justify-between items-center text-light mb-2 py-2 border-b border-solid border-light`}
               >
-                <span>{notification.content}</span>
+                <span>{notification.content as any}</span>
                 {/* {notification.read ? '✅' : <span onClick={() => markAsRead(notification.id)}>📬</span>} */}
               </div>
             );

@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/named
 import { EditorProps } from '@tiptap/pm/view';
 
 export const TiptapEditorProps: EditorProps = {
@@ -27,7 +28,7 @@ export const TiptapEditorProps: EditorProps = {
     if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
       event.preventDefault();
       const file = event.dataTransfer.files[0];
-      return handleImageUpload(file, view, event);
+      // return handleImageUpload(file, view, event);
     }
     return false;
   },
