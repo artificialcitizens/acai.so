@@ -10,11 +10,11 @@ import { VectorStoreContext } from './context/VectorStoreContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { GlobalStateProvider } from './context/GlobalStateContext';
 
-const socket = client('http://localhost:3000', {
-  auth: {
-    password: 'your_password_here',
-  },
-});
+// const socket = client('http://localhost:3000', {
+//   auth: {
+//     password: 'your_password_here',
+//   },
+// });
 const keyMap = {
   SNAP_LEFT: 'command+left',
 };
@@ -22,13 +22,13 @@ const keyMap = {
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <HotKeys keyMap={keyMap}>
-      <SocketContext.Provider value={socket}>
-        <GlobalStateProvider>
-          <Router>
-            <App />
-          </Router>
-        </GlobalStateProvider>
-      </SocketContext.Provider>
+      {/* <SocketContext.Provider value={socket}> */}
+      <GlobalStateProvider>
+        <Router>
+          <App />
+        </Router>
+      </GlobalStateProvider>
+      {/* </SocketContext.Provider> */}
     </HotKeys>
   </React.StrictMode>,
 );
