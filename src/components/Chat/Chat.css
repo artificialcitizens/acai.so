@@ -43,6 +43,10 @@
   background-color: white;
 }
 
+.cs-message-list {
+  height: calc(100vh - 57px);
+}
+
 .cs-message-list__scroll-wrapper > .cs-message {
   max-width: 90%;
   margin: 0.5rem 0;
