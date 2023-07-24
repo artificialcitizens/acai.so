@@ -111,7 +111,8 @@ function App() {
   const workspace = globalServices.appStateService.getSnapshot().context.workspaces[workspaceId];
   return (
     globalServices.appStateService && (
-      <VectorStoreContext.Provider value={{ vectorstore, addDocuments, similaritySearchWithScore }}>
+      // <VectorStoreContext.Provider value={{ vectorstore, addDocuments, similaritySearchWithScore }}>
+      <>
         <SideNav></SideNav>
         <FloatingButton
           handleClick={(e) => {
@@ -209,7 +210,8 @@ function App() {
             </SBSidebar> */}
           </main>
         </div>{' '}
-      </VectorStoreContext.Provider>
+        {/* </VectorStoreContext.Provider> */}
+      </>
     )
   );
 }
