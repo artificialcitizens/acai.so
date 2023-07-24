@@ -1,5 +1,0 @@
-
-What Are Design Tokens?
-
-Design Tokens
- Design tokens are atomic design properties - a color, font, border radius, or some combination of these properties - expressed as a source variable that can be combined, translated, and consumed across an entire digital ecosystem.
