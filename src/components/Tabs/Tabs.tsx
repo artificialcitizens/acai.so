@@ -6,22 +6,14 @@ import 'react-tabs/style/react-tabs.css';
 import './tabs.css';
 import { appStateMachine } from '../../state/app.xstate';
 import { v4 as uuidv4 } from 'uuid';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-interface TabManagerProps {
-  activeWorkspaceId: string;
-  activeTabId: string;
-}
-
-const TabManager: React.FC<TabManagerProps> = ({ activeWorkspaceId, activeTabId }) => {
+const TabManager: React.FC = () => {
   const service = useInterpret(appStateMachine);
-  const [tabId, setTabId] = React.useState(activeTabId);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    console.log('activeTabId', activeTabId);
-    setTabId(activeTabId);
-  }, [activeTabId]);
+  const location = useLocation();
+  const activeWorkspaceId = location.pathname.split('/')[1];
+  const activeTabId = location.pathname.split('/')[2];
 
   const handleCreateTab = () => {
     const title = prompt('Enter a title for the new tab');
@@ -38,9 +30,8 @@ const TabManager: React.FC<TabManagerProps> = ({ activeWorkspaceId, activeTabId 
   };
 
   const workspace = service.getSnapshot().context.workspaces[activeWorkspaceId];
-
   // Find the current active tab
-  const activeTab = workspace?.data.tiptap.tabs.find((tab) => tab.id === tabId);
+  const activeTab = workspace?.data.tiptap.tabs.find((tab) => tab.id === activeTabId);
   //@TODO: Add a home tab to take you to the workspace overview
   return (
     workspace && (

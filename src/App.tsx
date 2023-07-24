@@ -15,8 +15,9 @@ import RoomManager from './components/RoomManager/RoomManager';
 import { avaChat } from './utils/sb-langchain/agents/ava';
 import AudioWaveform from './components/AudioWave/AudioWave';
 import SocketContext from './context/SocketContext';
+import { useClickAway } from '@uidotdev/usehooks';
 import SBSidebar from './components/Sidebar';
-import { Header, ProjectLinks } from './components/ProjectLinks/ProjectLinks';
+import { ProjectLinks } from './components/ProjectLinks/ProjectLinks';
 import TabManager from './components/Tabs';
 import StorageMeter from './components/StorageMeter/StorageMeter';
 import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
@@ -25,10 +26,10 @@ import Chat from './components/Chat/Chat';
 import SBSearch from './components/Search';
 import ScratchPad from './components/ScratchPad/ScratchPad';
 import { makeObservations, queryPinecone } from './endpoints';
-export type State = 'idle' | 'passive' | 'ava' | 'notes' | 'strahl' | 'chat';
-import { Workspace, appStateMachine, handleCreateTab } from './state/app.xstate';
+import { Workspace, appStateMachine, handleCreateTab, uiMachine } from './state/';
 import TokenManager from './components/TokenManager/token-manager';
 import { useInterpret, useMachine, useSelector } from '@xstate/react';
+import { Ava } from './components/Ava/Ava';
 import useCookieStorage from './hooks/use-cookie-storage';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
 import { VectorStoreContext } from './context/VectorStoreContext';
@@ -37,6 +38,9 @@ import { SideNav } from './components/SideNav/SideNav';
 import { FloatingButton } from './components/FloatingButton/FloatingButton';
 import { GlobalStateContext, GlobalStateContextValue } from './context/GlobalStateContext';
 import { useLocation } from 'react-router-dom';
+// import Cursor from './components/Cursor/cursor';
+// import useElementPosition from './hooks/use-element-position';
+// import CursorDebug from './components/Cursor/CursorDebug';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 // const getGeolocation = () => {
 //   if ('geolocation' in navigator) {
@@ -60,45 +64,25 @@ function App() {
   // const [currentState, setCurrentState] = useState<State>('idle');
   // const [observations, setObservations] = useState<string>('');
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
-  const [chatOpen, setChatOpen] = useState(true);
-  const [agentThoughtsOpen, setAgentThoughtsOpen] = useState(true);
+
   const globalServices: GlobalStateContextValue = useContext(GlobalStateContext);
-  const service = useInterpret(appStateMachine);
-  const [workspaceId, setWorkspaceId] = useState<string>('');
-  const [tabId, setTabId] = useState<string>('');
-  const workspace = service.getSnapshot().context.workspaces[workspaceId];
-  const [openAIApiKey] = useCookieStorage('OPENAI_KEY');
+  const location = useLocation();
+  const workspaceId = location.pathname.split('/')[1];
   const { vectorstore, addDocuments, similaritySearchWithScore } = useMemoryVectorStore(
     '',
     // add only tabs that are set to be included in the context of the language model
     // @TODO: add a tool for Ava to see what the user is working on
     // workspace ? workspace.data.tiptap.tabs.map((tab) => tab.isContext && tab.content).join('\n') : '',
   );
-  const [fetchResponse, avaLoading] = useAva();
-  const [sideNavHidden, setSideNavHidden] = useState(true);
-  const [scratchpadContent, setScratchpadContent] = useState('');
-  const location = useLocation();
+  // const [elementPosition, updateElementSelector, elementName] = useElementPosition("[data-ava-element='audio-wave']");
+  // const [agentCursorPos, setAgentCursorPos] = useState([{ x: elementPosition.x, y: elementPosition.y }]);
 
-  useEffect(() => {
-    const workspaceId = location.pathname.split('/')[1];
-    const tabId = location.pathname.split('/')[2];
-    if (workspaceId) {
-      globalServices.appStateService.send({ type: 'SET_ACTIVE_WORKSPACE', workspaceId });
-      setWorkspaceId(workspaceId);
-    }
+  // useEffect(() => {
+  //   setAgentCursorPos([elementPosition]);
+  // }, [elementPosition]);
 
-    if (tabId) {
-      globalServices.appStateService.send({ type: 'SET_ACTIVE_TAB', tabId });
-      setTabId(tabId);
-    }
-  }, [globalServices, location]);
-
-  const toggleChat = () => {
-    setChatOpen(!chatOpen);
-  };
-
-  const toggleAgentThoughts = () => {
-    setAgentThoughtsOpen(!agentThoughtsOpen);
+  const toggleSideNav = () => {
+    globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV' });
   };
 
   const activateAudioContext = () => {
@@ -111,25 +95,28 @@ function App() {
     }
   };
 
-  // update the state on handleInputChange
-  const handleSystemNoteUpdate = (event: { target: { value: any } }) => {
-    const newNotes = event.target.value;
-    setScratchpadContent(newNotes);
-    globalServices.appStateService.send({ type: 'UPDATE_NOTES', id: workspaceId, notes: newNotes });
-  };
+  // const handleReachedDestination = () => {
+  //   console.log('Cursor has reached its destination', elementName);
+  //   const isUppercase = elementName === elementName.toUpperCase();
+  //   if (isUppercase) {
+  //     globalServices.uiStateService.send({ type: elementName, workspaceId });
+  //   }
+  //   console.log(isUppercase); // Outputs: true
+  // };
 
+  // // Get the center of the screen
+  // const centerX = window.innerWidth / 2;
+  // const centerY = window.innerHeight / 2;
+
+  const workspace = globalServices.appStateService.getSnapshot().context.workspaces[workspaceId];
   return (
     globalServices.appStateService && (
       <VectorStoreContext.Provider value={{ vectorstore, addDocuments, similaritySearchWithScore }}>
-        <SideNav
-          isToggled={sideNavHidden}
-          handleToggle={() => {
-            setSideNavHidden(!sideNavHidden);
-          }}
-        ></SideNav>
+        <SideNav></SideNav>
         <FloatingButton
-          handleClick={() => {
-            setSideNavHidden(!sideNavHidden);
+          handleClick={(e) => {
+            e.stopPropagation();
+            toggleSideNav();
           }}
         />
         <div
@@ -137,15 +124,17 @@ function App() {
           onClick={handleWindowClick}
         >
           <ToastManager />
-          {/* <AudioWaveform isOn={currentState === 'ava'} audioContext={audioContext} /> */}
+          {/* <AudioWaveform isOn={true} audioContext={audioContext} /> */}
+          {/* <Cursor coordinates={agentCursorPos} onReachedDestination={handleReachedDestination} speed={1.25} /> */}
           <main className="w-full flex flex-grow ">
             <div className="w-full flex flex-col">
               <div className="h-12 ml-16">{workspace && <h1 className="m-2 text-lg">{workspace.name}</h1>}</div>
-              <TabManager key={workspaceId} activeWorkspaceId={workspaceId} activeTabId={tabId} />
+              <TabManager />
             </div>
-            <SBSidebar>
+            <Ava />
+            {/* <SBSidebar>
               {' '}
-              <ExpansionPanel title="Junk Drawer">
+              <ExpansionPanel data-ava-element="junk-drawer-panel-toggle" title="Junk Drawer">
                 <div className="w-full">
                   <ProjectLinks />
                   <SBSearch
@@ -160,28 +149,29 @@ function App() {
                       globalServices.appStateService.send({ type: 'ADD_TAB', tab: newTab });
                     }}
                   />
+                  <CursorDebug onSubmit={updateElementSelector} />
                   <TokenManager />
                   <StorageMeter />
                 </div>
-                {/* <SpeechRecognition
+                <SpeechRecognition
                   active={speechRecognition}
                   onClick={() => {
                     setSpeechRecognition(!speechRecognition);
                   }}
                   onTranscriptionComplete={handleTranscription}
-                /> */}
-                {/* <ElevenLabs
+                />
+                <ElevenLabs
                   active={currentState === 'ava' || currentState === 'strahl'}
                   text={agentTranscript}
                   voice={currentState === 'ava' ? 'ava' : 'strahl'}
-                /> */}
-                {/* <Whisper
+                />
+                <Whisper
                 onRecordingComplete={(blob) => console.log(blob)}
                 onTranscriptionComplete={async (t) => {
                   console.log('Whisper Server Response', t);
                 }}
-              /> */}
-                {/* <RoomManager /> */}
+              />
+                <RoomManager />
               </ExpansionPanel>
               <ExpansionPanel title="Agent Settings">
                 <ScratchPad
@@ -190,10 +180,16 @@ function App() {
                   handleInputChange={handleSystemNoteUpdate}
                 />
               </ExpansionPanel>
-              {/* <ExpansionPanel title="Observations">
+              <ExpansionPanel title="Observations">
               <NotificationCenter placeholder="Always listening 👂" secondaryFilter="agent-observation" />
-            </ExpansionPanel> */}
-              <ExpansionPanel title="Agent" isOpened={agentThoughtsOpen} onChange={toggleAgentThoughts}>
+            </ExpansionPanel>
+              <ExpansionPanel
+                title="Agent"
+                data-ava-element="TOGGLE_AGENT_THOUGHTS"
+                isOpened={globalServices.uiStateService.getSnapshot().context.thoughtsOpen}
+                onChange={toggleAgentThoughts}
+                onClick={toggleAgentThoughts}
+              >
                 <NotificationCenter placeholder="A place for AI to ponder 🤔" secondaryFilter="agent-thought" />
               </ExpansionPanel>
               <ExpansionPanel className="flex-grow" title="Chat" isOpened={chatOpen} onChange={toggleChat}>
@@ -203,14 +199,14 @@ function App() {
                     avatar=".."
                     onSubmitHandler={async (message) => {
                       const systemMessage =
-                        globalServices.appStateService.state.context.workspaces[workspaceId].data.notes || '';
+                        globalServices.appStateService.getSnapshot().context.workspaces[workspaceId].data.notes || '';
                       const response = await fetchResponse(message, systemMessage);
                       return response;
                     }}
                   />
                 )}
               </ExpansionPanel>
-            </SBSidebar>
+            </SBSidebar> */}
           </main>
         </div>{' '}
       </VectorStoreContext.Provider>

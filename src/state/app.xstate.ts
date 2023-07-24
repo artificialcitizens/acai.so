@@ -177,7 +177,13 @@ export const appStateMachine = createMachine<IContext, Event>({
           actions: [
             assign((context, event) => {
               const newWorkspace = event.workspace;
-              const newContext = { ...context, workspaces: { ...context.workspaces, [newWorkspace.id]: newWorkspace } };
+              console.log(context);
+              const newContext = {
+                ...context,
+                activeWorkspaceId: newWorkspace.id,
+                workspaces: { ...context.workspaces, [newWorkspace.id]: newWorkspace },
+              };
+              console.log(newContext);
               return newContext;
             }),
             (context, event) => saveState(context),
