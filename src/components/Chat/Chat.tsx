@@ -1,19 +1,14 @@
-import React, { useEffect, useState, useRef, useCallback, useId } from 'react';
-import {
-  ChatContainer,
-  MessageList,
-  Message,
-  MessageInput,
-  TypingIndicator,
-  MessageModel,
-} from '@chatscope/chat-ui-kit-react';
+import React, { useEffect, useState, useRef, useCallback, useContext } from 'react';
+import { ChatContainer, MessageList, Message, MessageInput, TypingIndicator } from '@chatscope/chat-ui-kit-react';
 import './Chat.css';
 import Dropzone from '../Dropzone/Dropzone';
 import { toast } from 'react-toastify';
 import { toastifyError, toastifySuccess } from '../Toast';
-import { marked } from 'marked';
-import { useLocalStorage, useLocalStorageString } from '../../hooks/use-local-storage';
 import Linkify from 'react-linkify';
+import { GlobalStateContext, GlobalStateContextValue } from '../../context/GlobalStateContext';
+import { useActor } from '@xstate/react';
+import { ChatHistory } from '../../state';
+import { useLocation } from 'react-router-dom';
 
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
@@ -25,9 +20,25 @@ interface ChatProps {
   avatar: string;
 }
 const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, name = 'Ava' }) => {
+  const { uiStateService, agentStateService, appStateService }: GlobalStateContextValue =
+    useContext(GlobalStateContext);
+  const location = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [msgInputValue, setMsgInputValue] = useState(startingValue);
-  const [messages, setMessages] = useState<MessageModel[]>([]);
+  const workspaceId = location.pathname.split('/')[1];
+  const [state, send] = useActor(agentStateService);
+  const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
+  const [messages, setMessages] = useState<any[]>(
+    recentChatHistory.map((history: ChatHistory) => {
+      return {
+        message: history.text,
+        direction: history.type === 'user' ? 'outgoing' : 'incoming',
+        sender: history.type === 'user' ? 'User' : 'Assistant',
+        position: 'single',
+        sentTime: history.timestamp,
+      };
+    }),
+  );
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -57,10 +68,43 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
       addMessage(message, 'User', 'outgoing');
       setMsgInputValue('');
       inputRef.current?.focus();
+
+      const userChatHistory: ChatHistory = {
+        id: workspaceId,
+        text: message,
+        timestamp: Math.floor(Date.now() / 1000).toString(),
+        type: 'user',
+      };
+
+      send({
+        type: 'UPDATE',
+        agent: {
+          workspaceId: workspaceId,
+          recentChatHistory: [...recentChatHistory, userChatHistory],
+        },
+      });
+
       setLoading(true);
-      const chatHistory = messages.map((msg) => msg.message).join('\n');
+
       try {
-        const answer = await onSubmitHandler(message, chatHistory);
+        const answer = await onSubmitHandler(
+          message,
+          recentChatHistory.map((history: ChatHistory) => history.text).join('\n'),
+        );
+
+        const assistantChatHistory: ChatHistory = {
+          id: workspaceId,
+          text: answer,
+          timestamp: Math.floor(Date.now() / 1000).toString(),
+          type: 'ava',
+        };
+
+        send({
+          type: 'UPDATE_CHAT_HISTORY',
+          workspaceId: workspaceId,
+          recentChatHistory: [...recentChatHistory, userChatHistory, assistantChatHistory],
+        });
+
         setLoading(false);
         addMessage(answer, 'Assistant', 'incoming');
       } catch (error) {
@@ -72,12 +116,11 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
         );
       }
     },
-    [addMessage, setLoading, inputRef, setMsgInputValue, messages, onSubmitHandler],
+    [addMessage, setLoading, inputRef, setMsgInputValue, onSubmitHandler, recentChatHistory, send, workspaceId],
   );
 
   const handleFileDrop = (file: File) => {
     console.log(file);
-    // Check file type
     toast(`📁 Processing ${file.name}`, {
       toastId: `${file.name}`,
       className: 'custom-toast',
