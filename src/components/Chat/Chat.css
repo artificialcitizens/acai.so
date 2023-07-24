@@ -44,7 +44,7 @@
 }
 
 .cs-message-list {
-  height: calc(100vh - 57px);
+  height: calc(100vh - 10.5rem);
 }
 
 .cs-message-list__scroll-wrapper > .cs-message {
