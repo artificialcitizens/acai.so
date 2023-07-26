@@ -32,6 +32,7 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
 
   const createWorkspace = () => {
     const id = uuidv4().split('-')[0];
+    const tabId = uuidv4().split('-')[0];
     const name = prompt('Enter a name for your new workspace');
     if (!name) return;
     const newWorkspace: Workspace = {
@@ -49,8 +50,8 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
         tiptap: {
           tabs: [
             {
-              id: uuidv4().split('-')[0],
-              title: 'New Tab',
+              id: tabId,
+              title: `Welcome to ${name}!`,
               content: '',
               isContext: false,
               systemNote: '',
@@ -79,13 +80,14 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
     globalServices.appStateService.send({ type: 'ADD_WORKSPACE', workspace: newWorkspace });
 
     globalServices.agentStateService.send({ type: 'CREATE_AGENT', workspaceId: id });
+    navigate(`/${id}/${tabId}`);
   };
 
   // Function to create a new tab
   const createTab = async (workspaceId: string) => {
     const title = prompt('Enter a name for your new tab');
     if (!title) return;
-    const { id } = await handleCreateTab({ title, content: '' }, workspaceId, globalServices.appStateService.send);
+    const { id } = await handleCreateTab({ title, content: '' }, workspaceId);
     navigate(`/${workspaceId}/${id}`);
     globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV', workspaceId });
   };
@@ -103,7 +105,7 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
         {Object.values(workspaces).map((workspace) => (
           <li className="relative pb-2 border-b border-solid border-lighter !important" key={workspace.id}>
             <Link
-              className="flex h-12 cursor-pointer items-center truncate rounded-[5px] px-6 py-4 text-[0.875rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none "
+              className="flex h-12 cursor-pointer items-center truncate max-w-[50%] rounded-[5px] px-6 py-4 text-[0.875rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none "
               to={`/${workspace.id}`}
               data-te-sidenav-link-ref
               onClick={() => {
@@ -113,10 +115,9 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
               <span className="font-bold">{workspace.name}</span>
             </Link>
             <button
-              className="w-full"
+              className="justify-self-end w-8 mr-2"
               onClick={() => {
                 createTab(workspace.id);
-                navigate(`/${workspace.id}`);
               }}
             >
               +
@@ -134,7 +135,6 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
                     data-te-sidenav-link-ref
                     onClick={() => {
                       globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV' });
-                      console.log('workspace.id clicking tab', workspace.id);
                     }}
                   >
                     <span>{tab.title}</span>
