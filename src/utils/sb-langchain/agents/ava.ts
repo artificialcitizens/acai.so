@@ -163,16 +163,16 @@ const tools = [
     func: async (input: string) => input,
     returnDirect: true,
   }),
-  // I've found that sometimes the agent just needs a dumping ground to rework its thoughts
-  // this seems to help minimize LLM parsing errors
-  // @TODO: Log how many times this - and all - tools are used for analytics and verifying usefulness
-  new DynamicTool({
-    name: 'Thought Processing',
-    description: `This is useful for when you have a thought that you want to use in a task,
-    but you want to make sure it's formatted correctly.
-    Input is your thought and self-critique and output is the processed thought.`,
-    func: processThought,
-  }),
+  // // I've found that sometimes the agent just needs a dumping ground to rework its thoughts
+  // // this seems to help minimize LLM parsing errors
+  // // @TODO: Log how many times this - and all - tools are used for analytics and verifying usefulness
+  // new DynamicTool({
+  //   name: 'Thought Processing',
+  //   description: `This is useful for when you have a thought that you want to use in a task,
+  //   but you want to make sure it's formatted correctly.
+  //   Input is your thought and self-critique and output is the processed thought.`,
+  //   func: processThought,
+  // }),
   new DynamicTool({
     name: 'Human Feedback',
     description: `Use this tool for when you need a specific piece of information from a human that only that human would know. 
@@ -185,7 +185,7 @@ const createDocumentTool = (callback: any) => {
   return new DynamicTool({
     name: 'Create Document',
     description: `Use this tool any time Josh wants you to create a document or report, etc. 
-    Input is Title: string, Content: string formatted as markdown,
+    Input is <title>Title</title> <content>Content</content>
     DO NOT INCLUDE THIS INFORMATION IN THE RESPONSE, JOSH WILL GET IT AUTOMATICALLY
     `,
     func: callback,
@@ -255,8 +255,15 @@ const createAgentArtifacts = ({
     return result;
   };
   const documentTool = createDocumentTool((input: string) => {
-    const title = input.split('Title: ')[1].split(',\nContent:')[0].replace(/"/g, '');
-    const content = input.split(',\nContent:')[1].replace(/"/g, '');
+    const titleRegex = /<title>(.*?)<\/title>/s;
+    const titleMatch = titleRegex.exec(input);
+    const title = titleMatch ? titleMatch[1] : ''; // extracts 'Title'
+
+    const contentRegex = /<content>(.*?)<\/content>/s;
+    const contentMatch = contentRegex.exec(input);
+    const content = contentMatch ? contentMatch[1] : ''; // extracts 'Content'
+
+    console.log({ title, content });
     handleCreateDocument({ title, content });
   });
 
