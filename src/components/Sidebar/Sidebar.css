@@ -12,6 +12,10 @@
   @apply bg-dark text-light border-dark m-0 !important;
 }
 
+.chat-panel {
+  @apply flex-grow;
+}
+
 .cs-expansion-panel__content {
   @apply bg-dark border-lighter !important;
 }
