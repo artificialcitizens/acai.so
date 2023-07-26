@@ -57,20 +57,7 @@ const loadAgentState = (): AgentWorkspace => {
         loading: false,
         workspaceId: 'UUIDxyz',
         systemNotes: '',
-        recentChatHistory: [
-          {
-            id: 'UUIDxyz',
-            text: 'Hello, how can I help you?',
-            timestamp: '1621090800000',
-            type: 'ava',
-          },
-          {
-            id: 'UUIDxyz',
-            text: 'I need help with my account',
-            timestamp: '1651090800000',
-            type: 'user',
-          },
-        ],
+        recentChatHistory: [],
         agentLogs: {},
         agentTools: {},
       },
