@@ -13,13 +13,14 @@ import useCookieStorage from '../../hooks/use-cookie-storage';
 import { useAva } from '../../hooks/use-ava';
 import { GlobalStateContext, GlobalStateContextValue } from '../../context/GlobalStateContext';
 import { makeObservations, queryPinecone } from '../../endpoints';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { FloatingButton } from '../FloatingButton/FloatingButton';
 
 export const Ava = () => {
   const { appStateService, uiStateService, agentStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const location = useLocation();
+  const navigate = useNavigate();
   const workspaceId = location.pathname.split('/')[1];
   const systemNotes = useSelector(agentStateService, (state) => state.context[workspaceId]?.systemNotes) || '';
   const [openAIApiKey] = useCookieStorage('OPENAI_KEY');
@@ -55,6 +56,7 @@ export const Ava = () => {
                 workspaceId,
               };
               appStateService.send({ type: 'ADD_TAB', tab: newTab });
+              navigate(`/${workspaceId}/${newTab.id}`);
             }}
           />
           <TokenManager />
@@ -84,7 +86,7 @@ export const Ava = () => {
       >
         <NotificationCenter placeholder="A place for AI to ponder 🤔" secondaryFilter="agent-thought" />
       </ExpansionPanel>
-      <ExpansionPanel isOpened={true}>
+      <ExpansionPanel className="chat-panel" isOpened={true}>
         {openAIApiKey && (
           <Chat
             name="Ava"
