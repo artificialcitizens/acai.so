@@ -23,8 +23,8 @@ const voices = {
 };
 
 // Define a function called textToSpeech that takes in a string called inputText as its argument.
-const textToSpeech = async (inputText: string, voice: string) => {
-  const API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
+const textToSpeech = async (inputText: string, voice: string, apiKey: string) => {
+  const API_KEY = apiKey;
   // Set the ID of the voice to be used.
   const VOICE_ID = voices[voice as keyof typeof voices];
 
@@ -60,6 +60,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
   const [userTranscript, setUserTranscript] = useState<string>('');
   const [fetchResponse, avaLoading] = useAva();
   const [openAIApiKey] = useCookieStorage('OPENAI_KEY');
+  const [elevenlabsKey] = useCookieStorage('ELEVENLABS_API_KEY');
   const [elementPosition, updateElementSelector, elementName] = useElementPosition("[data-ava-element='audio-wave']");
   const [agentCursorPos, setAgentCursorPos] = useState([{ x: elementPosition.x, y: elementPosition.y }]);
 
@@ -128,10 +129,10 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
 
     switch (voiceRecognitionState) {
       case 'ava': {
-        if (!updatedUserTranscript) return;
+        if (!updatedUserTranscript || !elevenlabsKey) return;
         const systemNotes = 'You are responding via voice synthesis, keep the final answer short and to the point.';
         const response = await fetchResponse(updatedUserTranscript, systemNotes);
-        textToSpeech(response, 'ava').then((audioData) => {
+        textToSpeech(response, 'ava', elevenlabsKey).then((audioData) => {
           const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
           const audioUrl = URL.createObjectURL(audioBlob);
           setAudioSrc(audioUrl);
@@ -140,7 +141,8 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
       }
       case 'voice2voice': {
         if (!updatedUserTranscript || updatedUserTranscript.split(' ').length < 2) return;
-        textToSpeech(updatedUserTranscript, 'strahl').then((audioData) => {
+        if (!elevenlabsKey) return;
+        textToSpeech(updatedUserTranscript, 'strahl', elevenlabsKey).then((audioData) => {
           const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
           const audioUrl = URL.createObjectURL(audioBlob);
           setAudioSrc(audioUrl);
@@ -158,6 +160,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
 
   useSpeechRecognition({ onTranscriptionComplete, active: true });
   const isOn = voiceRecognitionState === 'ava' || voiceRecognitionState === 'notes';
+
   return (
     <>
       {audioContext && <AudioWaveform audioContext={audioContext} isOn={isOn} />}
