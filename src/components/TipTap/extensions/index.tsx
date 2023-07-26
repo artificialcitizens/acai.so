@@ -18,17 +18,17 @@ export const TiptapExtensions = [
   StarterKit.configure({
     bulletList: {
       HTMLAttributes: {
-        class: 'list-disc list-outside leading-3 -mt-2',
+        class: 'ml-2 mb-2 list-disc list-outside leading-1',
       },
     },
     orderedList: {
       HTMLAttributes: {
-        class: 'list-decimal list-outside leading-3 -mt-2',
+        class: 'ml-2 mb-2 list-decimal list-outside leading-1',
       },
     },
     listItem: {
       HTMLAttributes: {
-        class: 'leading-normal -mb-2',
+        class: 'ml-4 leading-normal',
       },
     },
     blockquote: {
