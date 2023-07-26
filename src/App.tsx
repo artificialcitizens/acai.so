@@ -11,9 +11,6 @@ import { FloatingButton } from './components/FloatingButton/FloatingButton';
 import { GlobalStateContext, GlobalStateContextValue } from './context/GlobalStateContext';
 import { useLocation } from 'react-router-dom';
 import ToastManager from './components/Toast';
-// import Cursor from './components/Cursor/cursor';
-// import useElementPosition from './hooks/use-element-position';
-// import CursorDebug from './components/Cursor/CursorDebug';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 
 function App() {

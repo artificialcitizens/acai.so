@@ -14,7 +14,6 @@ import { useAva } from '../../hooks/use-ava';
 import { GlobalStateContext, GlobalStateContextValue } from '../../context/GlobalStateContext';
 import { makeObservations, queryPinecone } from '../../endpoints';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FloatingButton } from '../FloatingButton/FloatingButton';
 
 export const Ava = () => {
   const { appStateService, uiStateService, agentStateService }: GlobalStateContextValue =

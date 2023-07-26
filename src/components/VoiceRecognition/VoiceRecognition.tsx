@@ -11,6 +11,7 @@ import useSpeechRecognition from '../../hooks/use-speech-recognition';
 import AudioWaveform from '../AudioWave/AudioWave';
 import Cursor from '../Cursor/Cursor';
 import useElementPosition from '../../hooks/use-element-position';
+// import CursorDebug from './components/Cursor/CursorDebug';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
