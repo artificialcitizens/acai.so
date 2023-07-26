@@ -9,6 +9,8 @@ import { GlobalStateContext, GlobalStateContextValue } from '../../context/Globa
 import { useLocation, useNavigate } from 'react-router-dom';
 import useSpeechRecognition from '../../hooks/use-speech-recognition';
 import AudioWaveform from '../AudioWave/AudioWave';
+import Cursor from '../Cursor/Cursor';
+import useElementPosition from '../../hooks/use-element-position';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
@@ -57,7 +59,25 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
   const [userTranscript, setUserTranscript] = useState<string>('');
   const [fetchResponse, avaLoading] = useAva();
   const [openAIApiKey] = useCookieStorage('OPENAI_KEY');
-  // const [active, setActive] = useState<boolean>(active);
+  const [elementPosition, updateElementSelector, elementName] = useElementPosition("[data-ava-element='audio-wave']");
+  const [agentCursorPos, setAgentCursorPos] = useState([{ x: elementPosition.x, y: elementPosition.y }]);
+
+  useEffect(() => {
+    setAgentCursorPos([elementPosition]);
+  }, [elementPosition]);
+
+  const handleReachedDestination = () => {
+    console.log('Cursor has reached its destination', elementName);
+    const isUppercase = elementName === elementName.toUpperCase();
+    if (isUppercase) {
+      globalServices.uiStateService.send({ type: elementName, workspaceId });
+    }
+    console.log(isUppercase); // Outputs: true
+  };
+
+  // Get the center of the screen
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
 
   const onTranscriptionComplete = async (t: string) => {
     if (!openAIApiKey) {
@@ -136,15 +156,19 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
   };
 
   useSpeechRecognition({ onTranscriptionComplete, active: true });
-
+  const isOn = voiceRecognitionState === 'ava' || voiceRecognitionState === 'notes';
   return (
     <>
-      {audioContext && (
-        <AudioWaveform
-          audioContext={audioContext}
-          isOn={voiceRecognitionState === 'ava' || voiceRecognitionState === 'notes'}
-        />
-      )}
+      {audioContext && <AudioWaveform audioContext={audioContext} isOn={isOn} />}
+      {/* <Cursor
+        style={{
+          visibility: !isOn ? 'hidden' : 'visible',
+          display: !isOn ? 'hidden' : '',
+        }}
+        coordinates={agentCursorPos}
+        onReachedDestination={handleReachedDestination}
+        speed={1.25}
+      /> */}
       <div className="rounded-lg mb-2 items-center justify-between flex-col hidden">
         <div className="w-full flex items-center mb-4">
           <span className="mr-2 text-light">Voice Recognition {voiceRecognitionState}</span>

@@ -9,10 +9,11 @@ interface Coordinate {
 interface CursorProps {
   coordinates: Coordinate[];
   onReachedDestination?: () => void;
+  style?: React.CSSProperties;
   speed?: number;
 }
 
-const Cursor: React.FC<CursorProps> = ({ coordinates, onReachedDestination, speed = 0.15 }) => {
+const Cursor: React.FC<CursorProps> = ({ coordinates, onReachedDestination, style, speed = 0.15 }) => {
   const [currentCoordinateIndex, setCurrentCoordinateIndex] = useState(0);
   const cursorRef = useRef<HTMLDivElement>(null);
 
@@ -32,8 +33,19 @@ const Cursor: React.FC<CursorProps> = ({ coordinates, onReachedDestination, spee
       onReachedDestination();
     }
   };
-
-  return <div className="cursor" ref={cursorRef} onTransitionEnd={handleTransitionEnd} />;
+  console.log({
+    ...style,
+  });
+  return (
+    <div
+      className="cursor"
+      style={{
+        ...style,
+      }}
+      ref={cursorRef}
+      onTransitionEnd={handleTransitionEnd}
+    />
+  );
 };
 
 export default Cursor;
