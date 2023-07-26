@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import useCookieStorage from './use-cookie-storage';
 import { avaChat } from '../utils/sb-langchain/agents/ava';
 import { toastifyAgentThought, toastifyError } from '../components/Toast';
 import { appStateMachine, handleCreateTab } from '../state';
 import { useInterpret } from '@xstate/react';
 import { marked } from 'marked';
+import { GlobalStateContext, GlobalStateContextValue } from '../context/GlobalStateContext';
+import { useLocation, useNavigate } from 'react-router-dom';
 // export const useAva = () => {
 export const useAva = (): [
   fetchResponse: (message: string, systemMessage: string) => Promise<string>,
@@ -14,7 +16,10 @@ export const useAva = (): [
   const [googleApiKey] = useCookieStorage('GOOGLE_API_KEY');
   const [googleCSEId] = useCookieStorage('GOOGLE_CSE_ID');
   const [loading, setLoading] = useState(false);
-  const service = useInterpret(appStateMachine);
+  const globalServices: GlobalStateContextValue = useContext(GlobalStateContext);
+  const location = useLocation();
+  const workspaceId = location.pathname.split('/')[1];
+  const navigate = useNavigate();
 
   const fetchResponse = async (message: string, systemMessage: string): Promise<string> => {
     setLoading(true);
@@ -32,13 +37,14 @@ export const useAva = (): [
           googleCSEId,
         },
         callbacks: {
-          handleCreateDocument: ({ title, content }: { title: string; content: string }) => {
-            const tab = handleCreateTab(
-              { title, content },
-              service.getSnapshot().context.activeWorkspaceId,
-              service.send,
-            );
-            // activate tab
+          handleCreateDocument: async ({ title, content }: { title: string; content: string }) => {
+            const tab = await handleCreateTab({ title, content }, workspaceId);
+            console.log({ tab });
+            globalServices.appStateService.send({
+              type: 'ADD_TAB',
+              tab,
+            });
+            navigate(`/${workspaceId}/${tab.id}`);
           },
           handleAgentAction: (action) => {
             const thought = action.log.split('Action:')[0].trim();
