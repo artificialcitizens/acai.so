@@ -11,6 +11,7 @@ import useSpeechRecognition from '../../hooks/use-speech-recognition';
 import AudioWaveform from '../AudioWave/AudioWave';
 import Cursor from '../Cursor/Cursor';
 import useElementPosition from '../../hooks/use-element-position';
+import { useHighlightedText } from '../../hooks/use-highlighted-text';
 // import CursorDebug from './components/Cursor/CursorDebug';
 
 interface VoiceRecognitionProps {
@@ -49,7 +50,7 @@ const textToSpeech = async (inputText: string, voice: string, apiKey: string) =>
   return speechDetails.data;
 };
 
-type VoiceState = 'idle' | 'ava' | 'notes' | 'strahl' | 'voice2voice';
+type VoiceState = 'idle' | 'ava' | 'notes' | 'strahl' | 'voice2voice' | 'following';
 const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => {
   const globalServices: GlobalStateContextValue = useContext(GlobalStateContext);
   const location = useLocation();
@@ -63,6 +64,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
   const [elevenlabsKey] = useCookieStorage('ELEVENLABS_API_KEY');
   const [elementPosition, updateElementSelector, elementName] = useElementPosition("[data-ava-element='audio-wave']");
   const [agentCursorPos, setAgentCursorPos] = useState([{ x: elementPosition.x, y: elementPosition.y }]);
+  const highlightedText = useHighlightedText();
 
   useEffect(() => {
     setAgentCursorPos([elementPosition]);
@@ -104,6 +106,12 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
         toastifyInfo('Voice to voice active');
         setVoiceRecognitionState('voice2voice');
         break;
+      case 'follow me':
+        setUserTranscript('');
+        // adjust to follow the cursor
+        toastifyInfo('Following');
+        setVoiceRecognitionState('following');
+        break;
       case 'cancel':
         toastifyInfo('Going Idle');
         setVoiceRecognitionState('idle');
@@ -128,9 +136,11 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
     }
 
     switch (voiceRecognitionState) {
-      case 'ava': {
+      case 'following': {
         if (!updatedUserTranscript || !elevenlabsKey) return;
-        const systemNotes = 'You are responding via voice synthesis, keep the final answer short and to the point.';
+        const systemNotes =
+          'You are responding via voice synthesis, keep the final answer short and to the point. Answer the users question about this text: ' +
+          highlightedText;
         const response = await fetchResponse(updatedUserTranscript, systemNotes);
         textToSpeech(response, 'ava', elevenlabsKey).then((audioData) => {
           const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
@@ -147,6 +157,17 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
           const audioUrl = URL.createObjectURL(audioBlob);
           setAudioSrc(audioUrl);
           setUserTranscript('');
+        });
+        break;
+      }
+      case 'ava': {
+        if (!updatedUserTranscript || !elevenlabsKey) return;
+        const systemNotes = 'You are responding via voice synthesis, keep the final answer short and to the point.';
+        const response = await fetchResponse(updatedUserTranscript, systemNotes);
+        textToSpeech(response, 'ava', elevenlabsKey).then((audioData) => {
+          const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          setAudioSrc(audioUrl);
         });
         break;
       }
@@ -185,7 +206,8 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
             onEnded={() => {
               setTimeout(() => {
                 setAudioSrc(null);
-                if (voiceRecognitionState === 'ava') setVoiceRecognitionState('idle');
+                if (voiceRecognitionState === 'ava' || voiceRecognitionState === 'following')
+                  setVoiceRecognitionState('idle');
               }, 200);
             }}
           />
