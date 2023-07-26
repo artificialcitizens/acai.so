@@ -24,13 +24,13 @@ export const Ava = () => {
   const workspaceId = location.pathname.split('/')[1];
   const systemNotes = useSelector(agentStateService, (state) => state.context[workspaceId]?.systemNotes) || '';
   const [openAIApiKey] = useCookieStorage('OPENAI_KEY');
+  const [fetchResponse, avaLoading] = useAva();
   // const { vectorstore, addDocuments, similaritySearchWithScore } = useMemoryVectorStore(
   //   '',
   //   // add only tabs that are set to be included in the context of the language model
   //   // @TODO: add a tool for Ava to see what the user is working on
   //   // workspace ? workspace.data.tiptap.tabs.map((tab) => tab.isContext && tab.content).join('\n') : '',
   // );
-  const [fetchResponse, avaLoading] = useAva();
 
   const toggleChat = () => {
     uiStateService.send({ type: 'TOGGLE_AGENT_CHAT' });
@@ -92,8 +92,7 @@ export const Ava = () => {
             name="Ava"
             avatar=".."
             onSubmitHandler={async (message) => {
-              const systemMessage = systemNotes;
-              const response = await fetchResponse(message, systemMessage);
+              const response = await fetchResponse(message, systemNotes);
               return response;
             }}
           />
