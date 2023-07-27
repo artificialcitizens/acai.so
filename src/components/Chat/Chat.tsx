@@ -47,6 +47,20 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
     }
   }, []);
 
+  useEffect(() => {
+    setMessages(
+      recentChatHistory.map((history: ChatHistory) => {
+        return {
+          message: history.text,
+          direction: history.type === 'user' ? 'outgoing' : 'incoming',
+          sender: history.type === 'user' ? 'User' : 'Assistant',
+          position: 'single',
+          sentTime: history.timestamp,
+        };
+      }),
+    );
+  }, [recentChatHistory, workspaceId]);
+
   const addMessage = useCallback(
     (message: string, sender: string, direction: 'incoming' | 'outgoing') => {
       setMessages((prevMessages) => [
@@ -193,7 +207,7 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
             ref={inputRef}
             sendOnReturnDisabled={false}
             onAttachClick={() => {
-              alert('Attach clicked');
+              agentStateService.send({ type: 'CLEAR_CHAT_HISTORY', workspaceId });
             }}
           />
         </ChatContainer>
