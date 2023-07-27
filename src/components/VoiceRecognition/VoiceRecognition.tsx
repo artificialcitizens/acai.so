@@ -112,10 +112,18 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
         toastifyInfo('Following');
         setVoiceRecognitionState('following');
         break;
+      case 'clear chat':
+        globalServices.agentStateService.send({ type: 'CLEAR_CHAT', workspaceId });
+        break;
       case 'cancel':
         toastifyInfo('Going Idle');
         setVoiceRecognitionState('idle');
         return;
+      case 'hey chris':
+        setUserTranscript('');
+        toastifyInfo('Chris is listening');
+        setVoiceRecognitionState('strahl');
+        break;
       case 'ready':
         {
           toastifyInfo('Notes being created');
@@ -171,6 +179,17 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
         });
         break;
       }
+      case 'strahl': {
+        if (!updatedUserTranscript || !elevenlabsKey) return;
+        const systemNotes = 'You are responding via voice synthesis, keep the final answer short and to the point.';
+        const response = await fetchResponse(updatedUserTranscript, systemNotes);
+        textToSpeech(response, 'strahl', elevenlabsKey).then((audioData) => {
+          const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          setAudioSrc(audioUrl);
+        });
+        break;
+      }
       case 'notes':
         setUserTranscript(userTranscript + '\n' + t);
         break;
@@ -180,7 +199,8 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
   };
 
   useSpeechRecognition({ onTranscriptionComplete, active: true });
-  const isOn = voiceRecognitionState === 'ava' || voiceRecognitionState === 'notes';
+  const isOn =
+    voiceRecognitionState === 'ava' || voiceRecognitionState === 'notes' || voiceRecognitionState === 'strahl';
 
   return (
     <>
