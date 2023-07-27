@@ -156,13 +156,12 @@ const createModels = (apiKey: string) => {
 
 const tools = [
   new Calculator(),
-  new DynamicTool({
-    name: 'Talk to Josh',
-    description:
-      'For when you just want to chat with Josh, or ask him a question. Input is the question or statement you want to make.',
-    func: async (input: string) => input,
-    returnDirect: true,
-  }),
+  // new DynamicTool({
+  //   name: 'Talk to Josh',
+  //   description: 'For when you just want to chat with Josh. Input is the chat output',
+  //   func: async (input: string) => input,
+  //   returnDirect: true,
+  // }),
   // // I've found that sometimes the agent just needs a dumping ground to rework its thoughts
   // // this seems to help minimize LLM parsing errors
   // // @TODO: Log how many times this - and all - tools are used for analytics and verifying usefulness
