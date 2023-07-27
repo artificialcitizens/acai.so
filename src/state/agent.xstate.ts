@@ -34,7 +34,8 @@ type AgentEvent =
   | { type: 'TOGGLE_TOOL'; toolName: string }
   | { type: 'UPDATE_SYSTEM_NOTES'; workspaceId: string; systemNotes: string }
   | { type: 'UPDATE_CHAT_HISTORY'; workspaceId: string; recentChatHistory: ChatHistory[] }
-  | { type: 'CREATE_AGENT'; workspaceId: string };
+  | { type: 'CREATE_AGENT'; workspaceId: string }
+  | { type: 'CLEAR_CHAT_HISTORY'; workspaceId: string };
 
 /**
  * Save AgentWorkspace to local storage
@@ -208,6 +209,22 @@ export const agentMachine = createMachine<AgentWorkspace, AgentEvent>({
         };
         saveAgentState(updatedContext);
         return updatedContext;
+      }),
+    },
+    CLEAR_CHAT_HISTORY: {
+      actions: assign((context, event) => {
+        if (event.workspaceId && context[event.workspaceId]) {
+          const updatedContext = {
+            ...context,
+            [event.workspaceId]: {
+              ...context[event.workspaceId],
+              recentChatHistory: [], // Clear the chat history
+            },
+          };
+          saveAgentState(updatedContext);
+          return updatedContext;
+        }
+        return context;
       }),
     },
   },
