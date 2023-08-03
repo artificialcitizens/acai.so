@@ -53,7 +53,7 @@ Relevant pieces of previous conversation:
 {history}
 
 (You do not need to use these pieces of information if not relevant)
-Current Date: ${timestampToHumanReadable(new Date())}
+Current Date: {current_date}
 Current Location: Near Halsey and NE 134th Pl, Portland OR, 97230
 Question: {input}
 Thought:{agent_scratchpad}`;
@@ -85,7 +85,12 @@ class CustomPromptTemplate extends BaseChatPromptTemplate {
         thoughts + [action.log, `\nObservation: ${observation}`, 'Thought:'].join('\n'),
       '',
     );
-    const newInput = { agent_scratchpad: agentScratchpad, system_message: this.systemMessage, ...values };
+    const newInput = {
+      agent_scratchpad: agentScratchpad,
+      system_message: this.systemMessage,
+      current_date: timestampToHumanReadable(new Date()),
+      ...values,
+    };
     /** Format the template. */
     const formatted = renderTemplate(template, 'f-string', newInput);
     // console.log({ formatted });
@@ -310,7 +315,7 @@ const createAgentArtifacts = ({
   tools.push(documentTool);
   tools.push(searchTool);
   tools.push(google);
-  // tools.push(colorTool);
+  tools.push(colorTool);
 
   const executor = new AgentExecutor({
     agent,
