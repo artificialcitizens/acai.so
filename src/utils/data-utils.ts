@@ -41,6 +41,24 @@ export function baseEncode(text: string): string {
   return encodeURIComponent(base64);
 }
 
+// Helper function to slugify a string
+export function slugify(str) {
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+// Helper function to read a file as text
+export function readFileAsText(file) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => resolve(event.target.result as string);
+    reader.onerror = (error) => reject(error);
+    reader.readAsText(file);
+  });
+}
+
 // const yamlStr = `
 // userName: Josh Mabry
 // currentLocation: Portland, Oregon
