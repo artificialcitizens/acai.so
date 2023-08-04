@@ -12,7 +12,7 @@ import AudioWaveform from '../AudioWave/AudioWave';
 import Cursor from '../Cursor/Cursor';
 import useElementPosition from '../../hooks/use-element-position';
 import { useHighlightedText } from '../../hooks/use-highlighted-text';
-import { useTextToSpeech } from '../../hooks/use-text-to-speech';
+import { useElevenlabs } from '../../hooks/use-elevenlabs';
 // import CursorDebug from './components/Cursor/CursorDebug';
 
 interface VoiceRecognitionProps {
@@ -39,7 +39,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
   const [elementPosition, updateElementSelector, elementName] = useElementPosition("[data-ava-element='audio-wave']");
   const [agentCursorPos, setAgentCursorPos] = useState([{ x: elementPosition.x, y: elementPosition.y }]);
   const highlightedText = useHighlightedText();
-  const synthesizeSpeech = useTextToSpeech(voices, elevenlabsKey || '');
+  const synthesizeSpeech = useElevenlabs(voices, elevenlabsKey || '');
 
   const synthesizeAndPlay = async (responsePromise: Promise<string>, voice: string) => {
     if (!elevenlabsKey) return;
