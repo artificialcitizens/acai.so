@@ -44,7 +44,9 @@ export const useAva = (): [
               type: 'ADD_TAB',
               tab,
             });
-            navigate(`/${workspaceId}/${tab.id}`);
+            setTimeout(() => {
+              navigate(`/${workspaceId}/${tab.id}`);
+            }, 250);
           },
           handleAgentAction: (action) => {
             const thought = action.log.split('Action:')[0].trim();

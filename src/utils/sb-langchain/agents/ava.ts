@@ -170,13 +170,13 @@ const tools = [
   // // I've found that sometimes the agent just needs a dumping ground to rework its thoughts
   // // this seems to help minimize LLM parsing errors
   // // @TODO: Log how many times this - and all - tools are used for analytics and verifying usefulness
-  // new DynamicTool({
-  //   name: 'Thought Processing',
-  //   description: `This is useful for when you have a thought that you want to use in a task,
-  //   but you want to make sure it's formatted correctly.
-  //   Input is your thought and self-critique and output is the processed thought.`,
-  //   func: processThought,
-  // }),
+  new DynamicTool({
+    name: 'Thought Processing',
+    description: `This is useful for when you have a thought that you want to use in a task,
+    but you want to make sure it's formatted correctly.
+    Input is your thought and self-critique and output is the processed thought.`,
+    func: processThought,
+  }),
   new DynamicTool({
     name: 'Human Feedback',
     description: `Use this tool for when you need a specific piece of information from a human that only that human would know. 
