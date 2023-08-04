@@ -33,7 +33,6 @@ export const useElevenlabs = (voices: Voices, apiKey?: string) => {
       const speechDetails = await axios.request(options);
       // Return the binary audio data received from the API response.
       return speechDetails.data;
-      // ... (textToSpeech function body)
     },
     [apiKey, voices],
   );
