@@ -12,6 +12,7 @@ import AudioWaveform from '../AudioWave/AudioWave';
 import Cursor from '../Cursor/Cursor';
 import useElementPosition from '../../hooks/use-element-position';
 import { useHighlightedText } from '../../hooks/use-highlighted-text';
+import { useTextToSpeech } from '../../hooks/use-text-to-speech';
 // import CursorDebug from './components/Cursor/CursorDebug';
 
 interface VoiceRecognitionProps {
@@ -21,33 +22,6 @@ interface VoiceRecognitionProps {
 const voices = {
   strahl: 'Gdbj8IU3v0OzqfE4M5dz',
   ava: 'XNjihqQlHh33hdGwAdnE',
-};
-
-// Define a function called textToSpeech that takes in a string called inputText as its argument.
-const textToSpeech = async (inputText: string, voice: string, apiKey: string) => {
-  const API_KEY = apiKey;
-  // Set the ID of the voice to be used.
-  const VOICE_ID = voices[voice as keyof typeof voices];
-
-  // Set options for the API request.
-  const options = {
-    method: 'POST',
-    url: `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
-    headers: {
-      accept: 'audio/mpeg', // Set the expected response type to audio/mpeg.
-      'content-type': 'application/json', // Set the content type to application/json.
-      'xi-api-key': `${API_KEY}`, // Set the API key in the headers.
-    },
-    data: {
-      text: inputText, // Pass in the inputText as the text to be converted to speech.
-    },
-    responseType: 'arraybuffer' as 'json', // Set the responseType to arraybuffer to receive binary data as response.
-  };
-
-  // Send the API request using Axios and wait for the response.
-  const speechDetails = await axios.request(options);
-  // Return the binary audio data received from the API response.
-  return speechDetails.data;
 };
 
 type VoiceState = 'idle' | 'ava' | 'notes' | 'strahl' | 'voice2voice' | 'following';
@@ -65,6 +39,17 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
   const [elementPosition, updateElementSelector, elementName] = useElementPosition("[data-ava-element='audio-wave']");
   const [agentCursorPos, setAgentCursorPos] = useState([{ x: elementPosition.x, y: elementPosition.y }]);
   const highlightedText = useHighlightedText();
+  const synthesizeSpeech = useTextToSpeech(voices, elevenlabsKey || '');
+
+  const synthesizeAndPlay = async (responsePromise: Promise<string>, voice: string) => {
+    if (!elevenlabsKey) return;
+    const response = await responsePromise;
+    synthesizeSpeech(response, voice).then((audioData) => {
+      const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      setAudioSrc(audioUrl);
+    });
+  };
 
   useEffect(() => {
     setAgentCursorPos([elementPosition]);
@@ -136,7 +121,9 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
           };
 
           globalServices.appStateService.send({ type: 'ADD_TAB', tab: newTab });
-          navigate(`/${workspaceId}/${newTab.id}`);
+          setTimeout(() => {
+            navigate(`/${workspaceId}/${newTab.id}`);
+          }, 150);
           setUserTranscript('');
           setVoiceRecognitionState('idle');
         }
@@ -149,47 +136,23 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
         const systemNotes =
           'You are responding via voice synthesis, keep the final answer short and to the point. Answer the users question about this text: ' +
           highlightedText;
-        const response = await fetchResponse(updatedUserTranscript, systemNotes);
-        textToSpeech(response, 'ava', elevenlabsKey).then((audioData) => {
-          const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          setAudioSrc(audioUrl);
-        });
+        synthesizeAndPlay(fetchResponse(updatedUserTranscript, systemNotes), 'ava');
         break;
       }
       case 'voice2voice': {
         if (!updatedUserTranscript || updatedUserTranscript.split(' ').length < 2) return;
         if (!elevenlabsKey) return;
-        textToSpeech(updatedUserTranscript, 'strahl', elevenlabsKey).then((audioData) => {
-          const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          setAudioSrc(audioUrl);
-          setUserTranscript('');
-        });
+        synthesizeAndPlay(Promise.resolve(updatedUserTranscript), 'strahl');
+        setUserTranscript('');
         break;
       }
-      case 'ava': {
-        if (!updatedUserTranscript || !elevenlabsKey) return;
-        const systemNotes = 'You are responding via voice synthesis, keep the final answer short and to the point.';
-        const response = await fetchResponse(updatedUserTranscript, systemNotes);
-        textToSpeech(response, 'ava', elevenlabsKey).then((audioData) => {
-          const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          setAudioSrc(audioUrl);
-        });
+
+      case 'ava':
+        synthesizeAndPlay(fetchResponse(updatedUserTranscript, ''), 'ava');
         break;
-      }
-      case 'strahl': {
-        if (!updatedUserTranscript || !elevenlabsKey) return;
-        const systemNotes = 'You are responding via voice synthesis, keep the final answer short and to the point.';
-        const response = await fetchResponse(updatedUserTranscript, systemNotes);
-        textToSpeech(response, 'strahl', elevenlabsKey).then((audioData) => {
-          const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          setAudioSrc(audioUrl);
-        });
+      case 'strahl':
+        synthesizeAndPlay(fetchResponse(updatedUserTranscript, ''), 'strahl');
         break;
-      }
       case 'notes':
         setUserTranscript(userTranscript + '\n' + t);
         break;
