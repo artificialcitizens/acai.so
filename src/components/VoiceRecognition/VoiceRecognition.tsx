@@ -3,15 +3,14 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useAva } from '../../hooks/use-ava';
 import useCookieStorage from '../../hooks/use-cookie-storage';
 import { toastifyInfo } from '../Toast';
-import { noteChain } from '../../utils/sb-langchain/chains/notes-chain';
-import { GlobalStateContext, GlobalStateContextValue } from '../../context/GlobalStateContext';
-import { useLocation, useNavigate } from 'react-router-dom';
+
 import useSpeechRecognition from '../../hooks/use-speech-recognition';
 import { useBark } from '../../hooks/use-bark';
 import AudioWaveform from '../AudioWave/AudioWave';
 
 import { useElevenlabs } from '../../hooks/use-elevenlabs';
 import ScratchPad from '../ScratchPad/ScratchPad';
+import { useVoiceCommands } from './use-voice-command';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
@@ -22,30 +21,59 @@ const voices = {
   ava: 'XNjihqQlHh33hdGwAdnE',
 };
 
-type VoiceState = 'idle' | 'ava' | 'notes' | 'strahl' | 'voice2voice' | 'following';
 // https://github.com/suno-ai/bark/blob/main/notebooks/long_form_generation.ipynb
 const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => {
-  const globalServices: GlobalStateContextValue = useContext(GlobalStateContext);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const workspaceId = location.pathname.split('/')[1];
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
-  const [voiceRecognitionState, setVoiceRecognitionState] = useState<VoiceState>('idle');
-  const [userTranscript, setUserTranscript] = useState<string>('');
   const [fetchResponse, avaLoading] = useAva();
   const [openAIApiKey] = useCookieStorage('OPENAI_KEY');
   const [elevenlabsKey] = useCookieStorage('ELEVENLABS_API_KEY');
   const synthesizeBarkSpeech = useBark();
   const synthesizeSpeech = useElevenlabs(voices, elevenlabsKey || '');
   const [synthesisMode, setSynthesisMode] = useState<'bark' | 'elevenlabs'>('elevenlabs');
+  const [manualTTS, setManualTTS] = useState<string>('');
+
+  const { userTranscript, setUserTranscript, voiceRecognitionState, setVoiceRecognitionState, handleVoiceCommand } =
+    useVoiceCommands();
+
+  const handleVoiceRecognition = (t: string) => {
+    switch (voiceRecognitionState) {
+      case 'voice2voice': {
+        if (!t || t.split(' ').length < 2) return;
+        if (!elevenlabsKey) return;
+        synthesizeAndPlay(Promise.resolve(t), 'strahl');
+        setUserTranscript('');
+        break;
+      }
+      case 'ava': {
+        const avaResponse = fetchResponse(
+          t,
+          'this is a voice synthesis pipeline, which means I can speak to you and you can respond with your voice.',
+        );
+        synthesizeAndPlay(avaResponse, 'ava');
+        break;
+      }
+      case 'strahl': {
+        const strahlResponse = fetchResponse(
+          t,
+          'you are to respond as Chris Strahl, Ceo of Knapsack. Joshs place of employment',
+        );
+        synthesizeAndPlay(strahlResponse, 'strahl');
+        break;
+      }
+      case 'notes':
+        setUserTranscript(userTranscript + '\n' + t);
+        break;
+      case 'idle':
+        break;
+    }
+  };
 
   const synthesizeAndPlay = async (responsePromise: Promise<string>, voice: string) => {
     const response = await responsePromise;
     let audioData;
 
     if (synthesisMode === 'bark') {
-      const musicalResponse = `${response}`;
-      audioData = await synthesizeBarkSpeech(musicalResponse);
+      audioData = await synthesizeBarkSpeech({ inputText: response, voicePreset: 'v2/en_speaker_9' });
     } else if (synthesisMode === 'elevenlabs' && elevenlabsKey) {
       audioData = await synthesizeSpeech(response, voice);
     }
@@ -62,78 +90,10 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
       toastifyInfo('Please set your OpenAI key in the settings');
       return;
     }
-
-    const updatedUserTranscript = userTranscript + '\n' + t;
+    const updatedUserTranscript = userTranscript + '\n' + t + '\n';
     setUserTranscript(updatedUserTranscript);
-
-    switch (t.toLowerCase()) {
-      case 'ava':
-        setUserTranscript('');
-        setVoiceRecognitionState('ava');
-        break;
-      case 'take notes':
-        setUserTranscript('');
-        toastifyInfo('Taking notes');
-        setVoiceRecognitionState('notes');
-        break;
-      case 'voice':
-        setUserTranscript('');
-        toastifyInfo('Voice to voice active');
-        setVoiceRecognitionState('voice2voice');
-        break;
-      case 'clear chat':
-        globalServices.agentStateService.send({ type: 'CLEAR_CHAT', workspaceId });
-        break;
-      case 'cancel':
-        setUserTranscript('');
-        toastifyInfo('Going Idle');
-        setVoiceRecognitionState('idle');
-        return;
-      case 'hey chris':
-        setUserTranscript('');
-        toastifyInfo('Chris is listening');
-        setVoiceRecognitionState('strahl');
-        break;
-      case 'ready':
-        {
-          toastifyInfo('Notes being created');
-          const notes = await noteChain(userTranscript, openAIApiKey);
-          const newTab = {
-            id: Date.now().toString(),
-            title: 'Notes',
-            content: notes,
-            workspaceId,
-          };
-          globalServices.appStateService.send({ type: 'ADD_TAB', tab: newTab });
-          setTimeout(() => {
-            navigate(`/${workspaceId}/${newTab.id}`);
-          }, 150);
-          setUserTranscript('');
-          setVoiceRecognitionState('idle');
-        }
-        break;
-    }
-
-    switch (voiceRecognitionState) {
-      case 'voice2voice': {
-        if (!updatedUserTranscript || updatedUserTranscript.split(' ').length < 2) return;
-        if (!elevenlabsKey) return;
-        synthesizeAndPlay(Promise.resolve(updatedUserTranscript), 'strahl');
-        setUserTranscript('');
-        break;
-      }
-      case 'ava':
-        synthesizeAndPlay(fetchResponse(updatedUserTranscript, ''), 'ava');
-        break;
-      case 'strahl':
-        synthesizeAndPlay(fetchResponse(updatedUserTranscript, ''), 'strahl');
-        break;
-      case 'notes':
-        setUserTranscript(userTranscript + '\n' + t);
-        break;
-      case 'idle':
-        break;
-    }
+    handleVoiceCommand(t);
+    handleVoiceRecognition(updatedUserTranscript);
   };
 
   useSpeechRecognition({ onTranscriptionComplete, active: true });
@@ -144,7 +104,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
     <>
       {audioContext && <AudioWaveform audioContext={audioContext} isOn={isOn} />}
 
-      <div className={`rounded-lg mb-2 items-center justify-between flex-col`}>
+      <div className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow`}>
         {audioSrc && (
           <audio
             controls
@@ -159,8 +119,30 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
             }}
           />
         )}
+        <ScratchPad
+          placeholder="User Transcript"
+          height="24px"
+          readonly
+          content={userTranscript}
+          handleInputChange={(e) => {}}
+        />
+        <form
+          className="text-light w-full flex flex-col flex-grow my-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            synthesizeAndPlay(Promise.resolve(manualTTS), 'ava');
+            setManualTTS('');
+          }}
+        >
+          <textarea
+            placeholder="Manual TTS"
+            className="rounded bg-base text-light p-4"
+            value={manualTTS}
+            onChange={(e) => setManualTTS(e.target.value)}
+          />
+          <button type="submit">Submit</button>
+        </form>
       </div>
-      <ScratchPad placeholder="Agent Refinement" content={userTranscript.trim()} handleInputChange={(e) => {}} />
     </>
   );
 };
