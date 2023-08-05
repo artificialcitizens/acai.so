@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useAva } from '../../hooks/use-ava';
 import useCookieStorage from '../../hooks/use-cookie-storage';
 import { toastifyInfo } from '../Toast';
@@ -85,6 +85,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
       setUserTranscript('');
     }
   };
+
   const onTranscriptionComplete = async (t: string) => {
     if (!openAIApiKey) {
       toastifyInfo('Please set your OpenAI key in the settings');

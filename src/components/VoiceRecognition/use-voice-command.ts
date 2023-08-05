@@ -1,8 +1,8 @@
 import { Dispatch, SetStateAction, useContext, useState } from 'react';
-import { toast } from 'react-toastify';
 import { noteChain } from '../../utils/sb-langchain/chains/notes-chain';
 import { GlobalStateContext, GlobalStateContextValue } from '../../context/GlobalStateContext';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toastifyInfo } from '../Toast';
 
 type VoiceState = 'idle' | 'ava' | 'notes' | 'strahl' | 'voice2voice' | 'following';
 type TTSState = 'bark' | 'elevenlabs';
@@ -27,7 +27,7 @@ export const setStatesAndToast = (
   setUserTranscript(transcript);
   setVoiceRecognitionState(recognitionState);
   if (toastMessage) {
-    toast.info(toastMessage);
+    toastifyInfo(toastMessage);
   }
 };
 
@@ -110,7 +110,7 @@ export const useVoiceCommands = () => {
 
     if (command) {
       if (command.toastMessage) {
-        toast.info(command.toastMessage);
+        toastifyInfo(command.toastMessage);
       }
       if (command.action) {
         await command.action(setUserTranscript, setVoiceRecognitionState, setSynthesisMode);
