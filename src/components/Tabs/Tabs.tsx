@@ -32,7 +32,12 @@ const TabManager: React.FC = () => {
   const workspace = service.getSnapshot().context.workspaces[activeWorkspaceId];
   // Find the current active tab
   const activeTab = workspace?.data.tiptap.tabs.find((tab) => tab.id === activeTabId);
-  //@TODO: Add a home tab to take you to the workspace overview
+
+  // Calculate the width for each tab
+  const tabWidth = workspace?.data.tiptap.tabs.length
+    ? `calc(100% / ${workspace.data.tiptap.tabs.length + 1})`
+    : '100%';
+
   return (
     workspace && (
       <Tabs key={activeWorkspaceId} className="flex-grow">
@@ -40,16 +45,22 @@ const TabManager: React.FC = () => {
           {workspace.data.tiptap.tabs.map((tab) => (
             <Link
               key={tab.id}
-              className={`cursor-pointer p-2 border truncate max-w-[25%] self-center h-full ${
-                tab.id === activeTabId ? 'bg-base' : ''
+              title={tab.title}
+              className={`cursor-pointer p-2 self-center truncate h-full border rounded-t whitespace-nowrap overflow-hidden ${
+                tab.id === activeTabId ? 'bg-base border-neutral-300' : 'border-neutral-600'
               }`}
               to={`/${workspace.id}/${tab.id}`}
               data-te-sidenav-link-ref
+              style={{ maxWidth: tabWidth }}
             >
-              <Tab className={`${tab.id === activeTabId ? 'underline' : ''}`}>{tab.title}</Tab>
+              <Tab className={`overflow-hidden`}>{tab.title}</Tab>
             </Link>
           ))}
-          <Tab className="cursor-pointer border-none p-2 px-4 text-center" onClick={handleCreateTab}>
+          <Tab
+            className="cursor-pointer border-none p-2 px-4 text-center"
+            onClick={handleCreateTab}
+            style={{ maxWidth: tabWidth }}
+          >
             +
           </Tab>
         </TabList>
