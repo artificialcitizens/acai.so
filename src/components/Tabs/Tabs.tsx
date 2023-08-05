@@ -41,19 +41,22 @@ const TabManager: React.FC = () => {
   return (
     workspace && (
       <Tabs key={activeWorkspaceId} className="flex-grow">
-        <TabList>
-          {workspace.data.tiptap.tabs.map((tab) => (
+        {/* hiding tabs for now, not happy with the layout */}
+        <TabList className={'hidden m-2 border-b-2 border-solid border-dark'}>
+          {workspace.data.tiptap.tabs.map((tab, index) => (
             <Link
               key={tab.id}
-              title={tab.title}
-              className={`cursor-pointer p-2 self-center truncate h-full border rounded-t whitespace-nowrap overflow-hidden ${
-                tab.id === activeTabId ? 'bg-base border-neutral-300' : 'border-neutral-600'
+              className={`cursor-pointer p-1 self-center text-light truncate h-full border-2 ${
+                tab.id === activeTabId ? ' border-dark rounded-t' : 'text-dark border-transparent'
               }`}
               to={`/${workspace.id}/${tab.id}`}
               data-te-sidenav-link-ref
               style={{ maxWidth: tabWidth }}
+              title={tab.title}
             >
-              <Tab className={`overflow-hidden`}>{tab.title}</Tab>
+              <Tab className={`overflow-hidden bg-transparent ${tab.id === activeTabId ? 'text-light' : 'text-dark'}`}>
+                {tab.title}
+              </Tab>
             </Link>
           ))}
           <Tab

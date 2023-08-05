@@ -17,7 +17,7 @@ const MarkdownInput: React.FC<MarkdownInputProps> = ({
   height = '24px',
 }) => {
   return (
-    <div className="pt-2 border-b-2 border-solid border-lighter w-full text-light">
+    <div className="pt-2 border-b-transparent shadow-none w-full">
       {!readonly ? (
         <textarea
           className={`min-h-[${height}] p-3 bg-base rounded w-full`}
@@ -27,7 +27,7 @@ const MarkdownInput: React.FC<MarkdownInputProps> = ({
         />
       ) : (
         <div
-          className={`min-h-[${height}] p-3 bg-base rounded overflow-y-auto w-full mt-2 border-b-2 border-solid border-lighter`}
+          className={`min-h-[${height}] p-3 bg-base rounded overflow-y-auto w-full mt-2 `}
           dangerouslySetInnerHTML={{ __html: marked(content || '') }}
         />
       )}

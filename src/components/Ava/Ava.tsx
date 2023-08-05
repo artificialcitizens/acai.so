@@ -70,7 +70,7 @@ export const Ava: React.FC<AvaProps> = ({ audioContext }) => {
       <ExpansionPanel title="Speech Recognition">
         <VoiceRecognition audioContext={audioContext} />
       </ExpansionPanel>
-      <ExpansionPanel title="Agent Settings">
+      <ExpansionPanel title="Settings">
         <ScratchPad
           placeholder="Agent Refinement"
           content={systemNotes}
@@ -84,16 +84,15 @@ export const Ava: React.FC<AvaProps> = ({ audioContext }) => {
         />
       </ExpansionPanel>
       <ExpansionPanel
-        className="pb-4"
-        title="Agent"
+        title="Logs"
         data-ava-element="TOGGLE_AGENT_THOUGHTS"
-        isOpened={true}
         onChange={toggleAgentThoughts}
         onClick={toggleAgentThoughts}
+        isOpened={uiStateService.getSnapshot().context.agentThoughts}
       >
         <NotificationCenter placeholder="A place for AI to ponder 🤔" secondaryFilter="agent-thought" />
       </ExpansionPanel>
-      <ExpansionPanel className="chat-panel" isOpened={true}>
+      <ExpansionPanel title="Chat" className="chat-panel" isOpened={true}>
         {openAIApiKey && (
           <Chat
             name="Ava"

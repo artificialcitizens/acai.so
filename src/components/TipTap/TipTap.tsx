@@ -215,7 +215,6 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
 
   return (
     <>
-      <MenuBar editor={editor} tipTapEditorId={currentTab.id} systemNote={currentTab.systemNote} />
       <div
         onClick={() => {
           editor?.chain().focus().run();
@@ -228,6 +227,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
         {editor && <EditorBubbleMenu editor={editor} />}
         <EditorContent editor={editor} />
       </div>
+      <MenuBar editor={editor} tipTapEditorId={currentTab.id} systemNote={currentTab.systemNote} />
     </>
   );
 };

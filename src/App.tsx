@@ -11,6 +11,8 @@ import { FloatingButton } from './components/FloatingButton/FloatingButton';
 import { GlobalStateContext, GlobalStateContextValue } from './context/GlobalStateContext';
 import { useLocation } from 'react-router-dom';
 import ToastManager from './components/Toast';
+import TipTap from './components/TipTap/TipTap';
+import { Tab } from './state';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 
 function App() {
@@ -41,6 +43,7 @@ function App() {
   };
 
   const workspace = globalServices.appStateService.getSnapshot().context.workspaces[workspaceId];
+  const activeTab = workspace && workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === workspace.activeTabId);
   return (
     globalServices.appStateService && (
       // <VectorStoreContext.Provider value={{ vectorstore, addDocuments, similaritySearchWithScore }}>
@@ -60,7 +63,7 @@ function App() {
           <main className="w-full flex flex-grow ">
             <div className="w-full flex flex-col">
               <div className="h-12 ml-16">{workspace && <h1 className="m-2 text-lg">{workspace.name}</h1>}</div>
-              <TabManager />
+              {activeTab && <TipTap tab={activeTab} />}
             </div>
             <Ava audioContext={audioContext} />
             {/* 
