@@ -14,8 +14,13 @@ import { useAva } from '../../hooks/use-ava';
 import { GlobalStateContext, GlobalStateContextValue } from '../../context/GlobalStateContext';
 import { makeObservations, queryPinecone } from '../../endpoints';
 import { useLocation, useNavigate } from 'react-router-dom';
+import VoiceRecognition from '../VoiceRecognition/VoiceRecognition';
 
-export const Ava = () => {
+interface AvaProps {
+  audioContext?: AudioContext;
+}
+
+export const Ava: React.FC<AvaProps> = ({ audioContext }) => {
   const { appStateService, uiStateService, agentStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const location = useLocation();
@@ -61,6 +66,9 @@ export const Ava = () => {
           <TokenManager />
           <StorageMeter />
         </div>
+      </ExpansionPanel>
+      <ExpansionPanel title="Speech Recognition">
+        <VoiceRecognition audioContext={audioContext} />
       </ExpansionPanel>
       <ExpansionPanel title="Agent Settings">
         <ScratchPad

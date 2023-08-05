@@ -11,6 +11,7 @@ import { useBark } from '../../hooks/use-bark';
 import AudioWaveform from '../AudioWave/AudioWave';
 
 import { useElevenlabs } from '../../hooks/use-elevenlabs';
+import ScratchPad from '../ScratchPad/ScratchPad';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
@@ -22,7 +23,7 @@ const voices = {
 };
 
 type VoiceState = 'idle' | 'ava' | 'notes' | 'strahl' | 'voice2voice' | 'following';
-
+// https://github.com/suno-ai/bark/blob/main/notebooks/long_form_generation.ipynb
 const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => {
   const globalServices: GlobalStateContextValue = useContext(GlobalStateContext);
   const location = useLocation();
@@ -36,14 +37,15 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
   const [elevenlabsKey] = useCookieStorage('ELEVENLABS_API_KEY');
   const synthesizeBarkSpeech = useBark();
   const synthesizeSpeech = useElevenlabs(voices, elevenlabsKey || '');
-  const [synthesisMode, setSynthesisMode] = useState('bark');
+  const [synthesisMode, setSynthesisMode] = useState<'bark' | 'elevenlabs'>('elevenlabs');
 
   const synthesizeAndPlay = async (responsePromise: Promise<string>, voice: string) => {
     const response = await responsePromise;
     let audioData;
 
     if (synthesisMode === 'bark') {
-      audioData = await synthesizeBarkSpeech(response);
+      const musicalResponse = `${response}`;
+      audioData = await synthesizeBarkSpeech(musicalResponse);
     } else if (synthesisMode === 'elevenlabs' && elevenlabsKey) {
       audioData = await synthesizeSpeech(response, voice);
     }
@@ -52,6 +54,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
       const audioBlob = new Blob([audioData], { type: synthesisMode === 'bark' ? 'audio/wav' : 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
       setAudioSrc(audioUrl);
+      setUserTranscript('');
     }
   };
   const onTranscriptionComplete = async (t: string) => {
@@ -65,6 +68,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
 
     switch (t.toLowerCase()) {
       case 'ava':
+        setUserTranscript('');
         setVoiceRecognitionState('ava');
         break;
       case 'take notes':
@@ -81,6 +85,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
         globalServices.agentStateService.send({ type: 'CLEAR_CHAT', workspaceId });
         break;
       case 'cancel':
+        setUserTranscript('');
         toastifyInfo('Going Idle');
         setVoiceRecognitionState('idle');
         return;
@@ -139,10 +144,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
     <>
       {audioContext && <AudioWaveform audioContext={audioContext} isOn={isOn} />}
 
-      <div className="rounded-lg mb-2 items-center justify-between flex-col hidden">
-        <div className="w-full flex items-center mb-4">
-          <span className="mr-2 text-light">Voice Recognition {voiceRecognitionState}</span>
-        </div>
+      <div className={`rounded-lg mb-2 items-center justify-between flex-col`}>
         {audioSrc && (
           <audio
             controls
@@ -158,6 +160,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
           />
         )}
       </div>
+      <ScratchPad placeholder="Agent Refinement" content={userTranscript.trim()} handleInputChange={(e) => {}} />
     </>
   );
 };

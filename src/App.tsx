@@ -62,8 +62,7 @@ function App() {
               <div className="h-12 ml-16">{workspace && <h1 className="m-2 text-lg">{workspace.name}</h1>}</div>
               <TabManager />
             </div>
-            <Ava />
-            <VoiceRecognition audioContext={audioContext} />
+            <Ava audioContext={audioContext} />
             {/* 
                 <Whisper
                 onRecordingComplete={(blob) => console.log(blob)}
