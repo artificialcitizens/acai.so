@@ -11,6 +11,7 @@ import AudioWaveform from '../AudioWave/AudioWave';
 import { useElevenlabs } from '../../hooks/use-elevenlabs';
 import ScratchPad from '../ScratchPad/ScratchPad';
 import { useVoiceCommands } from './use-voice-command';
+import { useWebSpeechSynthesis } from '../../hooks/use-web-tts';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
@@ -28,10 +29,10 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
   const [openAIApiKey] = useCookieStorage('OPENAI_KEY');
   const [elevenlabsKey] = useCookieStorage('ELEVENLABS_API_KEY');
   const synthesizeBarkSpeech = useBark();
-  const synthesizeSpeech = useElevenlabs(voices, elevenlabsKey || '');
-  const [synthesisMode, setSynthesisMode] = useState<'bark' | 'elevenlabs'>('elevenlabs');
+  const synthesizeElevenLabsSpeech = useElevenlabs(voices, elevenlabsKey || '');
+  const [synthesisMode, setSynthesisMode] = useState<'bark' | 'elevenlabs' | 'webSpeech'>('webSpeech');
   const [manualTTS, setManualTTS] = useState<string>('');
-
+  const synthesizeWebSpeech = useWebSpeechSynthesis();
   const { userTranscript, setUserTranscript, voiceRecognitionState, setVoiceRecognitionState, handleVoiceCommand } =
     useVoiceCommands();
 
@@ -67,6 +68,9 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
         break;
     }
   };
+  const handleTtsServiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSynthesisMode(event.target.value as 'bark' | 'elevenlabs' | 'webSpeech');
+  };
 
   const synthesizeAndPlay = async (responsePromise: Promise<string>, voice: string) => {
     const response = await responsePromise;
@@ -75,7 +79,10 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
     if (synthesisMode === 'bark') {
       audioData = await synthesizeBarkSpeech({ inputText: response, voicePreset: 'v2/en_speaker_9' });
     } else if (synthesisMode === 'elevenlabs' && elevenlabsKey) {
-      audioData = await synthesizeSpeech(response, voice);
+      audioData = await synthesizeElevenLabsSpeech(response, voice);
+    } else if (synthesisMode === 'webSpeech') {
+      synthesizeWebSpeech(response);
+      return;
     }
 
     if (audioData) {
@@ -120,11 +127,23 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
             }}
           />
         )}
+        <select className="bg-base text-dark font-medium p-1" value={synthesisMode} onChange={handleTtsServiceChange}>
+          <option className="text-light" value="webSpeech">
+            Web Speech API
+          </option>
+          <option className="text-light" value="bark">
+            Bark
+          </option>
+          <option className="text-light" value="elevenlabs">
+            Elevenlabs
+          </option>
+        </select>
+        ;
         <ScratchPad
           placeholder="User Transcript"
           height="24px"
           readonly
-          content={userTranscript}
+          content={userTranscript || 'User Transcript'}
           handleInputChange={(e) => {}}
         />
         <form

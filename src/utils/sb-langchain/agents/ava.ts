@@ -312,8 +312,8 @@ const createAgentArtifacts = ({
     func: search,
   });
 
+  // tools.push(searchTool);
   tools.push(documentTool);
-  tools.push(searchTool);
   tools.push(google);
   tools.push(colorTool);
 
