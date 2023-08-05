@@ -20,14 +20,14 @@ const MarkdownInput: React.FC<MarkdownInputProps> = ({
     <div className="pt-2 border-b-2 border-solid border-lighter w-full text-light">
       {!readonly ? (
         <textarea
-          className={`h-${height} p-3 bg-base rounded w-full`}
+          className={`min-h-[${height}] p-3 bg-base rounded w-full`}
           placeholder={placeholder}
           value={content}
           onChange={handleInputChange}
         />
       ) : (
         <div
-          className="h-56 p-3 bg-base rounded overflow-y-auto w-full mt-2 border-b-2 border-solid border-lighter"
+          className={`min-h-[${height}] p-3 bg-base rounded overflow-y-auto w-full mt-2 border-b-2 border-solid border-lighter`}
           dangerouslySetInnerHTML={{ __html: marked(content || '') }}
         />
       )}
