@@ -3,6 +3,7 @@ import { noteChain } from '../../utils/sb-langchain/chains/notes-chain';
 import { GlobalStateContext, GlobalStateContextValue } from '../../context/GlobalStateContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toastifyInfo } from '../Toast';
+import { Tab } from '../../state';
 
 type VoiceState = 'idle' | 'ava' | 'notes' | 'strahl' | 'voice2voice' | 'following';
 type TTSState = 'bark' | 'elevenlabs';
@@ -83,11 +84,16 @@ export const useVoiceCommands = () => {
         setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
       ) => {
         const notes = await noteChain(userTranscript);
-        const newTab = {
+        const newTab: Tab = {
           id: Date.now().toString(),
           title: 'Notes',
           content: notes,
           workspaceId,
+          filetype: 'markdown',
+          systemNote: '',
+          isContext: true,
+          createdAt: Date.now().toString(),
+          lastUpdated: Date.now().toString(),
         };
         globalServices.appStateService.send({ type: 'ADD_TAB', tab: newTab });
         setTimeout(() => {

@@ -356,12 +356,18 @@ export const appStateMachine = createMachine<IContext, Event>({
 export const handleCreateTab = async (
   args: { title: string; content: string },
   workspaceId: string,
-): Promise<Partial<Tab>> => {
+  filetype = 'markdown',
+): Promise<Tab> => {
   const newTab = {
     id: uuidv4().split('-')[0],
     title: args.title,
     content: args.content,
+    isContext: false,
+    systemNote: '',
     workspaceId,
+    filetype,
+    createdAt: new Date().toString(),
+    lastUpdated: new Date().toString(),
   };
   return newTab;
 };
