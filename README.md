@@ -4,7 +4,7 @@ AVA is a collection of AI powered tools to help you manage your digital world
 
 ## Technology Stack
 
-- [LangchainJS](https://js.langchain.com/docs/)
+- [LangchainJS](https://js.langchain.com/docs/) - Compose language models into chains
 - [React](https://reactjs.org/) - A JavaScript library for building user interfaces
 - [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapid UI development
 - [TypeScript](https://www.typescriptlang.org/) - A typed superset of JavaScript that adds optional static types
