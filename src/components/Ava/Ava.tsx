@@ -48,14 +48,13 @@ export const Ava: React.FC<AvaProps> = ({ audioContext }) => {
   return (
     <SBSidebar>
       {' '}
-      <ExpansionPanel data-ava-element="junk-drawer-panel-toggle" title="Junk Drawer">
-        <div className="w-full">
-          <ProjectLinks />
+      <ExpansionPanel data-ava-element="junk-drawer-panel-toggle" title="Knowledge">
+        <div className="flex flex-col">
           <SBSearch
             onSubmit={async (val) => {
               const response = await similaritySearchWithScore(val);
               console.log('response', response);
-              const results = filterAndCombineContent(response, 0.78);
+              const results = filterAndCombineContent(response, 0.79);
               const newTab: Tab = {
                 id: Date.now().toString(),
                 title: val,
@@ -71,14 +70,14 @@ export const Ava: React.FC<AvaProps> = ({ audioContext }) => {
               navigate(`/${workspaceId}/${newTab.id}`);
             }}
           />
-          <TokenManager />
-          <StorageMeter />
         </div>
+        <StorageMeter />
       </ExpansionPanel>
       <ExpansionPanel title="Voice Synthesis">
         <VoiceRecognition audioContext={audioContext} />
       </ExpansionPanel>
       <ExpansionPanel title="Settings">
+        <TokenManager />
         <ScratchPad
           placeholder="Agent Refinement"
           content={systemNotes}

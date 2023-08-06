@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Workspace, handleCreateTab } from '../../state';
 import { v4 as uuidv4 } from 'uuid';
 import { GlobalStateContext, GlobalStateContextValue } from '../../context/GlobalStateContext';
+import { ProjectLinks } from '../ProjectLinks/ProjectLinks';
 interface SideNavProps {
   children?: React.ReactNode;
 }
@@ -22,7 +23,6 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
 
   const ref = useClickAway(() => {
     if (!navOpenRef.current) return;
-    console.log('nav is open and clicked away from', navOpenRef.current);
     send({ type: 'TOGGLE_SIDE_NAV' });
   });
 
@@ -154,6 +154,7 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
           {children}
         </div>
       )}
+      <ProjectLinks />
     </nav>
   );
 };

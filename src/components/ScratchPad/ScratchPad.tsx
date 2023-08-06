@@ -3,7 +3,7 @@ import { marked } from 'marked';
 
 export interface MarkdownInputProps {
   content: string;
-  handleInputChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   placeholder?: string;
   readonly?: boolean;
   height?: string;

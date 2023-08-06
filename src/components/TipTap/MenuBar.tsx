@@ -4,6 +4,7 @@ import { useActor, useInterpret } from '@xstate/react';
 import { Tab, appStateMachine } from '../../state';
 import { FloatingButton } from '../FloatingButton/FloatingButton';
 import { GlobalStateContext, GlobalStateContextValue } from '../../context/GlobalStateContext';
+import { useNavigate } from 'react-router-dom';
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -20,6 +21,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
   const workspaceId = location.pathname.split('/')[1];
   const tabId = location.pathname.split('/')[2];
   const [state, send] = useActor(appStateService);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const ws = state.context.workspaces[workspaceId];
@@ -77,6 +79,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
                 workspaceId,
               });
               setLoading(false);
+              navigate(`/${workspaceId}`);
             }}
           >
             Delete

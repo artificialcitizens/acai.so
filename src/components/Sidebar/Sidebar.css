@@ -3,6 +3,7 @@
 }
 
 .cs-expansion-panel__content {
+  flex-direction: column;
   height: 100%;
 }
 

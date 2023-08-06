@@ -22,7 +22,6 @@ const voices = {
   ava: 'XNjihqQlHh33hdGwAdnE',
 };
 
-// https://github.com/suno-ai/bark/blob/main/notebooks/long_form_generation.ipynb
 const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [fetchResponse, avaLoading] = useAva();
@@ -139,13 +138,11 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
             Elevenlabs
           </option>
         </select>
-        ;
         <ScratchPad
           placeholder="User Transcript"
           height="24px"
           readonly
           content={userTranscript || 'User Transcript'}
-          handleInputChange={(e) => {}}
         />
         <form
           className="text-light w-full flex flex-col flex-grow my-2"
