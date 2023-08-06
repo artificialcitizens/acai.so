@@ -30,7 +30,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
   const [elevenlabsKey] = useCookieStorage('ELEVENLABS_API_KEY');
   const synthesizeBarkSpeech = useBark();
   const synthesizeElevenLabsSpeech = useElevenlabs(voices, elevenlabsKey || '');
-  const [synthesisMode, setSynthesisMode] = useState<'bark' | 'elevenlabs' | 'webSpeech'>('webSpeech');
+  const [synthesisMode, setSynthesisMode] = useState<'bark' | 'elevenlabs' | 'webSpeech'>('elevenlabs');
   const [manualTTS, setManualTTS] = useState<string>('');
   const synthesizeWebSpeech = useWebSpeechSynthesis();
   const { userTranscript, setUserTranscript, voiceRecognitionState, setVoiceRecognitionState, handleVoiceCommand } =

@@ -103,34 +103,29 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
     >
       <ul className="relative m-0 list-none px-[0.2rem]" data-te-sidenav-menu-ref>
         {Object.values(workspaces).map((workspace) => (
-          <li className="relative pb-2 border-b border-solid border-lighter !important" key={workspace.id}>
-            <Link
-              className="flex h-12 cursor-pointer items-center truncate max-w-[50%] rounded-[5px] px-6 py-4 text-[0.875rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none "
-              to={`/${workspace.id}`}
-              data-te-sidenav-link-ref
-              onClick={() => {
-                globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV' });
-              }}
-            >
-              <span className="font-bold">{workspace.name}</span>
-            </Link>
-            <button
-              className="justify-self-end w-8 mr-2"
-              onClick={() => {
-                createTab(workspace.id);
-              }}
-            >
-              +
-            </button>
+          <li className="relative pb-2 !important" key={workspace.id}>
+            <span className="flex border-b border-t border-solid border-lighter">
+              <Link
+                className="flex h-12 cursor-pointer truncate m-auto flex-grow rounded-[5px] px-1 py-4 text-[0.875rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none "
+                to={`/${workspace.id}`}
+                data-te-sidenav-link-ref
+                onClick={() => {
+                  globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV' });
+                }}
+              >
+                <span className="font-bold self-center">{workspace.name}</span>
+              </Link>
+            </span>
+
             <ul
               className="!visible relative m-0 hidden list-none p-0 data-[te-collapse-show]:block "
               data-te-sidenav-collapse-ref
               data-te-collapse-show
             >
               {workspace.data.tiptap.tabs.map((tab) => (
-                <li className="relative" key={tab.id}>
+                <li className="relative text-ellipsis overflow-hidden px-2 mb-2 " key={tab.id}>
                   <Link
-                    className="flex h-6 cursor-pointer items-center truncate rounded-[5px] py-4 pl-10 pr-6 text-[0.78rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
+                    className="flex h-6 cursor-pointer items-center leading-4 text-ellipsis rounded-[5px] py-4 pl-1  text-[0.78rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
                     to={`/${workspace.id}/${tab.id}`}
                     data-te-sidenav-link-ref
                     onClick={() => {
@@ -141,11 +136,19 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
                   </Link>
                 </li>
               ))}
+              <button
+                className="px-4 text-dark text-xs w-full text-right"
+                onClick={() => {
+                  createTab(workspace.id);
+                }}
+              >
+                New Document +
+              </button>
             </ul>
           </li>
         ))}
-        <button className="w-full" onClick={createWorkspace}>
-          +
+        <button className="w-full text-dark text-xs pl-2 text-left" onClick={createWorkspace}>
+          New Workspace +
         </button>
       </ul>
       {children && (
