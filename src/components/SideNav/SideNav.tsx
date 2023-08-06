@@ -116,7 +116,7 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
             </Link>
 
             <ul
-              className="!visible relative m-0 hidden list-none p-0 data-[te-collapse-show]:block "
+              className="!visible border-b border-solid border-dark pb-8 relative m-0 hidden list-none p-0 data-[te-collapse-show]:block "
               data-te-sidenav-collapse-ref
               data-te-collapse-show
             >
@@ -135,7 +135,7 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
                 </li>
               ))}
               <button
-                className="px-4 text-dark text-xs w-full text-right"
+                className="px-4 mb-4 text-dark text-xs w-full text-left"
                 onClick={() => {
                   createTab(workspace.id);
                 }}
