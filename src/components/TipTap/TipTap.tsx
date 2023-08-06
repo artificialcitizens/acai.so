@@ -221,6 +221,9 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
         }}
         className="overflow-scroll w-full mb-12 p-12 px-8  border-none sm:rounded-lg sm:border sm:px-12 flex-grow"
       >
+        <h2 className=" text-sm mb-4 pb-2 font-medium border-b border-solid border-dark text-light">
+          {currentTab.title}
+        </h2>
         {/* <div className="absolute flex right-5 top-5 mb-5 rounded-lg bg-base px-2 py-1 text-sm text-light">
           {saveStatus}
         </div> */}

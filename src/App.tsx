@@ -44,7 +44,7 @@ function App() {
   };
 
   const workspace = globalServices.appStateService.getSnapshot().context.workspaces[workspaceId];
-  const activeTab = workspace && workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId);
+  const activeTab: Tab = workspace && workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId);
   console.log({
     workspace,
     activeTab,
