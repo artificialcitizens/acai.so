@@ -67,7 +67,7 @@ export const Ava: React.FC<AvaProps> = ({ audioContext }) => {
           <StorageMeter />
         </div>
       </ExpansionPanel>
-      <ExpansionPanel title="Speech Recognition">
+      <ExpansionPanel title="Voice Synthesis">
         <VoiceRecognition audioContext={audioContext} />
       </ExpansionPanel>
       <ExpansionPanel title="Settings">

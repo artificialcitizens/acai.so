@@ -20,6 +20,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
   const workspaceId = location.pathname.split('/')[1];
   const tabId = location.pathname.split('/')[2];
   const [state, send] = useActor(appStateService);
+
   useEffect(() => {
     const ws = state.context.workspaces[workspaceId];
     const tab = ws?.data.tiptap.tabs.find((tab: Tab) => tab.id === tabId);
@@ -32,12 +33,12 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
   }, [state.context.workspaces, tabId, workspaceId]);
 
   return (
-    <div className="tiptap-menu flex items-center justify-around relative bg-darker ml-8">
-      <span>
+    <div className=" bg-darker">
+      <span className="absolute bottom-12">
         <FloatingButton handleClick={() => setShowMenu(!showMenu)} />
       </span>
       {showMenu && (
-        <>
+        <div className=" flex items-center justify-around left-12 bg-dark p-8">
           <button
             onClick={async () => {
               console.log('Sending TOGGLE_CONTEXT event'); // Add this line for debugging
@@ -54,6 +55,8 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
 
           <textarea
             value={systemNoteState}
+            className="w-96 rounded-md p-2 bg-base text-light"
+            placeholder="System Note"
             onChange={(e) => {
               setSystemNoteState(e.target.value);
               send({
@@ -78,7 +81,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
           >
             Delete
           </button>
-        </>
+        </div>
       )}
     </div>
   );

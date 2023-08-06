@@ -19,6 +19,7 @@ function App() {
   const globalServices: GlobalStateContextValue = useContext(GlobalStateContext);
   const location = useLocation();
   const workspaceId = location.pathname.split('/')[1];
+  const activeTabId = location.pathname.split('/')[2];
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(undefined);
 
   // const { vectorstore, addDocuments, similaritySearchWithScore } = useMemoryVectorStore(
@@ -43,7 +44,12 @@ function App() {
   };
 
   const workspace = globalServices.appStateService.getSnapshot().context.workspaces[workspaceId];
-  const activeTab = workspace && workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === workspace.activeTabId);
+  const activeTab = workspace && workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId);
+  console.log({
+    workspace,
+    activeTab,
+    workspaceId,
+  });
   return (
     globalServices.appStateService && (
       // <VectorStoreContext.Provider value={{ vectorstore, addDocuments, similaritySearchWithScore }}>
@@ -61,8 +67,8 @@ function App() {
         >
           <ToastManager />
           <main className="w-full flex flex-grow ">
-            <div className="w-full flex flex-col">
-              <div className="h-12 ml-16">{workspace && <h1 className="m-2 text-lg">{workspace.name}</h1>}</div>
+            <div className="w-full flex flex-col h-screen">
+              <div className="ml-16">{workspace && <h1 className="m-2 text-lg">{workspace.name}</h1>}</div>
               {activeTab && <TipTap tab={activeTab} />}
             </div>
             <Ava audioContext={audioContext} />
