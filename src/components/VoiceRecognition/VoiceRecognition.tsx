@@ -73,6 +73,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
   };
 
   const synthesizeAndPlay = async (responsePromise: Promise<string>, voice: string) => {
+    if (avaLoading) return;
     const response = await responsePromise;
     let audioData;
 

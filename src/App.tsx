@@ -1,10 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useState, useEffect, useContext } from 'react';
-import Whisper from './components/Whisper';
-import VoiceRecognition from './components/VoiceRecognition/VoiceRecognition';
-import SocketContext from './context/SocketContext';
-import TabManager from './components/Tabs';
+import React, { useState, useContext } from 'react';
 import { Ava } from './components/Ava/Ava';
 import { SideNav } from './components/SideNav/SideNav';
 import { FloatingButton } from './components/FloatingButton/FloatingButton';
@@ -13,6 +9,8 @@ import { useLocation } from 'react-router-dom';
 import ToastManager from './components/Toast';
 import TipTap from './components/TipTap/TipTap';
 import { Tab } from './state';
+import { VectorStoreContext } from './context/VectorStoreContext';
+import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 
 function App() {
@@ -22,12 +20,12 @@ function App() {
   const activeTabId = location.pathname.split('/')[2];
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(undefined);
 
-  // const { vectorstore, addDocuments, similaritySearchWithScore } = useMemoryVectorStore(
-  //   '',
-  //   // add only tabs that are set to be included in the context of the language model
-  //   // @TODO: add a tool for Ava to see what the user is working on
-  //   // workspace ? workspace.data.tiptap.tabs.map((tab) => tab.isContext && tab.content).join('\n') : '',
-  // );
+  const { vectorstore, addDocuments, similaritySearchWithScore } = useMemoryVectorStore(
+    '',
+    // add only tabs that are set to be included in the context of the language model
+    // @TODO: add a tool for Ava to see what the user is working on
+    // workspace ? workspace.data.tiptap.tabs.map((tab) => tab.isContext && tab.content).join('\n') : '',
+  );
 
   const toggleSideNav = () => {
     globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV' });
@@ -47,8 +45,7 @@ function App() {
   const activeTab: Tab = workspace && workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId);
   return (
     globalServices.appStateService && (
-      // <VectorStoreContext.Provider value={{ vectorstore, addDocuments, similaritySearchWithScore }}>
-      <>
+      <VectorStoreContext.Provider value={{ vectorstore, addDocuments, similaritySearchWithScore }}>
         <SideNav></SideNav>
         <FloatingButton
           handleClick={(e) => {
@@ -78,8 +75,7 @@ function App() {
              */}
           </main>
         </div>{' '}
-        {/* </VectorStoreContext.Provider> */}
-      </>
+      </VectorStoreContext.Provider>
     )
   );
 }

@@ -17,8 +17,8 @@ const SBSearch: React.FC<SBSearchProps> = ({ onSubmit }) => {
       onClearClick={() => setValue('')}
       onKeyDown={(e) => {
         if (value.length > 0 && e.key === 'Enter') {
-          setValue('');
           onSubmit(value);
+          setValue('');
         }
       }}
     />

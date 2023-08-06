@@ -27,7 +27,6 @@ export const useMemoryVectorStore = (initialText: string, chunkSize = 750, chunk
       chunkSize: chunkSize,
       chunkOverlap: chunkOverlap,
     }).then(async (res) => {
-      console.log(res);
       const vectorStore = await initializeMemoryVectorStore({ docs: res, openAIApiKey });
       setVectorStore(vectorStore);
     });
@@ -36,6 +35,19 @@ export const useMemoryVectorStore = (initialText: string, chunkSize = 750, chunk
   const addDocuments = (docs: Document[]) => {
     if (!vectorstore) return;
     addDocumentsToMemoryVectorStore(vectorstore, docs);
+  };
+
+  const filterAndCombineContent = (data: Array<[Document, number]>, threshold: number): string => {
+    // Filter out responses with a similarity score below the threshold
+    const filteredData = data.filter(([, similarityScore]) => similarityScore >= threshold);
+
+    // Map through the filtered data and extract the pageContent
+    const pageContents = filteredData.map(([document]) => document.pageContent);
+
+    // Combine the page contents into a single string
+    const combinedContent = pageContents.join('\n\n');
+
+    return combinedContent;
   };
 
   // const similaritySearch = async (query: string, k = 4, filter: any) => {
@@ -64,6 +76,7 @@ export const useMemoryVectorStore = (initialText: string, chunkSize = 750, chunk
   return {
     vectorstore,
     addDocuments,
+    filterAndCombineContent,
     // similaritySearch,
     // deleteFromStore,
     similaritySearchWithScore,

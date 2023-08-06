@@ -21,7 +21,7 @@ export const useAva = (): [
   const workspaceId = location.pathname.split('/')[1];
   const navigate = useNavigate();
 
-  const fetchResponse = async (message: string, systemMessage: string): Promise<string> => {
+  const queryAva = async (message: string, systemMessage: string): Promise<string> => {
     setLoading(true);
     if (!openAIApiKey || !googleApiKey || !googleCSEId) {
       toastifyError('Missing API keys');
@@ -64,5 +64,5 @@ export const useAva = (): [
     }
   };
 
-  return [fetchResponse, loading];
+  return [queryAva, loading];
 };

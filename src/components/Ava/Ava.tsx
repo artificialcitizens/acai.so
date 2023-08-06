@@ -12,9 +12,10 @@ import { useSelector } from '@xstate/react';
 import useCookieStorage from '../../hooks/use-cookie-storage';
 import { useAva } from '../../hooks/use-ava';
 import { GlobalStateContext, GlobalStateContextValue } from '../../context/GlobalStateContext';
-import { makeObservations, queryPinecone } from '../../endpoints';
 import { useLocation, useNavigate } from 'react-router-dom';
 import VoiceRecognition from '../VoiceRecognition/VoiceRecognition';
+import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
+import { Tab } from '../../state';
 
 interface AvaProps {
   audioContext?: AudioContext;
@@ -26,16 +27,16 @@ export const Ava: React.FC<AvaProps> = ({ audioContext }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const workspaceId = location.pathname.split('/')[1];
+  const workspace = appStateService.getSnapshot().context.workspaces[workspaceId];
+  const activeTabId = location.pathname.split('/')[2];
+  const activeTab: Tab = workspace && workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId);
   const systemNotes = useSelector(agentStateService, (state) => state.context[workspaceId]?.systemNotes) || '';
   const [openAIApiKey] = useCookieStorage('OPENAI_KEY');
   const [fetchResponse, avaLoading] = useAva();
-  // const { vectorstore, addDocuments, similaritySearchWithScore } = useMemoryVectorStore(
-  //   '',
-  //   // add only tabs that are set to be included in the context of the language model
-  //   // @TODO: add a tool for Ava to see what the user is working on
-  //   // workspace ? workspace.data.tiptap.tabs.map((tab) => tab.isContext && tab.content).join('\n') : '',
-  // );
-
+  const context = workspace
+    ? workspace.data.tiptap.tabs.map((tab: Tab) => (tab.isContext ? tab.content : '')).join('\n')
+    : '';
+  const { filterAndCombineContent, similaritySearchWithScore } = useMemoryVectorStore(context);
   const toggleChat = () => {
     uiStateService.send({ type: 'TOGGLE_AGENT_CHAT' });
   };
@@ -52,12 +53,19 @@ export const Ava: React.FC<AvaProps> = ({ audioContext }) => {
           <ProjectLinks />
           <SBSearch
             onSubmit={async (val) => {
-              const response = await queryPinecone(val);
-              const newTab = {
+              const response = await similaritySearchWithScore(val);
+              console.log('response', response);
+              const results = filterAndCombineContent(response, 0.78);
+              const newTab: Tab = {
                 id: Date.now().toString(),
                 title: val,
-                content: response,
+                content: results,
                 workspaceId,
+                isContext: false,
+                createdAt: new Date().toString(),
+                lastUpdated: new Date().toString(),
+                filetype: 'markdown',
+                systemNote: '',
               };
               appStateService.send({ type: 'ADD_TAB', tab: newTab });
               navigate(`/${workspaceId}/${newTab.id}`);
