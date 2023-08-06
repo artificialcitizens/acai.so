@@ -45,11 +45,6 @@ function App() {
 
   const workspace = globalServices.appStateService.getSnapshot().context.workspaces[workspaceId];
   const activeTab: Tab = workspace && workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId);
-  console.log({
-    workspace,
-    activeTab,
-    workspaceId,
-  });
   return (
     globalServices.appStateService && (
       // <VectorStoreContext.Provider value={{ vectorstore, addDocuments, similaritySearchWithScore }}>
