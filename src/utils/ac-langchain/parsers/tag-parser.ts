@@ -1,5 +1,5 @@
 import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { HumanMessage, SystemChatMessage } from 'langchain/schema';
+import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
 import { getCookie } from '../../config';
 
 type ParsedResponse = {
