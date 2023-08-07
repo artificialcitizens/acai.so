@@ -14,7 +14,7 @@ function useSpeechRecognition({
   useEffect(() => {
     if (!active) return;
     if (!('webkitSpeechRecognition' in window)) return;
-    speechRecognitionRef.current = new window.webkitSpeechRecognition();
+    speechRecognitionRef.current = new (window as any).webkitSpeechRecognition();
     speechRecognitionRef.current.continuous = true;
     speechRecognitionRef.current.interimResults = true;
     queue.addCallback(speechRecognitionRef.current.start());

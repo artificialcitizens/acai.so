@@ -1,4 +1,6 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable react/jsx-no-comment-textnodes */
 import React, { useContext, useEffect, useRef } from 'react';
 import { Sidenav, initTE } from 'tw-elements';
 import { useActor } from '@xstate/react';
@@ -104,17 +106,13 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
       <ul className="relative m-0 list-none px-[0.2rem]" data-te-sidenav-menu-ref>
         {Object.values(workspaces).map((workspace) => (
           <li className="relative pb-2 !important" key={workspace.id}>
-            <Link
+            <div
               className="flex h-12 cursor-pointer truncate m-auto flex-grow rounded-[5px] px-1 py-4 text-[0.875rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none "
-              to={`/${workspace.id}`}
               data-te-sidenav-link-ref
-              onClick={() => {
-                globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV' });
-              }}
+              onClick={() => {}}
             >
               <span className="font-bold self-center">{workspace.name}</span>
-            </Link>
-
+            </div>
             <ul
               className="!visible border-b border-solid border-dark pb-8 relative m-0 hidden list-none p-0 data-[te-collapse-show]:block "
               data-te-sidenav-collapse-ref
