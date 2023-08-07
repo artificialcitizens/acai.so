@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useContext, useState } from 'react';
-import { noteChain } from '../../utils/sb-langchain/chains/notes-chain';
+import { noteChain } from '../../utils/ac-langchain/chains/notes-chain';
 import { GlobalStateContext, GlobalStateContextValue } from '../../context/GlobalStateContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toastifyInfo } from '../Toast';

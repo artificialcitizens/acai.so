@@ -11,6 +11,7 @@ import TipTap from './components/TipTap/TipTap';
 import { Tab } from './state';
 import { VectorStoreContext } from './context/VectorStoreContext';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
+import { useTypeTag } from './hooks/ac-hooks/use-type-tag';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 
 function App() {
@@ -19,7 +20,7 @@ function App() {
   const workspaceId = location.pathname.split('/')[1];
   const activeTabId = location.pathname.split('/')[2];
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(undefined);
-
+  const { typeTagExample, parseResponse } = useTypeTag();
   const { vectorstore, addDocuments, similaritySearchWithScore } = useMemoryVectorStore(
     '',
     // add only tabs that are set to be included in the context of the language model

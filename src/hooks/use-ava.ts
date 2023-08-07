@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import useCookieStorage from './use-cookie-storage';
-import { avaChat } from '../utils/sb-langchain/agents/ava';
+import { avaChat } from '../utils/ac-langchain/agents/ava';
 import { toastifyAgentThought, toastifyError } from '../components/Toast';
 import { appStateMachine, handleCreateTab } from '../state';
 import { useInterpret } from '@xstate/react';

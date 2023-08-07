@@ -10,7 +10,7 @@ import { useActor } from '@xstate/react';
 import { ChatHistory } from '../../state';
 import { useLocation } from 'react-router-dom';
 import { readFileAsText, slugify } from '../../utils/data-utils.ts';
-import { convertDSPTranscript } from '../../utils/sb-langchain/text-splitters/dsp-splitter.ts';
+import { convertDSPTranscript } from '../../utils/ac-langchain/text-splitters/dsp-splitter.ts';
 import yaml from 'js-yaml';
 
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page

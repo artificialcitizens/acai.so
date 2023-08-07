@@ -3,8 +3,8 @@ import {
   initializeMemoryVectorStore,
   addDocumentsToMemoryVectorStore,
   similaritySearchWithScoreInMemoryVectorStore,
-} from '../utils/sb-langchain/vector-store/in-memory';
-import { createDocumentsFromText } from '../utils/sb-langchain/text-splitters';
+} from '../utils/ac-langchain/vector-store/in-memory';
+import { createDocumentsFromText } from '../utils/ac-langchain/text-splitters';
 import { Document } from 'langchain/document';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { toastifyError } from '../components/Toast';
