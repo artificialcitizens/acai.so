@@ -3,10 +3,14 @@ import { TokenTextSplitter } from 'langchain/text_splitter';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { HumanChatMessage } from 'langchain/schema';
 import { PromptTemplate } from 'langchain/prompts';
-import { StructuredOutputParser, OutputFixingParser } from 'langchain/output_parsers';
+import {
+  StructuredOutputParser,
+  OutputFixingParser,
+} from 'langchain/output_parsers';
 import { z } from 'zod';
 import { loadSummarizationChain } from 'langchain/chains';
 import { Document } from 'langchain/document';
+import { getToken } from '../../config';
 
 export type PartialContentResult = {
   id: number;
@@ -27,7 +31,9 @@ const summaryPrompt = PromptTemplate.fromTemplate(
   Be sure to leave in key details and do not embellish or add any information.`,
 );
 
-const parser = StructuredOutputParser.fromZodSchema(z.array(z.string()).describe('Questions in an array of strings'));
+const parser = StructuredOutputParser.fromZodSchema(
+  z.array(z.string()).describe('Questions in an array of strings'),
+);
 
 // https://www.youtube.com/watch?v=7Y6n5zBCzMo
 export const summarySplitter = new TokenTextSplitter({
@@ -38,16 +44,14 @@ export const summarySplitter = new TokenTextSplitter({
 
 export const getSummaries = async ({
   docs,
-  openAIApiKey,
 }: {
   docs: Document[];
-  openAIApiKey: string;
 }): Promise<PartialContentResult[]> => {
   const summaries: PartialContentResult[] = [];
   console.log(`Generating Partial Summaries for ${docs.length} chunks of text`);
 
   const quickModel = new ChatOpenAI({
-    openAIApiKey,
+    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
     temperature: 0,
   });
   const summaryPromises = docs.map(async (doc, index) => {
@@ -55,7 +59,9 @@ export const getSummaries = async ({
       text: doc.pageContent,
     });
     try {
-      const response = await quickModel.call([new HumanChatMessage(formattedSummaryPrompt)]);
+      const response = await quickModel.call([
+        new HumanChatMessage(formattedSummaryPrompt),
+      ]);
       const partialSummary = response.text;
       summaries.push({ id: index, partialSummary });
       return { id: index, partialSummary };

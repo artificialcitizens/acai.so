@@ -8,16 +8,14 @@ import { TiptapExtensions } from './extensions';
 import { useDebouncedCallback } from 'use-debounce';
 import { EditorBubbleMenu } from './components';
 import { toastifyDefault, toastifyError } from '../Toast';
-import { marked } from 'marked';
-import { useInterpret, useSelector } from '@xstate/react';
+import { useInterpret } from '@xstate/react';
 import { Tab, appStateMachine } from '../../state';
-import { VectorStoreContext } from '../../context/VectorStoreContext';
-import useCookieStorage from '../../hooks/use-cookie-storage';
-import { semanticSearchQuery } from '../../utils/ac-langchain/chains/semantic-search-query-chain';
+import { semanticSearchQueryGeneration } from '../../utils/ac-langchain/chains/semantic-search-query-chain';
 import { autoComplete } from '../../utils/ac-langchain/chains/autocomplete-chain';
 import Bottleneck from 'bottleneck';
 import { MenuBar } from './MenuBar';
 import './TipTap.css';
+import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
 interface EditorProps {
   tab: Tab;
 }
@@ -41,8 +39,8 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
 
   const [hydrated, setHydrated] = useState(false);
   const [saveStatus, setSaveStatus] = useState('Saved');
-  // const { similaritySearchWithScore } = useContext<any>(VectorStoreContext);
-  const [openAIApiKey] = useCookieStorage('OPENAI_KEY');
+  const { filterAndCombineContent, similaritySearchWithScore } =
+    useMemoryVectorStore('');
   const [completion, setCompletion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [currentContext, setCurrentContext] = useState('');
@@ -53,39 +51,49 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     setHydrated(false);
   }, [tab]);
 
-  const saveContent = (editor: Editor, workspaceId: string, extraContent = '') => {
+  const saveContent = (
+    editor: Editor,
+    workspaceId: string,
+    extraContent = '',
+  ) => {
     if (!currentTab) return;
     const content = editor.getJSON();
     setSaveStatus('Saving...');
-    service.send({ type: 'UPDATE_TAB_CONTENT', id: currentTab.id, content, workspaceId });
+    service.send({
+      type: 'UPDATE_TAB_CONTENT',
+      id: currentTab.id,
+      content,
+      workspaceId,
+    });
     setTimeout(() => {
       setSaveStatus('Saved');
     }, 100);
   };
 
-  // /**
-  //  * Creates context for the autocomplete vector search to inform autocomplete
-  //  */
-  // const setAutocompleteContext = async (editor: Editor) => {
-  //   const context = editor.getText();
-  //   // if the context is too short we'll just genarate results based on the current context
-  //   // @TODO: first conditional
-  //   // we generate results based on the context
-  //   const results: string[] = await semanticSearchQuery(context, openAIApiKey!);
-  //   // @TODO: we can set a dropdown with the 3 most relevant autofills suggestions based on the results of the semantic search queries
-  //   // console.log(results[0] + ' ' + results[1] + ' ' + results[2]);
-  //   const queryResults = await similaritySearchWithScore(`${results[0]} ${results[1]} ${results[2]}`);
-  //   const pageContent = queryResults.map((result: any) => {
-  //     if (result.score < 0.75) return;
-  //     return result[0].pageContent;
-  //   });
+  /**
+   * Creates context for the autocomplete vector search to inform autocomplete
+   */
+  const setAutocompleteContext = async (editor: Editor) => {
+    const context = editor.getText();
+    // if the context is too short we'll just genarate results based on the current context
+    // @TODO: first conditional
+    // we generate results based on the context
+    const results: string[] = await semanticSearchQueryGeneration(context);
+    // @TODO: we can set a dropdown with the 3 most relevant autofills suggestions based on the results of the semantic search queries
+    // console.log(results[0] + ' ' + results[1] + ' ' + results[2]);
+    const queryResults = await similaritySearchWithScore(
+      `${results[0]} ${results[1]} ${results[2]}`,
+    );
+    const pageContent = queryResults.map((result: any) => {
+      if (result.score < 0.75) return;
+      return result[0].pageContent;
+    });
 
-  //   setCurrentContext(pageContent.join('\n'));
-  // };
+    setCurrentContext(pageContent.join('\n'));
+  };
 
   const debouncedUpdates = useDebouncedCallback(async (editor: Editor) => {
     saveContent(editor, currentTab.workspaceId);
-    // await setAutocompleteContext(editor);
   }, 1000);
 
   const tokenQueue: string[] = [];
@@ -105,19 +113,21 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   const editor = useEditor({
     extensions: TiptapExtensions,
     editorProps: TiptapEditorProps,
-    onUpdate: (e) => {
+    onUpdate: async (e) => {
       setSaveStatus('Unsaved');
       const selection = e.editor.state.selection;
-      const lastTwo = e.editor.state.doc.textBetween(selection.from - 2, selection.from, '\n');
+      const lastTwo = e.editor.state.doc.textBetween(
+        selection.from - 2,
+        selection.from,
+        '\n',
+      );
       if (lastTwo === '++' && !isLoading) {
         e.editor.commands.deleteRange({
           from: selection.from - 2,
           to: selection.from,
         });
-        if (!openAIApiKey) {
-          toastifyError('Please add your OpenAI API key in the settings');
-          return;
-        }
+        setIsLoading(true);
+        await setAutocompleteContext(e.editor);
         autoComplete({
           context: e.editor.state.doc.textBetween(
             Math.max(0, e.editor.state.selection.from - 5000),
@@ -125,7 +135,6 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
             '\n',
           ),
           relatedInfo: currentContext || '',
-          openAIApiKey,
           callbacks: {
             onMessageStart: () => setIsLoading(true),
             onMessageError: (error: string) => {
@@ -162,7 +171,8 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
 
   // Insert chunks of the generated text
   useEffect(() => {
-    const diff = prev.current && completion ? completion.slice(prev.current.length) : '';
+    const diff =
+      prev.current && completion ? completion.slice(prev.current.length) : '';
     prev.current = completion;
     editor?.commands.insertContent(diff);
   }, [isLoading, editor, completion]);
@@ -230,7 +240,11 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
         {editor && <EditorBubbleMenu editor={editor} />}
         <EditorContent editor={editor} />
       </div>
-      <MenuBar editor={editor} tipTapEditorId={currentTab.id} systemNote={currentTab.systemNote} />
+      <MenuBar
+        editor={editor}
+        tipTapEditorId={currentTab.id}
+        systemNote={currentTab.systemNote}
+      />
     </>
   );
 };

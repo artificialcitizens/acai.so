@@ -18,7 +18,8 @@ ${priorList}
 `;
 
   const model = new ChatOpenAI({
-    openAIApiKey: getToken('OPENAI_API_KEY'),
+    openAIApiKey:
+      getToken('OPENAI_API_KEY') || import.meta.env.VITE_OPENAI_API_KEY,
     modelName: 'gpt-3.5-turbo-16k',
     temperature: 0,
   });

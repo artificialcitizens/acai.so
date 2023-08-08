@@ -9,9 +9,11 @@ import SBSearch from '../../components/Search';
 import ScratchPad from '../../components/ScratchPad/ScratchPad';
 import TokenManager from '../../components/TokenManager/token-manager';
 import { useSelector } from '@xstate/react';
-import useCookieStorage from '../../hooks/use-cookie-storage';
 import { useAva } from '../../hooks/use-ava';
-import { GlobalStateContext, GlobalStateContextValue } from '../../context/GlobalStateContext';
+import {
+  GlobalStateContext,
+  GlobalStateContextValue,
+} from '../../context/GlobalStateContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import VoiceRecognition from '../VoiceRecognition/VoiceRecognition';
 import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
@@ -22,21 +24,33 @@ interface AvaProps {
 }
 
 export const Ava: React.FC<AvaProps> = ({ audioContext }) => {
-  const { appStateService, uiStateService, agentStateService }: GlobalStateContextValue =
-    useContext(GlobalStateContext);
+  const {
+    appStateService,
+    uiStateService,
+    agentStateService,
+  }: GlobalStateContextValue = useContext(GlobalStateContext);
   const location = useLocation();
   const navigate = useNavigate();
   const workspaceId = location.pathname.split('/')[1];
-  const workspace = appStateService.getSnapshot().context.workspaces[workspaceId];
+  const workspace =
+    appStateService.getSnapshot().context.workspaces[workspaceId];
   const activeTabId = location.pathname.split('/')[2];
-  const activeTab: Tab = workspace && workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId);
-  const systemNotes = useSelector(agentStateService, (state) => state.context[workspaceId]?.systemNotes) || '';
-  const [openAIApiKey] = useCookieStorage('OPENAI_KEY');
+  const activeTab: Tab =
+    workspace &&
+    workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId);
+  const systemNotes =
+    useSelector(
+      agentStateService,
+      (state) => state.context[workspaceId]?.systemNotes,
+    ) || '';
   const [fetchResponse, avaLoading] = useAva();
   const context = workspace
-    ? workspace.data.tiptap.tabs.map((tab: Tab) => (tab.isContext ? tab.content : '')).join('\n')
+    ? workspace.data.tiptap.tabs
+        .map((tab: Tab) => (tab.isContext ? tab.content : ''))
+        .join('\n')
     : '';
-  const { filterAndCombineContent, similaritySearchWithScore } = useMemoryVectorStore(context);
+  const { filterAndCombineContent, similaritySearchWithScore } =
+    useMemoryVectorStore(context);
   const toggleChat = () => {
     uiStateService.send({ type: 'TOGGLE_AGENT_CHAT' });
   };
@@ -48,7 +62,10 @@ export const Ava: React.FC<AvaProps> = ({ audioContext }) => {
   return (
     <SBSidebar>
       {' '}
-      <ExpansionPanel data-ava-element="junk-drawer-panel-toggle" title="Knowledge">
+      <ExpansionPanel
+        data-ava-element="junk-drawer-panel-toggle"
+        title="Knowledge"
+      >
         <div className="flex flex-col">
           <SBSearch
             onSubmit={async (val) => {
@@ -97,10 +114,13 @@ export const Ava: React.FC<AvaProps> = ({ audioContext }) => {
         onClick={toggleAgentThoughts}
         isOpened={uiStateService.getSnapshot().context.agentThoughts}
       >
-        <NotificationCenter placeholder="A place for AI to ponder 🤔" secondaryFilter="agent-thought" />
+        <NotificationCenter
+          placeholder="A place for AI to ponder 🤔"
+          secondaryFilter="agent-thought"
+        />
       </ExpansionPanel>
       <ExpansionPanel title="Chat" className="chat-panel" isOpened={true}>
-        {openAIApiKey && (
+        {workspaceId && (
           <Chat
             name="Ava"
             avatar=".."

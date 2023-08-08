@@ -1,6 +1,7 @@
 // import { CallbackManager } from 'langchain/callbacks';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
+import { getToken } from '../../config';
 
 /**
  * @param context - The context of the message
@@ -12,13 +13,11 @@ import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
 export const autoComplete = async ({
   context,
   relatedInfo,
-  openAIApiKey,
   systemPromptOverride,
   callbacks,
 }: {
   context: string;
   relatedInfo: string;
-  openAIApiKey: string;
   systemPromptOverride?: string;
   callbacks: {
     onMessageStart?: (message: string) => void;
@@ -28,7 +27,7 @@ export const autoComplete = async ({
   };
 }): Promise<string> => {
   const model = new ChatOpenAI({
-    openAIApiKey,
+    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
     modelName: 'gpt-3.5-turbo-16k',
     temperature: 0.35,
     streaming: true,

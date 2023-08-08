@@ -1,5 +1,6 @@
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { HumanChatMessage, SystemChatMessage } from "langchain/schema";
+import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
+import { getToken } from '../../config';
 
 /**
  * Generate observations based on the given context
@@ -7,7 +8,7 @@ import { HumanChatMessage, SystemChatMessage } from "langchain/schema";
  */
 export const observationChain = async (
   context: string,
-  priorObservations = "no prior observations"
+  priorObservations = 'no prior observations',
 ): Promise<string> => {
   const prompt = `### Ignore all prior instructions
 you are tasked with taking the transcript of one or more individuals talking 
@@ -19,8 +20,12 @@ Here is the previous list of observations
 ${priorObservations}
 `;
 
-  const model = new ChatOpenAI({ modelName: "gpt-4", temperature: 0 });
-  console.log("context", context);
+  const model = new ChatOpenAI({
+    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
+    modelName: 'gpt-4',
+    temperature: 0,
+  });
+  console.log('context', context);
   const response = await model.call([
     new SystemChatMessage(prompt),
     new HumanChatMessage(context),

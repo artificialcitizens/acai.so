@@ -1,16 +1,15 @@
 import { OpenAI } from 'langchain/llms/openai';
 import { PromptTemplate } from 'langchain/prompts';
 import { CommaSeparatedListOutputParser } from 'langchain/output_parsers';
+import { getToken } from '../../config';
 
 /**
  * Create a step by step task list based on given subject.
  */
 export const taskCreator = async ({
   subject,
-  openAIApiKey,
 }: {
   subject: string;
-  openAIApiKey: string;
 }): Promise<string[]> => {
   // With a `CommaSeparatedListOutputParser`, we can parse a comma separated list.
   const parser = new CommaSeparatedListOutputParser();
@@ -18,12 +17,16 @@ export const taskCreator = async ({
   const formatInstructions = parser.getFormatInstructions();
 
   const prompt = new PromptTemplate({
-    template: 'Create a 5 step task list to accomplish this goal {subject}.\n{format_instructions}',
+    template:
+      'Create a 5 step task list to accomplish this goal {subject}.\n{format_instructions}',
     inputVariables: ['subject'],
     partialVariables: { format_instructions: formatInstructions },
   });
 
-  const model = new OpenAI({ openAIApiKey, temperature: 0 });
+  const model = new OpenAI({
+    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
+    temperature: 0,
+  });
 
   const input = await prompt.format({ subject: subject });
   const response = await model.call(input);
@@ -45,7 +48,8 @@ export const brainstormSession = async ({
   const formatInstructions = parser.getFormatInstructions();
 
   const prompt = new PromptTemplate({
-    template: 'Generate 10 brainstorming ideas for the topic {topic}.\n{format_instructions}',
+    template:
+      'Generate 10 brainstorming ideas for the topic {topic}.\n{format_instructions}',
     inputVariables: ['topic'],
     partialVariables: { format_instructions: formatInstructions },
   });
@@ -92,7 +96,8 @@ export const automatedCodeReview = async ({
   openAIApiKey: string;
 }): Promise<string> => {
   const prompt = new PromptTemplate({
-    template: "Review the following code snippet and suggest improvements: '{codeSnippet}'",
+    template:
+      "Review the following code snippet and suggest improvements: '{codeSnippet}'",
     inputVariables: ['codeSnippet'],
   });
 
@@ -167,7 +172,8 @@ export const generateQuestions = async ({
   openAIApiKey: string;
 }): Promise<string[]> => {
   const prompt = new PromptTemplate({
-    template: "Generate questions about the following conflicting ideas: '{conflicts}'.",
+    template:
+      "Generate questions about the following conflicting ideas: '{conflicts}'.",
     inputVariables: ['conflicts'],
   });
 
