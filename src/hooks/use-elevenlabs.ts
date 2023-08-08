@@ -9,13 +9,11 @@ interface Voices {
 }
 
 export const useElevenlabs = (voices: Voices) => {
-  const apiKey = getToken('ELEVENLABS_KEY');
+  const apiKey =
+    getToken('ELEVENLABS_API_KEY') || import.meta.env.VITE_ELEVENLABS_API_KEY;
   const synthesizeSpeech = useCallback(
     async (inputText: string, voice: string) => {
       const VOICE_ID = voices[voice];
-      console.log({
-        apiKey,
-      });
       const options = {
         method: 'POST',
         url: `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
