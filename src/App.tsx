@@ -4,29 +4,39 @@ import React, { useState, useContext } from 'react';
 import { Ava } from './components/Ava/Ava';
 import { SideNav } from './components/SideNav/SideNav';
 import { FloatingButton } from './components/FloatingButton/FloatingButton';
-import { GlobalStateContext, GlobalStateContextValue } from './context/GlobalStateContext';
+import {
+  GlobalStateContext,
+  GlobalStateContextValue,
+} from './context/GlobalStateContext';
 import { useLocation } from 'react-router-dom';
 import ToastManager from './components/Toast';
 import TipTap from './components/TipTap/TipTap';
 import { Tab } from './state';
 import { VectorStoreContext } from './context/VectorStoreContext';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
-import { useTypeTag } from './hooks/ac-hooks/use-type-tag';
+import useTypeTag from './hooks/ac-langchain/use-type-tag';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 
 function App() {
-  const globalServices: GlobalStateContextValue = useContext(GlobalStateContext);
+  const globalServices: GlobalStateContextValue =
+    useContext(GlobalStateContext);
   const location = useLocation();
   const workspaceId = location.pathname.split('/')[1];
   const activeTabId = location.pathname.split('/')[2];
-  const [audioContext, setAudioContext] = useState<AudioContext | undefined>(undefined);
-  const { typeTagExample, parseResponse } = useTypeTag();
-  const { vectorstore, addDocuments, similaritySearchWithScore } = useMemoryVectorStore(
-    '',
-    // add only tabs that are set to be included in the context of the language model
-    // @TODO: add a tool for Ava to see what the user is working on
-    // workspace ? workspace.data.tiptap.tabs.map((tab) => tab.isContext && tab.content).join('\n') : '',
+  const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
+    undefined,
   );
+  const data = {
+    name: ['Josh Mabry'],
+    age: ['38'],
+    location: ['Portland, OR'],
+    occupation: ['Software Engineer'],
+    siblings: ['Shena', 'Katie'],
+  };
+
+  const { typeTagResponse, parseResponse } = useTypeTag(data);
+  const { vectorstore, addDocuments, similaritySearchWithScore } =
+    useMemoryVectorStore('');
 
   const toggleSideNav = () => {
     globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV' });
@@ -42,11 +52,18 @@ function App() {
     }
   };
 
-  const workspace = globalServices.appStateService.getSnapshot().context.workspaces[workspaceId];
-  const activeTab: Tab = workspace && workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId);
+  const workspace =
+    globalServices.appStateService.getSnapshot().context.workspaces[
+      workspaceId
+    ];
+  const activeTab: Tab =
+    workspace &&
+    workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId);
   return (
     globalServices.appStateService && (
-      <VectorStoreContext.Provider value={{ vectorstore, addDocuments, similaritySearchWithScore }}>
+      <VectorStoreContext.Provider
+        value={{ vectorstore, addDocuments, similaritySearchWithScore }}
+      >
         <SideNav></SideNav>
         <FloatingButton
           handleClick={(e) => {
@@ -61,8 +78,11 @@ function App() {
           <ToastManager />
           <main className="w-full flex flex-grow ">
             <div className="w-full flex flex-col h-screen">
-              <div className="ml-16">{workspace && <h1 className="m-2 text-lg">{workspace.name}</h1>}</div>
+              <div className="ml-16">
+                {workspace && <h1 className="m-2 text-lg">{workspace.name}</h1>}
+              </div>
               {activeTab && <TipTap tab={activeTab} />}
+              {}
             </div>
             <Ava audioContext={audioContext} />
             {/* 
