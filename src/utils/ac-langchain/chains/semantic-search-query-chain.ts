@@ -2,7 +2,13 @@ import { OpenAI } from 'langchain/llms/openai';
 import { PromptTemplate } from 'langchain/prompts';
 import { CommaSeparatedListOutputParser } from 'langchain/output_parsers';
 
-export const semanticSearchQuery = async (text: string, openAIApiKey: string): Promise<string[]> => {
+/**
+ *  Create a list of comma separated sentences to semantically search a vectorstore with.
+ */
+export const semanticSearchQueryGeneration = async (
+  text: string,
+  openAIApiKey: string,
+): Promise<string[]> => {
   const prompt = new PromptTemplate({
     template: `Identify the key concepts in the following text: '{text}'.
     

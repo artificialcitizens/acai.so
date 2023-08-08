@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React, { useState } from 'react';
 import { useAva } from '../../hooks/use-ava';
-import useCookieStorage from '../../hooks/use-cookie-storage';
 import { toastifyInfo } from '../Toast';
 
 import useSpeechRecognition from '../../hooks/use-speech-recognition';
@@ -12,6 +11,7 @@ import { useElevenlabs } from '../../hooks/use-elevenlabs';
 import ScratchPad from '../ScratchPad/ScratchPad';
 import { useVoiceCommands } from './use-voice-command';
 import { useWebSpeechSynthesis } from '../../hooks/use-web-tts';
+import { getToken } from '../../utils/config';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
@@ -22,18 +22,27 @@ const voices = {
   ava: 'XNjihqQlHh33hdGwAdnE',
 };
 
-const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => {
+const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
+  audioContext,
+}) => {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [fetchResponse, avaLoading] = useAva();
-  const [openAIApiKey] = useCookieStorage('OPENAI_KEY');
-  const [elevenlabsKey] = useCookieStorage('ELEVENLABS_API_KEY');
+  const [openAIApiKey] = getToken('OPENAI_KEY');
+  const [elevenlabsKey] = getToken('ELEVENLABS_API_KEY');
   const synthesizeBarkSpeech = useBark();
   const synthesizeElevenLabsSpeech = useElevenlabs(voices, elevenlabsKey || '');
-  const [synthesisMode, setSynthesisMode] = useState<'bark' | 'elevenlabs' | 'webSpeech'>('elevenlabs');
+  const [synthesisMode, setSynthesisMode] = useState<
+    'bark' | 'elevenlabs' | 'webSpeech'
+  >('elevenlabs');
   const [manualTTS, setManualTTS] = useState<string>('');
   const synthesizeWebSpeech = useWebSpeechSynthesis();
-  const { userTranscript, setUserTranscript, voiceRecognitionState, setVoiceRecognitionState, handleVoiceCommand } =
-    useVoiceCommands();
+  const {
+    userTranscript,
+    setUserTranscript,
+    voiceRecognitionState,
+    setVoiceRecognitionState,
+    handleVoiceCommand,
+  } = useVoiceCommands();
 
   const handleVoiceRecognition = (t: string) => {
     switch (voiceRecognitionState) {
@@ -67,17 +76,25 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
         break;
     }
   };
-  const handleTtsServiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleTtsServiceChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     setSynthesisMode(event.target.value as 'bark' | 'elevenlabs' | 'webSpeech');
   };
 
-  const synthesizeAndPlay = async (responsePromise: Promise<string>, voice: string) => {
+  const synthesizeAndPlay = async (
+    responsePromise: Promise<string>,
+    voice: string,
+  ) => {
     if (avaLoading) return;
     const response = await responsePromise;
     let audioData;
 
     if (synthesisMode === 'bark') {
-      audioData = await synthesizeBarkSpeech({ inputText: response, voicePreset: 'v2/en_speaker_9' });
+      audioData = await synthesizeBarkSpeech({
+        inputText: response,
+        voicePreset: 'v2/en_speaker_9',
+      });
     } else if (synthesisMode === 'elevenlabs' && elevenlabsKey) {
       audioData = await synthesizeElevenLabsSpeech(response, voice);
     } else if (synthesisMode === 'webSpeech') {
@@ -86,7 +103,9 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
     }
 
     if (audioData) {
-      const audioBlob = new Blob([audioData], { type: synthesisMode === 'bark' ? 'audio/wav' : 'audio/mpeg' });
+      const audioBlob = new Blob([audioData], {
+        type: synthesisMode === 'bark' ? 'audio/wav' : 'audio/mpeg',
+      });
       const audioUrl = URL.createObjectURL(audioBlob);
       setAudioSrc(audioUrl);
       setUserTranscript('');
@@ -106,13 +125,19 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
 
   useSpeechRecognition({ onTranscriptionComplete, active: true });
   const isOn =
-    voiceRecognitionState === 'ava' || voiceRecognitionState === 'notes' || voiceRecognitionState === 'strahl';
+    voiceRecognitionState === 'ava' ||
+    voiceRecognitionState === 'notes' ||
+    voiceRecognitionState === 'strahl';
 
   return (
     <>
-      {audioContext && <AudioWaveform audioContext={audioContext} isOn={isOn} />}
+      {audioContext && (
+        <AudioWaveform audioContext={audioContext} isOn={isOn} />
+      )}
 
-      <div className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow`}>
+      <div
+        className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow`}
+      >
         {audioSrc && (
           <audio
             controls
@@ -121,13 +146,20 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({ audioContext }) => 
             onEnded={() => {
               setTimeout(() => {
                 setAudioSrc(null);
-                if (voiceRecognitionState === 'ava' || voiceRecognitionState === 'following')
+                if (
+                  voiceRecognitionState === 'ava' ||
+                  voiceRecognitionState === 'following'
+                )
                   setVoiceRecognitionState('idle');
               }, 200);
             }}
           />
         )}
-        <select className="bg-base text-dark font-medium p-1" value={synthesisMode} onChange={handleTtsServiceChange}>
+        <select
+          className="bg-base text-dark font-medium p-1"
+          value={synthesisMode}
+          onChange={handleTtsServiceChange}
+        >
           <option className="text-light" value="webSpeech">
             Web Speech API
           </option>

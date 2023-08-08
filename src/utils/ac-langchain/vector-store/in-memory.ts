@@ -2,12 +2,16 @@ import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { Document } from 'langchain/document';
 import { Embeddings } from 'langchain/embeddings/base';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { getCookie } from '../../config';
+import { getToken } from '../../config';
 
-export const initializeMemoryVectorStore = async ({ docs }: { docs: Document[] }) => {
+export const initializeMemoryVectorStore = async ({
+  docs,
+}: {
+  docs: Document[];
+}) => {
   const vectorStore = await MemoryVectorStore.fromDocuments(
     docs,
-    new OpenAIEmbeddings({ openAIApiKey: getCookie('OPENAI_KEY') }),
+    new OpenAIEmbeddings({ openAIApiKey: getToken('OPENAI_KEY') }),
   );
   return vectorStore;
 };
@@ -57,7 +61,12 @@ export const fromTextsToMemoryVectorStore = async (
   embeddings: Embeddings,
   dbConfig?: any,
 ): Promise<MemoryVectorStore> => {
-  const vectorStore = await MemoryVectorStore.fromTexts(texts, metadatas, embeddings, dbConfig);
+  const vectorStore = await MemoryVectorStore.fromTexts(
+    texts,
+    metadatas,
+    embeddings,
+    dbConfig,
+  );
   return vectorStore;
 };
 
@@ -68,6 +77,9 @@ export const fromExistingIndexToMemoryVectorStore = async (
   embeddings: Embeddings,
   dbConfig?: any,
 ): Promise<MemoryVectorStore> => {
-  const vectorStore = await MemoryVectorStore.fromExistingIndex(embeddings, dbConfig);
+  const vectorStore = await MemoryVectorStore.fromExistingIndex(
+    embeddings,
+    dbConfig,
+  );
   return vectorStore;
 };

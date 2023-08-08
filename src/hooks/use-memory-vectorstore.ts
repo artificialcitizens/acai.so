@@ -8,11 +8,17 @@ import { createDocumentsFromText } from '../utils/ac-langchain/text-splitters';
 import { Document } from 'langchain/document';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { toastifyError } from '../components/Toast';
-import { getCookie } from '../utils/config';
+import { getToken } from '../utils/config';
 
-export const useMemoryVectorStore = (initialText: string, chunkSize = 750, chunkOverlap = 75) => {
-  const [vectorstore, setVectorStore] = useState<MemoryVectorStore | null>(null);
-  const openAIApiKey = getCookie('OPENAI_KEY');
+export const useMemoryVectorStore = (
+  initialText: string,
+  chunkSize = 750,
+  chunkOverlap = 75,
+) => {
+  const [vectorstore, setVectorStore] = useState<MemoryVectorStore | null>(
+    null,
+  );
+  const openAIApiKey = getToken('OPENAI_KEY');
 
   useEffect(() => {
     if (!openAIApiKey) {
@@ -35,9 +41,14 @@ export const useMemoryVectorStore = (initialText: string, chunkSize = 750, chunk
     addDocumentsToMemoryVectorStore(vectorstore, docs);
   };
 
-  const filterAndCombineContent = (data: Array<[Document, number]>, threshold: number): string => {
+  const filterAndCombineContent = (
+    data: Array<[Document, number]>,
+    threshold: number,
+  ): string => {
     // Filter out responses with a similarity score below the threshold
-    const filteredData = data.filter(([, similarityScore]) => similarityScore >= threshold);
+    const filteredData = data.filter(
+      ([, similarityScore]) => similarityScore >= threshold,
+    );
 
     // Map through the filtered data and extract the pageContent
     const pageContents = filteredData.map(([document]) => document.pageContent);
@@ -48,9 +59,18 @@ export const useMemoryVectorStore = (initialText: string, chunkSize = 750, chunk
     return combinedContent;
   };
 
-  const similaritySearchWithScore = async (query: string, k = 4, filter?: any) => {
+  const similaritySearchWithScore = async (
+    query: string,
+    k = 4,
+    filter?: any,
+  ) => {
     if (!vectorstore) return [];
-    return await similaritySearchWithScoreInMemoryVectorStore(vectorstore, query, k, filter);
+    return await similaritySearchWithScoreInMemoryVectorStore(
+      vectorstore,
+      query,
+      k,
+      filter,
+    );
   };
 
   return {

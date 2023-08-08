@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { OpenAI } from 'langchain/llms/openai';
 import { APIChain } from 'langchain/chains';
-import { getCookie } from '../../utils/config';
+import { getToken } from '../../utils/config';
 
 const API_DOCS = `...`; // API documentation string
 
@@ -20,7 +20,7 @@ export function useAPIChain(options: UseAPIChainOptions = {}) {
   useEffect(() => {
     async function initializeModel() {
       const openAIModel = new OpenAI({
-        openAIApiKey: getCookie('OPENAI_KEY'),
+        openAIApiKey: getToken('OPENAI_KEY'),
         modelName: 'text-davinci-003',
       });
 

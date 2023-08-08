@@ -2,19 +2,24 @@
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
 
-const systemPrompt = `You are an AI writing assistant that continues existing text based on given from prior text.
-Give more weight/priority to the later characters than the beginning ones
-`;
-
+/**
+ * @param context - The context of the message
+ * @param relatedInfo - Related information that can be used to help inform the brief autocomplete of the sentence and no more than 50 characters.
+ * @param openAIApiKey - OpenAI API key
+ * @param systemPromptOverride - Override the system prompt entirely
+ * @param callbacks - Callbacks for the chat model
+ */
 export const autoComplete = async ({
   context,
   relatedInfo,
   openAIApiKey,
+  systemPromptOverride,
   callbacks,
 }: {
   context: string;
   relatedInfo: string;
   openAIApiKey: string;
+  systemPromptOverride?: string;
   callbacks: {
     onMessageStart?: (message: string) => void;
     onMessageError?: (error: string) => void;
@@ -46,6 +51,10 @@ export const autoComplete = async ({
     ],
   });
 
+  const systemPrompt = `You are an AI writing assistant that continues existing text based on given from prior text.
+Give more weight/priority to the later characters than the beginning ones
+`;
+
   const formattedInfo = `
   Related information that can be used to help inform the brief autocomplete of the sentence and no more than 50 characters.
   
@@ -54,14 +63,17 @@ export const autoComplete = async ({
   Related information that can be used to help inform the brief autocomplete of the sentence and NO MORE THAN 50 CHARACTERS
   `;
 
+  const systemMessage =
+    systemPromptOverride || `${systemPrompt} \n\n ${formattedInfo}`;
   console.log({
     formattedInfo,
     context,
+    systemMessage,
     systemPrompt,
   });
 
   const response = await model.call([
-    new SystemChatMessage(`${systemPrompt} \n\n ${formattedInfo}`),
+    new SystemChatMessage(systemMessage),
     new HumanChatMessage(context),
   ]);
   return response.text;

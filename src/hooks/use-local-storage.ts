@@ -26,8 +26,11 @@ export const useLocalStorage = (
   const setValue = (value: ILocalStorageObject) => {
     setStoredValue((prevValue) => {
       const newValue = { ...prevValue, ...value };
-      window.localStorage.setItem(key, JSON.stringify(newValue));
-      return { ...newValue }; // return a new object
+      if (JSON.stringify(prevValue) !== JSON.stringify(newValue)) {
+        window.localStorage.setItem(key, JSON.stringify(newValue));
+        return newValue;
+      }
+      return prevValue;
     });
   };
 
@@ -40,7 +43,10 @@ export const useLocalStorage = (
     });
   };
 
-  const updateValue = (id: string, newValue: { title: string; content: string }) => {
+  const updateValue = (
+    id: string,
+    newValue: { title: string; content: string },
+  ) => {
     setStoredValue((prevValue) => {
       const updatedValue = { ...prevValue, [id]: newValue };
       window.localStorage.setItem(key, JSON.stringify(updatedValue));
@@ -57,7 +63,10 @@ export const useLocalStorage = (
   return [storedValue, setValue, deleteValue, updateValue, getValue];
 };
 
-export const useLocalStorageString = (key: string, initialValue: string): [string, (value: string) => void] => {
+export const useLocalStorageKeyValue = (
+  key: string,
+  initialValue: string,
+): [string, (value: string) => void] => {
   const [storedValue, setStoredValue] = useState(initialValue);
 
   useEffect(() => {

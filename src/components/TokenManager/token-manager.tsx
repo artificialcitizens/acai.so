@@ -1,19 +1,51 @@
 import React, { useEffect, FormEvent, useState, useMemo } from 'react';
-import useCookieStorage from '../../hooks/use-cookie-storage';
 import { toastifyInfo, toastifySuccess } from '../Toast';
+import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 
 const TokenManager: React.FC = () => {
-  const [openAIKey, setOpenAIKey] = useCookieStorage('OPENAI_KEY');
-  const [googleApiKey, setGoogleApiKey] = useCookieStorage('GOOGLE_API_KEY');
-  const [googleCSEId, setGoogleCSEId] = useCookieStorage('GOOGLE_CSE_ID');
-  const [elevenlabsApiKey, setElevenlabsApiKey] = useCookieStorage('ELEVENLABS_API_KEY');
+  const [openAIKey, setOpenAIKey] = useLocalStorageKeyValue(
+    'OPENAI_KEY',
+    import.meta.env.VITE_OPENAI_KEY || '',
+  );
+  const [googleApiKey, setGoogleApiKey] = useLocalStorageKeyValue(
+    'GOOGLE_API_KEY',
+    import.meta.env.VITE_GOOGLE_API_KEY || '',
+  );
+  const [googleCSEId, setGoogleCSEId] = useLocalStorageKeyValue(
+    'GOOGLE_CSE_ID',
+    import.meta.env.VITE_GOOGLE_CSE_ID || '',
+  );
+  const [elevenlabsApiKey, setElevenlabsApiKey] = useLocalStorageKeyValue(
+    'ELEVENLABS_API_KEY',
+    import.meta.env.VITE_ELEVENLABS_API_KEY || '',
+  );
 
   const keys = useMemo(
     () => [
-      { id: 'OPENAI_KEY', name: 'OpenAI API Key', value: openAIKey, setValue: setOpenAIKey },
-      { id: 'GOOGLE_API_KEY', name: 'Google API Key', value: googleApiKey, setValue: setGoogleApiKey },
-      { id: 'GOOGLE_CSE_ID', name: 'Google CSE Key', value: googleCSEId, setValue: setGoogleCSEId },
-      { id: 'ELEVENLABS_API_KEY', name: 'Elevenlabs Api Key', value: elevenlabsApiKey, setValue: setElevenlabsApiKey },
+      {
+        id: 'OPENAI_KEY',
+        name: 'OpenAI API Key',
+        value: openAIKey,
+        setValue: setOpenAIKey,
+      },
+      {
+        id: 'GOOGLE_API_KEY',
+        name: 'Google API Key',
+        value: googleApiKey,
+        setValue: setGoogleApiKey,
+      },
+      {
+        id: 'GOOGLE_CSE_ID',
+        name: 'Google CSE Key',
+        value: googleCSEId,
+        setValue: setGoogleCSEId,
+      },
+      {
+        id: 'ELEVENLABS_API_KEY',
+        name: 'Elevenlabs Api Key',
+        value: elevenlabsApiKey,
+        setValue: setElevenlabsApiKey,
+      },
     ],
     [
       openAIKey,
@@ -42,7 +74,7 @@ const TokenManager: React.FC = () => {
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     keys.forEach(({ id, setValue }) => {
-      setValue(values[id], 30);
+      setValue(values[id]);
     });
     toastifyInfo('Keys saved');
   };

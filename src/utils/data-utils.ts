@@ -59,6 +59,15 @@ export function readFileAsText(file) {
   });
 }
 
+export const writeToLocalStorage = (key: string, data: any): void => {
+  localStorage.setItem(key, JSON.stringify(data));
+};
+
+export const readFromLocalStorage = (key: string): any => {
+  const rawData = localStorage.getItem(key);
+  return rawData ? JSON.parse(rawData) : null;
+};
+
 // const yamlStr = `
 // userName: Josh Mabry
 // currentLocation: Portland, Oregon
