@@ -132,7 +132,6 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
             <div
               className="flex h-12 cursor-pointer truncate m-auto flex-grow rounded-[5px] px-1 py-4 text-[0.875rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none "
               data-te-sidenav-link-ref
-              onClick={() => {}}
             >
               <span className="font-bold self-center">{workspace.name}</span>
             </div>
