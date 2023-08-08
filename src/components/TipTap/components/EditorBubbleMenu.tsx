@@ -1,7 +1,13 @@
 import { BubbleMenu, BubbleMenuProps } from '@tiptap/react';
 import cx from 'classnames';
 import { FC, useState } from 'react';
-import { BoldIcon, ItalicIcon, UnderlineIcon, StrikethroughIcon, CodeIcon } from 'lucide-react';
+import {
+  BoldIcon,
+  ItalicIcon,
+  UnderlineIcon,
+  StrikethroughIcon,
+  CodeIcon,
+} from 'lucide-react';
 
 import { NodeSelector } from './NodeSelector';
 
@@ -59,11 +65,22 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
   const [isNodeSelectorOpen, setIsNodeSelectorOpen] = useState(false);
 
   return (
-    <BubbleMenu {...bubbleMenuProps} className="flex overflow-hidden rounded border border-lighter bg-dark shadow-xl">
-      <NodeSelector editor={props.editor} isOpen={isNodeSelectorOpen} setIsOpen={setIsNodeSelectorOpen} />
+    <BubbleMenu
+      {...bubbleMenuProps}
+      className="flex overflow-hidden rounded border border-lighter bg-dark shadow-xl"
+    >
+      <NodeSelector
+        editor={props.editor}
+        isOpen={isNodeSelectorOpen}
+        setIsOpen={setIsNodeSelectorOpen}
+      />
 
       {items.map((item, index) => (
-        <button key={index} onClick={item.command} className="p-2 text-light hover:bg-darker active:bg-darker">
+        <button
+          key={index}
+          onClick={item.command}
+          className="p-2 text-light hover:bg-darker active:bg-darker"
+        >
           <item.icon
             className={cx('h-4 w-4', {
               'text-blue-500': item.isActive(),

@@ -1,6 +1,14 @@
 import { Editor } from '@tiptap/core';
 import cx from 'classnames';
-import { Check, ChevronDown, Heading1, Heading2, Heading3, ListOrdered, TextIcon } from 'lucide-react';
+import {
+  Check,
+  ChevronDown,
+  Heading1,
+  Heading2,
+  Heading3,
+  ListOrdered,
+  TextIcon,
+} from 'lucide-react';
 import { FC } from 'react';
 
 import { BubbleMenuItem } from './EditorBubbleMenu';
@@ -11,14 +19,22 @@ interface NodeSelectorProps {
   setIsOpen: (isOpen: boolean) => void;
 }
 
-export const NodeSelector: FC<NodeSelectorProps> = ({ editor, isOpen, setIsOpen }) => {
+export const NodeSelector: FC<NodeSelectorProps> = ({
+  editor,
+  isOpen,
+  setIsOpen,
+}) => {
   const items: BubbleMenuItem[] = [
     {
       name: 'Text',
       icon: TextIcon,
-      command: () => editor.chain().focus().toggleNode('paragraph', 'paragraph').run(),
+      command: () =>
+        editor.chain().focus().toggleNode('paragraph', 'paragraph').run(),
       // I feel like there has to be a more efficient way to do this – feel free to PR if you know how!
-      isActive: () => editor.isActive('paragraph') && !editor.isActive('bulletList') && !editor.isActive('orderedList'),
+      isActive: () =>
+        editor.isActive('paragraph') &&
+        !editor.isActive('bulletList') &&
+        !editor.isActive('orderedList'),
     },
     {
       name: 'Heading 1',
@@ -74,9 +90,12 @@ export const NodeSelector: FC<NodeSelectorProps> = ({ editor, isOpen, setIsOpen 
                 item.command();
                 setIsOpen(false);
               }}
-              className={cx('flex items-center justify-between rounded-sm px-2 py-1 text-sm text-light hover:bg-dark', {
-                'text-blue-600': item.isActive(),
-              })}
+              className={cx(
+                'flex items-center justify-between rounded-sm px-2 py-1 text-sm text-light hover:bg-dark',
+                {
+                  'text-blue-600': item.isActive(),
+                },
+              )}
             >
               <div className="flex items-center space-x-2">
                 <div className="rounded-sm border border-lighter p-1">

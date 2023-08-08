@@ -10,7 +10,10 @@ const StorageMeter: React.FC = () => {
 
       for (const x in localStorage) {
         const amount = (localStorage[x].length * 2) / 1024 / 1024;
-        if (!isNaN(amount) && Object.prototype.hasOwnProperty.call(localStorage, x)) {
+        if (
+          !isNaN(amount) &&
+          Object.prototype.hasOwnProperty.call(localStorage, x)
+        ) {
           total += amount;
         }
       }

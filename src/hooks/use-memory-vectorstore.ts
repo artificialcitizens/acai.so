@@ -7,8 +7,6 @@ import {
 import { createDocumentsFromText } from '../utils/ac-langchain/text-splitters';
 import { Document } from 'langchain/document';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { toastifyError } from '../components/Toast';
-import { getToken } from '../utils/config';
 
 export const useMemoryVectorStore = (
   initialText: string,
@@ -18,14 +16,8 @@ export const useMemoryVectorStore = (
   const [vectorstore, setVectorStore] = useState<MemoryVectorStore | null>(
     null,
   );
-  const openAIApiKey = getToken('OPENAI_KEY');
 
   useEffect(() => {
-    if (!openAIApiKey) {
-      toastifyError('OpenAI API key not set');
-      return;
-    }
-
     createDocumentsFromText({
       text: initialText,
       chunkSize: chunkSize,
@@ -34,7 +26,7 @@ export const useMemoryVectorStore = (
       const vectorStore = await initializeMemoryVectorStore({ docs: res });
       setVectorStore(vectorStore);
     });
-  }, [openAIApiKey, initialText, chunkSize, chunkOverlap]);
+  }, [initialText, chunkSize, chunkOverlap]);
 
   const addDocuments = (docs: Document[]) => {
     if (!vectorstore) return;

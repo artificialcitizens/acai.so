@@ -5,7 +5,9 @@ const useAvaElements = (): string[] => {
 
   useEffect(() => {
     const avaElements = document.querySelectorAll('[data-ava-element]');
-    const elementValues = Array.from(avaElements).map((element) => element.getAttribute('data-ava-element') || '');
+    const elementValues = Array.from(avaElements).map(
+      (element) => element.getAttribute('data-ava-element') || '',
+    );
     setElements(elementValues);
   }, []);
 

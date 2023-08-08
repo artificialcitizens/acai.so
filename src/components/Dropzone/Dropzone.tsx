@@ -68,17 +68,25 @@ const Dropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
     [onFilesDrop],
   );
 
-  const handleDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setHighlight(true);
-  }, []);
+  const handleDragOver = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      setHighlight(true);
+    },
+    [],
+  );
 
   const handleDragLeave = useCallback(() => {
     setHighlight(false);
   }, []);
 
   return (
-    <div className="flex flex-grow" onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}>
+    <div
+      className="flex flex-grow"
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+    >
       {children}
     </div>
   );

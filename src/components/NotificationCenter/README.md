@@ -23,7 +23,11 @@ The component is designed to be flexible and can be easily integrated into any a
 ## Example
 
 ```jsx
-<NotificationCenter notificationFilter={['error', 'info']} secondaryFilter="warning" placeholder="No notifications" />
+<NotificationCenter
+  notificationFilter={['error', 'info']}
+  secondaryFilter="warning"
+  placeholder="No notifications"
+/>
 ```
 
 In this example, the `NotificationCenter` will only display notifications of type 'error', 'info', or whose data type is 'warning'. If there are no such notifications, it will display the message 'No notifications'.

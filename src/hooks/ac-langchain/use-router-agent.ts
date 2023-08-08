@@ -5,7 +5,10 @@ import { toastifyAgentThought, toastifyError } from '../../components/Toast';
 import { appStateMachine, handleCreateTab } from '../../state';
 import { useInterpret } from '@xstate/react';
 import { marked } from 'marked';
-import { GlobalStateContext, GlobalStateContextValue } from '../../context/GlobalStateContext';
+import {
+  GlobalStateContext,
+  GlobalStateContextValue,
+} from '../../context/GlobalStateContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 type AgentState = {
@@ -18,11 +21,17 @@ export const useAgent = (): {
 } => {
   const [loading, setLoading] = useState(false);
 
-  const routeQuery = async (message: string, systemMessage: string): Promise<string> => {
+  const routeQuery = async (
+    message: string,
+    systemMessage: string,
+  ): Promise<string> => {
     setLoading(true);
   };
 
-  const queryAgent = async (message: string, systemMessage: string): Promise<string> => {
+  const queryAgent = async (
+    message: string,
+    systemMessage: string,
+  ): Promise<string> => {
     setLoading(true);
     try {
       return response;

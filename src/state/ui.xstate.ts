@@ -18,7 +18,9 @@ const saveUIState = (state: IContext) => {
  */
 const loadUIState = (): IContext => {
   const savedState = localStorage.getItem('uiState');
-  return savedState ? JSON.parse(savedState) : { thoughtsOpen: false, sideNavOpen: false, agentChatOpen: false };
+  return savedState
+    ? JSON.parse(savedState)
+    : { thoughtsOpen: false, sideNavOpen: false, agentChatOpen: false };
 };
 
 // Define the initial context

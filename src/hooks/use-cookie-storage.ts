@@ -5,7 +5,9 @@ type UseCookieStorageReturn = [string | null, SetCookie];
 
 function useCookieStorage(cookieName: string): UseCookieStorageReturn {
   const [cookie, setCookieValue] = useState<string | null>(() => {
-    const cookieVal = document.cookie.split('; ').find((row) => row.startsWith(`${cookieName}=`));
+    const cookieVal = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith(`${cookieName}=`));
     return cookieVal ? cookieVal.split('=')[1] : null;
   });
 

@@ -8,7 +8,9 @@ export interface GlobalStateContextValue {
   agentStateService: ReturnType<typeof useInterpret>;
 }
 
-export const GlobalStateContext = createContext<GlobalStateContextValue>({} as GlobalStateContextValue);
+export const GlobalStateContext = createContext<GlobalStateContextValue>(
+  {} as GlobalStateContextValue,
+);
 
 export const GlobalStateProvider = ({ children }: { children: ReactNode }) => {
   const service = useInterpret(appStateMachine);
@@ -21,5 +23,9 @@ export const GlobalStateProvider = ({ children }: { children: ReactNode }) => {
     agentStateService: agentService,
   };
 
-  return <GlobalStateContext.Provider value={value}>{children}</GlobalStateContext.Provider>;
+  return (
+    <GlobalStateContext.Provider value={value}>
+      {children}
+    </GlobalStateContext.Provider>
+  );
 };

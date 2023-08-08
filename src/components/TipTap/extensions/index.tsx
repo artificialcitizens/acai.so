@@ -38,12 +38,14 @@ export const TiptapExtensions = [
     },
     codeBlock: {
       HTMLAttributes: {
-        class: 'rounded-sm bg-stone-100 p-5 font-mono font-medium text-stone-800',
+        class:
+          'rounded-sm bg-stone-100 p-5 font-mono font-medium text-stone-800',
       },
     },
     code: {
       HTMLAttributes: {
-        class: 'rounded-md bg-stone-200 px-1.5 py-1 font-mono font-medium text-black',
+        class:
+          'rounded-md bg-stone-200 px-1.5 py-1 font-mono font-medium text-black',
         spellcheck: 'false',
       },
     },
@@ -67,7 +69,10 @@ export const TiptapExtensions = [
             const start = range.from;
             let end = range.to;
 
-            tr.insert(start - 1, this.type.create(attributes)).delete(tr.mapping.map(start), tr.mapping.map(end));
+            tr.insert(start - 1, this.type.create(attributes)).delete(
+              tr.mapping.map(start),
+              tr.mapping.map(end),
+            );
           },
         }),
       ];
@@ -79,7 +84,8 @@ export const TiptapExtensions = [
   }),
   TiptapLink.configure({
     HTMLAttributes: {
-      class: 'text-light underline underline-offset-[3px] hover:text-stone-600 transition-colors cursor-pointer',
+      class:
+        'text-light underline underline-offset-[3px] hover:text-stone-600 transition-colors cursor-pointer',
     },
   }),
   TiptapImage.configure({

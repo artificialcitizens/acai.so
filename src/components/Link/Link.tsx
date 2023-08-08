@@ -17,7 +17,12 @@ function Link({ page, children }: any) {
   };
 
   return (
-    <a className={status} href={page || '#'} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+    <a
+      className={status}
+      href={page || '#'}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
       {children}
     </a>
   );

@@ -14,13 +14,15 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
   secondaryFilter,
   placeholder,
 }) => {
-  const { notifications, clear, markAllAsRead, markAsRead, unreadCount } = useNotificationCenter();
+  const { notifications, clear, markAllAsRead, markAsRead, unreadCount } =
+    useNotificationCenter();
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   const notificationsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (notificationsRef.current) {
-      notificationsRef.current.scrollTop = notificationsRef.current.scrollHeight;
+      notificationsRef.current.scrollTop =
+        notificationsRef.current.scrollHeight;
     }
   }, [notifications]);
   const toggleFilter = (e: React.ChangeEvent) => {
@@ -31,16 +33,25 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
     ? notifications.filter((notification) => {
         return notificationFilter.includes(notification.type || '');
       })
-    : notifications.filter((notification: any) => notification.data?.type === secondaryFilter);
+    : notifications.filter(
+        (notification: any) => notification.data?.type === secondaryFilter,
+      );
 
   return (
     <div className=" pt-2 border-b-2 border-solid border-lighter w-full">
       {/* <div className="bg-base p-2 flex justify-between items-center text-white"></div> */}
-      <div className="h-36 p-3 bg-base rounded overflow-y-auto w-full" ref={notificationsRef}>
-        {(!filteredNotifications.length || (unreadCount === 0 && showUnreadOnly)) && (
+      <div
+        className="h-36 p-3 bg-base rounded overflow-y-auto w-full"
+        ref={notificationsRef}
+      >
+        {(!filteredNotifications.length ||
+          (unreadCount === 0 && showUnreadOnly)) && (
           <p className="text-light">{placeholder}</p>
         )}
-        {(showUnreadOnly ? filteredNotifications.filter((v) => !v.read) : filteredNotifications)
+        {(showUnreadOnly
+          ? filteredNotifications.filter((v) => !v.read)
+          : filteredNotifications
+        )
           .reverse()
           .map((notification) => {
             return (

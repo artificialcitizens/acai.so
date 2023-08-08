@@ -9,6 +9,7 @@
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "server": "nodemon --exec ts-node-esm server.ts",
     "preview": "vite preview",
+    "prettier": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "coverage": "vitest run --coverage",

@@ -3,7 +3,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useActor, useInterpret } from '@xstate/react';
 import { Tab, appStateMachine } from '../../state';
 import { FloatingButton } from '../FloatingButton/FloatingButton';
-import { GlobalStateContext, GlobalStateContextValue } from '../../context/GlobalStateContext';
+import {
+  GlobalStateContext,
+  GlobalStateContextValue,
+} from '../../context/GlobalStateContext';
 import { useNavigate } from 'react-router-dom';
 
 interface MenuBarProps {
@@ -13,7 +16,8 @@ interface MenuBarProps {
 }
 
 export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
-  const { appStateService }: GlobalStateContextValue = useContext(GlobalStateContext);
+  const { appStateService }: GlobalStateContextValue =
+    useContext(GlobalStateContext);
   const [isContext, setIsContext] = useState(false);
   const [systemNoteState, setSystemNoteState] = useState('');
   const [loading, setLoading] = useState(false);

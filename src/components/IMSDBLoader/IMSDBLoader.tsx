@@ -5,7 +5,9 @@ const ScriptLoader = () => {
   const [inputURL, setInputURL] = useState('');
   const [formattedJSON, setFormattedJSON] = useState('');
 
-  const handleChange = (e: { target: { value: React.SetStateAction<string> } }) => {
+  const handleChange = (e: {
+    target: { value: React.SetStateAction<string> };
+  }) => {
     setInputURL(e.target.value);
   };
 
@@ -22,7 +24,13 @@ const ScriptLoader = () => {
     <div>
       <form onSubmit={handleSubmit}>
         <label htmlFor="url">Enter URL:</label>
-        <input type="text" id="url" value={inputURL} onChange={handleChange} required />
+        <input
+          type="text"
+          id="url"
+          value={inputURL}
+          onChange={handleChange}
+          required
+        />
         <button type="submit">Load URL</button>
       </form>
       {formattedJSON && (

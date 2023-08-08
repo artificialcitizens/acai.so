@@ -1,5 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import React, { useState, useEffect, useCallback, ReactNode, useRef, useLayoutEffect } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+  useRef,
+  useLayoutEffect,
+} from 'react';
 // eslint-disable-next-line import/named
 import { Editor, Range, Extension } from '@tiptap/core';
 import Suggestion from '@tiptap/suggestion';
@@ -41,7 +48,15 @@ const Command = Extension.create({
     return {
       suggestion: {
         char: '/',
-        command: ({ editor, range, props }: { editor: Editor; range: Range; props: any }) => {
+        command: ({
+          editor,
+          range,
+          props,
+        }: {
+          editor: Editor;
+          range: Range;
+          props: any;
+        }) => {
           props.command({ editor, range });
         },
       },
@@ -80,7 +95,12 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       searchTerms: ['p', 'paragraph'],
       icon: <Text size={18} />,
       command: ({ editor, range }: CommandProps) => {
-        editor.chain().focus().deleteRange(range).toggleNode('paragraph', 'paragraph').run();
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .toggleNode('paragraph', 'paragraph')
+          .run();
       },
     },
     {
@@ -98,7 +118,12 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       searchTerms: ['title', 'big', 'large'],
       icon: <Heading1 size={18} />,
       command: ({ editor, range }: CommandProps) => {
-        editor.chain().focus().deleteRange(range).setNode('heading', { level: 1 }).run();
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .setNode('heading', { level: 1 })
+          .run();
       },
     },
     {
@@ -107,7 +132,12 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       searchTerms: ['subtitle', 'medium'],
       icon: <Heading2 size={18} />,
       command: ({ editor, range }: CommandProps) => {
-        editor.chain().focus().deleteRange(range).setNode('heading', { level: 2 }).run();
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .setNode('heading', { level: 2 })
+          .run();
       },
     },
     {
@@ -116,7 +146,12 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       searchTerms: ['subtitle', 'small'],
       icon: <Heading3 size={18} />,
       command: ({ editor, range }: CommandProps) => {
-        editor.chain().focus().deleteRange(range).setNode('heading', { level: 3 }).run();
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .setNode('heading', { level: 3 })
+          .run();
       },
     },
     {
@@ -143,14 +178,21 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       searchTerms: ['blockquote'],
       icon: <TextQuote size={18} />,
       command: ({ editor, range }: CommandProps) =>
-        editor.chain().focus().deleteRange(range).toggleNode('paragraph', 'paragraph').toggleBlockquote().run(),
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .toggleNode('paragraph', 'paragraph')
+          .toggleBlockquote()
+          .run(),
     },
     {
       title: 'Code',
       description: 'Capture a code snippet.',
       searchTerms: ['codeblock'],
       icon: <Code size={18} />,
-      command: ({ editor, range }: CommandProps) => editor.chain().focus().deleteRange(range).toggleCodeBlock().run(),
+      command: ({ editor, range }: CommandProps) =>
+        editor.chain().focus().deleteRange(range).toggleCodeBlock().run(),
     },
     // {
     //   title: 'Image',
@@ -178,7 +220,8 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       return (
         item.title.toLowerCase().includes(search) ||
         item.description.toLowerCase().includes(search) ||
-        (item.searchTerms && item.searchTerms.some((term: string) => term.includes(search)))
+        (item.searchTerms &&
+          item.searchTerms.some((term: string) => term.includes(search)))
       );
     }
     return true;
@@ -307,7 +350,11 @@ const CommandList = ({
             onClick={() => selectItem(index)}
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-md border border-lighter bg-dark">
-              {item.title === 'Continue writing' && isLoading ? <LoadingCircle /> : item.icon}
+              {item.title === 'Continue writing' && isLoading ? (
+                <LoadingCircle />
+              ) : (
+                item.icon
+              )}
             </div>
             <div>
               <p className="font-medium">{item.title}</p>

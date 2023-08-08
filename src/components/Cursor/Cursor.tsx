@@ -13,7 +13,12 @@ interface CursorProps {
   speed?: number;
 }
 
-const Cursor: React.FC<CursorProps> = ({ coordinates, onReachedDestination, style, speed = 0.15 }) => {
+const Cursor: React.FC<CursorProps> = ({
+  coordinates,
+  onReachedDestination,
+  style,
+  speed = 0.15,
+}) => {
   const [currentCoordinateIndex, setCurrentCoordinateIndex] = useState(0);
   const cursorRef = useRef<HTMLDivElement>(null);
 

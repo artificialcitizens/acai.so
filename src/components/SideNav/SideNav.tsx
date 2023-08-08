@@ -8,7 +8,10 @@ import { useClickAway } from '@uidotdev/usehooks';
 import { Link, useNavigate } from 'react-router-dom';
 import { Workspace, handleCreateTab } from '../../state';
 import { v4 as uuidv4 } from 'uuid';
-import { GlobalStateContext, GlobalStateContextValue } from '../../context/GlobalStateContext';
+import {
+  GlobalStateContext,
+  GlobalStateContextValue,
+} from '../../context/GlobalStateContext';
 import { ProjectLinks } from '../ProjectLinks/ProjectLinks';
 interface SideNavProps {
   children?: React.ReactNode;
@@ -16,7 +19,8 @@ interface SideNavProps {
 
 export const SideNav: React.FC<SideNavProps> = ({ children }) => {
   const navigate = useNavigate();
-  const globalServices: GlobalStateContextValue = useContext(GlobalStateContext);
+  const globalServices: GlobalStateContextValue =
+    useContext(GlobalStateContext);
   const [state, send] = useActor(globalServices.uiStateService);
   const navOpen = state.context.sideNavOpen;
 
@@ -79,9 +83,15 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
         notes: '',
       },
     };
-    globalServices.appStateService.send({ type: 'ADD_WORKSPACE', workspace: newWorkspace });
+    globalServices.appStateService.send({
+      type: 'ADD_WORKSPACE',
+      workspace: newWorkspace,
+    });
 
-    globalServices.agentStateService.send({ type: 'CREATE_AGENT', workspaceId: id });
+    globalServices.agentStateService.send({
+      type: 'CREATE_AGENT',
+      workspaceId: id,
+    });
     navigate(`/${id}/${tabId}`);
   };
 
@@ -91,9 +101,13 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
     if (!title) return;
     const { id } = await handleCreateTab({ title, content: '' }, workspaceId);
     navigate(`/${workspaceId}/${id}`);
-    globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV', workspaceId });
+    globalServices.uiStateService.send({
+      type: 'TOGGLE_SIDE_NAV',
+      workspaceId,
+    });
   };
-  const workspaces = globalServices.appStateService.getSnapshot().context.workspaces as Record<string, Workspace>;
+  const workspaces = globalServices.appStateService.getSnapshot().context
+    .workspaces as Record<string, Workspace>;
   return (
     <nav
       className="fixed left-0 top-0 z-[1035] h-screen w-60 -translate-x-full overflow-hidden bg-dark shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] data-[te-sidenav-hidden='false']:translate-x-0 dark:bg-zinc-800"
@@ -103,7 +117,10 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
       data-te-sidenav-content="#content"
       ref={ref}
     >
-      <ul className="relative m-0 list-none px-[0.2rem]" data-te-sidenav-menu-ref>
+      <ul
+        className="relative m-0 list-none px-[0.2rem]"
+        data-te-sidenav-menu-ref
+      >
         {Object.values(workspaces).map((workspace) => (
           <li className="relative pb-2 !important" key={workspace.id}>
             <div
@@ -119,13 +136,18 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
               data-te-collapse-show
             >
               {workspace.data.tiptap.tabs.map((tab) => (
-                <li className="relative text-ellipsis overflow-hidden px-2 mb-2 " key={tab.id}>
+                <li
+                  className="relative text-ellipsis overflow-hidden px-2 mb-2 "
+                  key={tab.id}
+                >
                   <Link
                     className="flex h-6 cursor-pointer items-center leading-4 text-ellipsis rounded-[5px] py-4 pl-1  text-[0.78rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
                     to={`/${workspace.id}/${tab.id}`}
                     data-te-sidenav-link-ref
                     onClick={() => {
-                      globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV' });
+                      globalServices.uiStateService.send({
+                        type: 'TOGGLE_SIDE_NAV',
+                      });
                     }}
                   >
                     <span>{tab.title}</span>
@@ -143,7 +165,10 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
             </ul>
           </li>
         ))}
-        <button className="w-full text-dark text-xs pl-2 text-left" onClick={createWorkspace}>
+        <button
+          className="w-full text-dark text-xs pl-2 text-left"
+          onClick={createWorkspace}
+        >
           New Workspace +
         </button>
       </ul>

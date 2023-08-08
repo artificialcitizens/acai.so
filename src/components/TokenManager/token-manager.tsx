@@ -69,7 +69,9 @@ const TokenManager: React.FC = () => {
       }
     });
     setValues(newValues);
-  }, [openAIKey, googleApiKey, googleCSEId, elevenlabsApiKey, keys]);
+    // keys causes an infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openAIKey, googleApiKey, googleCSEId, elevenlabsApiKey]);
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();

@@ -1,11 +1,20 @@
 import { Dispatch, SetStateAction, useContext, useState } from 'react';
 import { noteChain } from '../../utils/ac-langchain/chains/notes-chain';
-import { GlobalStateContext, GlobalStateContextValue } from '../../context/GlobalStateContext';
+import {
+  GlobalStateContext,
+  GlobalStateContextValue,
+} from '../../context/GlobalStateContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toastifyInfo } from '../Toast';
 import { Tab } from '../../state';
 
-type VoiceState = 'idle' | 'ava' | 'notes' | 'strahl' | 'voice2voice' | 'following';
+type VoiceState =
+  | 'idle'
+  | 'ava'
+  | 'notes'
+  | 'strahl'
+  | 'voice2voice'
+  | 'following';
 type TTSState = 'bark' | 'elevenlabs';
 
 interface Command {
@@ -34,9 +43,13 @@ export const setStatesAndToast = (
 
 export const useVoiceCommands = () => {
   const [userTranscript, setUserTranscript] = useState('');
-  const [voiceRecognitionState, setVoiceRecognitionState] = useState<VoiceState>('idle');
-  const [synthesisMode, setSynthesisMode] = useState<'bark' | 'elevenlabs'>('bark');
-  const globalServices: GlobalStateContextValue = useContext(GlobalStateContext);
+  const [voiceRecognitionState, setVoiceRecognitionState] =
+    useState<VoiceState>('idle');
+  const [synthesisMode, setSynthesisMode] = useState<'bark' | 'elevenlabs'>(
+    'bark',
+  );
+  const globalServices: GlobalStateContextValue =
+    useContext(GlobalStateContext);
   const location = useLocation();
   const navigate = useNavigate();
   const workspaceId = location.pathname.split('/')[1];
@@ -47,35 +60,69 @@ export const useVoiceCommands = () => {
       action: (
         setUserTranscript: Dispatch<SetStateAction<string>>,
         setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
-      ) => setStatesAndToast(setUserTranscript, setVoiceRecognitionState, '', 'ava'),
+      ) =>
+        setStatesAndToast(
+          setUserTranscript,
+          setVoiceRecognitionState,
+          '',
+          'ava',
+        ),
     },
     {
       commands: ['take notes'],
       action: (
         setUserTranscript: Dispatch<SetStateAction<string>>,
         setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
-      ) => setStatesAndToast(setUserTranscript, setVoiceRecognitionState, '', 'notes', 'Taking notes'),
+      ) =>
+        setStatesAndToast(
+          setUserTranscript,
+          setVoiceRecognitionState,
+          '',
+          'notes',
+          'Taking notes',
+        ),
     },
     {
       commands: ['voice'],
       action: (
         setUserTranscript: Dispatch<SetStateAction<string>>,
         setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
-      ) => setStatesAndToast(setUserTranscript, setVoiceRecognitionState, '', 'voice2voice', 'Voice to voice active'),
+      ) =>
+        setStatesAndToast(
+          setUserTranscript,
+          setVoiceRecognitionState,
+          '',
+          'voice2voice',
+          'Voice to voice active',
+        ),
     },
     {
       commands: ['cancel'],
       action: (
         setUserTranscript: Dispatch<SetStateAction<string>>,
         setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
-      ) => setStatesAndToast(setUserTranscript, setVoiceRecognitionState, '', 'idle', 'Going Idle'),
+      ) =>
+        setStatesAndToast(
+          setUserTranscript,
+          setVoiceRecognitionState,
+          '',
+          'idle',
+          'Going Idle',
+        ),
     },
     {
       commands: ['hey chris'],
       action: (
         setUserTranscript: Dispatch<SetStateAction<string>>,
         setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
-      ) => setStatesAndToast(setUserTranscript, setVoiceRecognitionState, '', 'strahl', 'Chris is listening'),
+      ) =>
+        setStatesAndToast(
+          setUserTranscript,
+          setVoiceRecognitionState,
+          '',
+          'strahl',
+          'Chris is listening',
+        ),
     },
     {
       commands: ['ready'],
@@ -99,7 +146,13 @@ export const useVoiceCommands = () => {
         setTimeout(() => {
           navigate(`/${workspaceId}/${newTab.id}`);
         }, 150);
-        setStatesAndToast(setUserTranscript, setVoiceRecognitionState, '', 'idle', 'Notes being created');
+        setStatesAndToast(
+          setUserTranscript,
+          setVoiceRecognitionState,
+          '',
+          'idle',
+          'Notes being created',
+        );
       },
     },
     {
@@ -107,7 +160,14 @@ export const useVoiceCommands = () => {
       action: (
         setUserTranscript: Dispatch<SetStateAction<string>>,
         setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
-      ) => setStatesAndToast(setUserTranscript, setVoiceRecognitionState, '', 'following', 'Following mode'),
+      ) =>
+        setStatesAndToast(
+          setUserTranscript,
+          setVoiceRecognitionState,
+          '',
+          'following',
+          'Following mode',
+        ),
     },
   ];
 
@@ -119,7 +179,11 @@ export const useVoiceCommands = () => {
         toastifyInfo(command.toastMessage);
       }
       if (command.action) {
-        await command.action(setUserTranscript, setVoiceRecognitionState, setSynthesisMode);
+        await command.action(
+          setUserTranscript,
+          setVoiceRecognitionState,
+          setSynthesisMode,
+        );
       }
     }
   };

@@ -5,9 +5,16 @@ interface Position {
   y: number;
 }
 
-const useElementPosition = (initialElementSelector: string): [Position, (newSelector: string) => void, string] => {
-  const [elementSelector, setElementSelector] = useState(initialElementSelector);
-  const [elementPosition, setElementPosition] = useState<Position>({ x: 0, y: 0 });
+const useElementPosition = (
+  initialElementSelector: string,
+): [Position, (newSelector: string) => void, string] => {
+  const [elementSelector, setElementSelector] = useState(
+    initialElementSelector,
+  );
+  const [elementPosition, setElementPosition] = useState<Position>({
+    x: 0,
+    y: 0,
+  });
 
   const updatePosition = useCallback(() => {
     const element = document.querySelector(elementSelector);

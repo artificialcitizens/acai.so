@@ -33,7 +33,11 @@ type AgentEvent =
   | { type: 'UPDATE'; agent: Partial<AgentContext> }
   | { type: 'TOGGLE_TOOL'; toolName: string }
   | { type: 'UPDATE_SYSTEM_NOTES'; workspaceId: string; systemNotes: string }
-  | { type: 'UPDATE_CHAT_HISTORY'; workspaceId: string; recentChatHistory: ChatHistory[] }
+  | {
+      type: 'UPDATE_CHAT_HISTORY';
+      workspaceId: string;
+      recentChatHistory: ChatHistory[];
+    }
   | { type: 'CREATE_AGENT'; workspaceId: string }
   | { type: 'CLEAR_CHAT_HISTORY'; workspaceId: string };
 

@@ -19,10 +19,14 @@ const tools = [
 
 const vectorStore = new MemoryVectorStore(new OpenAIEmbeddings());
 
-const autogpt = AutoGPT.fromLLMAndTools(new ChatOpenAI({ temperature: 0 }), tools, {
-  memory: vectorStore.asRetriever(),
-  aiName: 'Tom',
-  aiRole: 'Assistant',
-});
+const autogpt = AutoGPT.fromLLMAndTools(
+  new ChatOpenAI({ temperature: 0 }),
+  tools,
+  {
+    memory: vectorStore.asRetriever(),
+    aiName: 'Tom',
+    aiRole: 'Assistant',
+  },
+);
 
 await autogpt.run(['write a weather report for SF today']);

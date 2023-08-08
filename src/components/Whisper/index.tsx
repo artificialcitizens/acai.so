@@ -8,8 +8,12 @@ interface MicRecorderProps {
   onTranscriptionComplete: (transcript: string) => void;
 }
 
-const Whisper: React.FC<MicRecorderProps> = ({ onRecordingComplete, onTranscriptionComplete }) => {
-  const { startRecording, stopRecording, recordingBlob, isRecording } = useAudioRecorder();
+const Whisper: React.FC<MicRecorderProps> = ({
+  onRecordingComplete,
+  onTranscriptionComplete,
+}) => {
+  const { startRecording, stopRecording, recordingBlob, isRecording } =
+    useAudioRecorder();
   const socketRef = useRef<any | null>(null);
   useEffect(() => {
     socketRef.current = socketIOClient(SOCKET_SERVER_URL);
@@ -63,7 +67,11 @@ const Whisper: React.FC<MicRecorderProps> = ({ onRecordingComplete, onTranscript
     <span className="flex items-center rounded-md justify-between mb-2">
       <span className="mr-2 text-light">Whisper</span>
       <button
-        className={isRecording ? 'p-0 w-6 h-6 rounded-full bg-red-500' : 'rounded-full p-0 w-6 h-6 bg-slate-400'}
+        className={
+          isRecording
+            ? 'p-0 w-6 h-6 rounded-full bg-red-500'
+            : 'rounded-full p-0 w-6 h-6 bg-slate-400'
+        }
         onClick={isRecording ? stopRecording : startRecording}
       />
     </span>

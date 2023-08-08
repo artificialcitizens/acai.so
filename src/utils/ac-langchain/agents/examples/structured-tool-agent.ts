@@ -15,7 +15,8 @@ export const run = async () => {
         low: z.number().describe('The lower bound of the generated number'),
         high: z.number().describe('The upper bound of the generated number'),
       }),
-      func: async ({ low, high }) => (Math.random() * (high - low) + low).toString(), // Outputs still must be strings
+      func: async ({ low, high }) =>
+        (Math.random() * (high - low) + low).toString(), // Outputs still must be strings
     }),
   ];
 

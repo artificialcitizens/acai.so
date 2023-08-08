@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React, { useState } from 'react';
 import { useAva } from '../../hooks/use-ava';
-import { toastifyInfo } from '../Toast';
 
 import useSpeechRecognition from '../../hooks/use-speech-recognition';
 import { useBark } from '../../hooks/use-bark';
@@ -27,10 +26,9 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 }) => {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [fetchResponse, avaLoading] = useAva();
-  const [openAIApiKey] = getToken('OPENAI_KEY');
   const [elevenlabsKey] = getToken('ELEVENLABS_API_KEY');
   const synthesizeBarkSpeech = useBark();
-  const synthesizeElevenLabsSpeech = useElevenlabs(voices, elevenlabsKey || '');
+  const synthesizeElevenLabsSpeech = useElevenlabs(voices);
   const [synthesisMode, setSynthesisMode] = useState<
     'bark' | 'elevenlabs' | 'webSpeech'
   >('elevenlabs');
@@ -113,10 +111,6 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   };
 
   const onTranscriptionComplete = async (t: string) => {
-    if (!openAIApiKey) {
-      toastifyInfo('Please set your OpenAI key in the settings');
-      return;
-    }
     const updatedUserTranscript = userTranscript + '\n' + t + '\n';
     setUserTranscript(updatedUserTranscript);
     handleVoiceCommand(t);

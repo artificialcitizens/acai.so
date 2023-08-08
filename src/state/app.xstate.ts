@@ -67,7 +67,12 @@ type Event =
   | { type: 'DELETE_WORKSPACE'; id: string; workspaceId: string }
   | { type: 'ADD_TAB'; tab: any }
   | { type: 'DELETE_TAB'; id: string; workspaceId: string }
-  | { type: 'UPDATE_TAB_CONTENT'; id: string; content: any; workspaceId: string }
+  | {
+      type: 'UPDATE_TAB_CONTENT';
+      id: string;
+      content: any;
+      workspaceId: string;
+    }
   | { type: 'SET_ACTIVE_WORKSPACE'; workspaceId: string }
   | {
       type: 'SET_ACTIVE_TAB';
@@ -75,7 +80,12 @@ type Event =
     }
   | { type: 'UPDATE_NOTES'; id: string; notes: string }
   | { type: 'TOGGLE_CONTEXT'; id: string; workspaceId: string }
-  | { type: 'UPDATE_TAB_SYSTEM_NOTE'; id: string; systemNote: string; workspaceId: string };
+  | {
+      type: 'UPDATE_TAB_SYSTEM_NOTE';
+      id: string;
+      systemNote: string;
+      workspaceId: string;
+    };
 
 /**
  * Save state to local storage
@@ -154,7 +164,10 @@ export const appStateMachine = createMachine<IContext, Event>({
       on: {
         UPDATE_NAME: {
           actions: [
-            assign((context, event) => ({ ...context, userName: event.userName })),
+            assign((context, event) => ({
+              ...context,
+              userName: event.userName,
+            })),
             (context, event) => saveState(context),
           ],
         },
@@ -169,7 +182,10 @@ export const appStateMachine = createMachine<IContext, Event>({
         },
         UPDATE_TIME: {
           actions: [
-            assign((context, event) => ({ ...context, localTime: event.localTime })),
+            assign((context, event) => ({
+              ...context,
+              localTime: event.localTime,
+            })),
             (context, event) => saveState(context),
           ],
         },
@@ -181,7 +197,10 @@ export const appStateMachine = createMachine<IContext, Event>({
               const newContext = {
                 ...context,
                 activeWorkspaceId: newWorkspace.id,
-                workspaces: { ...context.workspaces, [newWorkspace.id]: newWorkspace },
+                workspaces: {
+                  ...context.workspaces,
+                  [newWorkspace.id]: newWorkspace,
+                },
               };
               console.log(newContext);
               return newContext;
@@ -213,14 +232,25 @@ export const appStateMachine = createMachine<IContext, Event>({
               const workspace = context.workspaces[workspaceId];
               if (workspace) {
                 // Remove the tab from the tabs array
-                workspace.data.tiptap.tabs = workspace.data.tiptap.tabs.filter((tab) => tab.id !== tabId);
+                workspace.data.tiptap.tabs = workspace.data.tiptap.tabs.filter(
+                  (tab) => tab.id !== tabId,
+                );
                 // Create a new workspace object with the updated tabs
                 const newWorkspace = {
                   ...workspace,
-                  data: { ...workspace.data, tiptap: { ...workspace.data.tiptap, tabs: workspace.data.tiptap.tabs } },
+                  data: {
+                    ...workspace.data,
+                    tiptap: {
+                      ...workspace.data.tiptap,
+                      tabs: workspace.data.tiptap.tabs,
+                    },
+                  },
                 };
                 // Create a new workspaces object with the updated workspace
-                const newWorkspaces = { ...context.workspaces, [workspaceId]: newWorkspace };
+                const newWorkspaces = {
+                  ...context.workspaces,
+                  [workspaceId]: newWorkspace,
+                };
                 return { ...context, workspaces: newWorkspaces };
               }
               return context;
@@ -235,14 +265,26 @@ export const appStateMachine = createMachine<IContext, Event>({
               const workspace = context.workspaces[newTab.workspaceId];
               if (workspace) {
                 // Create a new array with the new tab
-                workspace.data.tiptap.tabs = [...workspace.data.tiptap.tabs, newTab];
+                workspace.data.tiptap.tabs = [
+                  ...workspace.data.tiptap.tabs,
+                  newTab,
+                ];
                 // Create a new workspace object with the updated tabs
                 const newWorkspace = {
                   ...workspace,
-                  data: { ...workspace.data, tiptap: { ...workspace.data.tiptap, tabs: workspace.data.tiptap.tabs } },
+                  data: {
+                    ...workspace.data,
+                    tiptap: {
+                      ...workspace.data.tiptap,
+                      tabs: workspace.data.tiptap.tabs,
+                    },
+                  },
                 };
                 // Create a new workspaces object with the updated workspace
-                const newWorkspaces = { ...context.workspaces, [newTab.workspaceId]: newWorkspace };
+                const newWorkspaces = {
+                  ...context.workspaces,
+                  [newTab.workspaceId]: newWorkspace,
+                };
                 return { ...context, workspaces: newWorkspaces };
               }
               return context;
@@ -255,7 +297,9 @@ export const appStateMachine = createMachine<IContext, Event>({
             assign((context, event) => {
               const id = event.id;
               Object.values(context.workspaces).forEach((workspace) => {
-                workspace.data.tiptap.tabs = workspace.data.tiptap.tabs.filter((tab) => tab.id !== id);
+                workspace.data.tiptap.tabs = workspace.data.tiptap.tabs.filter(
+                  (tab) => tab.id !== id,
+                );
               });
               return { ...context };
             }),
@@ -269,7 +313,9 @@ export const appStateMachine = createMachine<IContext, Event>({
               const { id, content, workspaceId } = event;
               const workspace = context.workspaces[workspaceId];
               if (workspace) {
-                const tab = workspace.data.tiptap.tabs.find((tab) => tab.id === id);
+                const tab = workspace.data.tiptap.tabs.find(
+                  (tab) => tab.id === id,
+                );
                 if (tab) {
                   tab.content = content;
                 }
@@ -321,7 +367,9 @@ export const appStateMachine = createMachine<IContext, Event>({
               const { id, workspaceId } = event;
               const workspace = context.workspaces[workspaceId];
               if (workspace) {
-                const tab = workspace.data.tiptap.tabs.find((tab) => tab.id === id);
+                const tab = workspace.data.tiptap.tabs.find(
+                  (tab) => tab.id === id,
+                );
                 if (tab) {
                   tab.isContext = !tab.isContext;
                 }
@@ -338,7 +386,9 @@ export const appStateMachine = createMachine<IContext, Event>({
               const { id, systemNote, workspaceId } = event;
               const workspace = context.workspaces[workspaceId];
               if (workspace) {
-                const tab = workspace.data.tiptap.tabs.find((tab) => tab.id === id);
+                const tab = workspace.data.tiptap.tabs.find(
+                  (tab) => tab.id === id,
+                );
                 if (tab) {
                   tab.systemNote = systemNote;
                 }

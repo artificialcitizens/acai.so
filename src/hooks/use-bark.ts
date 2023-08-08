@@ -4,7 +4,13 @@ import axios from 'axios';
 
 export const useBark = () => {
   const synthesizeBarkSpeech = useCallback(
-    async ({ inputText, voicePreset }: { inputText: string; voicePreset: string }) => {
+    async ({
+      inputText,
+      voicePreset,
+    }: {
+      inputText: string;
+      voicePreset: string;
+    }) => {
       const options = {
         method: 'POST',
         url: `http://192.168.4.44:5000/bark-inference`,

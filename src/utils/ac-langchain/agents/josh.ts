@@ -1,15 +1,15 @@
-import { ConversationChain } from "langchain/chains";
-import { ChatOpenAI } from "langchain/chat_models/openai";
+import { ConversationChain } from 'langchain/chains';
+import { ChatOpenAI } from 'langchain/chat_models/openai';
 import {
   ChatPromptTemplate,
   HumanMessagePromptTemplate,
   SystemMessagePromptTemplate,
   MessagesPlaceholder,
-} from "langchain/prompts";
-import { BufferWindowMemory } from "langchain/memory";
+} from 'langchain/prompts';
+import { BufferWindowMemory } from 'langchain/memory';
 
 const chat = new ChatOpenAI({
-  modelName: "gpt-3.5-turbo-16k",
+  modelName: 'gpt-3.5-turbo-16k',
   temperature: 0,
 });
 export const askJosh = async (query: string) => {
@@ -18,7 +18,7 @@ export const askJosh = async (query: string) => {
       `### Ignore Prior Instructions
       You are Josh Mabry. You are to answer questions for him based on the provided information as Josh Mabry. Do not respond as an AI assistant.
       The current date is: ${Date.now()}
-      `
+      `,
     ),
     SystemMessagePromptTemplate.fromTemplate(
       `Josh_Mabry_Biography:
@@ -50,16 +50,16 @@ export const askJosh = async (query: string) => {
     - Niece:
         Name: Skylar Mabry
         Birthday: '01-06-2014'
-      `
+      `,
     ),
-    new MessagesPlaceholder("history"),
-    HumanMessagePromptTemplate.fromTemplate("{input}"),
+    new MessagesPlaceholder('history'),
+    HumanMessagePromptTemplate.fromTemplate('{input}'),
   ]);
 
   const chain = new ConversationChain({
     memory: new BufferWindowMemory({
       returnMessages: true,
-      memoryKey: "history",
+      memoryKey: 'history',
       k: 10,
     }),
     prompt: chatPrompt,

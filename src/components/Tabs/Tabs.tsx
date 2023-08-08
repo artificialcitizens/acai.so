@@ -31,7 +31,9 @@ const TabManager: React.FC = () => {
 
   const workspace = service.getSnapshot().context.workspaces[activeWorkspaceId];
   // Find the current active tab
-  const activeTab = workspace?.data.tiptap.tabs.find((tab) => tab.id === activeTabId);
+  const activeTab = workspace?.data.tiptap.tabs.find(
+    (tab) => tab.id === activeTabId,
+  );
 
   // Calculate the width for each tab
   const tabWidth = workspace?.data.tiptap.tabs.length
@@ -47,14 +49,20 @@ const TabManager: React.FC = () => {
             <Link
               key={tab.id}
               className={`cursor-pointer p-1 self-center text-light truncate h-full border-2 ${
-                tab.id === activeTabId ? ' border-dark rounded-t' : 'text-dark border-transparent'
+                tab.id === activeTabId
+                  ? ' border-dark rounded-t'
+                  : 'text-dark border-transparent'
               }`}
               to={`/${workspace.id}/${tab.id}`}
               data-te-sidenav-link-ref
               style={{ maxWidth: tabWidth }}
               title={tab.title}
             >
-              <Tab className={`overflow-hidden bg-transparent ${tab.id === activeTabId ? 'text-light' : 'text-dark'}`}>
+              <Tab
+                className={`overflow-hidden bg-transparent ${
+                  tab.id === activeTabId ? 'text-light' : 'text-dark'
+                }`}
+              >
                 {tab.title}
               </Tab>
             </Link>
@@ -68,7 +76,9 @@ const TabManager: React.FC = () => {
           </Tab>
         </TabList>
         {workspace.data.tiptap.tabs.map((tab) => (
-          <TabPanel key={tab.id}>{activeTab && <TipTap tab={activeTab} />}</TabPanel>
+          <TabPanel key={tab.id}>
+            {activeTab && <TipTap tab={activeTab} />}
+          </TabPanel>
         ))}
         <TabPanel>
           <p>Create a new panel by selecting the + button</p>

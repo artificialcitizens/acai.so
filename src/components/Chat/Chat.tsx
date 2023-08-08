@@ -1,11 +1,26 @@
-import React, { useEffect, useState, useRef, useCallback, useContext } from 'react';
-import { ChatContainer, MessageList, Message, MessageInput, TypingIndicator } from '@chatscope/chat-ui-kit-react';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useContext,
+} from 'react';
+import {
+  ChatContainer,
+  MessageList,
+  Message,
+  MessageInput,
+  TypingIndicator,
+} from '@chatscope/chat-ui-kit-react';
 import './Chat.css';
 import Dropzone from '../Dropzone/Dropzone';
 import { toast } from 'react-toastify';
 import { toastifyError, toastifySuccess } from '../Toast';
 import Linkify from 'react-linkify';
-import { GlobalStateContext, GlobalStateContextValue } from '../../context/GlobalStateContext';
+import {
+  GlobalStateContext,
+  GlobalStateContextValue,
+} from '../../context/GlobalStateContext';
 import { useActor } from '@xstate/react';
 import { ChatHistory } from '../../state';
 import { useLocation } from 'react-router-dom';
@@ -22,13 +37,21 @@ interface ChatProps {
   name: string;
   avatar: string;
 }
-const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, name = 'Ava' }) => {
-  const { uiStateService, agentStateService, appStateService }: GlobalStateContextValue =
-    useContext(GlobalStateContext);
+const Chat: React.FC<ChatProps> = ({
+  onSubmitHandler,
+  height,
+  startingValue,
+  name = 'Ava',
+}) => {
+  const {
+    uiStateService,
+    agentStateService,
+    appStateService,
+  }: GlobalStateContextValue = useContext(GlobalStateContext);
   const location = useLocation();
+  const workspaceId = location.pathname.split('/')[1];
   const inputRef = useRef<HTMLInputElement>(null);
   const [msgInputValue, setMsgInputValue] = useState(startingValue);
-  const workspaceId = location.pathname.split('/')[1];
   const [state, send] = useActor(agentStateService);
   const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
   const [messages, setMessages] = useState<any[]>(
@@ -106,7 +129,9 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
       try {
         const answer = await onSubmitHandler(
           message,
-          recentChatHistory.map((history: ChatHistory) => history.text).join('\n'),
+          recentChatHistory
+            .map((history: ChatHistory) => history.text)
+            .join('\n'),
         );
 
         const assistantChatHistory: ChatHistory = {
@@ -119,7 +144,11 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
         send({
           type: 'UPDATE_CHAT_HISTORY',
           workspaceId: workspaceId,
-          recentChatHistory: [...recentChatHistory, userChatHistory, assistantChatHistory],
+          recentChatHistory: [
+            ...recentChatHistory,
+            userChatHistory,
+            assistantChatHistory,
+          ],
         });
 
         setLoading(false);
@@ -133,7 +162,16 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
         );
       }
     },
-    [addMessage, setLoading, inputRef, setMsgInputValue, onSubmitHandler, recentChatHistory, send, workspaceId],
+    [
+      addMessage,
+      setLoading,
+      inputRef,
+      setMsgInputValue,
+      onSubmitHandler,
+      recentChatHistory,
+      send,
+      workspaceId,
+    ],
   );
 
   const handleFileDrop = async (files: File[], name: string) => {
@@ -222,7 +260,9 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
         <ChatContainer className="bg-dark">
           <MessageList
             className="bg-dark"
-            typingIndicator={loading && <TypingIndicator content={`${name} is thinking`} />}
+            typingIndicator={
+              loading && <TypingIndicator content={`${name} is thinking`} />
+            }
           >
             {messages.map((message) => (
               <Message
@@ -234,8 +274,17 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
               >
                 <Message.CustomContent>
                   <Linkify
-                    componentDecorator={(decoratedHref: string, decoratedText: string, key: React.Key) => (
-                      <a target="blank" rel="noopener" href={decoratedHref} key={key}>
+                    componentDecorator={(
+                      decoratedHref: string,
+                      decoratedText: string,
+                      key: React.Key,
+                    ) => (
+                      <a
+                        target="blank"
+                        rel="noopener"
+                        href={decoratedHref}
+                        key={key}
+                      >
                         {decoratedText}
                       </a>
                     )}
@@ -255,7 +304,10 @@ const Chat: React.FC<ChatProps> = ({ onSubmitHandler, height, startingValue, nam
             ref={inputRef}
             sendOnReturnDisabled={false}
             onAttachClick={() => {
-              agentStateService.send({ type: 'CLEAR_CHAT_HISTORY', workspaceId });
+              agentStateService.send({
+                type: 'CLEAR_CHAT_HISTORY',
+                workspaceId,
+              });
             }}
           />
         </ChatContainer>

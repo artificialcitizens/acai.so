@@ -2,19 +2,20 @@
 import { useCallback } from 'react';
 import axios from 'axios';
 import { toastifyDefault } from '../components/Toast';
+import { getToken } from '../utils/config';
 
 interface Voices {
   [key: string]: string;
 }
 
-export const useElevenlabs = (voices: Voices, apiKey?: string) => {
-  if (!apiKey) {
-    toastifyDefault('No API key provided for Elevenlabs');
-  }
+export const useElevenlabs = (voices: Voices) => {
+  const apiKey = getToken('ELEVENLABS_KEY');
   const synthesizeSpeech = useCallback(
     async (inputText: string, voice: string) => {
       const VOICE_ID = voices[voice];
-
+      console.log({
+        apiKey,
+      });
       const options = {
         method: 'POST',
         url: `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,

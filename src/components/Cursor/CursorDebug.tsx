@@ -9,9 +9,12 @@ const CursorDebug: React.FC<CursorDebugProps> = ({ onSubmit }) => {
   const [selectedElement, setSelectedElement] = useState('');
   const avaElements = useAvaElements();
 
-  const handleSelectChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedElement(event.target.value);
-  }, []);
+  const handleSelectChange = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setSelectedElement(event.target.value);
+    },
+    [],
+  );
 
   const handleSubmit = useCallback(
     (event: React.FormEvent) => {
