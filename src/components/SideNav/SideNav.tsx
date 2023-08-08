@@ -99,8 +99,14 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
   const createTab = async (workspaceId: string) => {
     const title = prompt('Enter a name for your new tab');
     if (!title) return;
-    const { id } = await handleCreateTab({ title, content: '' }, workspaceId);
-    navigate(`/${workspaceId}/${id}`);
+    const tab = await handleCreateTab({ title, content: '' }, workspaceId);
+    globalServices.appStateService.send({
+      type: 'ADD_TAB',
+      tab,
+    });
+    setTimeout(() => {
+      navigate(`/${workspaceId}/${tab.id}`);
+    }, 250);
     globalServices.uiStateService.send({
       type: 'TOGGLE_SIDE_NAV',
       workspaceId,
