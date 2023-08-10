@@ -9,7 +9,7 @@ export const useBark = () => {
       voicePreset,
     }: {
       inputText: string;
-      voicePreset: string;
+      voicePreset: string | undefined;
     }) => {
       const options = {
         method: 'POST',

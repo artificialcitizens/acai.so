@@ -8,14 +8,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { toastifyInfo } from '../Toast';
 import { Tab } from '../../state';
 
-type VoiceState =
-  | 'idle'
-  | 'ava'
-  | 'notes'
-  | 'strahl'
-  | 'voice2voice'
-  | 'following';
-type TTSState = 'bark' | 'elevenlabs';
+type VoiceState = 'idle' | 'ava' | 'notes' | 'voice' | 'following';
+export type TTSState = 'bark' | 'elevenlabs' | 'webSpeech';
 
 interface Command {
   commands: string[];
@@ -45,9 +39,7 @@ export const useVoiceCommands = () => {
   const [userTranscript, setUserTranscript] = useState('');
   const [voiceRecognitionState, setVoiceRecognitionState] =
     useState<VoiceState>('idle');
-  const [synthesisMode, setSynthesisMode] = useState<'bark' | 'elevenlabs'>(
-    'bark',
-  );
+  const [synthesisMode, setSynthesisMode] = useState<TTSState>('bark');
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const location = useLocation();
@@ -92,7 +84,7 @@ export const useVoiceCommands = () => {
           setUserTranscript,
           setVoiceRecognitionState,
           '',
-          'voice2voice',
+          'voice',
           'Voice to voice active',
         ),
     },
@@ -108,20 +100,6 @@ export const useVoiceCommands = () => {
           '',
           'idle',
           'Going Idle',
-        ),
-    },
-    {
-      commands: ['hey chris'],
-      action: (
-        setUserTranscript: Dispatch<SetStateAction<string>>,
-        setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
-      ) =>
-        setStatesAndToast(
-          setUserTranscript,
-          setVoiceRecognitionState,
-          '',
-          'strahl',
-          'Chris is listening',
         ),
     },
     {

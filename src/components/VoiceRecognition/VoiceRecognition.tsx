@@ -8,47 +8,43 @@ import AudioWaveform from '../AudioWave/AudioWave';
 
 import { useElevenlabs } from '../../hooks/use-elevenlabs';
 import ScratchPad from '../ScratchPad/ScratchPad';
-import { useVoiceCommands } from './use-voice-command';
+import { TTSState, useVoiceCommands } from './use-voice-command';
 import { useWebSpeechSynthesis } from '../../hooks/use-web-tts';
 import { getToken } from '../../utils/config';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
 }
-
-const voices = {
-  strahl: 'Gdbj8IU3v0OzqfE4M5dz',
-  ava: 'XNjihqQlHh33hdGwAdnE',
-};
-
+// @TODO: manage state in localstorage
 const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   audioContext,
 }) => {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [fetchResponse, avaLoading] = useAva();
-  const [elevenlabsKey] = getToken('ELEVENLABS_API_KEY');
+  const [ttsLoading, setTtsLoading] = useState<boolean>(false);
+  const elevenlabsKey = getToken('ELEVENLABS_API_KEY');
   const synthesizeBarkSpeech = useBark();
-  const synthesizeElevenLabsSpeech = useElevenlabs(voices);
+  const [singleCommandMode, setSingleCommandMode] = useState<boolean>(false);
+  const synthesizeElevenLabsSpeech = useElevenlabs();
   const [synthesisMode, setSynthesisMode] = useState<
     'bark' | 'elevenlabs' | 'webSpeech'
   >('elevenlabs');
   const [manualTTS, setManualTTS] = useState<string>('');
   const synthesizeWebSpeech = useWebSpeechSynthesis();
   const {
-    userTranscript,
     setUserTranscript,
-    voiceRecognitionState,
     setVoiceRecognitionState,
+    userTranscript,
+    voiceRecognitionState,
     handleVoiceCommand,
   } = useVoiceCommands();
 
   const handleVoiceRecognition = (t: string) => {
+    if (!t || t.split(' ').length < 2) return;
     switch (voiceRecognitionState) {
-      case 'voice2voice': {
-        if (!t || t.split(' ').length < 2) return;
+      case 'voice': {
         if (!elevenlabsKey) return;
-        synthesizeAndPlay(Promise.resolve(t), 'strahl');
-        setUserTranscript('');
+        synthesizeAndPlay(Promise.resolve(t), 'ava');
         break;
       }
       case 'ava': {
@@ -59,39 +55,31 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         synthesizeAndPlay(avaResponse, 'ava');
         break;
       }
-      case 'strahl': {
-        const strahlResponse = fetchResponse(
-          t,
-          'you are to respond as Chris Strahl, Ceo of Knapsack. Joshs place of employment',
-        );
-        synthesizeAndPlay(strahlResponse, 'strahl');
-        break;
-      }
       case 'notes':
-        setUserTranscript(userTranscript + '\n' + t);
-        break;
       case 'idle':
         break;
     }
   };
+
   const handleTtsServiceChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
-    setSynthesisMode(event.target.value as 'bark' | 'elevenlabs' | 'webSpeech');
+    setSynthesisMode(event.target.value as TTSState);
   };
 
   const synthesizeAndPlay = async (
     responsePromise: Promise<string>,
     voice: string,
   ) => {
-    if (avaLoading) return;
+    if (avaLoading || ttsLoading) return;
+    setTtsLoading(true);
     const response = await responsePromise;
     let audioData;
 
     if (synthesisMode === 'bark') {
       audioData = await synthesizeBarkSpeech({
         inputText: response,
-        voicePreset: 'v2/en_speaker_9',
+        voicePreset: undefined,
       });
     } else if (synthesisMode === 'elevenlabs' && elevenlabsKey) {
       audioData = await synthesizeElevenLabsSpeech(response, voice);
@@ -117,13 +105,13 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     handleVoiceRecognition(updatedUserTranscript);
   };
 
+  // @TODO add a way to turn off voice recognition
   useSpeechRecognition({ onTranscriptionComplete, active: true });
-  const isOn =
-    voiceRecognitionState === 'ava' ||
-    voiceRecognitionState === 'notes' ||
-    voiceRecognitionState === 'strahl';
+
+  const isOn = voiceRecognitionState !== 'idle';
 
   return (
+    // move audio waveform to main app root
     <>
       {audioContext && (
         <AudioWaveform audioContext={audioContext} isOn={isOn} />
@@ -139,13 +127,11 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             autoPlay
             onEnded={() => {
               setTimeout(() => {
+                if (singleCommandMode) setVoiceRecognitionState('idle');
+                setUserTranscript('');
                 setAudioSrc(null);
-                if (
-                  voiceRecognitionState === 'ava' ||
-                  voiceRecognitionState === 'following'
-                )
-                  setVoiceRecognitionState('idle');
-              }, 200);
+                setTtsLoading(false);
+              }, 250);
             }}
           />
         )}

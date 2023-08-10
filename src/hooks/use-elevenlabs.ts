@@ -7,7 +7,12 @@ interface Voices {
   [key: string]: string;
 }
 
-export const useElevenlabs = (voices: Voices) => {
+const voices: Voices = {
+  strahl: 'Gdbj8IU3v0OzqfE4M5dz',
+  ava: 'XNjihqQlHh33hdGwAdnE',
+};
+
+export const useElevenlabs = () => {
   const apiKey =
     getToken('ELEVENLABS_API_KEY') || import.meta.env.VITE_ELEVENLABS_API_KEY;
   const synthesizeSpeech = useCallback(
@@ -15,7 +20,7 @@ export const useElevenlabs = (voices: Voices) => {
       const VOICE_ID = voices[voice];
       const options = {
         method: 'POST',
-        url: `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
+        url: `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}/stream`,
         headers: {
           accept: 'audio/mpeg', // Set the expected response type to audio/mpeg.
           'content-type': 'application/json', // Set the content type to application/json.
@@ -32,7 +37,7 @@ export const useElevenlabs = (voices: Voices) => {
       // Return the binary audio data received from the API response.
       return speechDetails.data;
     },
-    [apiKey, voices],
+    [apiKey],
   );
 
   return synthesizeSpeech;
