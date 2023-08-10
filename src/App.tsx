@@ -14,7 +14,7 @@ import TipTap from './components/TipTap/TipTap';
 import { Tab } from './state';
 import { VectorStoreContext } from './context/VectorStoreContext';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
-import useTypeTag from './hooks/ac-langchain/use-type-tag';
+// import useTypeTag from './hooks/ac-langchain/use-type-tag';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 
 function App() {
@@ -26,15 +26,15 @@ function App() {
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined,
   );
-  const data = {
-    name: ['Josh Mabry'],
-    age: ['38'],
-    location: ['Portland, OR'],
-    occupation: ['Software Engineer'],
-    siblings: ['Shena', 'Katie'],
-  };
+  // const data = {
+  //   name: ['Josh Mabry'],
+  //   age: ['38'],
+  //   location: ['Portland, OR'],
+  //   occupation: ['Software Engineer'],
+  //   siblings: ['Shena', 'Katie'],
+  // };
 
-  const { typeTagResponse, parseResponse } = useTypeTag(data);
+  // const { typeTagResponse, parseResponse } = useTypeTag(data);
   const { vectorstore, addDocuments, similaritySearchWithScore } =
     useMemoryVectorStore('');
 
