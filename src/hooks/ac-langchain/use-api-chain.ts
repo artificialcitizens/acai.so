@@ -20,7 +20,7 @@ export function useAPIChain(options: UseAPIChainOptions = {}) {
   useEffect(() => {
     async function initializeModel() {
       const openAIModel = new OpenAI({
-        openAIApiKey: getToken('OPENAI_KEY'),
+        openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
         modelName: 'text-davinci-003',
       });
 

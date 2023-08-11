@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAva } from '../../hooks/use-ava';
 
 import useSpeechRecognition from '../../hooks/use-speech-recognition';
@@ -38,6 +38,11 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     voiceRecognitionState,
     handleVoiceCommand,
   } = useVoiceCommands();
+
+  useEffect(() => {
+    const isOn = voiceRecognitionState !== 'idle';
+    onVoiceActivation(isOn);
+  }, [voiceRecognitionState, onVoiceActivation]);
 
   const handleVoiceRecognition = (t: string) => {
     if (!t || t.split(' ').length < 2) return;
@@ -109,8 +114,6 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   // @TODO add a way to turn off voice recognition
   useSpeechRecognition({ onTranscriptionComplete, active: true });
 
-  const isOn = voiceRecognitionState !== 'idle';
-  onVoiceActivation(isOn);
   return (
     <div
       className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow`}

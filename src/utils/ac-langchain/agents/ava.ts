@@ -24,7 +24,6 @@ import {
   GoogleCustomSearch,
   Tool,
   DynamicTool,
-  StructuredTool,
 } from 'langchain/tools';
 import { WebBrowser } from 'langchain/tools/webbrowser';
 import { Calculator } from 'langchain/tools/calculator';
@@ -273,8 +272,8 @@ const createAgentArtifacts = ({
   });
 
   const google = new GoogleCustomSearch({
-    apiKey: getToken('GOOGLE_API_KEY'),
-    googleCSEId: getToken('GOOGLE_CSE_ID'),
+    apiKey: getToken('GOOGLE_API_KEY') || import.meta.env.VITE_GOOGLE_API_KEY,
+    googleCSEId: getToken('GOOGLE_CSE_ID') || import.meta.env.VITE_GOOGLE_CSE_ID,
   });
 
   google.description =

@@ -117,7 +117,7 @@ export const appStateMachine = createMachine<IContext, Event>({
     workspaces: {
       UUIDxyz: {
         id: 'UUIDxyz',
-        name: 'Knapsack',
+        name: 'Ava',
         createdAt: timestampToHumanReadable(),
         lastUpdated: timestampToHumanReadable(),
         private: true,
@@ -131,9 +131,9 @@ export const appStateMachine = createMachine<IContext, Event>({
             tabs: [
               {
                 id: 'UUIDabc',
-                title: 'Home',
+                title: 'Meet Ava',
                 filetype: 'markdown',
-                content: 'Hello World!',
+                content: "Hello I'm Ava, your automated virtual assistant.",
                 isContext: false,
                 systemNote: '',
                 workspaceId: 'UUIDxyz',

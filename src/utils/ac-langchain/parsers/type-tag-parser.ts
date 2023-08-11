@@ -96,7 +96,7 @@ ${exampleOutput}
 };
 
 const chat = new ChatOpenAI({
-  openAIApiKey: getToken('OPENAI_KEY'),
+  openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
 });
 
 /**

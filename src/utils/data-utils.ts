@@ -42,7 +42,7 @@ export function baseEncode(text: string): string {
 }
 
 // Helper function to slugify a string
-export function slugify(str) {
+export function slugify(str: string) {
   return str
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
@@ -50,10 +50,10 @@ export function slugify(str) {
 }
 
 // Helper function to read a file as text
-export function readFileAsText(file) {
+export function readFileAsText(file: Blob) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (event) => resolve(event.target.result as string);
+    reader.onload = (event) => resolve(event.target?.result as string);
     reader.onerror = (error) => reject(error);
     reader.readAsText(file);
   });

@@ -15,35 +15,42 @@ const Dropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
       const items = event.dataTransfer.items;
       const droppedFiles: File[] = [];
 
-      const processEntry = async (entry: any): Promise<File[] | File> => {
+      const processEntry = async (
+        entry: any,
+      ): Promise<File[] | File | undefined> => {
         if (entry.isFile) {
           return new Promise<File>((resolve) => {
-            entry.file((file) => resolve(file));
+            entry.file((file: File | PromiseLike<File>) => resolve(file));
           });
         } else if (entry.isDirectory) {
           return readDirectory(entry.createReader());
         }
+        return undefined;
       };
 
-      const readDirectory = async (reader: any): Promise<File[]> => {
+      const readDirectory = async (
+        reader: any,
+      ): Promise<File[] | undefined> => {
         const entries = await readEntries(reader);
-        const folderFiles = [];
+        const folderFiles: File[] = [];
 
         for (const entry of entries) {
           const fileOrFiles = await processEntry(entry);
           if (Array.isArray(fileOrFiles)) {
             folderFiles.push(...fileOrFiles);
           } else {
-            folderFiles.push(fileOrFiles);
+            if (fileOrFiles) folderFiles.push(fileOrFiles);
           }
         }
 
-        return folderFiles;
+        return folderFiles.length > 0 ? folderFiles : undefined; // modify this line
       };
 
       const readEntries = (reader: any): Promise<any[]> => {
         return new Promise<any[]>((resolve) => {
-          reader.readEntries((entries) => resolve(entries));
+          reader.readEntries((entries: any[] | PromiseLike<any[]>) =>
+            resolve(entries),
+          );
         });
       };
 
@@ -54,7 +61,7 @@ const Dropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
           if (Array.isArray(fileOrFiles)) {
             droppedFiles.push(...fileOrFiles);
           } else {
-            droppedFiles.push(fileOrFiles);
+            if (fileOrFiles) droppedFiles.push(fileOrFiles);
           }
         }
       }
