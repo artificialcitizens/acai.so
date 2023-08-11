@@ -1,5 +1,5 @@
 export const ProjectLinks = () => (
-  <div className="bg-dark p-2 absolute bottom-0 flex justify-center items-center w-full">
+  <div className="bg-dark p-2 flex justify-center items-center w-full">
     {/* Add the github logo that links to the current repo */}
     <a
       href="https://trello.com/b/TX8T7lWe/%F0%9F%A7%A0-second-brain"

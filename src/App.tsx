@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Ava } from './components/Ava/Ava';
 import { SideNav } from './components/SideNav/SideNav';
 import { FloatingButton } from './components/FloatingButton/FloatingButton';
@@ -14,6 +14,7 @@ import TipTap from './components/TipTap/TipTap';
 import { Tab } from './state';
 import { VectorStoreContext } from './context/VectorStoreContext';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
+import { useLocalStorageKeyValue } from './hooks/use-local-storage';
 // import useTypeTag from './hooks/ac-langchain/use-type-tag';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 
@@ -23,20 +24,24 @@ function App() {
   const location = useLocation();
   const workspaceId = location.pathname.split('/')[1];
   const activeTabId = location.pathname.split('/')[2];
+  const [currentWorkspaceId, setCurrentWorkspaceId] = useLocalStorageKeyValue(
+    'current_workspace',
+    '',
+  );
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined,
   );
-  // const data = {
-  //   name: ['Josh Mabry'],
-  //   age: ['38'],
-  //   location: ['Portland, OR'],
-  //   occupation: ['Software Engineer'],
-  //   siblings: ['Shena', 'Katie'],
-  // };
+  useEffect(() => {
+    setCurrentWorkspaceId(workspaceId);
+  }, [workspaceId, setCurrentWorkspaceId]);
 
-  // const { typeTagResponse, parseResponse } = useTypeTag(data);
-  const { vectorstore, addDocuments, similaritySearchWithScore } =
-    useMemoryVectorStore('');
+  const {
+    vectorstore,
+    addDocuments,
+    addText,
+    similaritySearchWithScore,
+    filterAndCombineContent,
+  } = useMemoryVectorStore('');
 
   const toggleSideNav = () => {
     globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV' });
@@ -54,7 +59,7 @@ function App() {
 
   const workspace =
     globalServices.appStateService.getSnapshot().context.workspaces[
-      workspaceId
+      currentWorkspaceId
     ];
   const activeTab: Tab =
     workspace &&
@@ -62,7 +67,13 @@ function App() {
   return (
     globalServices.appStateService && (
       <VectorStoreContext.Provider
-        value={{ vectorstore, addDocuments, similaritySearchWithScore }}
+        value={{
+          vectorstore,
+          addText,
+          addDocuments,
+          similaritySearchWithScore,
+          filterAndCombineContent,
+        }}
       >
         <SideNav></SideNav>
         <FloatingButton
@@ -84,7 +95,7 @@ function App() {
               {activeTab && <TipTap tab={activeTab} />}
               {}
             </div>
-            <Ava audioContext={audioContext} />
+            <Ava workspaceId={workspaceId} audioContext={audioContext} />
             {/* 
                 <Whisper
                 onRecordingComplete={(blob) => console.log(blob)}

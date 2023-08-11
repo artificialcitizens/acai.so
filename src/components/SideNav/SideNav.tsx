@@ -116,7 +116,7 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
     .workspaces as Record<string, Workspace>;
   return (
     <nav
-      className="fixed left-0 top-0 z-[1035] h-screen w-60 -translate-x-full overflow-hidden bg-dark shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] data-[te-sidenav-hidden='false']:translate-x-0 dark:bg-zinc-800"
+      className="fixed flex flex-col left-0 top-0 z-[1035] max-h-screen w-60 -translate-x-full overflow-hidden bg-dark shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] data-[te-sidenav-hidden='false']:translate-x-0 dark:bg-zinc-800"
       data-te-sidenav-init
       data-te-sidenav-hidden={!navOpen}
       data-te-sidenav-mode="push"
@@ -124,7 +124,7 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
       ref={ref}
     >
       <ul
-        className="relative m-0 list-none px-[0.2rem]"
+        className="relative m-0 list-none px-[0.2rem] flex-grow max-height-[calc(100vh-4rem)] overflow-y-auto"
         data-te-sidenav-menu-ref
       >
         {Object.values(workspaces).map((workspace) => (
@@ -177,11 +177,6 @@ export const SideNav: React.FC<SideNavProps> = ({ children }) => {
           New Workspace +
         </button>
       </ul>
-      {children && (
-        <div className="flex flex-col flex-1 overflow-hidden" id="content">
-          {children}
-        </div>
-      )}
       <ProjectLinks />
     </nav>
   );

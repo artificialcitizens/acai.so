@@ -33,6 +33,16 @@ export const useMemoryVectorStore = (
     addDocumentsToMemoryVectorStore(vectorstore, docs);
   };
 
+  const addText = async (text: string) => {
+    if (!vectorstore) return;
+    const docs = await createDocumentsFromText({
+      text,
+      chunkSize,
+      chunkOverlap,
+    });
+    addDocuments(docs);
+  };
+
   const filterAndCombineContent = (
     data: Array<[Document, number]>,
     threshold: number,
@@ -44,7 +54,6 @@ export const useMemoryVectorStore = (
 
     // Map through the filtered data and extract the pageContent
     const pageContents = filteredData.map(([document]) => document.pageContent);
-
     // Combine the page contents into a single string
     const combinedContent = pageContents.join('\n\n');
 
@@ -68,6 +77,7 @@ export const useMemoryVectorStore = (
   return {
     vectorstore,
     addDocuments,
+    addText,
     filterAndCombineContent,
     similaritySearchWithScore,
   };

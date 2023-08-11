@@ -16,6 +16,7 @@ import Bottleneck from 'bottleneck';
 import { MenuBar } from './MenuBar';
 import './TipTap.css';
 import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
+import { VectorStoreContext } from '../../context/VectorStoreContext';
 interface EditorProps {
   tab: Tab;
 }
@@ -34,19 +35,41 @@ const type = (text: string) => {
 
 const wrappedType = limiter.wrap(type);
 
+export const extractContentFromTipTap = (tipTapContent: any): string => {
+  let rawContent = '';
+  console.time('setAutocompleteContext');
+  if (tipTapContent.content) {
+    tipTapContent.content.forEach((node: any) => {
+      if (node.type === 'text') {
+        rawContent += node.text;
+      } else if (node.content) {
+        rawContent += extractContentFromTipTap(node);
+      }
+    });
+  }
+  console.timeEnd('setAutocompleteContext');
+  return rawContent;
+};
+
 const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   const service = useInterpret(appStateMachine);
 
   const [hydrated, setHydrated] = useState(false);
   const [saveStatus, setSaveStatus] = useState('Saved');
-  const { filterAndCombineContent, similaritySearchWithScore } =
-    useMemoryVectorStore('');
+
   const [completion, setCompletion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [currentContext, setCurrentContext] = useState('');
   const [currentTab, setCurrentTab] = useState<Tab>(tab);
+  const {
+    vectorstore,
+    addDocuments,
+    similaritySearchWithScore,
+    filterAndCombineContent,
+  } = useContext(VectorStoreContext) as ReturnType<typeof useMemoryVectorStore>;
 
   useEffect(() => {
+    console.log('setting current tab', tab);
     setCurrentTab(tab);
     setHydrated(false);
   }, [tab]);
@@ -56,6 +79,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     workspaceId: string,
     extraContent = '',
   ) => {
+    console.log('saving content', currentTab);
     if (!currentTab) return;
     const content = editor.getJSON();
     setSaveStatus('Saving...');
@@ -73,19 +97,16 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   /**
    * Creates context for the autocomplete vector search to inform autocomplete
    */
-  const setAutocompleteContext = async (editor: Editor) => {
-    const context = editor.getText();
-    // if the context is too short we'll just genarate results based on the current context
-    // @TODO: first conditional
-    // we generate results based on the context
-    const results: string[] = await semanticSearchQueryGeneration(context);
-    // @TODO: we can set a dropdown with the 3 most relevant autofills suggestions based on the results of the semantic search queries
-    // console.log(results[0] + ' ' + results[1] + ' ' + results[2]);
+  const setAutocompleteContext = async (editorContent: any) => {
+    const context = extractContentFromTipTap(editorContent);
+    const contextArrayLastTen = context.split(' ').slice(-10);
+
     const queryResults = await similaritySearchWithScore(
-      `${results[0]} ${results[1]} ${results[2]}`,
+      contextArrayLastTen.join(' '),
     );
+
     const pageContent = queryResults.map((result: any) => {
-      if (result.score < 0.75) return;
+      if (result.score < 0.79) return;
       return result[0].pageContent;
     });
 
@@ -234,9 +255,6 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
         <h2 className=" text-sm mb-4 pb-2 font-medium border-b border-solid border-dark text-light">
           {currentTab.title}
         </h2>
-        {/* <div className="absolute flex right-5 top-5 mb-5 rounded-lg bg-base px-2 py-1 text-sm text-light">
-          {saveStatus}
-        </div> */}
         {editor && <EditorBubbleMenu editor={editor} />}
         <EditorContent editor={editor} />
       </div>

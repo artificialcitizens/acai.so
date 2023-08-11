@@ -10,13 +10,14 @@ export const createDocumentsFromText = async ({
   chunkSize: number;
   chunkOverlap: number;
 }): Promise<Document<Record<string, any>>[]> => {
+  if (!text) return [];
+
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize,
     chunkOverlap,
   });
 
   const output = await splitter.createDocuments([text]);
-
   return output;
 };
 
@@ -29,6 +30,7 @@ export const splitDocuments = async ({
   chunkSize: number;
   chunkOverlap: number;
 }): Promise<Document<Record<string, any>>[]> => {
+  if (docs.length === 0) return [];
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize,
     chunkOverlap,

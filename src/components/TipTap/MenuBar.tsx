@@ -8,6 +8,8 @@ import {
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
 import { useNavigate } from 'react-router-dom';
+import { VectorStoreContext } from '../../context/VectorStoreContext';
+import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -26,6 +28,13 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
   const tabId = location.pathname.split('/')[2];
   const [state, send] = useActor(appStateService);
   const navigate = useNavigate();
+  const {
+    vectorstore,
+    addDocuments,
+    similaritySearchWithScore,
+    filterAndCombineContent,
+    addText,
+  } = useContext(VectorStoreContext) as ReturnType<typeof useMemoryVectorStore>;
 
   useEffect(() => {
     const ws = state.context.workspaces[workspaceId];
@@ -44,7 +53,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
         <FloatingButton handleClick={() => setShowMenu(!showMenu)} />
       </span>
       {showMenu && (
-        <div className=" flex items-center justify-around left-12 bg-dark p-8">
+        <div className="flex items-center justify-around left-12 bg-dark p-8">
           <button
             onClick={async () => {
               console.log('Sending TOGGLE_CONTEXT event'); // Add this line for debugging
