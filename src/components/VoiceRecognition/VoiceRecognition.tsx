@@ -10,6 +10,7 @@ import ScratchPad from '../ScratchPad/ScratchPad';
 import { TTSState, useVoiceCommands } from './use-voice-command';
 import { useWebSpeechSynthesis } from '../../hooks/use-web-tts';
 import { getToken } from '../../utils/config';
+import { toastifyInfo } from '../Toast';
 
 interface VoiceRecognitionProps {
   onVoiceActivation: (bool: boolean) => void;
@@ -72,9 +73,10 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   ) => {
     if (avaLoading || ttsLoading) return;
     setTtsLoading(true);
+    toastifyInfo('Generating Text');
     const response = await responsePromise;
     let audioData;
-
+    toastifyInfo('Generating Audio');
     if (synthesisMode === 'bark') {
       audioData = await synthesizeBarkSpeech({
         inputText: response,
@@ -126,7 +128,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
                 setUserTranscript('');
                 setAudioSrc(null);
                 setTtsLoading(false);
-              }, 250);
+              }, 1000);
             }}
           />
         )}

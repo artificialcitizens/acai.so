@@ -9,9 +9,7 @@ interface AudioWaveformProps {
   isOn: boolean;
   audioContext: AudioContext | null;
 }
-// @TODO: Creata a state that manages if the user or assistant is speaking
-// @TODO: Update to fill in and change color when it's assistants turn to speak
-// @TODO: Update to use mic or audio from the application
+
 const AudioWaveform: React.FC<AudioWaveformProps> = ({
   isOn,
   audioContext,
