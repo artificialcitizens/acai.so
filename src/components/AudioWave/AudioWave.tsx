@@ -93,6 +93,7 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({
         left: '0',
         zIndex: 100,
         opacity: isOn ? 1 : 0,
+        pointerEvents: isOn ? 'all' : 'none',
       }}
     >
       <svg ref={ref} width="150" height="150" />
