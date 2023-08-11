@@ -15,7 +15,7 @@ import { toastifyInfo } from '../Toast';
 interface VoiceRecognitionProps {
   onVoiceActivation: (bool: boolean) => void;
 }
-// @TODO: manage state in localstorage
+// @TODO: create xstate machine
 const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   onVoiceActivation,
 }) => {
@@ -112,65 +112,62 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const isOn = voiceRecognitionState !== 'idle';
   onVoiceActivation(isOn);
   return (
-    // move audio waveform to main app root
-    <>
-      <div
-        className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow`}
-      >
-        {audioSrc && (
-          <audio
-            controls
-            src={audioSrc}
-            autoPlay
-            onEnded={() => {
-              setTimeout(() => {
-                if (singleCommandMode) setVoiceRecognitionState('idle');
-                setUserTranscript('');
-                setAudioSrc(null);
-                setTtsLoading(false);
-              }, 1000);
-            }}
-          />
-        )}
-        <select
-          className="bg-base text-dark font-medium p-1"
-          value={synthesisMode}
-          onChange={handleTtsServiceChange}
-        >
-          <option className="text-light" value="webSpeech">
-            Web Speech API
-          </option>
-          <option className="text-light" value="bark">
-            Bark
-          </option>
-          <option className="text-light" value="elevenlabs">
-            Elevenlabs
-          </option>
-        </select>
-        <ScratchPad
-          placeholder="User Transcript"
-          height="24px"
-          readonly
-          content={userTranscript || 'User Transcript'}
-        />
-        <form
-          className="text-light w-full flex flex-col flex-grow my-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            synthesizeAndPlay(Promise.resolve(manualTTS), 'ava');
-            setManualTTS('');
+    <div
+      className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow`}
+    >
+      {audioSrc && (
+        <audio
+          controls
+          src={audioSrc}
+          autoPlay
+          onEnded={() => {
+            setTimeout(() => {
+              if (singleCommandMode) setVoiceRecognitionState('idle');
+              setUserTranscript('');
+              setAudioSrc(null);
+              setTtsLoading(false);
+            }, 1000);
           }}
-        >
-          <textarea
-            placeholder="Manual TTS"
-            className="rounded bg-base text-light p-4"
-            value={manualTTS}
-            onChange={(e) => setManualTTS(e.target.value)}
-          />
-          <button type="submit">Submit</button>
-        </form>
-      </div>
-    </>
+        />
+      )}
+      <select
+        className="bg-base text-dark font-medium p-1"
+        value={synthesisMode}
+        onChange={handleTtsServiceChange}
+      >
+        <option className="text-light" value="webSpeech">
+          Web Speech API
+        </option>
+        <option className="text-light" value="bark">
+          Bark
+        </option>
+        <option className="text-light" value="elevenlabs">
+          Elevenlabs
+        </option>
+      </select>
+      <ScratchPad
+        placeholder="User Transcript"
+        height="24px"
+        readonly
+        content={userTranscript || 'User Transcript'}
+      />
+      <form
+        className="text-light w-full flex flex-col flex-grow my-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          synthesizeAndPlay(Promise.resolve(manualTTS), 'ava');
+          setManualTTS('');
+        }}
+      >
+        <textarea
+          placeholder="Manual TTS"
+          className="rounded bg-base text-light p-4"
+          value={manualTTS}
+          onChange={(e) => setManualTTS(e.target.value)}
+        />
+        <button type="submit">Submit</button>
+      </form>
+    </div>
   );
 };
 

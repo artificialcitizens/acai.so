@@ -13,11 +13,8 @@ import {
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
 import { ProjectLinks } from '../ProjectLinks/ProjectLinks';
-interface SideNavProps {
-  children?: React.ReactNode;
-}
 
-export const SideNav: React.FC<SideNavProps> = ({ children }) => {
+export const SideNav: React.FC = () => {
   const navigate = useNavigate();
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
