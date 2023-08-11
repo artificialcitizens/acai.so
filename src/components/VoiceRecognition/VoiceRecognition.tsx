@@ -4,7 +4,6 @@ import { useAva } from '../../hooks/use-ava';
 
 import useSpeechRecognition from '../../hooks/use-speech-recognition';
 import { useBark } from '../../hooks/use-bark';
-import AudioWaveform from '../AudioWave/AudioWave';
 
 import { useElevenlabs } from '../../hooks/use-elevenlabs';
 import ScratchPad from '../ScratchPad/ScratchPad';
@@ -13,11 +12,11 @@ import { useWebSpeechSynthesis } from '../../hooks/use-web-tts';
 import { getToken } from '../../utils/config';
 
 interface VoiceRecognitionProps {
-  audioContext?: AudioContext;
+  onVoiceActivation: (bool: boolean) => void;
 }
 // @TODO: manage state in localstorage
 const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
-  audioContext,
+  onVoiceActivation,
 }) => {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [fetchResponse, avaLoading] = useAva();
@@ -109,14 +108,10 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   useSpeechRecognition({ onTranscriptionComplete, active: true });
 
   const isOn = voiceRecognitionState !== 'idle';
-
+  onVoiceActivation(isOn);
   return (
     // move audio waveform to main app root
     <>
-      {audioContext && (
-        <AudioWaveform audioContext={audioContext} isOn={isOn} />
-      )}
-
       <div
         className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow`}
       >

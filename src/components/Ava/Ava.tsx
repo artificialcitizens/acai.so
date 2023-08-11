@@ -20,11 +20,11 @@ import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
 
 interface AvaProps {
-  audioContext?: AudioContext;
   workspaceId: string;
+  onVoiceActivation: (bool: boolean) => void;
 }
 
-export const Ava: React.FC<AvaProps> = ({ audioContext, workspaceId }) => {
+export const Ava: React.FC<AvaProps> = ({ workspaceId, onVoiceActivation }) => {
   const {
     appStateService,
     uiStateService,
@@ -86,7 +86,7 @@ export const Ava: React.FC<AvaProps> = ({ audioContext, workspaceId }) => {
         <StorageMeter />
       </ExpansionPanel>
       <ExpansionPanel title="Voice Synthesis">
-        <VoiceRecognition audioContext={audioContext} />
+        <VoiceRecognition onVoiceActivation={onVoiceActivation} />
       </ExpansionPanel>
       <ExpansionPanel title="Settings">
         <TokenManager />

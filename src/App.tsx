@@ -15,6 +15,7 @@ import { Tab } from './state';
 import { VectorStoreContext } from './context/VectorStoreContext';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
 import { useLocalStorageKeyValue } from './hooks/use-local-storage';
+import AudioWaveform from './components/AudioWave/AudioWave';
 // import useTypeTag from './hooks/ac-langchain/use-type-tag';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 
@@ -31,6 +32,7 @@ function App() {
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined,
   );
+  const [listening, setListening] = useState<boolean>(false);
   useEffect(() => {
     setCurrentWorkspaceId(workspaceId);
   }, [workspaceId, setCurrentWorkspaceId]);
@@ -76,6 +78,9 @@ function App() {
         }}
       >
         <SideNav></SideNav>
+        {audioContext && (
+          <AudioWaveform audioContext={audioContext} isOn={listening} />
+        )}
         <FloatingButton
           handleClick={(e) => {
             e.stopPropagation();
@@ -95,7 +100,7 @@ function App() {
               {activeTab && <TipTap tab={activeTab} />}
               {}
             </div>
-            <Ava workspaceId={workspaceId} audioContext={audioContext} />
+            <Ava workspaceId={workspaceId} onVoiceActivation={setListening} />
             {/* 
                 <Whisper
                 onRecordingComplete={(blob) => console.log(blob)}
