@@ -15,7 +15,7 @@ import { toastifyInfo } from '../Toast';
 interface VoiceRecognitionProps {
   onVoiceActivation: (bool: boolean) => void;
 }
-// @TODO: create xstate machine
+// @TODO: create xstate machine for voice recognition
 const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   onVoiceActivation,
 }) => {
@@ -28,7 +28,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const synthesizeElevenLabsSpeech = useElevenlabs();
   const [synthesisMode, setSynthesisMode] = useState<
     'bark' | 'elevenlabs' | 'webSpeech'
-  >('elevenlabs');
+  >('bark');
   const [manualTTS, setManualTTS] = useState<string>('');
   const synthesizeWebSpeech = useWebSpeechSynthesis();
   const {
@@ -46,6 +46,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 
   const handleVoiceRecognition = (t: string) => {
     if (!t || t.split(' ').length < 2) return;
+
     switch (voiceRecognitionState) {
       case 'voice': {
         if (!elevenlabsKey) return;
@@ -78,7 +79,6 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   ) => {
     if (avaLoading || ttsLoading) return;
     setTtsLoading(true);
-    toastifyInfo('Generating Text');
     const response = await responsePromise;
     let audioData;
     toastifyInfo('Generating Audio');
@@ -91,6 +91,8 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
       audioData = await synthesizeElevenLabsSpeech(response, voice);
     } else if (synthesisMode === 'webSpeech') {
       synthesizeWebSpeech(response);
+      setUserTranscript('');
+      setTtsLoading(false);
       return;
     }
 

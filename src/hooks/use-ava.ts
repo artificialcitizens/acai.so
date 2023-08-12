@@ -1,6 +1,10 @@
 import { useContext, useState } from 'react';
 import { avaChat } from '../utils/ac-langchain/agents/ava';
-import { toastifyAgentThought, toastifyError } from '../components/Toast';
+import {
+  toastifyAgentThought,
+  toastifyError,
+  toastifyInfo,
+} from '../components/Toast';
 import { handleCreateTab } from '../state';
 import {
   GlobalStateContext,
@@ -24,6 +28,7 @@ export const useAva = (): [
     systemMessage: string,
   ): Promise<string> => {
     setLoading(true);
+    toastifyInfo('Generating Text');
 
     try {
       const response = await avaChat({
