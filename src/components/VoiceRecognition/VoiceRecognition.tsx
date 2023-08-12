@@ -20,16 +20,17 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   onVoiceActivation,
 }) => {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
-  const [fetchResponse, avaLoading] = useAva();
+  const [fetchAvaResponse, avaLoading] = useAva();
   const [ttsLoading, setTtsLoading] = useState<boolean>(false);
   const elevenlabsKey = getToken('ELEVENLABS_API_KEY');
-  const synthesizeBarkSpeech = useBark();
   const [singleCommandMode, setSingleCommandMode] = useState<boolean>(false);
-  const synthesizeElevenLabsSpeech = useElevenlabs();
   const [synthesisMode, setSynthesisMode] = useState<
     'bark' | 'elevenlabs' | 'webSpeech'
   >('bark');
   const [manualTTS, setManualTTS] = useState<string>('');
+
+  const synthesizeElevenLabsSpeech = useElevenlabs();
+  const synthesizeBarkSpeech = useBark();
   const synthesizeWebSpeech = useWebSpeechSynthesis();
   const {
     setUserTranscript,
@@ -38,6 +39,10 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     voiceRecognitionState,
     handleVoiceCommand,
   } = useVoiceCommands();
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSingleCommandMode(event.target.checked);
+  };
 
   useEffect(() => {
     const isOn = voiceRecognitionState !== 'idle';
@@ -54,7 +59,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         break;
       }
       case 'ava': {
-        const avaResponse = fetchResponse(
+        const avaResponse = fetchAvaResponse(
           t,
           'this is a voice synthesis pipeline, which means I can speak to you and you can respond with your voice.',
         );
@@ -93,6 +98,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
       synthesizeWebSpeech(response);
       setUserTranscript('');
       setTtsLoading(false);
+      if (singleCommandMode) setVoiceRecognitionState('idle');
       return;
     }
 
@@ -103,6 +109,10 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
       const audioUrl = URL.createObjectURL(audioBlob);
       setAudioSrc(audioUrl);
       setUserTranscript('');
+    }
+
+    if (singleCommandMode) {
+      setVoiceRecognitionState('idle');
     }
   };
 
@@ -136,7 +146,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         />
       )}
       <select
-        className="bg-base text-dark font-medium p-1"
+        className="bg-base text-dark font-medium p-1 mb-2"
         value={synthesisMode}
         onChange={handleTtsServiceChange}
       >
@@ -150,6 +160,19 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           Elevenlabs
         </option>
       </select>
+      <span className="flex mb-2">
+        <label className="text-light ml-2" htmlFor="singleCommandMode">
+          Single Command Mode
+        </label>
+        <input
+          className="mx-1"
+          type="checkbox"
+          id="singleCommandMode"
+          name="option"
+          checked={singleCommandMode}
+          onChange={handleChange}
+        />
+      </span>
       <ScratchPad
         placeholder="User Transcript"
         height="24px"
