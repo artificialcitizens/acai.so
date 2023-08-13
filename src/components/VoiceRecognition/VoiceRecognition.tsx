@@ -184,6 +184,12 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   // @TODO add a way to turn off voice recognition
   useSpeechRecognition({ onTranscriptionComplete, active: !ttsLoading });
 
+  const handleManualTTS = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    synthesizeAndPlay(Promise.resolve(manualTTS), 'ava');
+    setManualTTS('');
+  };
+
   return (
     <div
       className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow`}
@@ -240,17 +246,19 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
       />
       <form
         className="text-light w-full flex flex-col flex-grow my-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          synthesizeAndPlay(Promise.resolve(manualTTS), 'ava');
-          setManualTTS('');
-        }}
+        onSubmit={handleManualTTS}
       >
         <textarea
           placeholder="Manual TTS"
           className="rounded bg-base text-light p-4"
           value={manualTTS}
           onChange={(e) => setManualTTS(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleManualTTS(e);
+            }
+          }}
         />
         <button type="submit">Submit</button>
       </form>
