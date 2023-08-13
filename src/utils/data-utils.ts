@@ -34,7 +34,36 @@ export function timestampToHumanReadable(): string {
 
   const strTime = hours + ':' + newMinutes + ' ' + ampm;
 
-  return strTime;
+  const days = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+  ];
+  const dayOfWeek = days[date.getDay()];
+
+  const dayOfMonth = date.getDate();
+
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+  const month = months[date.getMonth()];
+
+  return `${dayOfWeek}, ${month} ${dayOfMonth}, ${date.getFullYear()} ${strTime}`;
 }
 
 export function baseEncode(text: string): string {
