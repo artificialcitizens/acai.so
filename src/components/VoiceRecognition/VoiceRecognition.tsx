@@ -10,7 +10,7 @@ import ScratchPad from '../ScratchPad/ScratchPad';
 import { TTSState, useVoiceCommands } from './use-voice-command';
 import { useWebSpeechSynthesis } from '../../hooks/use-web-tts';
 import { getToken } from '../../utils/config';
-import { toastifyInfo } from '../Toast';
+import { toastifyError, toastifyInfo } from '../Toast';
 
 interface VoiceRecognitionProps {
   onVoiceActivation: (bool: boolean) => void;
@@ -54,7 +54,6 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 
     switch (voiceRecognitionState) {
       case 'voice': {
-        if (!elevenlabsKey) return;
         synthesizeAndPlay(Promise.resolve(t), 'ava');
         break;
       }
@@ -92,7 +91,11 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         inputText: response,
         voicePreset: undefined,
       });
-    } else if (synthesisMode === 'elevenlabs' && elevenlabsKey) {
+    } else if (synthesisMode === 'elevenlabs') {
+      if (!elevenlabsKey) {
+        toastifyError('Missing Elevenlabs API Key');
+        return;
+      }
       audioData = await synthesizeElevenLabsSpeech(response, voice);
     } else if (synthesisMode === 'webSpeech') {
       synthesizeWebSpeech(response);
