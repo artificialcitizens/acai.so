@@ -146,9 +146,10 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         }
         audioData = await synthesizeElevenLabsSpeech(response, voice);
       } else if (synthesisMode === 'webSpeech') {
-        synthesizeWebSpeech(response);
-        setUserTranscript('');
-        setTtsLoading(false);
+        synthesizeWebSpeech(response, () => {
+          setUserTranscript('');
+          setTtsLoading(false);
+        });
         if (singleCommandMode) setVoiceRecognitionState('idle');
         return;
       } else {
