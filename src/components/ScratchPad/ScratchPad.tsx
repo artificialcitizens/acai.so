@@ -1,5 +1,4 @@
 import React from 'react';
-import { marked } from 'marked';
 
 export interface MarkdownInputProps {
   content: string;
@@ -28,7 +27,7 @@ const MarkdownInput: React.FC<MarkdownInputProps> = ({
       ) : (
         <div
           className={`min-h-[${height}] p-3 text-light bg-base rounded overflow-y-auto w-full mt-2 `}
-          dangerouslySetInnerHTML={{ __html: marked(content || '') }}
+          dangerouslySetInnerHTML={{ __html: content }}
         />
       )}
     </div>

@@ -20,15 +20,10 @@ import {
   InputValues,
   PartialValues,
 } from 'langchain/schema';
-import {
-  GoogleCustomSearch,
-  Tool,
-  DynamicTool,
-} from 'langchain/tools';
+import { GoogleCustomSearch, Tool, DynamicTool } from 'langchain/tools';
 import { WebBrowser } from 'langchain/tools/webbrowser';
 import { Calculator } from 'langchain/tools/calculator';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { timestampToHumanReadable } from '../../date-time';
 import { BufferWindowMemory } from 'langchain/memory';
 import { BaseCallbackHandler } from 'langchain/callbacks';
 import { Embeddings } from 'langchain/embeddings/base';
@@ -273,7 +268,8 @@ const createAgentArtifacts = ({
 
   const google = new GoogleCustomSearch({
     apiKey: getToken('GOOGLE_API_KEY') || import.meta.env.VITE_GOOGLE_API_KEY,
-    googleCSEId: getToken('GOOGLE_CSE_ID') || import.meta.env.VITE_GOOGLE_CSE_ID,
+    googleCSEId:
+      getToken('GOOGLE_CSE_ID') || import.meta.env.VITE_GOOGLE_CSE_ID,
   });
 
   google.description =
