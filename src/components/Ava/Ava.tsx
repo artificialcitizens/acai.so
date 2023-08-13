@@ -18,6 +18,7 @@ import VoiceRecognition from '../VoiceRecognition/VoiceRecognition';
 import { Tab } from '../../state';
 import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
+import ChatModelDropdown from '../ChatSettings';
 
 interface AvaProps {
   workspaceId: string;
@@ -38,7 +39,7 @@ export const Ava: React.FC<AvaProps> = ({ workspaceId, onVoiceActivation }) => {
       agentStateService,
       (state) => state.context[workspaceId]?.systemNotes,
     ) || '';
-  const [fetchResponse] = useAva();
+  const [avaResponse] = useAva();
   const contextTabs = workspace
     ? workspace.data.tiptap.tabs.filter((tab: Tab) => tab.isContext)
     : '';
@@ -101,6 +102,7 @@ export const Ava: React.FC<AvaProps> = ({ workspaceId, onVoiceActivation }) => {
             });
           }}
         />
+        <ChatModelDropdown workspaceId={workspaceId} />
       </ExpansionPanel>
       <ExpansionPanel
         title="Logs"
@@ -120,7 +122,7 @@ export const Ava: React.FC<AvaProps> = ({ workspaceId, onVoiceActivation }) => {
             name="Ava"
             avatar=".."
             onSubmitHandler={async (message) => {
-              const response = await fetchResponse(message, systemNotes);
+              const response = await avaResponse(message, systemNotes);
               return response;
             }}
           />
