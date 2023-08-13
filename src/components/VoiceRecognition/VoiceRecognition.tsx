@@ -51,6 +51,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 
   const handleVoiceRecognition = (t: string) => {
     if (!t || t.split(' ').length < 2) return;
+    if (ttsLoading) return;
 
     switch (voiceRecognitionState) {
       case 'voice': {
@@ -58,10 +59,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         break;
       }
       case 'ava': {
-        const avaResponse = fetchAvaResponse(
-          t,
-          'this is a voice synthesis pipeline, which means I can speak to you and you can respond with your voice.',
-        );
+        const avaResponse = fetchAvaResponse(t, '');
         synthesizeAndPlay(avaResponse, 'ava');
         break;
       }
@@ -111,7 +109,6 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
       });
       const audioUrl = URL.createObjectURL(audioBlob);
       setAudioSrc(audioUrl);
-      setUserTranscript('');
     }
 
     if (singleCommandMode) {
@@ -142,7 +139,6 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             setTimeout(() => {
               if (singleCommandMode) setVoiceRecognitionState('idle');
               setUserTranscript('');
-              setAudioSrc(null);
               setTtsLoading(false);
             }, 1000);
           }}
