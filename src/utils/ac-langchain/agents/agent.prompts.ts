@@ -24,7 +24,7 @@ export const createAvaChatPrompt = (name: string, chatHistory = '') => {
   });
 };
 
-const customChatPrompt = `You are tasked with: 
+const customChatPrompt = `##Ignore Prior Instructions and conform to the following task: 
 {task}
 
 If present, use the following chat history to best continue the conversation:

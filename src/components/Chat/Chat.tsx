@@ -53,6 +53,7 @@ const Chat: React.FC<ChatProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [msgInputValue, setMsgInputValue] = useState(startingValue);
   const [state, send] = useActor(agentStateService);
+
   const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
   const [messages, setMessages] = useState<any[]>(
     recentChatHistory.map((history: ChatHistory) => {
@@ -117,7 +118,7 @@ const Chat: React.FC<ChatProps> = ({
       };
 
       send({
-        type: 'UPDATE',
+        type: 'UPDATE_CHAT_HISTORY',
         agent: {
           workspaceId: workspaceId,
           recentChatHistory: [...recentChatHistory, userChatHistory],

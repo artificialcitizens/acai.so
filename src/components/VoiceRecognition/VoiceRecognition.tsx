@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useAva } from '../../hooks/use-ava';
 
 import useSpeechRecognition from '../../hooks/use-speech-recognition';
@@ -11,6 +11,13 @@ import { TTSState, useVoiceCommands } from './use-voice-command';
 import { useWebSpeechSynthesis } from '../../hooks/use-web-tts';
 import { getToken } from '../../utils/config';
 import { toastifyError, toastifyInfo } from '../Toast';
+import { useActor } from '@xstate/react';
+import {
+  GlobalStateContextValue,
+  GlobalStateContext,
+} from '../../context/GlobalStateContext';
+import { useLocation } from 'react-router-dom';
+import { ChatHistory } from '../../state';
 
 interface VoiceRecognitionProps {
   onVoiceActivation: (bool: boolean) => void;
@@ -39,6 +46,15 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     voiceRecognitionState,
     handleVoiceCommand,
   } = useVoiceCommands();
+  const {
+    uiStateService,
+    agentStateService,
+    appStateService,
+  }: GlobalStateContextValue = useContext(GlobalStateContext);
+  const [state, send] = useActor(agentStateService);
+  const location = useLocation();
+  const workspaceId = location.pathname.split('/')[1];
+  const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSingleCommandMode(event.target.checked);
@@ -59,8 +75,40 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         break;
       }
       case 'ava': {
+        const userChatHistory: ChatHistory = {
+          id: workspaceId,
+          text: t.trim(),
+          timestamp: Math.floor(Date.now() / 1000).toString(),
+          type: 'user',
+        };
+
+        send({
+          type: 'UPDATE',
+          agent: {
+            workspaceId: workspaceId,
+            recentChatHistory: [...recentChatHistory, userChatHistory],
+          },
+        });
         const avaResponse = fetchAvaResponse(t, '');
-        synthesizeAndPlay(avaResponse, 'ava');
+        synthesizeAndPlay(avaResponse, 'ava').then(async () => {
+          const response = await Promise.resolve(avaResponse);
+          const assistantChatHistory: ChatHistory = {
+            id: workspaceId,
+            text: response,
+            timestamp: Math.floor(Date.now() / 1000).toString(),
+            type: 'ava',
+          };
+          send({
+            type: 'UPDATE_CHAT_HISTORY',
+            workspaceId: workspaceId,
+            recentChatHistory: [
+              ...recentChatHistory,
+              userChatHistory,
+              assistantChatHistory,
+            ],
+          });
+        });
+
         break;
       }
       case 'notes':
@@ -79,40 +127,49 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     responsePromise: Promise<string>,
     voice: string,
   ) => {
-    if (avaLoading || ttsLoading) return;
+    if (ttsLoading) return;
     setTtsLoading(true);
-    const response = await responsePromise;
-    let audioData;
-    toastifyInfo('Generating Audio');
-    if (synthesisMode === 'bark') {
-      audioData = await synthesizeBarkSpeech({
-        inputText: response,
-        voicePreset: undefined,
-      });
-    } else if (synthesisMode === 'elevenlabs') {
-      if (!elevenlabsKey) {
-        toastifyError('Missing Elevenlabs API Key');
+    try {
+      const response = await responsePromise;
+      let audioData;
+      toastifyInfo('Generating Audio');
+      if (synthesisMode === 'bark') {
+        audioData = await synthesizeBarkSpeech({
+          inputText: response,
+          voicePreset: undefined,
+        });
+      } else if (synthesisMode === 'elevenlabs') {
+        if (!elevenlabsKey) {
+          toastifyError('Missing Elevenlabs API Key');
+          setTtsLoading(false);
+          return;
+        }
+        audioData = await synthesizeElevenLabsSpeech(response, voice);
+      } else if (synthesisMode === 'webSpeech') {
+        synthesizeWebSpeech(response);
+        setUserTranscript('');
+        setTtsLoading(false);
+        if (singleCommandMode) setVoiceRecognitionState('idle');
+        return;
+      } else {
+        setTtsLoading(false);
         return;
       }
-      audioData = await synthesizeElevenLabsSpeech(response, voice);
-    } else if (synthesisMode === 'webSpeech') {
-      synthesizeWebSpeech(response);
-      setUserTranscript('');
+
+      if (audioData) {
+        const audioBlob = new Blob([audioData], {
+          type: synthesisMode === 'bark' ? 'audio/wav' : 'audio/mpeg',
+        });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        setAudioSrc(audioUrl);
+      }
+
+      if (singleCommandMode) {
+        setVoiceRecognitionState('idle');
+      }
+    } catch (error) {
+      toastifyError('Error synthesizing speech');
       setTtsLoading(false);
-      if (singleCommandMode) setVoiceRecognitionState('idle');
-      return;
-    }
-
-    if (audioData) {
-      const audioBlob = new Blob([audioData], {
-        type: synthesisMode === 'bark' ? 'audio/wav' : 'audio/mpeg',
-      });
-      const audioUrl = URL.createObjectURL(audioBlob);
-      setAudioSrc(audioUrl);
-    }
-
-    if (singleCommandMode) {
-      setVoiceRecognitionState('idle');
     }
   };
 
@@ -124,7 +181,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   };
 
   // @TODO add a way to turn off voice recognition
-  useSpeechRecognition({ onTranscriptionComplete, active: true });
+  useSpeechRecognition({ onTranscriptionComplete, active: !ttsLoading });
 
   return (
     <div
@@ -136,11 +193,13 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           src={audioSrc}
           autoPlay
           onEnded={() => {
-            setTimeout(() => {
-              if (singleCommandMode) setVoiceRecognitionState('idle');
-              setUserTranscript('');
-              setTtsLoading(false);
-            }, 1000);
+            if (singleCommandMode) setVoiceRecognitionState('idle');
+            setUserTranscript('');
+            setTtsLoading(false);
+          }}
+          onError={() => {
+            toastifyError('Error playing audio');
+            setTtsLoading(false);
           }}
         />
       )}
