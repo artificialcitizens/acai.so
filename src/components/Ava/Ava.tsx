@@ -65,9 +65,7 @@ export const Ava: React.FC<AvaProps> = ({ workspaceId, onVoiceActivation }) => {
           <SBSearch
             onSubmit={async (val: string) => {
               const response = await similaritySearchWithScore(val);
-              console.log('response', response);
               const results = filterAndCombineContent(response, 0.75);
-              console.log('results', results);
               const newTab: Tab = {
                 id: Date.now().toString(),
                 title: val,
