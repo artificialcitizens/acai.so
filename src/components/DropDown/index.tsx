@@ -1,3 +1,3 @@
-import { AvaDropdown } from './DropDown';
+import { Dropdown } from './DropDown';
 
-export default AvaDropdown;
+export default Dropdown;

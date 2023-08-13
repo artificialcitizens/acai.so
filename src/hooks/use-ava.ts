@@ -58,12 +58,41 @@ export const useAva = (): [
         console.log({ response });
         return response;
       }
-      case 'researcher':
-        break;
       case 'assistant':
-        break;
-      case 'custom':
-        break;
+      case 'researcher':
+      case 'custom': {
+        const response = await avaChat({
+          input: message,
+          systemMessage,
+          callbacks: {
+            handleCreateDocument: async ({
+              title,
+              content,
+            }: {
+              title: string;
+              content: string;
+            }) => {
+              const tab = await handleCreateTab(
+                { title, content },
+                workspaceId,
+              );
+              console.log({ tab });
+              globalServices.appStateService.send({
+                type: 'ADD_TAB',
+                tab,
+              });
+              setTimeout(() => {
+                navigate(`/${workspaceId}/${tab.id}`);
+              }, 250);
+            },
+            handleAgentAction: (action) => {
+              const thought = action.log.split('Action:')[0].trim();
+              toastifyAgentThought(thought);
+            },
+          },
+        });
+        return response;
+      }
       default: {
         const response = await queryChat({
           systemMessage,

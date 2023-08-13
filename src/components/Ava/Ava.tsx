@@ -92,7 +92,7 @@ export const Ava: React.FC<AvaProps> = ({ workspaceId, onVoiceActivation }) => {
       <ExpansionPanel title="Settings">
         <TokenManager />
         <ScratchPad
-          placeholder="Agent Refinement"
+          placeholder="Custom Prompt"
           content={systemNotes}
           handleInputChange={(e) => {
             agentStateService.send({

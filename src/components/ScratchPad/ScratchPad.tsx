@@ -16,7 +16,7 @@ const MarkdownInput: React.FC<MarkdownInputProps> = ({
   height = '24px',
 }) => {
   return (
-    <div className="pt-2 border-b-transparent text-light shadow-none w-full">
+    <div className="pt-2 mb-2 border-b-transparent text-light shadow-none w-full">
       {!readonly ? (
         <textarea
           className={`min-h-[${height}] p-3 bg-base rounded w-full`}

@@ -18,6 +18,7 @@ import {
 } from '../../context/GlobalStateContext';
 import { useLocation } from 'react-router-dom';
 import { ChatHistory } from '../../state';
+import Dropdown from '../DropDown';
 
 interface VoiceRecognitionProps {
   onVoiceActivation: (bool: boolean) => void;
@@ -117,12 +118,6 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     }
   };
 
-  const handleTtsServiceChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    setSynthesisMode(event.target.value as TTSState);
-  };
-
   const synthesizeAndPlay = async (
     responsePromise: Promise<string>,
     voice: string,
@@ -190,12 +185,30 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     setManualTTS('');
   };
 
+  const handleTtsServiceChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setSynthesisMode(event.target.value as TTSState);
+  };
+
+  const options = [
+    { value: 'webSpeech', label: 'Web Speech API' },
+    { value: 'bark', label: 'Bark' },
+    { value: 'elevenlabs', label: 'Elevenlabs' },
+  ];
+  const handleDropdownChange = (value: string) => {
+    handleTtsServiceChange({
+      target: { value },
+    } as React.ChangeEvent<HTMLSelectElement>);
+  };
+
   return (
     <div
       className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow`}
     >
       {audioSrc && (
         <audio
+          className="rounded-full p-2"
           controls
           src={audioSrc}
           autoPlay
@@ -210,33 +223,26 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           }}
         />
       )}
-      <select
-        className="bg-base text-dark font-medium p-1 mb-2"
-        value={synthesisMode}
-        onChange={handleTtsServiceChange}
-      >
-        <option className="text-light" value="webSpeech">
-          Web Speech API
-        </option>
-        <option className="text-light" value="bark">
-          Bark
-        </option>
-        <option className="text-light" value="elevenlabs">
-          Elevenlabs
-        </option>
-      </select>
-      <span className="flex mb-2">
-        <label className="text-light ml-2" htmlFor="singleCommandMode">
-          Single Command Mode
-        </label>
-        <input
-          className="mx-1"
-          type="checkbox"
-          id="singleCommandMode"
-          name="option"
-          checked={singleCommandMode}
-          onChange={handleChange}
+      <span className="flex">
+        <Dropdown
+          label="Synthesis Mode"
+          options={options}
+          value={synthesisMode}
+          onChange={handleDropdownChange}
         />
+        <span className="flex mb-2 items-start">
+          <label className="text-light ml-2" htmlFor="singleCommandMode">
+            Single Command
+          </label>
+          <input
+            className="mx-1 mt-[0.25rem]"
+            type="checkbox"
+            id="singleCommandMode"
+            name="option"
+            checked={singleCommandMode}
+            onChange={handleChange}
+          />
+        </span>
       </span>
       <ScratchPad
         placeholder="User Transcript"
@@ -253,7 +259,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           className="rounded bg-base text-light p-4"
           value={manualTTS}
           onChange={(e) => setManualTTS(e.target.value)}
-          onKeyDown={(e) => {
+          onKeyDown={(e: any) => {
             if (e.key === 'Enter') {
               e.preventDefault();
               handleManualTTS(e);
