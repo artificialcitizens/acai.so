@@ -24,16 +24,17 @@ export const yamlToJson = (yamlStr: string): Json | undefined => {
 
 export function timestampToHumanReadable(): string {
   const date = new Date();
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: 'long',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: 'numeric',
-    minute: 'numeric',
-    hour12: true,
-  };
-  return new Intl.DateTimeFormat('en-US', options).format(date);
+  let hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? 'pm' : 'am';
+
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  const newMinutes = minutes < 10 ? '0' + minutes : minutes;
+
+  const strTime = hours + ':' + newMinutes + ' ' + ampm;
+
+  return strTime;
 }
 
 export function baseEncode(text: string): string {
