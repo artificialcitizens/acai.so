@@ -43,8 +43,6 @@ export const Ava: React.FC<AvaProps> = ({ workspaceId, onVoiceActivation }) => {
   const contextTabs = workspace
     ? workspace.data.tiptap.tabs.filter((tab: Tab) => tab.isContext)
     : '';
-  console.log('contextTabs', contextTabs);
-  // remove any undefined values
 
   const { similaritySearchWithScore, filterAndCombineContent } = useContext(
     VectorStoreContext,
@@ -52,6 +50,10 @@ export const Ava: React.FC<AvaProps> = ({ workspaceId, onVoiceActivation }) => {
 
   const toggleAgentThoughts = () => {
     uiStateService.send({ type: 'TOGGLE_AGENT_THOUGHTS' });
+  };
+
+  const toggleAgentChat = () => {
+    uiStateService.send({ type: 'TOGGLE_AGENT_CHAT' });
   };
 
   return (
@@ -114,7 +116,13 @@ export const Ava: React.FC<AvaProps> = ({ workspaceId, onVoiceActivation }) => {
           secondaryFilter="agent-thought"
         />
       </ExpansionPanel>
-      <ExpansionPanel title="Chat" className="chat-panel" isOpened={true}>
+      <ExpansionPanel
+        title="Chat"
+        className="chat-panel"
+        onChange={toggleAgentChat}
+        onClick={toggleAgentChat}
+        isOpened={uiStateService.getSnapshot().context.agentChat}
+      >
         {workspaceId && (
           <Chat
             name="Ava"
