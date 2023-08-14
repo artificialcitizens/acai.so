@@ -17,6 +17,7 @@ import { MenuBar } from './MenuBar';
 import './TipTap.css';
 import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
 import { VectorStoreContext } from '../../context/VectorStoreContext';
+import { EditorContext } from '../../context/EditorContext';
 interface EditorProps {
   tab: Tab;
 }
@@ -67,7 +68,8 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     similaritySearchWithScore,
     filterAndCombineContent,
   } = useContext(VectorStoreContext) as ReturnType<typeof useMemoryVectorStore>;
-
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const { setEditor } = useContext(EditorContext)!;
   useEffect(() => {
     console.log('setting current tab', tab);
     setCurrentTab(tab);
@@ -242,8 +244,14 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     }
   }, [editor, hydrated, currentTab]);
 
-  if (!currentTab) return <p>nothing to see here</p>;
+  useEffect(() => {
+    setEditor(editor);
+    return () => {
+      setEditor(null);
+    };
+  }, [editor, setEditor]);
 
+  if (!currentTab) return <p>nothing to see here</p>;
   return (
     <>
       <div

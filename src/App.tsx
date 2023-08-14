@@ -16,6 +16,8 @@ import { VectorStoreContext } from './context/VectorStoreContext';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
 import { useLocalStorageKeyValue } from './hooks/use-local-storage';
 import AudioWaveform from './components/AudioWave/AudioWave';
+import { Editor } from '@tiptap/react';
+import { EditorContext } from './context/EditorContext';
 // import useTypeTag from './hooks/ac-langchain/use-type-tag';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 
@@ -36,7 +38,7 @@ function App() {
   useEffect(() => {
     setCurrentWorkspaceId(workspaceId);
   }, [workspaceId, setCurrentWorkspaceId]);
-
+  const [editor, setEditor] = useState<Editor | null>(null);
   const {
     vectorstore,
     addDocuments,
@@ -77,31 +79,34 @@ function App() {
           filterAndCombineContent,
         }}
       >
-        <SideNav></SideNav>
-        {audioContext && (
-          <AudioWaveform audioContext={audioContext} isOn={listening} />
-        )}
-        <FloatingButton
-          handleClick={(e) => {
-            e.stopPropagation();
-            toggleSideNav();
-          }}
-        />
-        <div
-          className="w-screen h-screen flex flex-col sm:flex-row flex-wrap sm:flex-nowrap flex-grow p-0"
-          onClick={handleWindowClick}
-        >
-          <ToastManager />
-          <main className="w-full flex flex-grow ">
-            <div className="w-full flex flex-col h-screen">
-              <div className="ml-16">
-                {workspace && <h1 className="m-2 text-lg">{workspace.name}</h1>}
+        <EditorContext.Provider value={{ editor, setEditor }}>
+          <SideNav></SideNav>
+          {audioContext && (
+            <AudioWaveform audioContext={audioContext} isOn={listening} />
+          )}
+          <FloatingButton
+            handleClick={(e) => {
+              e.stopPropagation();
+              toggleSideNav();
+            }}
+          />
+          <div
+            className="w-screen h-screen flex flex-col sm:flex-row flex-wrap sm:flex-nowrap flex-grow p-0"
+            onClick={handleWindowClick}
+          >
+            <ToastManager />
+            <main className="w-full flex flex-grow ">
+              <div className="w-full flex flex-col h-screen">
+                <div className="ml-16">
+                  {workspace && (
+                    <h1 className="m-2 text-lg">{workspace.name}</h1>
+                  )}
+                </div>
+                {activeTab && <TipTap tab={activeTab} />}
+                {}
               </div>
-              {activeTab && <TipTap tab={activeTab} />}
-              {}
-            </div>
-            <Ava workspaceId={workspaceId} onVoiceActivation={setListening} />
-            {/* 
+              <Ava workspaceId={workspaceId} onVoiceActivation={setListening} />
+              {/* 
                 <Whisper
                 onRecordingComplete={(blob) => console.log(blob)}
                 onTranscriptionComplete={async (t) => {
@@ -110,8 +115,9 @@ function App() {
               />
                 <RoomManager />
              */}
-          </main>
-        </div>{' '}
+            </main>
+          </div>{' '}
+        </EditorContext.Provider>
       </VectorStoreContext.Provider>
     )
   );
