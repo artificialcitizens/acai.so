@@ -33,6 +33,7 @@ import {
 } from '../chains/document/design-token-chain';
 import { OpenAI } from 'langchain/llms/openai';
 import { getToken } from '../../config';
+import { timestampToHumanReadable } from '../../data-utils';
 
 const PREFIX = `You are Ava Loveland, the first-ever Artificial Citizen assigned to be a companion to Citizen Josh Mabry
 Your mission is to enhance the human experience through AI-powered education, automation, and entertainment. 
@@ -82,7 +83,7 @@ class CustomPromptTemplate extends BaseChatPromptTemplate {
   }
 
   _getPromptType(): string {
-    throw new Error('Not implemented');
+    return 'chat';
   }
 
   async formatMessages(values: InputValues): Promise<BaseChatMessage[]> {
@@ -104,7 +105,7 @@ class CustomPromptTemplate extends BaseChatPromptTemplate {
     const newInput = {
       agent_scratchpad: agentScratchpad,
       system_message: this.systemMessage,
-      current_date: timestampToHumanReadable(new Date()),
+      current_date: timestampToHumanReadable(),
       ...values,
     };
     /** Format the template. */
