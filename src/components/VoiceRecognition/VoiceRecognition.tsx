@@ -247,7 +247,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 
   const handleManualTTS = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    synthesizeAndPlay(Promise.resolve(manualTTS), 'strahl');
+    synthesizeAndPlay(Promise.resolve(manualTTS), 'ava');
     setManualTTS('');
   };
 
