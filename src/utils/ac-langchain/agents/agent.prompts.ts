@@ -58,11 +58,11 @@ const writingAssistantPrompt = `##Ignore Prior Instructions
 ====================
 User Time and Date {timeStamp}
 ====================
-Your job is to help {name} answer questions and offer writing help about the following document:
+Your job is to help {user} answer questions and offer writing help about the following document:
 
 {document}
 
-Your job is to help {name} answer questions and offer writing help about the above document
+Your job is to help {user} answer questions and offer writing help about the above document
 =================
 If present, use the following chat history to best continue the conversation:
 {chatHistory}

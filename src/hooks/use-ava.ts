@@ -11,9 +11,11 @@ import { queryChat } from '../utils/ac-langchain/agents/chat-model';
 import {
   createAvaChatPrompt,
   createCustomPrompt,
+  createWritingPromptTemplate,
 } from '../utils/ac-langchain/agents/agent.prompts';
 import { useActor } from '@xstate/react';
 import { EditorContext } from '../context/EditorContext';
+import { queryAssistant } from '../utils/ac-langchain/agents/assistant';
 
 export const useAva = (): [
   fetchResponse: (message: string, systemMessage: string) => Promise<string>,
@@ -40,9 +42,6 @@ export const useAva = (): [
     message: string,
     systemMessage: string,
   ): Promise<string> => {
-    if (editor) {
-      console.log(editor.getText());
-    }
     setLoading(true);
     toastifyInfo('Generating Text');
     switch (currentAgent.agentMode) {
@@ -58,37 +57,17 @@ export const useAva = (): [
         });
         return response;
       }
-      case 'assistant':
-      case 'researcher':
-      case 'custom': {
-        const response = await avaChat({
-          input: message,
-          systemMessage,
-          callbacks: {
-            handleCreateDocument: async ({
-              title,
-              content,
-            }: {
-              title: string;
-              content: string;
-            }) => {
-              const tab = await handleCreateTab(
-                { title, content },
-                workspaceId,
-              );
-              globalServices.appStateService.send({
-                type: 'ADD_TAB',
-                tab,
-              });
-              setTimeout(() => {
-                navigate(`/${workspaceId}/${tab.id}`);
-              }, 250);
-            },
-            handleAgentAction: (action) => {
-              const thought = action.log.split('Action:')[0].trim();
-              toastifyAgentThought(thought);
-            },
-          },
+      case 'writing-assistant': {
+        if (!editor) throw new Error('No editor');
+        const prompt = await createWritingPromptTemplate({
+          user: 'Josh',
+          document: editor.getText(),
+          chatHistory: formattedChatHistory,
+        });
+        const response = await queryAssistant({
+          systemMessage: prompt,
+          message,
+          modelName: currentAgent.openAIChatModel,
         });
         return response;
       }
