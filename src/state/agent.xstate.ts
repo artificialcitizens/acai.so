@@ -7,7 +7,13 @@ export interface ChatHistory {
   type: 'user' | 'ava';
 }
 
-export const agentMode = ['chat', 'researcher', 'assistant', 'custom'];
+export const agentMode = [
+  'chat',
+  // 'researcher',
+  // 'assistant',
+  'writing-assistant',
+  // 'custom',
+];
 
 export type AgentMode = (typeof agentMode)[number];
 

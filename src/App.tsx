@@ -14,7 +14,6 @@ import TipTap from './components/TipTap/TipTap';
 import { Tab } from './state';
 import { VectorStoreContext } from './context/VectorStoreContext';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
-import { useLocalStorageKeyValue } from './hooks/use-local-storage';
 import AudioWaveform from './components/AudioWave/AudioWave';
 import { Editor } from '@tiptap/react';
 import { EditorContext } from './context/EditorContext';
@@ -27,17 +26,11 @@ function App() {
   const location = useLocation();
   const workspaceId = location.pathname.split('/')[1];
   const activeTabId = location.pathname.split('/')[2];
-  const [currentWorkspaceId, setCurrentWorkspaceId] = useLocalStorageKeyValue(
-    'current_workspace',
-    '',
-  );
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined,
   );
   const [listening, setListening] = useState<boolean>(false);
-  useEffect(() => {
-    setCurrentWorkspaceId(workspaceId);
-  }, [workspaceId, setCurrentWorkspaceId]);
+
   const [editor, setEditor] = useState<Editor | null>(null);
   const {
     vectorstore,
@@ -63,7 +56,7 @@ function App() {
 
   const workspace =
     globalServices.appStateService.getSnapshot().context.workspaces[
-      currentWorkspaceId
+      workspaceId
     ];
   const activeTab: Tab =
     workspace &&
@@ -95,6 +88,7 @@ function App() {
             onClick={handleWindowClick}
           >
             <ToastManager />
+            {/* @TODO: Setup non workspace and tab view */}
             <main className="w-full flex flex-grow ">
               <div className="w-full flex flex-col h-screen">
                 <div className="ml-16">

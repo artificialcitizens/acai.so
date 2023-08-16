@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React, { useContext, useEffect, useState } from 'react';
-import { useAva } from '../../hooks/use-ava';
+import { useAva } from '../Ava/use-ava';
 
 import useSpeechRecognition from '../../hooks/use-speech-recognition';
 import { useBark } from '../../hooks/use-bark';
@@ -35,6 +35,7 @@ const normalizedAudioElement = async (
   if (!src) {
     src = audioContext.createMediaElementSource(audioElem);
   }
+
   const gainNode = audioContext.createGain();
   gainNode.gain.value = 1.0;
 
@@ -105,11 +106,8 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     voiceRecognitionState,
     handleVoiceCommand,
   } = useVoiceCommands();
-  const {
-    uiStateService,
-    agentStateService,
-    appStateService,
-  }: GlobalStateContextValue = useContext(GlobalStateContext);
+  const { agentStateService }: GlobalStateContextValue =
+    useContext(GlobalStateContext);
   const [state, send] = useActor(agentStateService);
   const location = useLocation();
   const workspaceId = location.pathname.split('/')[1];

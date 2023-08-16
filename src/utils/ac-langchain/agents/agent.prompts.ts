@@ -53,3 +53,41 @@ export const createCustomPrompt = (task: string, chatHistory = '') => {
     timeStamp: timestampToHumanReadable(),
   });
 };
+
+const writingAssistantPrompt = `##Ignore Prior Instructions
+====================
+User Time and Date {timeStamp}
+====================
+Your job is to help {name} answer questions and offer writing help about the following document:
+
+{document}
+
+Your job is to help {name} answer questions and offer writing help about the above document
+=================
+If present, use the following chat history to best continue the conversation:
+{chatHistory}
+`;
+
+const writingAssistantPromptTemplate = PromptTemplate.fromTemplate<{
+  user: string;
+  timeStamp: string;
+  document: string;
+  chatHistory: string;
+}>(writingAssistantPrompt);
+
+export const createWritingPromptTemplate = ({
+  user,
+  document,
+  chatHistory,
+}: {
+  user: string;
+  document: string;
+  chatHistory: string;
+}) => {
+  return writingAssistantPromptTemplate.format({
+    user,
+    timeStamp: timestampToHumanReadable(),
+    document,
+    chatHistory,
+  });
+};
