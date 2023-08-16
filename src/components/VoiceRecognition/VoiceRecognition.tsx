@@ -25,19 +25,23 @@ interface VoiceRecognitionProps {
   onVoiceActivation: (bool: boolean) => void;
 }
 
+let src: MediaElementAudioSourceNode | null = null;
+
 const normalizedAudioElement = async (
   audioElem: HTMLAudioElement,
   audioBlob: Blob,
   audioContext: AudioContext,
 ) => {
-  const src = audioContext.createMediaElementSource(audioElem);
+  if (!src) {
+    src = audioContext.createMediaElementSource(audioElem);
+  }
   const gainNode = audioContext.createGain();
   gainNode.gain.value = 1.0;
 
   audioElem.addEventListener(
     'play',
     () => {
-      src.connect(gainNode);
+      src!.connect(gainNode);
       gainNode.connect(audioContext.destination);
     },
     true,
@@ -46,7 +50,7 @@ const normalizedAudioElement = async (
   audioElem.addEventListener(
     'pause',
     () => {
-      src.disconnect(gainNode);
+      src!.disconnect(gainNode);
       gainNode.disconnect(audioContext.destination);
     },
     true,
