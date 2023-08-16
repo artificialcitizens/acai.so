@@ -93,12 +93,7 @@ export const useAva = (): [
         return response;
       }
       default: {
-        const response = await queryChat({
-          systemMessage,
-          message,
-          modelName: currentAgent.openAIChatModel,
-        });
-        return response;
+        throw new Error(`Unexpected agentMode: ${currentAgent.agentMode}`);
       }
     }
   };

@@ -21,11 +21,65 @@ import { ChatHistory } from '../../state';
 import Dropdown from '../DropDown';
 
 interface VoiceRecognitionProps {
+  audioContext?: AudioContext;
   onVoiceActivation: (bool: boolean) => void;
 }
+
+const normalizedAudioElement = async (
+  audioElem: HTMLAudioElement,
+  audioBlob: Blob,
+  audioContext: AudioContext,
+) => {
+  const src = audioContext.createMediaElementSource(audioElem);
+  const gainNode = audioContext.createGain();
+  gainNode.gain.value = 1.0;
+
+  audioElem.addEventListener(
+    'play',
+    () => {
+      src.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+    },
+    true,
+  );
+
+  audioElem.addEventListener(
+    'pause',
+    () => {
+      src.disconnect(gainNode);
+      gainNode.disconnect(audioContext.destination);
+    },
+    true,
+  );
+
+  const arrayBuffer = await audioBlob.arrayBuffer();
+  const decodedData = await audioContext.decodeAudioData(arrayBuffer);
+
+  const decodedBuffer = decodedData.getChannelData(0);
+  const sliceLen = Math.floor(decodedData.sampleRate * 0.05);
+  const averages = [];
+  let sum = 0.0;
+  for (let i = 0; i < decodedBuffer.length; i++) {
+    sum += decodedBuffer[i] ** 2;
+    if (i % sliceLen === 0) {
+      sum = Math.sqrt(sum / sliceLen);
+      averages.push(sum);
+      sum = 0;
+    }
+  }
+  averages.sort((a, b) => a - b);
+  const a = averages[Math.floor(averages.length * 0.95)];
+
+  let gain = 1.0 / a;
+  gain = gain / 10.0;
+  console.log('gain determined', a, gain);
+  gainNode.gain.value = gain;
+};
+
 // @TODO: create xstate machine for voice recognition
 const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   onVoiceActivation,
+  audioContext,
 }) => {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [fetchAvaResponse, avaLoading] = useAva();
@@ -36,7 +90,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     'bark' | 'elevenlabs' | 'webSpeech'
   >('bark');
   const [manualTTS, setManualTTS] = useState<string>('');
-
+  const [listening, setListening] = useState<boolean>(false);
   const synthesizeElevenLabsSpeech = useElevenlabs();
   const synthesizeBarkSpeech = useBark();
   const synthesizeWebSpeech = useWebSpeechSynthesis();
@@ -56,9 +110,14 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const location = useLocation();
   const workspaceId = location.pathname.split('/')[1];
   const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
+  const audioRef = React.useRef<HTMLAudioElement>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSingleCommandMode(event.target.checked);
+  };
+
+  const handleSpeechChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setListening(event.target.checked);
   };
 
   useEffect(() => {
@@ -84,7 +143,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         };
 
         send({
-          type: 'UPDATE',
+          type: 'UPDATE_CHAT_HISTORY',
           agent: {
             workspaceId: workspaceId,
             recentChatHistory: [...recentChatHistory, userChatHistory],
@@ -152,14 +211,14 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         return;
       }
 
-      if (audioData) {
+      if (audioData && audioContext && audioRef.current) {
         const audioBlob = new Blob([audioData], {
           type: synthesisMode === 'bark' ? 'audio/wav' : 'audio/mpeg',
         });
         const audioUrl = URL.createObjectURL(audioBlob);
+        normalizedAudioElement(audioRef.current, audioBlob, audioContext);
         setAudioSrc(audioUrl);
       }
-
       if (singleCommandMode) {
         setVoiceRecognitionState('idle');
       }
@@ -177,11 +236,14 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   };
 
   // @TODO add a way to turn off voice recognition
-  useSpeechRecognition({ onTranscriptionComplete, active: !ttsLoading });
+  useSpeechRecognition({
+    onTranscriptionComplete,
+    active: !ttsLoading && listening,
+  });
 
   const handleManualTTS = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    synthesizeAndPlay(Promise.resolve(manualTTS), 'ava');
+    synthesizeAndPlay(Promise.resolve(manualTTS), 'strahl');
     setManualTTS('');
   };
 
@@ -206,11 +268,12 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     <div
       className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow`}
     >
-      {audioSrc && (
+      {audioContext && (
         <audio
+          ref={audioRef}
           className="rounded-full p-2"
           controls
-          src={audioSrc}
+          src={audioSrc ? audioSrc : undefined}
           autoPlay
           onEnded={() => {
             if (singleCommandMode) setVoiceRecognitionState('idle');
@@ -241,6 +304,19 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             name="option"
             checked={singleCommandMode}
             onChange={handleChange}
+          />
+        </span>
+        <span className="flex mb-2 items-start">
+          <label className="text-light ml-2" htmlFor="singleCommandMode">
+            Speech Recognition
+          </label>
+          <input
+            className="mx-1 mt-[0.25rem]"
+            type="checkbox"
+            id="singleCommandMode"
+            name="option"
+            checked={listening}
+            onChange={handleSpeechChange}
           />
         </span>
       </span>

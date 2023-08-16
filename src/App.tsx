@@ -105,7 +105,11 @@ function App() {
                 {activeTab && <TipTap tab={activeTab} />}
                 {}
               </div>
-              <Ava workspaceId={workspaceId} onVoiceActivation={setListening} />
+              <Ava
+                workspaceId={workspaceId}
+                onVoiceActivation={setListening}
+                audioContext={audioContext}
+              />
               {/* 
                 <Whisper
                 onRecordingComplete={(blob) => console.log(blob)}

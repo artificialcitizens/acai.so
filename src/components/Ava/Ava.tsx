@@ -22,10 +22,15 @@ import ChatModelDropdown from '../ChatSettings';
 
 interface AvaProps {
   workspaceId: string;
+  audioContext?: AudioContext;
   onVoiceActivation: (bool: boolean) => void;
 }
 
-export const Ava: React.FC<AvaProps> = ({ workspaceId, onVoiceActivation }) => {
+export const Ava: React.FC<AvaProps> = ({
+  workspaceId,
+  onVoiceActivation,
+  audioContext,
+}) => {
   const {
     appStateService,
     uiStateService,
@@ -87,7 +92,10 @@ export const Ava: React.FC<AvaProps> = ({ workspaceId, onVoiceActivation }) => {
         <StorageMeter />
       </ExpansionPanel>
       <ExpansionPanel title="Voice Synthesis">
-        <VoiceRecognition onVoiceActivation={onVoiceActivation} />
+        <VoiceRecognition
+          onVoiceActivation={onVoiceActivation}
+          audioContext={audioContext}
+        />
       </ExpansionPanel>
       <ExpansionPanel title="Settings">
         <TokenManager />
