@@ -90,13 +90,14 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const [fetchAvaResponse, avaLoading] = useAva();
   const [ttsLoading, setTtsLoading] = useState<boolean>(false);
   const elevenlabsKey = getToken('ELEVENLABS_API_KEY');
+  const [elevenLabsVoice, setElevenLabsVoice] = useState<string>('');
   const [singleCommandMode, setSingleCommandMode] = useState<boolean>(false);
   const [synthesisMode, setSynthesisMode] = useState<
     'bark' | 'elevenlabs' | 'webSpeech'
   >('bark');
   const [manualTTS, setManualTTS] = useState<string>('');
   const [listening, setListening] = useState<boolean>(false);
-  const synthesizeElevenLabsSpeech = useElevenlabs();
+  const { synthesizeElevenLabsSpeech, voices } = useElevenlabs();
   const synthesizeBarkSpeech = useBark();
   const synthesizeWebSpeech = useWebSpeechSynthesis();
   const {
@@ -133,7 +134,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 
     switch (voiceRecognitionState) {
       case 'voice': {
-        synthesizeAndPlay(Promise.resolve(t), 'ava');
+        synthesizeAndPlay(Promise.resolve(t));
         break;
       }
       case 'ava': {
@@ -152,7 +153,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           },
         });
         const avaResponse = fetchAvaResponse(t, '');
-        synthesizeAndPlay(avaResponse, 'ava').then(async () => {
+        synthesizeAndPlay(avaResponse).then(async () => {
           const response = await Promise.resolve(avaResponse);
           const assistantChatHistory: ChatHistory = {
             id: workspaceId,
@@ -179,10 +180,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     }
   };
 
-  const synthesizeAndPlay = async (
-    responsePromise: Promise<string>,
-    voice: string,
-  ) => {
+  const synthesizeAndPlay = async (responsePromise: Promise<string>) => {
     if (ttsLoading) return;
     setTtsLoading(true);
     try {
@@ -200,7 +198,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           setTtsLoading(false);
           return;
         }
-        audioData = await synthesizeElevenLabsSpeech(response, voice);
+        audioData = await synthesizeElevenLabsSpeech(response, elevenLabsVoice);
       } else if (synthesisMode === 'webSpeech') {
         synthesizeWebSpeech(response, () => {
           setUserTranscript('');
@@ -245,7 +243,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 
   const handleManualTTS = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    synthesizeAndPlay(Promise.resolve(manualTTS), 'ava');
+    synthesizeAndPlay(Promise.resolve(manualTTS));
     setManualTTS('');
   };
 
@@ -260,10 +258,15 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     { value: 'bark', label: 'Bark' },
     { value: 'elevenlabs', label: 'Elevenlabs' },
   ];
+
   const handleDropdownChange = (value: string) => {
     handleTtsServiceChange({
       target: { value },
     } as React.ChangeEvent<HTMLSelectElement>);
+  };
+
+  const handleElevenLabsDropdownChange = (value: string) => {
+    setElevenLabsVoice(value);
   };
 
   return (
@@ -295,6 +298,14 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           value={synthesisMode}
           onChange={handleDropdownChange}
         />
+        {synthesisMode === 'elevenlabs' && (
+          <Dropdown
+            label="Voice"
+            options={voices}
+            value={elevenLabsVoice || voices?.[0]?.value || ''}
+            onChange={handleElevenLabsDropdownChange}
+          />
+        )}
         <span className="flex mb-2 items-start">
           <label className="text-light ml-2" htmlFor="singleCommandMode">
             Single Command
