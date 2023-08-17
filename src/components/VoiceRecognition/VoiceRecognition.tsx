@@ -25,62 +25,6 @@ interface VoiceRecognitionProps {
   onVoiceActivation: (bool: boolean) => void;
 }
 
-let src: MediaElementAudioSourceNode | null = null;
-
-const normalizedAudioElement = async (
-  audioElem: HTMLAudioElement,
-  audioBlob: Blob,
-  audioContext: AudioContext,
-) => {
-  if (!src) {
-    src = audioContext.createMediaElementSource(audioElem);
-  }
-
-  const gainNode = audioContext.createGain();
-  gainNode.gain.value = 1.0;
-
-  audioElem.addEventListener(
-    'play',
-    () => {
-      src!.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-    },
-    true,
-  );
-
-  audioElem.addEventListener(
-    'pause',
-    () => {
-      src!.disconnect(gainNode);
-      gainNode.disconnect(audioContext.destination);
-    },
-    true,
-  );
-
-  const arrayBuffer = await audioBlob.arrayBuffer();
-  const decodedData = await audioContext.decodeAudioData(arrayBuffer);
-
-  const decodedBuffer = decodedData.getChannelData(0);
-  const sliceLen = Math.floor(decodedData.sampleRate * 0.05);
-  const averages = [];
-  let sum = 0.0;
-  for (let i = 0; i < decodedBuffer.length; i++) {
-    sum += decodedBuffer[i] ** 2;
-    if (i % sliceLen === 0) {
-      sum = Math.sqrt(sum / sliceLen);
-      averages.push(sum);
-      sum = 0;
-    }
-  }
-  averages.sort((a, b) => a - b);
-  const a = averages[Math.floor(averages.length * 0.95)];
-
-  let gain = 1.0 / a;
-  gain = gain / 10.0;
-  console.log('gain determined', a, gain);
-  gainNode.gain.value = gain;
-};
-
 // @TODO: create xstate machine for voice recognition
 const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   onVoiceActivation,
@@ -94,7 +38,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const [singleCommandMode, setSingleCommandMode] = useState<boolean>(false);
   const [synthesisMode, setSynthesisMode] = useState<
     'bark' | 'elevenlabs' | 'webSpeech'
-  >('bark');
+  >('elevenlabs');
   const [manualTTS, setManualTTS] = useState<string>('');
   const [listening, setListening] = useState<boolean>(false);
   const { synthesizeElevenLabsSpeech, voices } = useElevenlabs();
@@ -114,6 +58,8 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const workspaceId = location.pathname.split('/')[1];
   const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
   const audioRef = React.useRef<HTMLAudioElement>(null);
+  const srcRef = React.useRef<MediaElementAudioSourceNode | null>(null);
+  const gainNodeRef = React.useRef<GainNode | null>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSingleCommandMode(event.target.checked);
@@ -121,6 +67,47 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 
   const handleSpeechChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setListening(event.target.checked);
+  };
+
+  const normalizedAudioElement = async (
+    audioElem: HTMLAudioElement,
+    audioBlob: Blob,
+    audioContext: AudioContext,
+  ) => {
+    if (!srcRef.current) {
+      srcRef.current = audioContext.createMediaElementSource(audioElem);
+    }
+
+    if (!gainNodeRef.current) {
+      gainNodeRef.current = audioContext.createGain();
+    }
+
+    gainNodeRef.current.gain.value = 1.0;
+
+    const arrayBuffer = await audioBlob.arrayBuffer();
+    const decodedData = await audioContext.decodeAudioData(arrayBuffer);
+
+    const decodedBuffer = decodedData.getChannelData(0);
+    const sliceLen = Math.floor(decodedData.sampleRate * 0.05);
+    const averages = [];
+    let sum = 0.0;
+    for (let i = 0; i < decodedBuffer.length; i++) {
+      sum += decodedBuffer[i] ** 2;
+      if (i % sliceLen === 0) {
+        sum = Math.sqrt(sum / sliceLen);
+        averages.push(sum);
+        sum = 0;
+      }
+    }
+    averages.sort((a, b) => a - b);
+    const a = averages[Math.floor(averages.length * 0.95)];
+
+    let gain = 1.0 / a;
+    gain = gain / 10.0;
+    gain = Math.max(gain, 0.02);
+    gain = Math.min(gain, 1);
+
+    gainNodeRef.current!.gain.value = gain;
   };
 
   useEffect(() => {
@@ -280,14 +267,22 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           controls
           src={audioSrc ? audioSrc : undefined}
           autoPlay
+          onPlay={() => {
+            srcRef.current!.connect(gainNodeRef.current!);
+            gainNodeRef.current!.connect(audioContext.destination);
+          }}
           onEnded={() => {
             if (singleCommandMode) setVoiceRecognitionState('idle');
             setUserTranscript('');
             setTtsLoading(false);
+            srcRef.current!.disconnect(gainNodeRef.current!);
+            gainNodeRef.current!.disconnect(audioContext.destination);
           }}
           onError={() => {
             toastifyError('Error playing audio');
             setTtsLoading(false);
+            srcRef.current!.disconnect(gainNodeRef.current!);
+            gainNodeRef.current!.disconnect(audioContext.destination);
           }}
         />
       )}
