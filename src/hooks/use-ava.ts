@@ -45,6 +45,49 @@ export const useAva = (): [
     setLoading(true);
     toastifyInfo('Generating Text');
     switch (currentAgent.agentMode) {
+      case 'ava': {
+        try {
+          const response = await avaChat({
+            input: message,
+            systemMessage,
+            chatHistory: formattedChatHistory,
+            currentDocument: editor?.getText() || '',
+            callbacks: {
+              handleCreateDocument: async ({
+                title,
+                content,
+              }: {
+                title: string;
+                content: string;
+              }) => {
+                const tab = await handleCreateTab(
+                  { title, content },
+                  workspaceId,
+                );
+                console.log({ tab });
+                globalServices.appStateService.send({
+                  type: 'ADD_TAB',
+                  tab,
+                });
+                setTimeout(() => {
+                  navigate(`/${workspaceId}/${tab.id}`);
+                }, 250);
+              },
+              handleAgentAction: (action) => {
+                const thought = action.log.split('Action:')[0].trim();
+                toastifyAgentThought(thought);
+              },
+            },
+          });
+          return response;
+        } catch (error) {
+          console.log({ error });
+          toastifyInfo('Error generating text');
+          return '';
+        } finally {
+          setLoading(false);
+        }
+      }
       case 'chat': {
         const sysMessage = systemMessage
           ? await createCustomPrompt(systemMessage, formattedChatHistory)

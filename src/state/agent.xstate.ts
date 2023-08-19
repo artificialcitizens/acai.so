@@ -8,10 +8,10 @@ export interface ChatHistory {
 }
 
 export const agentMode = [
+  'ava',
   'chat',
-  // 'researcher',
-  // 'assistant',
   'writing-assistant',
+  // 'assistant',
   // 'custom',
 ];
 
