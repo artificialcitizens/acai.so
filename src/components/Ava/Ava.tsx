@@ -7,7 +7,7 @@ import Chat from '../../components/Chat/Chat';
 import SBSearch from '../../components/Search/Search';
 import ScratchPad from '../../components/ScratchPad/ScratchPad';
 import TokenManager from '../../components/TokenManager/token-manager';
-import { useSelector } from '@xstate/react';
+import { useActor, useSelector } from '@xstate/react';
 import { useAva } from '../../hooks/use-ava';
 import {
   GlobalStateContext,
@@ -45,6 +45,7 @@ export const Ava: React.FC<AvaProps> = ({
       (state) => state.context[workspaceId]?.systemNotes,
     ) || '';
   const [avaResponse] = useAva();
+  const [uiState] = useActor(uiStateService);
   const contextTabs = workspace
     ? workspace.data.tiptap.tabs.filter((tab: Tab) => tab.isContext)
     : '';
@@ -116,8 +117,7 @@ export const Ava: React.FC<AvaProps> = ({
         title="Logs"
         data-ava-element="TOGGLE_AGENT_THOUGHTS"
         onChange={toggleAgentThoughts}
-        onClick={toggleAgentThoughts}
-        isOpened={uiStateService.getSnapshot().context.agentThoughts}
+        isOpened={uiState.context.thoughtsOpen}
       >
         <NotificationCenter
           placeholder="A place for AI to ponder 🤔"
@@ -128,8 +128,7 @@ export const Ava: React.FC<AvaProps> = ({
         title="Chat"
         className="chat-panel"
         onChange={toggleAgentChat}
-        onClick={toggleAgentChat}
-        isOpened={uiStateService.getSnapshot().context.agentChat}
+        isOpened={uiState.context.agentChatOpen}
       >
         {workspaceId && (
           <Chat

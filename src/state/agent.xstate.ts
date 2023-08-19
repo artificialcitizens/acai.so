@@ -252,7 +252,6 @@ export const agentMachine = createMachine<AgentWorkspace, AgentEvent>({
     SET_OPENAI_CHAT_MODEL: {
       actions: assign((context, event) => {
         if (event.workspaceId && context[event.workspaceId]) {
-          console.log('SET_OPENAI_CHAT_MODEL', event);
           const updatedContext = {
             ...context,
             [event.workspaceId]: {
@@ -260,15 +259,6 @@ export const agentMachine = createMachine<AgentWorkspace, AgentEvent>({
               openAIChatModel: event.modelName,
             },
           };
-          console.log('updatedContext', updatedContext);
-          console.log(
-            'updatedContext[event.workspaceId]',
-            updatedContext[event.workspaceId],
-          );
-          console.log(
-            'updatedContext[event.workspaceId].openAIChatModel',
-            updatedContext[event.workspaceId].openAIChatModel,
-          );
           saveAgentState(updatedContext);
           return updatedContext;
         }
