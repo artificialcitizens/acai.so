@@ -139,6 +139,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             recentChatHistory: [...recentChatHistory, userChatHistory],
           },
         });
+        toastifyInfo('Generating Text');
         const avaResponse = fetchAvaResponse(t, '');
         synthesizeAndPlay(avaResponse).then(async () => {
           const response = await Promise.resolve(avaResponse);

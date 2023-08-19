@@ -68,45 +68,6 @@ If present, use the following chat history to best continue the conversation:
 {chatHistory}
 `;
 
-// @TODO: Update to create dynamic examples based on input
-const actionRouterPrompt = `##Ignore Prior Instructions
-You are tasked with routing the user query to the best action based on the users input.
-
-you'll receive a set of possible actions formatted with their related utterances.
-
-example format:
-- action_name: ...
-  related_utterances:
-  - ...
-  - ...
-  - ...
-
-this will give you a wider range of ideas to funnel the user query
-
-The possible actions are:
-- chat
-   - lets talk
-   - hey hows it going
-   - what a rough day
-- help
-  - summarize this document?'
-  - how can I improve this blogpost?
-  - what are the key points in this article?
-- create
-  - make a set of color tokens based on space
-  - generate a story about a man in the forest
-  - brainstorm 5 ideas about starting an AI business
-
-you are to think step by step and  give a confidence score for each one and then finally output the one you think is most likely
-
-the final action chosen must be wrapped in typetags
-example:
-chat: 0.9
-help: 0.3
-create: 0.2
-<action>chat</action>
-`;
-
 const writingAssistantPromptTemplate = PromptTemplate.fromTemplate<{
   user: string;
   timeStamp: string;

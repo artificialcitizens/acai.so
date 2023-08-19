@@ -15,7 +15,6 @@ import {
 import './Chat.css';
 import Dropzone from '../Dropzone/Dropzone';
 import { toast } from 'react-toastify';
-import { toastifyError, toastifySuccess } from '../Toast';
 import Linkify from 'react-linkify';
 import {
   GlobalStateContext,
@@ -267,7 +266,7 @@ const Chat: React.FC<ChatProps> = ({
           >
             {messages.map((message) => (
               <Message
-                key={message.sentTime}
+                key={message.sentTime + message.sender}
                 model={{
                   direction: message.direction,
                   position: message.position,

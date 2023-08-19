@@ -10,10 +10,31 @@ export interface ChatHistory {
 export const agentMode = [
   'ava',
   'chat',
-  'writing-assistant',
-  // 'assistant',
+  'create',
+  'help',
   // 'custom',
 ];
+
+export const agentModeUtterances = {
+  ava: [''],
+  chat: [
+    'lets chat',
+    'hey, hows it going?',
+    'Hello!',
+    'I need to talk to someone',
+  ],
+  create: [
+    'make a set of color tokens based on space',
+    'generate a story about a man in the woods',
+    'brainstorm 5 ideas about starting an AI business',
+  ],
+  help: [
+    'summarize this document?',
+    'how can I improve this blogpost?',
+    'what are the key points in this article?',
+  ],
+  // custom: 'Custom',
+};
 
 export type AgentMode = (typeof agentMode)[number];
 

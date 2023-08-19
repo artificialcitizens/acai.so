@@ -16,11 +16,6 @@ export const queryChat = async ({
   modelName: string;
   temperature?: number;
 }): Promise<string> => {
-  console.log({
-    systemMessage,
-    message,
-    modelName,
-  });
   const chat = new ChatOpenAI({
     openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
     modelName,

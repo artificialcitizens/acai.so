@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 import { avaChat } from '../utils/ac-langchain/agents/ava';
-import { toastifyAgentThought, toastifyInfo } from '../components/Toast';
-import { handleCreateTab } from '../state';
+import { toastifyAgentLog } from '../components/Toast';
+import { handleCreateTab, agentModeUtterances } from '../state';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -16,6 +16,7 @@ import {
 import { useActor } from '@xstate/react';
 import { EditorContext } from '../context/EditorContext';
 import { queryAssistant } from '../utils/ac-langchain/agents/assistant';
+import { queryRouterAgent } from '../utils/ac-langchain/agents/router-agent';
 
 export const useAva = (): [
   fetchResponse: (message: string, systemMessage: string) => Promise<string>,
@@ -35,59 +36,30 @@ export const useAva = (): [
         `${chat.type}: ${chat.text}`,
     )
     .join('\n');
+  const formattedActions = Object.entries(agentModeUtterances).map(
+    ([key, value]) => {
+      if (key === 'ava') return;
+
+      return `${key}: \n-${value.join(',\n ')}`;
+    },
+  );
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { editor } = useContext(EditorContext)!;
-
   const queryAva = async (
     message: string,
     systemMessage: string,
   ): Promise<string> => {
     setLoading(true);
-    toastifyInfo('Generating Text');
-    switch (currentAgent.agentMode) {
-      case 'ava': {
-        try {
-          const response = await avaChat({
-            input: message,
-            systemMessage,
-            chatHistory: formattedChatHistory,
-            currentDocument: editor?.getText() || '',
-            callbacks: {
-              handleCreateDocument: async ({
-                title,
-                content,
-              }: {
-                title: string;
-                content: string;
-              }) => {
-                const tab = await handleCreateTab(
-                  { title, content },
-                  workspaceId,
-                );
-                console.log({ tab });
-                globalServices.appStateService.send({
-                  type: 'ADD_TAB',
-                  tab,
-                });
-                setTimeout(() => {
-                  navigate(`/${workspaceId}/${tab.id}`);
-                }, 250);
-              },
-              handleAgentAction: (action) => {
-                const thought = action.log.split('Action:')[0].trim();
-                toastifyAgentThought(thought);
-              },
-            },
-          });
-          return response;
-        } catch (error) {
-          console.log({ error });
-          toastifyInfo('Error generating text');
-          return '';
-        } finally {
-          setLoading(false);
-        }
-      }
+    let mode = currentAgent.agentMode;
+    if (currentAgent.agentMode === 'ava') {
+      const response = await queryRouterAgent({
+        actions: formattedActions.join('\n'),
+        input: message,
+        chatHistory: formattedChatHistory,
+      });
+      mode = response;
+    }
+    switch (mode) {
       case 'chat': {
         const sysMessage = systemMessage
           ? await createCustomPrompt(systemMessage, formattedChatHistory)
@@ -98,9 +70,10 @@ export const useAva = (): [
           message,
           modelName: currentAgent.openAIChatModel,
         });
+        setLoading(false);
         return response;
       }
-      case 'writing-assistant': {
+      case 'help': {
         if (!editor) throw new Error('No editor');
         const prompt = await createWritingPromptTemplate({
           user: 'Josh',
@@ -112,9 +85,46 @@ export const useAva = (): [
           message,
           modelName: currentAgent.openAIChatModel,
         });
+        setLoading(false);
+        return response;
+      }
+      case 'create': {
+        const response = await avaChat({
+          input: message,
+          systemMessage,
+          chatHistory: formattedChatHistory,
+          currentDocument: editor?.getText() || '',
+          callbacks: {
+            handleCreateDocument: async ({
+              title,
+              content,
+            }: {
+              title: string;
+              content: string;
+            }) => {
+              const tab = await handleCreateTab(
+                { title, content },
+                workspaceId,
+              );
+              globalServices.appStateService.send({
+                type: 'ADD_TAB',
+                tab,
+              });
+              setTimeout(() => {
+                navigate(`/${workspaceId}/${tab.id}`);
+              }, 250);
+            },
+            handleAgentAction: (action) => {
+              const thought = action.log.split('Action:')[0].trim();
+              toastifyAgentLog(thought);
+            },
+          },
+        });
+        setLoading(false);
         return response;
       }
       default: {
+        setLoading(false);
         throw new Error(`Unexpected agentMode: ${currentAgent.agentMode}`);
       }
     }
