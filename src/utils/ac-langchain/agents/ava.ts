@@ -15,8 +15,8 @@ import {
   AgentAction,
   AgentFinish,
   AgentStep,
-  BaseChatMessage,
-  HumanChatMessage,
+  BaseMessage,
+  HumanMessage,
   InputValues,
   PartialValues,
 } from 'langchain/schema';
@@ -86,7 +86,7 @@ class CustomPromptTemplate extends BaseChatPromptTemplate {
     return 'chat';
   }
 
-  async formatMessages(values: InputValues): Promise<BaseChatMessage[]> {
+  async formatMessages(values: InputValues): Promise<BaseMessage[]> {
     /** Construct the final template */
     const toolStrings = this.tools
       .map((tool) => `${tool.name}: ${tool.description}`)
@@ -111,10 +111,10 @@ class CustomPromptTemplate extends BaseChatPromptTemplate {
     /** Format the template. */
     const formatted = renderTemplate(template, 'f-string', newInput);
     // console.log({ formatted });
-    return [new HumanChatMessage(formatted)];
+    return [new HumanMessage(formatted)];
   }
 
-  partial(_values: PartialValues): Promise<BasePromptTemplate> {
+  partial(_values: PartialValues): Promise<BaseChatPromptTemplate> {
     throw new Error('Not implemented');
   }
 
@@ -150,6 +150,7 @@ class CustomOutputParser extends AgentActionOutputParser {
     throw new Error('Not implemented');
   }
 }
+
 async function processThought(thought: string) {
   console.log('Processing thought', thought);
   return thought;
