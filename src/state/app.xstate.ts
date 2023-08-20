@@ -97,10 +97,16 @@ export const saveState = (state: IContext) => {
 /**
  * Load state from local storage
  */
-export const loadState = (): IContext | undefined => {
-  const savedState = localStorage.getItem('appState');
-  if (savedState) {
-    return JSON.parse(savedState);
+export const loadState = () => {
+  try {
+    const serializedState = localStorage.getItem('appState');
+    if (serializedState === null) {
+      return null;
+    }
+    return JSON.parse(serializedState);
+  } catch (err) {
+    console.error('Error loading state:', err);
+    return null;
   }
 };
 
@@ -402,6 +408,14 @@ export const appStateMachine = createMachine<IContext, Event>({
     },
   },
 });
+
+// Load state from local storage
+const loadedState = loadState();
+
+// If there is no loaded state, save the initial state
+if (loadedState === null) {
+  saveState(appStateMachine.context);
+}
 
 export const handleCreateTab = async (
   args: { title: string; content: string },

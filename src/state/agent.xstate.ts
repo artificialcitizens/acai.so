@@ -7,12 +7,45 @@ export interface ChatHistory {
   type: 'user' | 'ava';
 }
 
-type AgentContext = {
+export const agentMode = [
+  'ava',
+  'chat',
+  'create',
+  'help',
+  // 'custom',
+];
+
+export const agentModeUtterances = {
+  ava: [''],
+  chat: [
+    'lets chat',
+    'hey, hows it going?',
+    'Hello!',
+    'I need to talk to someone',
+  ],
+  create: [
+    'make a set of color tokens based on space',
+    'generate a story about a man in the woods',
+    'brainstorm 5 ideas about starting an AI business',
+  ],
+  help: [
+    'summarize this document?',
+    'how can I improve this blogpost?',
+    'what are the key points in this article?',
+  ],
+  // custom: 'Custom',
+};
+
+export type AgentMode = (typeof agentMode)[number];
+
+export type AgentContext = {
   id: string;
   loading: boolean;
+  agentMode: AgentMode;
   workspaceId: string;
   systemNotes: string;
   recentChatHistory: ChatHistory[];
+  openAIChatModel: string;
   agentLogs: {
     [key: string]: any;
   };
@@ -39,7 +72,9 @@ type AgentEvent =
       recentChatHistory: ChatHistory[];
     }
   | { type: 'CREATE_AGENT'; workspaceId: string }
-  | { type: 'CLEAR_CHAT_HISTORY'; workspaceId: string };
+  | { type: 'CLEAR_CHAT_HISTORY'; workspaceId: string }
+  | { type: 'SET_OPENAI_CHAT_MODEL'; workspaceId: string; modelName: string }
+  | { type: 'SET_AGENT_MODE'; workspaceId: string; mode: AgentMode };
 
 /**
  * Save AgentWorkspace to local storage
@@ -61,6 +96,8 @@ const loadAgentState = (): AgentWorkspace => {
         id: 'UUIDxyzzd',
         loading: false,
         workspaceId: 'UUIDxyz',
+        agentMode: 'chat',
+        openAIChatModel: 'gpt-4',
         systemNotes: '',
         recentChatHistory: [],
         agentLogs: {},
@@ -77,7 +114,9 @@ export const createAgent = (workspaceId: string): AgentContext => {
     id: workspaceId,
     loading: false,
     workspaceId: workspaceId,
+    agentMode: 'chat',
     systemNotes: '',
+    openAIChatModel: 'gpt-4',
     recentChatHistory: [],
     agentLogs: {},
     agentTools: {},
@@ -223,6 +262,38 @@ export const agentMachine = createMachine<AgentWorkspace, AgentEvent>({
             [event.workspaceId]: {
               ...context[event.workspaceId],
               recentChatHistory: [], // Clear the chat history
+            },
+          };
+          saveAgentState(updatedContext);
+          return updatedContext;
+        }
+        return context;
+      }),
+    },
+    SET_OPENAI_CHAT_MODEL: {
+      actions: assign((context, event) => {
+        if (event.workspaceId && context[event.workspaceId]) {
+          const updatedContext = {
+            ...context,
+            [event.workspaceId]: {
+              ...context[event.workspaceId],
+              openAIChatModel: event.modelName,
+            },
+          };
+          saveAgentState(updatedContext);
+          return updatedContext;
+        }
+        return context;
+      }),
+    },
+    SET_AGENT_MODE: {
+      actions: assign((context, event) => {
+        if (event.workspaceId && context[event.workspaceId]) {
+          const updatedContext = {
+            ...context,
+            [event.workspaceId]: {
+              ...context[event.workspaceId],
+              agentMode: event.mode,
             },
           };
           saveAgentState(updatedContext);

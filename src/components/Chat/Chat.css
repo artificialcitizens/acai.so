@@ -52,6 +52,6 @@
   margin: 0.5rem 0;
 }
 
-.scrollbar-container {
-  @apply bg-base;
+.scrollbar-container .cs-message-list__scroll-wrapper {
+  @apply bg-base absolute;
 }

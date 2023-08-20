@@ -1,4 +1,4 @@
-import { createMachine, assign } from 'xstate';
+import { createMachine, assign, actions } from 'xstate';
 
 interface IContext {
   thoughtsOpen: boolean;
@@ -26,7 +26,8 @@ const loadUIState = (): IContext => {
 // Define the initial context
 const initialContext: IContext = loadUIState();
 
-// Define the machine
+const { pure } = actions;
+
 export const uiMachine = createMachine<IContext>({
   id: 'ui',
   initial: 'idle',
@@ -36,30 +37,39 @@ export const uiMachine = createMachine<IContext>({
   },
   on: {
     TOGGLE_AGENT_THOUGHTS: {
-      actions: assign({
-        thoughtsOpen: (context) => {
-          const updatedState = !context.thoughtsOpen;
-          saveUIState({ ...context, thoughtsOpen: updatedState });
-          return updatedState;
-        },
+      actions: pure((context) => {
+        const updatedState = !context.thoughtsOpen;
+        return [
+          assign({ thoughtsOpen: updatedState }),
+          actions.assign((ctx) => {
+            saveUIState({ ...ctx, thoughtsOpen: updatedState });
+            return ctx;
+          }),
+        ];
       }),
     },
     TOGGLE_SIDE_NAV: {
-      actions: assign({
-        sideNavOpen: (context) => {
-          const updatedState = !context.sideNavOpen;
-          saveUIState({ ...context, sideNavOpen: updatedState });
-          return updatedState;
-        },
+      actions: pure((context) => {
+        const updatedState = !context.sideNavOpen;
+        return [
+          assign({ sideNavOpen: updatedState }),
+          actions.assign((ctx) => {
+            saveUIState({ ...ctx, sideNavOpen: updatedState });
+            return ctx;
+          }),
+        ];
       }),
     },
     TOGGLE_AGENT_CHAT: {
-      actions: assign({
-        agentChatOpen: (context) => {
-          const updatedState = !context.agentChatOpen;
-          saveUIState({ ...context, agentChatOpen: updatedState });
-          return updatedState;
-        },
+      actions: pure((context) => {
+        const updatedState = !context.agentChatOpen;
+        return [
+          assign({ agentChatOpen: updatedState }),
+          actions.assign((ctx) => {
+            saveUIState({ ...ctx, agentChatOpen: updatedState });
+            return ctx;
+          }),
+        ];
       }),
     },
   },

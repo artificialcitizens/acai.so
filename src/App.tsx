@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { Ava } from './components/Ava/Ava';
 import { SideNav } from './components/SideNav/SideNav';
 import { FloatingButton } from './components/FloatingButton/FloatingButton';
@@ -14,8 +14,9 @@ import TipTap from './components/TipTap/TipTap';
 import { Tab } from './state';
 import { VectorStoreContext } from './context/VectorStoreContext';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
-import { useLocalStorageKeyValue } from './hooks/use-local-storage';
 import AudioWaveform from './components/AudioWave/AudioWave';
+import { Editor } from '@tiptap/react';
+import { EditorContext } from './context/EditorContext';
 // import useTypeTag from './hooks/ac-langchain/use-type-tag';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 
@@ -25,18 +26,12 @@ function App() {
   const location = useLocation();
   const workspaceId = location.pathname.split('/')[1];
   const activeTabId = location.pathname.split('/')[2];
-  const [currentWorkspaceId, setCurrentWorkspaceId] = useLocalStorageKeyValue(
-    'current_workspace',
-    '',
-  );
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined,
   );
   const [listening, setListening] = useState<boolean>(false);
-  useEffect(() => {
-    setCurrentWorkspaceId(workspaceId);
-  }, [workspaceId, setCurrentWorkspaceId]);
 
+  const [editor, setEditor] = useState<Editor | null>(null);
   const {
     vectorstore,
     addDocuments,
@@ -61,7 +56,7 @@ function App() {
 
   const workspace =
     globalServices.appStateService.getSnapshot().context.workspaces[
-      currentWorkspaceId
+      workspaceId
     ];
   const activeTab: Tab =
     workspace &&
@@ -77,31 +72,39 @@ function App() {
           filterAndCombineContent,
         }}
       >
-        <SideNav></SideNav>
-        {audioContext && (
-          <AudioWaveform audioContext={audioContext} isOn={listening} />
-        )}
-        <FloatingButton
-          handleClick={(e) => {
-            e.stopPropagation();
-            toggleSideNav();
-          }}
-        />
-        <div
-          className="w-screen h-screen flex flex-col sm:flex-row flex-wrap sm:flex-nowrap flex-grow p-0"
-          onClick={handleWindowClick}
-        >
-          <ToastManager />
-          <main className="w-full flex flex-grow ">
-            <div className="w-full flex flex-col h-screen">
-              <div className="ml-16">
-                {workspace && <h1 className="m-2 text-lg">{workspace.name}</h1>}
+        <EditorContext.Provider value={{ editor, setEditor }}>
+          <SideNav></SideNav>
+          {audioContext && (
+            <AudioWaveform audioContext={audioContext} isOn={listening} />
+          )}
+          <FloatingButton
+            handleClick={(e) => {
+              e.stopPropagation();
+              toggleSideNav();
+            }}
+          />
+          <div
+            className="w-screen h-screen flex flex-col sm:flex-row flex-wrap sm:flex-nowrap flex-grow p-0"
+            onClick={handleWindowClick}
+          >
+            <ToastManager />
+            {/* @TODO: Setup non workspace and tab view */}
+            <main className="w-full flex flex-grow ">
+              <div className="w-full flex flex-col h-screen">
+                <div className="ml-16">
+                  {workspace && (
+                    <h1 className="m-2 text-lg">{workspace.name}</h1>
+                  )}
+                </div>
+                {activeTab && <TipTap tab={activeTab} />}
+                {}
               </div>
-              {activeTab && <TipTap tab={activeTab} />}
-              {}
-            </div>
-            <Ava workspaceId={workspaceId} onVoiceActivation={setListening} />
-            {/* 
+              <Ava
+                workspaceId={workspaceId}
+                onVoiceActivation={setListening}
+                audioContext={audioContext}
+              />
+              {/* 
                 <Whisper
                 onRecordingComplete={(blob) => console.log(blob)}
                 onTranscriptionComplete={async (t) => {
@@ -110,48 +113,15 @@ function App() {
               />
                 <RoomManager />
              */}
-          </main>
-        </div>{' '}
+            </main>
+          </div>{' '}
+        </EditorContext.Provider>
       </VectorStoreContext.Provider>
     )
   );
 }
 
 export default App;
-// const getGeolocation = () => {
-//   if ('geolocation' in navigator) {
-//     navigator.geolocation.getCurrentPosition(
-//       function success(position) {
-//         console.log('latitude', position.coords.latitude, 'longitude', position.coords.longitude);
-//       },
-//       function error(error_message) {
-//         console.log('An error has occured while retrieving location', error_message);
-//       },
-//     );
-//   } else {
-//     console.log('geolocation is not enabled on this browser');
-//   }
-// };
-// useEffect(() => {
-//   getGeolocation();
-// }, []);
-
-// const delay = 100000;
-// useEffect(() => {
-//   let intervalId: NodeJS.Timeout;
-
-//     if (currentState === 'passive') {
-//       intervalId = setInterval(async () => {
-//         const newObservations = await makeObservations(userTranscript, observations);
-//         setObservations(newObservations);
-//       }, delay);
-//     }
-
-//   return () => {
-//     clearInterval(intervalId);
-//   };
-// }, [currentState, delay, userTranscript]);
-
 // const socket = useContext(SocketContext);
 
 // useEffect(() => {

@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useAva } from '../../hooks/use-ava';
 
 import useSpeechRecognition from '../../hooks/use-speech-recognition';
@@ -10,26 +10,38 @@ import ScratchPad from '../ScratchPad/ScratchPad';
 import { TTSState, useVoiceCommands } from './use-voice-command';
 import { useWebSpeechSynthesis } from '../../hooks/use-web-tts';
 import { getToken } from '../../utils/config';
-import { toastifyInfo } from '../Toast';
+import { toastifyError, toastifyInfo } from '../Toast';
+import { useActor } from '@xstate/react';
+import {
+  GlobalStateContextValue,
+  GlobalStateContext,
+} from '../../context/GlobalStateContext';
+import { useLocation } from 'react-router-dom';
+import { ChatHistory } from '../../state';
+import Dropdown from '../DropDown';
 
 interface VoiceRecognitionProps {
+  audioContext?: AudioContext;
   onVoiceActivation: (bool: boolean) => void;
 }
+
 // @TODO: create xstate machine for voice recognition
 const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   onVoiceActivation,
+  audioContext,
 }) => {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [fetchAvaResponse, avaLoading] = useAva();
   const [ttsLoading, setTtsLoading] = useState<boolean>(false);
   const elevenlabsKey = getToken('ELEVENLABS_API_KEY');
+  const [elevenLabsVoice, setElevenLabsVoice] = useState<string>('');
   const [singleCommandMode, setSingleCommandMode] = useState<boolean>(false);
   const [synthesisMode, setSynthesisMode] = useState<
     'bark' | 'elevenlabs' | 'webSpeech'
-  >('bark');
+  >('elevenlabs');
   const [manualTTS, setManualTTS] = useState<string>('');
-
-  const synthesizeElevenLabsSpeech = useElevenlabs();
+  const [listening, setListening] = useState<boolean>(false);
+  const { synthesizeElevenLabsSpeech, voices } = useElevenlabs();
   const synthesizeBarkSpeech = useBark();
   const synthesizeWebSpeech = useWebSpeechSynthesis();
   const {
@@ -39,9 +51,63 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     voiceRecognitionState,
     handleVoiceCommand,
   } = useVoiceCommands();
+  const { agentStateService }: GlobalStateContextValue =
+    useContext(GlobalStateContext);
+  const [state, send] = useActor(agentStateService);
+  const location = useLocation();
+  const workspaceId = location.pathname.split('/')[1];
+  const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
+  const audioRef = React.useRef<HTMLAudioElement>(null);
+  const srcRef = React.useRef<MediaElementAudioSourceNode | null>(null);
+  const gainNodeRef = React.useRef<GainNode | null>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSingleCommandMode(event.target.checked);
+  };
+
+  const handleSpeechChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setListening(event.target.checked);
+  };
+
+  const normalizedAudioElement = async (
+    audioElem: HTMLAudioElement,
+    audioBlob: Blob,
+    audioContext: AudioContext,
+  ) => {
+    if (!srcRef.current) {
+      srcRef.current = audioContext.createMediaElementSource(audioElem);
+    }
+
+    if (!gainNodeRef.current) {
+      gainNodeRef.current = audioContext.createGain();
+    }
+
+    gainNodeRef.current.gain.value = 1.0;
+
+    const arrayBuffer = await audioBlob.arrayBuffer();
+    const decodedData = await audioContext.decodeAudioData(arrayBuffer);
+
+    const decodedBuffer = decodedData.getChannelData(0);
+    const sliceLen = Math.floor(decodedData.sampleRate * 0.05);
+    const averages = [];
+    let sum = 0.0;
+    for (let i = 0; i < decodedBuffer.length; i++) {
+      sum += decodedBuffer[i] ** 2;
+      if (i % sliceLen === 0) {
+        sum = Math.sqrt(sum / sliceLen);
+        averages.push(sum);
+        sum = 0;
+      }
+    }
+    averages.sort((a, b) => a - b);
+    const a = averages[Math.floor(averages.length * 0.95)];
+
+    let gain = 1.0 / a;
+    gain = gain / 10.0;
+    gain = Math.max(gain, 0.02);
+    gain = Math.min(gain, 1);
+
+    gainNodeRef.current!.gain.value = gain;
   };
 
   useEffect(() => {
@@ -51,19 +117,49 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 
   const handleVoiceRecognition = (t: string) => {
     if (!t || t.split(' ').length < 2) return;
+    if (ttsLoading) return;
 
     switch (voiceRecognitionState) {
       case 'voice': {
-        if (!elevenlabsKey) return;
-        synthesizeAndPlay(Promise.resolve(t), 'ava');
+        synthesizeAndPlay(Promise.resolve(t));
         break;
       }
       case 'ava': {
-        const avaResponse = fetchAvaResponse(
-          t,
-          'this is a voice synthesis pipeline, which means I can speak to you and you can respond with your voice.',
-        );
-        synthesizeAndPlay(avaResponse, 'ava');
+        const userChatHistory: ChatHistory = {
+          id: workspaceId,
+          text: t.trim(),
+          timestamp: Math.floor(Date.now() / 1000).toString(),
+          type: 'user',
+        };
+
+        send({
+          type: 'UPDATE_CHAT_HISTORY',
+          agent: {
+            workspaceId: workspaceId,
+            recentChatHistory: [...recentChatHistory, userChatHistory],
+          },
+        });
+        toastifyInfo('Generating Text');
+        const avaResponse = fetchAvaResponse(t, '');
+        synthesizeAndPlay(avaResponse).then(async () => {
+          const response = await Promise.resolve(avaResponse);
+          const assistantChatHistory: ChatHistory = {
+            id: workspaceId,
+            text: response,
+            timestamp: Math.floor(Date.now() / 1000).toString(),
+            type: 'ava',
+          };
+          send({
+            type: 'UPDATE_CHAT_HISTORY',
+            workspaceId: workspaceId,
+            recentChatHistory: [
+              ...recentChatHistory,
+              userChatHistory,
+              assistantChatHistory,
+            ],
+          });
+        });
+
         break;
       }
       case 'notes':
@@ -72,47 +168,51 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     }
   };
 
-  const handleTtsServiceChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    setSynthesisMode(event.target.value as TTSState);
-  };
-
-  const synthesizeAndPlay = async (
-    responsePromise: Promise<string>,
-    voice: string,
-  ) => {
-    if (avaLoading || ttsLoading) return;
+  const synthesizeAndPlay = async (responsePromise: Promise<string>) => {
+    if (ttsLoading) return;
     setTtsLoading(true);
-    const response = await responsePromise;
-    let audioData;
-    toastifyInfo('Generating Audio');
-    if (synthesisMode === 'bark') {
-      audioData = await synthesizeBarkSpeech({
-        inputText: response,
-        voicePreset: undefined,
-      });
-    } else if (synthesisMode === 'elevenlabs' && elevenlabsKey) {
-      audioData = await synthesizeElevenLabsSpeech(response, voice);
-    } else if (synthesisMode === 'webSpeech') {
-      synthesizeWebSpeech(response);
-      setUserTranscript('');
+    try {
+      const response = await responsePromise;
+      let audioData;
+      toastifyInfo('Generating Audio');
+      if (synthesisMode === 'bark') {
+        audioData = await synthesizeBarkSpeech({
+          inputText: response,
+          voicePreset: undefined,
+        });
+      } else if (synthesisMode === 'elevenlabs') {
+        if (!elevenlabsKey) {
+          toastifyError('Missing Elevenlabs API Key');
+          setTtsLoading(false);
+          return;
+        }
+        audioData = await synthesizeElevenLabsSpeech(response, elevenLabsVoice);
+      } else if (synthesisMode === 'webSpeech') {
+        synthesizeWebSpeech(response, () => {
+          setUserTranscript('');
+          setTtsLoading(false);
+        });
+        if (singleCommandMode) setVoiceRecognitionState('idle');
+        return;
+      } else {
+        setTtsLoading(false);
+        return;
+      }
+
+      if (audioData && audioContext && audioRef.current) {
+        const audioBlob = new Blob([audioData], {
+          type: synthesisMode === 'bark' ? 'audio/wav' : 'audio/mpeg',
+        });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        normalizedAudioElement(audioRef.current, audioBlob, audioContext);
+        setAudioSrc(audioUrl);
+      }
+      if (singleCommandMode) {
+        setVoiceRecognitionState('idle');
+      }
+    } catch (error) {
+      toastifyError('Error synthesizing speech');
       setTtsLoading(false);
-      if (singleCommandMode) setVoiceRecognitionState('idle');
-      return;
-    }
-
-    if (audioData) {
-      const audioBlob = new Blob([audioData], {
-        type: synthesisMode === 'bark' ? 'audio/wav' : 'audio/mpeg',
-      });
-      const audioUrl = URL.createObjectURL(audioBlob);
-      setAudioSrc(audioUrl);
-      setUserTranscript('');
-    }
-
-    if (singleCommandMode) {
-      setVoiceRecognitionState('idle');
     }
   };
 
@@ -124,54 +224,110 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   };
 
   // @TODO add a way to turn off voice recognition
-  useSpeechRecognition({ onTranscriptionComplete, active: true });
+  useSpeechRecognition({
+    onTranscriptionComplete,
+    active: !ttsLoading && listening,
+  });
+
+  const handleManualTTS = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    synthesizeAndPlay(Promise.resolve(manualTTS));
+    setManualTTS('');
+  };
+
+  const handleTtsServiceChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setSynthesisMode(event.target.value as TTSState);
+  };
+
+  const options = [
+    { value: 'webSpeech', label: 'Web Speech API' },
+    { value: 'bark', label: 'Bark' },
+    { value: 'elevenlabs', label: 'Elevenlabs' },
+  ];
+
+  const handleDropdownChange = (value: string) => {
+    handleTtsServiceChange({
+      target: { value },
+    } as React.ChangeEvent<HTMLSelectElement>);
+  };
+
+  const handleElevenLabsDropdownChange = (value: string) => {
+    setElevenLabsVoice(value);
+  };
 
   return (
     <div
       className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow`}
     >
-      {audioSrc && (
+      {audioContext && (
         <audio
+          ref={audioRef}
+          className="rounded-full p-2"
           controls
-          src={audioSrc}
+          src={audioSrc ? audioSrc : undefined}
           autoPlay
+          onPlay={() => {
+            srcRef.current!.connect(gainNodeRef.current!);
+            gainNodeRef.current!.connect(audioContext.destination);
+          }}
           onEnded={() => {
-            setTimeout(() => {
-              if (singleCommandMode) setVoiceRecognitionState('idle');
-              setUserTranscript('');
-              setAudioSrc(null);
-              setTtsLoading(false);
-            }, 1000);
+            if (singleCommandMode) setVoiceRecognitionState('idle');
+            setUserTranscript('');
+            setTtsLoading(false);
+            srcRef.current!.disconnect(gainNodeRef.current!);
+            gainNodeRef.current!.disconnect(audioContext.destination);
+          }}
+          onError={() => {
+            toastifyError('Error playing audio');
+            setTtsLoading(false);
+            srcRef.current!.disconnect(gainNodeRef.current!);
+            gainNodeRef.current!.disconnect(audioContext.destination);
           }}
         />
       )}
-      <select
-        className="bg-base text-dark font-medium p-1 mb-2"
-        value={synthesisMode}
-        onChange={handleTtsServiceChange}
-      >
-        <option className="text-light" value="webSpeech">
-          Web Speech API
-        </option>
-        <option className="text-light" value="bark">
-          Bark
-        </option>
-        <option className="text-light" value="elevenlabs">
-          Elevenlabs
-        </option>
-      </select>
-      <span className="flex mb-2">
-        <label className="text-light ml-2" htmlFor="singleCommandMode">
-          Single Command Mode
-        </label>
-        <input
-          className="mx-1"
-          type="checkbox"
-          id="singleCommandMode"
-          name="option"
-          checked={singleCommandMode}
-          onChange={handleChange}
+      <span className="flex">
+        <Dropdown
+          label="Synthesis Mode"
+          options={options}
+          value={synthesisMode}
+          onChange={handleDropdownChange}
         />
+        {synthesisMode === 'elevenlabs' && (
+          <Dropdown
+            label="Voice"
+            options={voices}
+            value={elevenLabsVoice || voices?.[0]?.value || ''}
+            onChange={handleElevenLabsDropdownChange}
+          />
+        )}
+        <span className="flex mb-2 items-start">
+          <label className="text-light ml-2" htmlFor="singleCommandMode">
+            Single Command
+          </label>
+          <input
+            className="mx-1 mt-[0.25rem]"
+            type="checkbox"
+            id="singleCommandMode"
+            name="option"
+            checked={singleCommandMode}
+            onChange={handleChange}
+          />
+        </span>
+        <span className="flex mb-2 items-start">
+          <label className="text-light ml-2" htmlFor="singleCommandMode">
+            Speech Recognition
+          </label>
+          <input
+            className="mx-1 mt-[0.25rem]"
+            type="checkbox"
+            id="singleCommandMode"
+            name="option"
+            checked={listening}
+            onChange={handleSpeechChange}
+          />
+        </span>
       </span>
       <ScratchPad
         placeholder="User Transcript"
@@ -181,17 +337,19 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
       />
       <form
         className="text-light w-full flex flex-col flex-grow my-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          synthesizeAndPlay(Promise.resolve(manualTTS), 'ava');
-          setManualTTS('');
-        }}
+        onSubmit={handleManualTTS}
       >
         <textarea
           placeholder="Manual TTS"
           className="rounded bg-base text-light p-4"
           value={manualTTS}
           onChange={(e) => setManualTTS(e.target.value)}
+          onKeyDown={(e: any) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleManualTTS(e);
+            }
+          }}
         />
         <button type="submit">Submit</button>
       </form>

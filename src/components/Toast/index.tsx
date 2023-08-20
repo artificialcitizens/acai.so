@@ -64,11 +64,15 @@ export const toastifyDefault = (msg: string) => {
   });
 };
 
-export const toastifyAgentThought = (msg: string) => {
+// @TODO: Update to use meta tag for filtering logs
+/**
+ * Sends an invisible toast to the notification manager to display as log
+ */
+export const toastifyAgentLog = (msg: string, metaTag?: string) => {
   return toast(msg, {
     className: 'toast-agent-thought',
     position: 'top-right',
-    data: { type: 'agent-thought' },
+    data: { type: 'agent-thought', metaTag },
     toastId: `agent-thought-${Date.now()}`,
   });
 };

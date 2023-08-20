@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import isEqual from 'lodash.isequal';
 
 export const useDeepCompare = (value: any) => {

@@ -15,7 +15,6 @@ import {
 import './Chat.css';
 import Dropzone from '../Dropzone/Dropzone';
 import { toast } from 'react-toastify';
-import { toastifyError, toastifySuccess } from '../Toast';
 import Linkify from 'react-linkify';
 import {
   GlobalStateContext,
@@ -53,6 +52,7 @@ const Chat: React.FC<ChatProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [msgInputValue, setMsgInputValue] = useState(startingValue);
   const [state, send] = useActor(agentStateService);
+
   const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
   const [messages, setMessages] = useState<any[]>(
     recentChatHistory.map((history: ChatHistory) => {
@@ -117,7 +117,7 @@ const Chat: React.FC<ChatProps> = ({
       };
 
       send({
-        type: 'UPDATE',
+        type: 'UPDATE_CHAT_HISTORY',
         agent: {
           workspaceId: workspaceId,
           recentChatHistory: [...recentChatHistory, userChatHistory],
@@ -266,7 +266,7 @@ const Chat: React.FC<ChatProps> = ({
           >
             {messages.map((message) => (
               <Message
-                key={message.sentTime}
+                key={message.sentTime + message.sender}
                 model={{
                   direction: message.direction,
                   position: message.position,
