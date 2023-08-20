@@ -28,7 +28,7 @@ import { Embeddings } from 'langchain/embeddings/base';
 import {
   createColorTokens,
   mapColorsToEvents,
-} from '../chains/document/design-token-chain';
+} from '../chains/design-token-chain';
 import { OpenAI } from 'langchain/llms/openai';
 import { getToken } from '../../config';
 import { timestampToHumanReadable } from '../../data-utils';
@@ -41,9 +41,11 @@ import { queryChat } from './chat-model';
 import { queryAssistant } from './assistant';
 
 const PREFIX = `###IGNORE PRIOR INSTRUCTIONS:
-You are an intelligent digital worker and you must determine the best way to complete the task at hand.
+You are an intelligent digital worker and you must use the research tools to research the users query
+and then you must use the create-document tool to send the information to the user.
 ###########
 You must use one of the following tools for your response:`;
+
 const formatInstructions = (
   toolNames: string,
 ) => `YOU MUST USE THE FOLLOWING FORMAT FOR YOUR OUTPUT:
@@ -56,6 +58,7 @@ Observation: the result of the action
 ... (this Thought/Action/Action Input/Observation can repeat N times)
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question`;
+
 const SUFFIX = `YOUR REPLIES MUST USE THE ABOVE FORMAT FORMAT SO THAT IT
 CAN BE PARSED WITH: /Action: (.*)\nAction Input: (.*)/s
 #################
@@ -99,6 +102,12 @@ class CustomPromptTemplate extends BaseChatPromptTemplate {
       .join('\n');
     const toolNames = this.tools.map((tool) => tool.name).join('\n');
     const instructions = formatInstructions(toolNames);
+    console.log('ava-formatMessages', {
+      toolStrings,
+      instructions,
+      values,
+      toolNames,
+    });
     const template = [PREFIX, toolStrings, instructions, SUFFIX].join('\n\n');
     /** Construct the agent_scratchpad */
     const intermediateSteps = values.intermediate_steps as AgentStep[];
@@ -158,27 +167,21 @@ class CustomOutputParser extends AgentActionOutputParser {
   }
 }
 
-async function processThought(thought: string) {
-  console.log('Processing thought', thought);
-  return thought;
-}
-async function humanFeedback(question: string) {
-  const answer = prompt(question);
-  return answer || "Josh didn't respond in time, use your best judgement";
-}
-
+let chatModel: ChatOpenAI;
+let model: OpenAI;
+let embeddings: Embeddings;
 const createModels = (apiKey: string) => {
-  // @TODO create a smart and fast model
-  const chatModel = new ChatOpenAI({
+  if (chatModel && model && embeddings) return { chatModel, model, embeddings };
+  chatModel = new ChatOpenAI({
     openAIApiKey: apiKey,
     modelName: 'gpt-4-0314',
-    temperature: 0.2,
+    temperature: 0.1,
   });
-  const model = new OpenAI({
+  model = new OpenAI({
     openAIApiKey: apiKey,
     temperature: 0.3,
   });
-  const embeddings = new OpenAIEmbeddings({
+  embeddings = new OpenAIEmbeddings({
     openAIApiKey: apiKey,
   });
   return { chatModel, model, embeddings };
@@ -187,23 +190,15 @@ const createModels = (apiKey: string) => {
 const tools = [
   new Calculator(),
   new DynamicTool({
-    name: 'Human Feedback',
+    name: 'human-input',
     description: `Use this tool for when you need a specific piece of information from a human that only that human would know. 
     Input is a short question for the human and the output is the humans response`,
-    func: humanFeedback,
+    func: async (question: string) => {
+      const answer = prompt(question);
+      return answer || "Josh didn't respond in time, use your best judgement";
+    },
   }),
 ];
-
-const createDocumentTool = (callback: any) => {
-  return new DynamicTool({
-    name: 'Create Document',
-    description: `Use this tool any time Josh wants you to create a document or report, etc. 
-    Input is <title>Title</title> <content>Content</content>
-    DO NOT INCLUDE THIS INFORMATION IN THE RESPONSE, JOSH WILL GET IT AUTOMATICALLY
-    `,
-    func: callback,
-  });
-};
 
 const createLlmChain = (
   model: any,
@@ -277,71 +272,49 @@ const createAgentArtifacts = ({
   google.description =
     'For when you need to find or search information for Josh, you can use this to search Google for the results. Input is query to search for and output is results.';
 
-  const search = async (url: string) => {
-    const targetUrl = encodeURIComponent(url);
-    const result = await browser.call(
-      `http://localhost:3000/proxy?url=${targetUrl}`,
-    );
-    return result;
-  };
-
-  const documentTool = createDocumentTool((input: string) => {
-    const titleRegex = /<title>(.*?)<\/title>/s;
-    const titleMatch = titleRegex.exec(input);
-    const title = titleMatch ? titleMatch[1] : ''; // extracts 'Title'
-
-    const contentRegex = /<content>(.*?)<\/content>/s;
-    const contentMatch = contentRegex.exec(input);
-    const content = contentMatch ? contentMatch[1] : ''; // extracts 'Content'
-
-    handleCreateDocument({ title, content });
-  });
-
-  const writingAssistantTool = new DynamicTool({
-    name: 'Answer Questions about "this" document or writing',
-    description: `THIS TOOL HAS ACCESS TO ANY DOCUMENTS THE USER WANTS TO KNOW ABOUT. Use this to perform tasks with the document the user is working on, such as summarization or Q&A
-    Input is the user request for the document and output is the response.
+  const documentTool = new DynamicTool({
+    name: 'create-document-or-report',
+    description: `Use this tool any time Josh wants you to create a document or report, etc. 
+    Input is <title>Title</title> <content>Content</content>
+    DO NOT INCLUDE THIS INFORMATION IN THE RESPONSE, JOSH WILL GET IT AUTOMATICALLY
     `,
     func: async (input: string) => {
-      if (!currentDocument) {
-        return 'No document found, please navigate to the document you want to get suggestions for.';
-      }
-      const prompt = await createWritingPromptTemplate({
-        user: 'Josh',
-        document: currentDocument || '',
-        chatHistory,
-      });
-      const response = await queryAssistant({
-        systemMessage: prompt,
-        message: input,
-        modelName: 'gpt-3.5-turbo-16k',
-      });
-      return response;
+      const titleRegex = /<title>(.*?)<\/title>/s;
+      const titleMatch = titleRegex.exec(input);
+      const title = titleMatch ? titleMatch[1] : ''; // extracts 'Title'
+
+      const contentRegex = /<content>(.*?)<\/content>/s;
+      const contentMatch = contentRegex.exec(input);
+      const content = contentMatch ? contentMatch[1] : ''; // extracts 'Content'
+
+      handleCreateDocument({ title, content });
+      // @TODO: update to return url to document
+      return "I've created the document for you.";
     },
     returnDirect: true,
   });
 
-  const chatTool = new DynamicTool({
-    name: 'Talk to User',
-    description:
-      'For when the user wants to chat. Input is the user message and output is the response.',
-    func: async (input: string) => {
-      const sysMessage = systemMessage
-        ? await createCustomPrompt(systemMessage, chatHistory)
-        : // @TODO: Update once user profile is implemented
-          await createAvaChatPrompt('Josh', chatHistory);
-      const response = await queryChat({
-        systemMessage: sysMessage,
-        message: input,
-        modelName: 'gpt-3.5-turbo',
-      });
-      return response;
-    },
-    returnDirect: true,
-  });
+  // const chatTool = new DynamicTool({
+  //   name: 'Talk to User',
+  //   description:
+  //     'For when the user wants to chat. Input is the user message and output is the response.',
+  //   func: async (input: string) => {
+  //     const sysMessage = systemMessage
+  //       ? await createCustomPrompt(systemMessage, chatHistory)
+  //       : // @TODO: Update once user profile is implemented
+  //         await createAvaChatPrompt('Josh', chatHistory);
+  //     const response = await queryChat({
+  //       systemMessage: sysMessage,
+  //       message: input,
+  //       modelName: 'gpt-3.5-turbo',
+  //     });
+  //     return response;
+  //   },
+  //   returnDirect: true,
+  // });
 
   const colorTool = new DynamicTool({
-    name: 'Create Color Token Document',
+    name: 'create-color-tokens',
     description: `Use this tool to create color tokens based on a given description from the user.
     Examples Inputs: A palette of colors inspired by the beach,
       A palette of neutral colors to compliment #df1642 and #ef3de5
@@ -352,31 +325,32 @@ const createAgentArtifacts = ({
     `,
     func: async (string: string): Promise<string> => {
       const colorTokens = await createColorTokens(string, model);
-      // showing a an example of how to map the colors to xstate events
+      // showing an example of how to map the colors to xstate events
       // const colorTokenEvent = mapColorsToEvents(colorTokens);
       const colorString = Object.entries(colorTokens)
         .map(([key, value]) => `${key}: ${value}`)
         .join('\n');
-      try {
-        //@TODO: return the document and workspace id to point the user to the document
-        // create option for whether to navigate to the document or not
-        handleCreateDocument({
-          title: 'Color Tokens',
-          content: '```\n' + colorString + '\n```',
-        });
-        return 'success';
-      } catch (error) {
-        console.log({ error });
-        return 'error: ' + JSON.stringify(error);
-      }
-
-      // return colorString;
+      // @TODO: return the document and workspace id to point the user to the document
+      // create option for whether to navigate to the document or not
+      handleCreateDocument({
+        title: 'Color Tokens',
+        content: '```\n' + colorString + '\n```',
+      });
+      return 'success';
     },
     returnDirect: true,
   });
 
+  const search = async (url: string) => {
+    const targetUrl = encodeURIComponent(url);
+    const proxyUrl =
+      getToken('PROXY_SERVER_URL') || import.meta.env.VITE_PROXY_SERVER_URL;
+    const result = await browser.call(`${proxyUrl}/proxy?url=${targetUrl}`);
+    return result;
+  };
+
   const searchTool = new DynamicTool({
-    name: 'Website Browser',
+    name: 'website-browser',
     description: `Use this tool to search a website for information. 
     Input is the full url of the website you want to search.
     for example: https://www.google.com/
@@ -385,36 +359,37 @@ const createAgentArtifacts = ({
     func: search,
   });
 
-  // @TODO: update if settings for tool && tool is pushed
+  // @TODO: update tools to be dynamic based on settings
   // setting.searchTool && tools.push(searchTool);
+  tools.push(searchTool);
   // tools.push(writingAssistantTool);
+  // tools.push(chatTool);
   tools.push(documentTool);
   tools.push(google);
   tools.push(colorTool);
-  tools.push(chatTool);
 
   const executor = new AgentExecutor({
     agent,
     tools,
   });
 
-  // @TODO: Update to refine logs
+  // @TODO: Update to create more log data
   const handler = BaseCallbackHandler.fromMethods({
     handleLLMStart(llm, _prompts: string[]) {
-      // console.log("handleLLMStart: I'm the second handler!!", { llm });
+      console.log("handleLLMStart: I'm the second handler!!", { llm });
     },
     handleChainStart(chain) {
-      // console.log("handleChainStart: I'm the second handler!!", { chain });
+      console.log("handleChainStart: I'm the second handler!!", { chain });
     },
     handleAgentAction(action) {
       console.log('handleAgentAction', action);
       handleAgentAction(action);
     },
     handleToolStart(tool) {
-      // console.log('handleToolStart', { tool });
+      console.log('handleToolStart', { tool });
     },
     handleToolEnd(tool) {
-      // console.log('handleToolEnd', { tool });
+      console.log('handleToolEnd', { tool });
     },
   });
 
@@ -455,17 +430,6 @@ export const avaChat = async ({
     currentDocument,
     callbacks,
   });
-  try {
-    const result = await executor.call({ input }, [handler]);
-    return result.output;
-  } catch (error: any) {
-    // try it again
-    if (error.message.startsWith('Could not parse LLM output:')) {
-      console.log('first llm parsing error', error);
-      const result = await executor.call({ input }, [handler]);
-      return result.output;
-    } else {
-      throw error;
-    }
-  }
+  const result = await executor.call({ input }, [handler]);
+  return result.output;
 };

@@ -30,7 +30,7 @@ export const useAva = (): [
   const navigate = useNavigate();
   const [state] = useActor(globalServices.agentStateService);
   const currentAgent = state.context[workspaceId];
-  const formattedChatHistory = currentAgent.recentChatHistory
+  const formattedChatHistory = currentAgent?.recentChatHistory
     .map(
       (chat: { type: 'ava' | 'user'; text: string }) =>
         `${chat.type}: ${chat.text}`,
@@ -61,6 +61,7 @@ export const useAva = (): [
     }
     switch (mode) {
       case 'chat': {
+        // if the user has a custom prompt we override the system prompt
         const sysMessage = systemMessage
           ? await createCustomPrompt(systemMessage, formattedChatHistory)
           : // @TODO: Update once user profile is implemented
@@ -102,6 +103,10 @@ export const useAva = (): [
               title: string;
               content: string;
             }) => {
+              console.log('create document', {
+                title,
+                content,
+              });
               const tab = await handleCreateTab(
                 { title, content },
                 workspaceId,

@@ -48,14 +48,14 @@ export const ChatModelDropdown: React.FC<ChatModelProps> = ({
       <Dropdown
         label="Chat Model"
         options={openAIModels.map((model) => ({ value: model, label: model }))}
-        value={state.context[workspaceId].openAIChatModel}
+        value={state.context[workspaceId]?.openAIChatModel || ''}
         onChange={handleModelChange}
       />
 
       <Dropdown
         label="Agent Mode"
         options={agentMode.map((mode) => ({ value: mode, label: mode }))}
-        value={state.context[workspaceId].agentMode}
+        value={state.context[workspaceId]?.agentMode || ''}
         onChange={handleModeChange}
       />
     </span>

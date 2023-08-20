@@ -19,6 +19,7 @@ import { Tab } from '../../state';
 import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
 import ChatModelDropdown from '../ChatSettings';
+import { SocketManager } from '../SocketManager';
 
 interface AvaProps {
   workspaceId: string;
@@ -100,6 +101,8 @@ export const Ava: React.FC<AvaProps> = ({
       </ExpansionPanel>
       <ExpansionPanel title="Settings">
         <TokenManager />
+        <hr />
+        <ChatModelDropdown workspaceId={workspaceId} />
         <ScratchPad
           placeholder="Custom Prompt"
           content={systemNotes}
@@ -111,7 +114,7 @@ export const Ava: React.FC<AvaProps> = ({
             });
           }}
         />
-        <ChatModelDropdown workspaceId={workspaceId} />
+        <SocketManager />
       </ExpansionPanel>
       <ExpansionPanel
         title="Logs"

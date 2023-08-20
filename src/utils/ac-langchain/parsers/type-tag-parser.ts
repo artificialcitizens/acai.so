@@ -39,8 +39,7 @@ export const convertJsonToTagTypeString = (data: TagExampleJSON): string => {
  * Creates a prompt example based on the passed in tags and examples.
  */
 export const typeTagExampleSystemPrompt = `###### Ignore all prior instructions
-you are tasked with creating examples for a language model you expand 
-on this example for a language model to use as an example. The idea is 
+you are tasked with creating examples for a language model by expanding on this example. The idea is 
 that the tags could appear anywhere in the content and then the model 
 will need to wrap the appropriate content in the appropriate tags. 
 for example:

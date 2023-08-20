@@ -6,6 +6,10 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
+/**
+ *
+ * @returns a list of all available OpenAI chat models
+ */
 export const getOpenAIChatModels = async () => {
   const response = await openai.listModels();
   const models = response.data;

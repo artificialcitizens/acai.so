@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { Ava } from './components/Ava/Ava';
 import { SideNav } from './components/SideNav/SideNav';
 import { FloatingButton } from './components/FloatingButton/FloatingButton';
@@ -122,40 +122,6 @@ function App() {
 }
 
 export default App;
-// const getGeolocation = () => {
-//   if ('geolocation' in navigator) {
-//     navigator.geolocation.getCurrentPosition(
-//       function success(position) {
-//         console.log('latitude', position.coords.latitude, 'longitude', position.coords.longitude);
-//       },
-//       function error(error_message) {
-//         console.log('An error has occured while retrieving location', error_message);
-//       },
-//     );
-//   } else {
-//     console.log('geolocation is not enabled on this browser');
-//   }
-// };
-// useEffect(() => {
-//   getGeolocation();
-// }, []);
-
-// const delay = 100000;
-// useEffect(() => {
-//   let intervalId: NodeJS.Timeout;
-
-//     if (currentState === 'passive') {
-//       intervalId = setInterval(async () => {
-//         const newObservations = await makeObservations(userTranscript, observations);
-//         setObservations(newObservations);
-//       }, delay);
-//     }
-
-//   return () => {
-//     clearInterval(intervalId);
-//   };
-// }, [currentState, delay, userTranscript]);
-
 // const socket = useContext(SocketContext);
 
 // useEffect(() => {

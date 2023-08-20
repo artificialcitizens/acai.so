@@ -71,6 +71,15 @@ export function baseEncode(text: string): string {
   return encodeURIComponent(base64);
 }
 
+export const convertImageToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(file);
+  });
+};
+
 // Helper function to slugify a string
 export function slugify(str: string) {
   return str

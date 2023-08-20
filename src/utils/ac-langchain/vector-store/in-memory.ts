@@ -34,6 +34,7 @@ export const addDocumentsToMemoryVectorStore = async (
 export const similaritySearchInMemoryVectorStore = async (
   vectorStore: MemoryVectorStore,
   query: string,
+  /** Returns top k relevant documents from the search */
   k = 4,
   filter?: (doc: Document<Record<string, any>>) => boolean,
 ): Promise<Document<Record<string, any>>[]> => {
