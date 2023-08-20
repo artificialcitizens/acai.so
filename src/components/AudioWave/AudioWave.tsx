@@ -24,7 +24,12 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({
 
     if (audioContext) {
       const analyser = audioContext.createAnalyser();
-
+      if (!navigator.mediaDevices) {
+        console.warn(
+          'No media devices found, please enable audio access if you want to use the voice synthesis',
+        );
+        return;
+      }
       navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
         const source = audioContext.createMediaStreamSource(stream);
         source.connect(analyser);
