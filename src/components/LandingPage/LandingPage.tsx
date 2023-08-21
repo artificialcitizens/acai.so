@@ -3,43 +3,54 @@ import screenshot from '../../assets/app-screenshot.png';
 import './LandingPage.css'; // import the CSS file
 
 const tagLines = [
-  'Acai is an AI powered super tool',
-  'Acai compliments your workflow',
-  'Acai expands your capabilities',
-  'Acai is your personal assistant',
-  'Acai empowers you to do more',
+  'ACAI is an AI powered super tool',
+  'ACAI compliments your workflow',
+  'ACAI expands your capabilities',
+  'ACAI is your personal assistant',
+  'ACAI empowers you to do more',
   // Add more taglines as needed
 ];
 
-const LandingPage: React.FC = () => {
-  const [tagLineIndex, setTagLineIndex] = useState(0);
+interface LandingPageProps {
+  singleTagline?: boolean;
+}
+
+const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
+  const [tagLineIndex, setTagLineIndex] = useState(
+    Math.floor(Math.random() * tagLines.length),
+  );
   const [wordIndex, setWordIndex] = useState(0);
   const [isTaglineComplete, setIsTaglineComplete] = useState(false);
 
   const timers = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
+    if (singleTagline && isTaglineComplete) return; // If singleTagline is true and the tagline is complete, stop the effect
+
     timers.current.push(
       setTimeout(() => {
         setWordIndex((prevIndex) => prevIndex + 1);
       }, 500),
-    ); // Adjust speed as needed
+    );
 
     if (wordIndex === tagLines[tagLineIndex].split(' ').length) {
       setIsTaglineComplete(true);
       timers.current.forEach(clearTimeout);
       timers.current = [];
-      timers.current.push(
-        setTimeout(() => {
-          setTagLineIndex((prevIndex) => (prevIndex + 1) % tagLines.length);
-          setWordIndex(0);
-          setIsTaglineComplete(false);
-        }, 2000),
-      ); // Fade-out animation duration
+      if (!singleTagline) {
+        // Only update the tagline if singleTagline is false
+        timers.current.push(
+          setTimeout(() => {
+            setTagLineIndex((prevIndex) => (prevIndex + 1) % tagLines.length);
+            setWordIndex(0);
+            setIsTaglineComplete(false);
+          }, 5000),
+        );
+      }
     }
 
     return () => timers.current.forEach(clearTimeout);
-  }, [wordIndex, tagLineIndex]);
+  }, [wordIndex, tagLineIndex, singleTagline, isTaglineComplete]);
 
   return (
     <div className="relative bg-gradient-to-b from-darker to-acai-darker h-screen w-screen m-0 flex flex-col items-center justify-center text-white">
