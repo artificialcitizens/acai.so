@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './LandingPage.css'; // import the CSS file
+import berry from '../../assets/acai-dot.png';
 
 const tagLines = [
   'Your AI toolkit',
@@ -73,35 +74,45 @@ const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
   }, [wordIndex, tagLineIndex, singleTagline, isTaglineComplete]);
 
   return (
-    <div className="relative bg-gradient-to-b from-darker to-acai-darker h-screen w-screen m-0 flex flex-col  text-white p-4 items-center justify-center">
-      <h1 className="text-2xl md:text-5xl mb-2 z-10">acai</h1>
-      <p className="mb-8 font-medium text-xs md:text-sm">powered by AVA</p>
-      <div className="relative bg-darker rounded-3xl overflow-hidden w-3/4 h-3/4 z-10 shadow-lg">
-        <img
-          src={''}
-          alt="App Screenshot"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-darker to-acai-darker bg-opacity-100 flex items-start justify-start p-8 md:p-2 md:items-center md:justify-center transition-opacity duration-500 group-hover:opacity-0">
-          <p className="text-2xl md:text-4xl text-white">
-            {tagLines[tagLineIndex].split(' ').map((word, index) => (
-              <span
-                key={index}
-                className={index < wordIndex ? 'fade-in' : 'fade-out'}
-                style={{
-                  visibility:
-                    index < wordIndex || isTaglineComplete
-                      ? 'visible'
-                      : 'hidden',
-                }}
-              >
-                {word}{' '}
-              </span>
-            ))}
-          </p>
+    <>
+      <nav className="w-screen bg-darker h-8">
+        {/* <img src={berry} alt="acai logo" className="w-8 h-8 p-2 relative" /> */}
+      </nav>
+      <div className="text-acai-white relative bg-gradient-to-b from-darker to-acai-darker h-screen w-screen m-0 flex flex-col p-4 items-center justify-start">
+        <span className="flex items-center">
+          <h1 className="text-2xl text-acai-white md:text-4xl font-bold mb-0 z-10">
+            acai
+          </h1>
+          {/* <img src={berry} alt="acai logo" className="w-8 h-8 relative" /> */}
+        </span>
+        <p className="mb-8 font-medium text-xs md:text-xs">powered by AVA</p>
+        <div className="relative bg-darker rounded-3xl overflow-hidden w-3/4 h-3/4 z-10 shadow-lg">
+          <img
+            src={''}
+            alt="App Screenshot"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-darker to-acai-darker bg-opacity-100 flex items-start justify-start p-8 md:p-2 md:items-center md:justify-center transition-opacity duration-500 group-hover:opacity-0">
+            <p className="text-2xl md:text-4xl text-acai-white">
+              {tagLines[tagLineIndex].split(' ').map((word, index) => (
+                <span
+                  key={index}
+                  className={index < wordIndex ? 'fade-in' : 'fade-out'}
+                  style={{
+                    visibility:
+                      index < wordIndex || isTaglineComplete
+                        ? 'visible'
+                        : 'hidden',
+                  }}
+                >
+                  {word}{' '}
+                </span>
+              ))}
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
