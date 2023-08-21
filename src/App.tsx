@@ -8,7 +8,7 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from './context/GlobalStateContext';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ToastManager from './components/Toast';
 import TipTap from './components/TipTap/TipTap';
 import { Tab } from './state';
@@ -24,7 +24,14 @@ function App() {
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const location = useLocation();
+  const navigate = useNavigate();
+  // if there is no workspace id in the url, redirect to welcome page
   const workspaceId = location.pathname.split('/')[1];
+  const workspace =
+    globalServices.appStateService.getSnapshot().context.workspaces[
+      workspaceId
+    ];
+  if (!workspace) navigate('/docs/welcome');
   const activeTabId = location.pathname.split('/')[2];
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined,
@@ -54,10 +61,6 @@ function App() {
     }
   };
 
-  const workspace =
-    globalServices.appStateService.getSnapshot().context.workspaces[
-      workspaceId
-    ];
   const activeTab: Tab =
     workspace &&
     workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId);
@@ -122,44 +125,3 @@ function App() {
 }
 
 export default App;
-// const socket = useContext(SocketContext);
-
-// useEffect(() => {
-//   if (!socket) return;
-
-//   const handleConnect = () => console.log(`Connected: ${socket.id}`);
-//   const handleMessage = (message: string) => console.log(message);
-//   const handleDisconnect = () => console.log(`Disconnected: ${socket.id}`);
-
-//   // const handleAgentObservation = (observation: { content: string }) => {
-//   //   // setCurrentTool(observation.content);
-//   //   // const thought = observation.log.split('Observation:')[0].trim();
-//   //   toastifyAgentObservation(observation.content);
-//   // };
-
-//   socket.on('connect', handleConnect);
-//   socket.on('message', handleMessage);
-//   socket.on('disconnect', handleDisconnect);
-//   socket.on('create-tab', (data) =>
-//     handleCreateTab({ title: data.title, content: data.content }, send, workspace.id),
-//   );
-
-//   return () => {
-//     socket.off('connect', handleConnect);
-//     socket.off('message', handleMessage);
-//     socket.off('disconnect', handleDisconnect);
-//     socket.off('create-tab', (data) =>
-//       handleCreateTab({ title: data.title, content: data.content }, send, workspace.id),
-//     );
-//   };
-
-//   // HERE IS HOW TO USE TOOLS VIA SOCKET BY HAVING THE TOOL SEND THE ACTION THROUGH SOCKET
-//   // socket.on('agent-action', (action: string) => {
-//   //   console.log('agent-action', action);
-//   //   if (action === 'start-listening') {
-//   //     setAvaListening(true);
-//   //   } else if (action === 'stop-listening') {
-//   //     setAvaListening(false);
-//   //   }
-//   // });
-// }, [send, socket, workspace]); // specify the dependencies here

@@ -115,34 +115,93 @@ export const appStateMachine = createMachine<IContext, Event>({
   id: 'appState',
   initial: 'idle',
   context: loadState() || {
-    userName: 'Josh Mabry',
     activeWorkspaceId: 'UUIDxyz',
     activeTabId: 'UUIDabc',
     currentLocation: '',
     localTime: timestampToHumanReadable(),
     workspaces: {
-      UUIDxyz: {
-        id: 'UUIDxyz',
-        name: 'Ava',
+      docs: {
+        id: 'docs',
+        name: 'acai.so',
         createdAt: timestampToHumanReadable(),
         lastUpdated: timestampToHumanReadable(),
         private: true,
-        settings: {
-          webSpeechRecognition: true,
-          tts: false,
-          whisper: false,
-        },
         data: {
           tiptap: {
             tabs: [
               {
-                id: 'UUIDabc',
-                title: 'Meet Ava',
+                id: 'welcome',
+                title: 'Welcome to acai.so 🟣',
                 filetype: 'markdown',
-                content: "Hello I'm Ava, your automated virtual assistant.",
+                content: `# Welcome
+                
+                Welcome to acai.so, the AI supertool.        
+                acai.so is a collection of NLU, NLP, and AI tools that work together to accelerate your learning, productivity, and creativity.
+
+                With acai.so, you can create individual workspaces to organize your thoughts, ideas, and projects. Each workspace has it's own instance of document editor, chat interface, and an automated virtual assistant (AVA) that can help you create, edit, and organize your documents, as well as answer questions, summarize, and more.
+
+                ⚠️ Please note: This is an early alpha preview build and is not yet ready for production use. Things can and will break.
+                Please report any bugs or issues to link to our [Github issues](https://github.com/artificialcitizens/acai.so/issues).
+                
+                Thanks for helping make acai.so better for everyone!
+                `,
                 isContext: false,
                 systemNote: '',
-                workspaceId: 'UUIDxyz',
+                workspaceId: 'docs',
+                createdAt: timestampToHumanReadable(),
+                lastUpdated: timestampToHumanReadable(),
+              },
+              {
+                id: 'getting-started',
+                title: 'Getting Started',
+                filetype: 'markdown',
+                content: `# Getting Started
+                
+                acai.so consists of two main modules:
+
+                - AVA
+                - Document Editor
+
+                ## AVA
+                
+                AVA is your automated virtual assistant. By using a decoupled system and event driven actions, AVA has knowledge of all the data in acai.so, as well as the ability to interact with the UI to create documents, activate tabs, and much more.
+                
+                ### Submodules
+
+                Ava has several submodules that combine to create a powerful agentic system. These submodules are:
+                - Knowledge (WIP) - this allows the user to upload documents for AVA to reference while answering questions or creating content.
+                - Voice Synthesis - this allows for verbal communication with AVA and leverages various text-to-speech and speech-to-text APIs to synthesize and understand speech.
+                - Chat - this allows for text-based communication with AVA and leverages various NLU and NLP APIs to understand and respond to text. This is the main interface for interacting with AVA.
+
+                ## Document Editor
+
+                ⚠️ This is still a work in progress and a lot of the functionality is currently in development.
+
+                The document editor is a powerful tool for creating, editing, and organizing documents. It is built on top of the [tiptap](https://www.tiptap.dev/) editor and is an AI powered open source alternative to Notion, Roam, and other document editors.
+                By giving Ava access to the document editor, you can use AVA to create and edit documents, as well as answer questions about the document, summarize, and more.
+                
+                `,
+                isContext: false,
+                systemNote: '',
+                workspaceId: 'docs',
+                createdAt: timestampToHumanReadable(),
+                lastUpdated: timestampToHumanReadable(),
+              },
+              {
+                id: 'ava',
+                title: 'AVA, your automated virtual assistant',
+                filetype: 'markdown',
+                content: `# AVA - Your Automated Virtual Assistant
+
+                AVA is an automated virtual assistant that can help you create, edit, and organize your documents, as well as answer questions, summarize, and more.
+
+                ⚠️ Please note: This is an early alpha preview build and is not yet ready for production use. Things can and will break.
+                Please report any bugs or issues to link to our [Github issues](https://github.com/artificialcitizens/acai.so/issues).
+                Thanks for helping make acai.so better for everyone!
+                `,
+                isContext: false,
+                systemNote: '',
+                workspaceId: 'docs',
                 createdAt: timestampToHumanReadable(),
                 lastUpdated: timestampToHumanReadable(),
               },

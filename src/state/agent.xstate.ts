@@ -92,10 +92,10 @@ const loadAgentState = (): AgentWorkspace => {
     return JSON.parse(savedState);
   } else {
     const initialState: AgentWorkspace = {
-      UUIDxyz: {
-        id: 'UUIDxyzzd',
+      docs: {
+        id: 'acai-docs',
         loading: false,
-        workspaceId: 'UUIDxyz',
+        workspaceId: 'docs',
         agentMode: 'chat',
         openAIChatModel: 'gpt-4',
         systemNotes: '',

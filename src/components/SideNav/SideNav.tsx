@@ -94,6 +94,9 @@ export const SideNav: React.FC = () => {
 
   // Function to create a new tab
   const createTab = async (workspaceId: string) => {
+    // don't allow creating tabs in docs workspace on prod
+    if (workspaceId === 'docs' && !import.meta.env.DEV) return;
+
     const title = prompt('Enter a name for your new tab');
     if (!title) return;
     const tab = await handleCreateTab({ title, content: '' }, workspaceId);

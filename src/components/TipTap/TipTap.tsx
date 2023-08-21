@@ -59,6 +59,8 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   const [saveStatus, setSaveStatus] = useState('Saved');
 
   const [completion, setCompletion] = useState('');
+  // update to use the auth context
+  const [canEdit, setCanEdit] = useState<boolean>(tab.workspaceId !== 'docs');
   const [isLoading, setIsLoading] = useState(false);
   const [currentContext, setCurrentContext] = useState('');
   const [currentTab, setCurrentTab] = useState<Tab>(tab);
@@ -71,9 +73,9 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { setEditor } = useContext(EditorContext)!;
   useEffect(() => {
-    console.log('setting current tab', tab);
     setCurrentTab(tab);
     setHydrated(false);
+    setCanEdit(tab.workspaceId !== 'docs');
   }, [tab]);
 
   const saveContent = (
@@ -81,9 +83,13 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     workspaceId: string,
     extraContent = '',
   ) => {
-    console.log('saving content', currentTab);
     if (!currentTab) return;
+
+    // don't save if on prod
+    if (workspaceId === 'docs' && !import.meta.env.DEV) return;
+    setSaveStatus('Unsaved');
     const content = editor.getJSON();
+    console.log('content', content);
     setSaveStatus('Saving...');
     service.send({
       type: 'UPDATE_TAB_CONTENT',

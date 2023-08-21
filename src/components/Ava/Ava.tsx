@@ -38,8 +38,7 @@ export const Ava: React.FC<AvaProps> = ({
     agentStateService,
   }: GlobalStateContextValue = useContext(GlobalStateContext);
   const navigate = useNavigate();
-  const workspace =
-    appStateService.getSnapshot().context.workspaces[workspaceId];
+
   const systemNotes =
     useSelector(
       agentStateService,
@@ -47,9 +46,6 @@ export const Ava: React.FC<AvaProps> = ({
     ) || '';
   const [avaResponse] = useAva();
   const [uiState] = useActor(uiStateService);
-  const contextTabs = workspace
-    ? workspace.data.tiptap.tabs.filter((tab: Tab) => tab.isContext)
-    : '';
 
   const { similaritySearchWithScore, filterAndCombineContent } = useContext(
     VectorStoreContext,
@@ -63,9 +59,28 @@ export const Ava: React.FC<AvaProps> = ({
     uiStateService.send({ type: 'TOGGLE_AGENT_CHAT' });
   };
 
-  return (
+  return workspaceId === 'docs' ? (
     <SBSidebar>
-      {' '}
+      <ExpansionPanel
+        title="Chat"
+        className="chat-panel"
+        onChange={() => ''}
+        isOpened={true}
+      >
+        {workspaceId && (
+          <Chat
+            name="Ava"
+            avatar=".."
+            onSubmitHandler={async (message) => {
+              const response = await avaResponse(message, systemNotes);
+              return response;
+            }}
+          />
+        )}
+      </ExpansionPanel>
+    </SBSidebar>
+  ) : (
+    <SBSidebar>
       <ExpansionPanel
         data-ava-element="junk-drawer-panel-toggle"
         title="Knowledge"

@@ -22,7 +22,7 @@ import {
 } from '../../context/GlobalStateContext';
 import { useActor } from '@xstate/react';
 import { ChatHistory } from '../../state';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { readFileAsText, slugify } from '../../utils/data-utils.ts';
 import { convertDSPTranscript } from '../../utils/ac-langchain/text-splitters/dsp-splitter.ts';
 import yaml from 'js-yaml';
@@ -55,7 +55,7 @@ const Chat: React.FC<ChatProps> = ({
 
   const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
   const [messages, setMessages] = useState<any[]>(
-    recentChatHistory.map((history: ChatHistory) => {
+    recentChatHistory?.map((history: ChatHistory) => {
       return {
         message: history.text,
         direction: history.type === 'user' ? 'outgoing' : 'incoming',
@@ -75,7 +75,7 @@ const Chat: React.FC<ChatProps> = ({
 
   useEffect(() => {
     setMessages(
-      recentChatHistory.map((history: ChatHistory) => {
+      recentChatHistory?.map((history: ChatHistory) => {
         return {
           message: history.text,
           direction: history.type === 'user' ? 'outgoing' : 'incoming',
@@ -264,7 +264,7 @@ const Chat: React.FC<ChatProps> = ({
               loading && <TypingIndicator content={`${name} is thinking`} />
             }
           >
-            {messages.map((message) => (
+            {messages?.map((message) => (
               <Message
                 key={message.sentTime + message.sender}
                 model={{

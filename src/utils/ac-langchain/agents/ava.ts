@@ -5,18 +5,25 @@ import {
 } from 'langchain/agents';
 import { LLMChain } from 'langchain/chains';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
+// @TODO: figure out why these imports are not being found but still working
 import {
   BaseChatPromptTemplate,
+  // eslint-disable-next-line import/named
   SerializedBasePromptTemplate,
   renderTemplate,
 } from 'langchain/prompts';
 import {
+  // eslint-disable-next-line import/named
   AgentAction,
+  // eslint-disable-next-line import/named
   AgentFinish,
+  // eslint-disable-next-line import/named
   AgentStep,
   BaseMessage,
   HumanMessage,
+  // eslint-disable-next-line import/named
   InputValues,
+  // eslint-disable-next-line import/named
   PartialValues,
 } from 'langchain/schema';
 import { GoogleCustomSearch, Tool, DynamicTool } from 'langchain/tools';
