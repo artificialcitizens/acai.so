@@ -31,8 +31,9 @@ function App() {
     globalServices.appStateService.getSnapshot().context.workspaces[
       workspaceId
     ];
-  if (!workspace) navigate('/docs/welcome');
   const activeTabId = location.pathname.split('/')[2];
+  if (!workspace || (workspaceId === 'docs' && !activeTabId))
+    navigate('/docs/welcome');
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined,
   );
