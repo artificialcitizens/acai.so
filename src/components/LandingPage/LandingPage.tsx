@@ -73,17 +73,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
   }, [wordIndex, tagLineIndex, singleTagline, isTaglineComplete]);
 
   return (
-    <div className="relative bg-gradient-to-b from-darker to-acai-darker h-screen w-screen m-0 flex flex-col items-center justify-center text-white">
-      <h1 className="text-5xl mb-2 z-10">acai</h1>
-      <p className="mb-8 font-medium text-sm">powered by AVA</p>
+    <div className="relative bg-gradient-to-b from-darker to-acai-darker h-screen w-screen m-0 flex flex-col  text-white p-4 items-center justify-center">
+      <h1 className="text-2xl md:text-5xl mb-2 z-10">acai</h1>
+      <p className="mb-8 font-medium text-xs md:text-sm">powered by AVA</p>
       <div className="relative bg-darker rounded-3xl overflow-hidden w-3/4 h-3/4 z-10 shadow-lg">
         <img
           src={''}
           alt="App Screenshot"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-darker to-acai-darker bg-opacity-100 flex items-center justify-center transition-opacity duration-500 group-hover:opacity-0">
-          <p className="text-4xl text-white">
+        <div className="absolute inset-0 bg-gradient-to-t from-darker to-acai-darker bg-opacity-100 flex items-start justify-start p-8 md:p-2 md:items-center md:justify-center transition-opacity duration-500 group-hover:opacity-0">
+          <p className="text-2xl md:text-4xl text-white">
             {tagLines[tagLineIndex].split(' ').map((word, index) => (
               <span
                 key={index}
