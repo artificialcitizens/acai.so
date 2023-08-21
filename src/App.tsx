@@ -27,7 +27,11 @@ function App() {
   const navigate = useNavigate();
   // if there is no workspace id in the url, redirect to welcome page
   const workspaceId = location.pathname.split('/')[1];
-  if (!workspaceId) navigate('/docs/welcome');
+  const workspace =
+    globalServices.appStateService.getSnapshot().context.workspaces[
+      workspaceId
+    ];
+  if (!workspace) navigate('/docs/welcome');
   const activeTabId = location.pathname.split('/')[2];
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined,
@@ -57,10 +61,6 @@ function App() {
     }
   };
 
-  const workspace =
-    globalServices.appStateService.getSnapshot().context.workspaces[
-      workspaceId
-    ];
   const activeTab: Tab =
     workspace &&
     workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId);

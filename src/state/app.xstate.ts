@@ -131,7 +131,7 @@ export const appStateMachine = createMachine<IContext, Event>({
             tabs: [
               {
                 id: 'welcome',
-                title: 'acai.so - The AI Supertool',
+                title: 'Welcome to acai.so 🟣',
                 filetype: 'markdown',
                 content: `# Welcome
                 
@@ -142,6 +142,7 @@ export const appStateMachine = createMachine<IContext, Event>({
 
                 ⚠️ Please note: This is an early alpha preview build and is not yet ready for production use. Things can and will break.
                 Please report any bugs or issues to link to our [Github issues](https://github.com/artificialcitizens/acai.so/issues).
+                
                 Thanks for helping make acai.so better for everyone!
                 `,
                 isContext: false,
