@@ -3,12 +3,33 @@ import screenshot from '../../assets/app-screenshot.png';
 import './LandingPage.css'; // import the CSS file
 
 const tagLines = [
-  'ACAI is an AI powered super tool',
-  'ACAI compliments your workflow',
-  'ACAI expands your capabilities',
-  'ACAI is your personal assistant',
-  'ACAI empowers you to do more',
-  // Add more taglines as needed
+  'Your AI toolkit',
+  'Your Personal Assistant',
+  'Your supercharged productivity tool',
+  'Your AI powered notebook',
+  'Your digital life organizer',
+  'Your smart work companion',
+  'Your AI-driven taskmaster',
+  'Your virtual efficiency expert',
+  'Your intelligent work buddy',
+  'Your AI productivity booster',
+  'Your smart task organizer',
+  'Your automated workflow assistant',
+  'Your digital productivity coach',
+  'Your smart work accelerator',
+  'Your intelligent task manager',
+  'Your smart AI companion',
+  'Your personal AI secretary',
+  'Your virtual work partner',
+  'Your digital taskmaster',
+  'Your intelligent productivity tool',
+  'Your smart work assistant',
+  'Your virtual AI secretary',
+  'Your digital productivity partner',
+  'Your AI-powered work companion',
+  'Your intelligent work assistant',
+  'Your smart productivity booster',
+  'Your virtual task manager',
 ];
 
 interface LandingPageProps {
@@ -30,7 +51,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
     timers.current.push(
       setTimeout(() => {
         setWordIndex((prevIndex) => prevIndex + 1);
-      }, 500),
+      }, 400),
     );
 
     if (wordIndex === tagLines[tagLineIndex].split(' ').length) {
@@ -54,7 +75,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
 
   return (
     <div className="relative bg-gradient-to-b from-darker to-acai-darker h-screen w-screen m-0 flex flex-col items-center justify-center text-white">
-      <h1 className="text-5xl mb-8 z-10">acai.so</h1>
+      <h1 className="text-5xl mb-2 z-10">acai</h1>
+      <p className="mb-8 font-medium text-sm">powered by AVA</p>
       <div className="relative bg-darker rounded-xl overflow-hidden w-3/4 h-3/4 z-10 group">
         <img
           src={screenshot}
