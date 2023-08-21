@@ -75,10 +75,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
 
   return (
     <>
-      <nav className="w-screen bg-darker h-8">
-        {/* <img src={berry} alt="acai logo" className="w-8 h-8 p-2 relative" /> */}
+      <nav className="sticky w-screen bg-darker h-8">
+        {/* <img
+          src={berry}
+          alt="acai logo"
+          className="sticky w-8 h-8 p-2 mr-1 float-right"
+        /> */}
       </nav>
-      <div className="text-acai-white relative bg-gradient-to-b from-darker to-acai-darker h-screen w-screen m-0 flex flex-col p-4 items-center justify-start">
+      <div
+        className="text-acai-white relative bg-gradient-to-b from-darker to-acai-darker w-screen m-0 flex flex-col p-4 items-center justify-start"
+        style={{
+          height: 'calc(100vh - 2rem)',
+        }}
+      >
         <span className="flex items-center">
           <h1 className="text-2xl text-acai-white md:text-4xl font-bold mb-0 z-10">
             acai
