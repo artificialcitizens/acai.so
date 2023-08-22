@@ -24,3 +24,7 @@
     opacity: 1;
   }
 }
+
+.nav-link {
+  @apply text-white mx-2;
+}
