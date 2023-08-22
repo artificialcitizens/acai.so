@@ -64,7 +64,7 @@ export const SocketManager: React.FC = () => {
         </label>
         <input
           id="url"
-          className="text-acai-white px-[2px]"
+          className="text-acai-white bg-base px-[2px]"
           type="text"
           value={storedUrl}
           onChange={(e) => setStoredUrl(e.target.value)}
@@ -75,7 +75,7 @@ export const SocketManager: React.FC = () => {
           Password:
         </label>
         <input
-          className="text-acai-white px-[2px]"
+          className="text-acai-white bg-base px-[2px]"
           id="password"
           type="password"
           value={storedPassword}
@@ -85,7 +85,7 @@ export const SocketManager: React.FC = () => {
       <input
         type="submit"
         value="Connect"
-        className="bg-transparent text-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-light focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        className="bg-neutral-900 text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-light focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
       />
     </form>
   );

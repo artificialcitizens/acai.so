@@ -115,8 +115,13 @@ export const Ava: React.FC<AvaProps> = ({
         />
       </ExpansionPanel>
       <ExpansionPanel title="Settings">
+        <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
+          Tokens
+        </h5>
         <TokenManager />
-        <hr />
+        <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
+          AVA settings
+        </h5>
         <ChatModelDropdown workspaceId={workspaceId} />
         <ScratchPad
           placeholder="Custom Prompt"
@@ -129,6 +134,9 @@ export const Ava: React.FC<AvaProps> = ({
             });
           }}
         />
+        <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
+          Custom Agent Server
+        </h5>
         <SocketManager />
       </ExpansionPanel>
       <ExpansionPanel
