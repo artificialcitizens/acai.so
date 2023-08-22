@@ -46,7 +46,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
       >
         {(!filteredNotifications.length ||
           (unreadCount === 0 && showUnreadOnly)) && (
-          <p className="text-light">{placeholder}</p>
+          <p className="text-acai-white">{placeholder}</p>
         )}
         {(showUnreadOnly
           ? filteredNotifications.filter((v) => !v.read)
@@ -59,7 +59,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 key={notification.id}
                 className={`alert alert-${
                   notification.type || 'info'
-                } flex justify-between items-center text-light mb-2 py-2 border-b border-solid border-light`}
+                } flex justify-between items-center text-acai-white mb-2 py-2 border-b border-solid border-light`}
               >
                 <span>{notification.content as any}</span>
                 {/* {notification.read ? '✅' : <span onClick={() => markAsRead(notification.id)}>📬</span>} */}

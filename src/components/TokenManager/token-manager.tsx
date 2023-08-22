@@ -85,9 +85,9 @@ const TokenManager: React.FC = () => {
     <form onSubmit={handleSubmit}>
       {keys.map(({ id, name }) => (
         <span className="flex mb-2 items-center" key={id}>
-          <label className="text-light pr-2 w-[50%]">{name}:</label>
+          <label className="text-acai-white pr-2 w-[50%]">{name}:</label>
           <input
-            className="text-light px-[2px]"
+            className="text-acai-white px-[2px]"
             type="password"
             value={values[id] || ''}
             onChange={(e) => setValues({ ...values, [id]: e.target.value })}

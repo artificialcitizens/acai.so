@@ -1,11 +1,11 @@
 export const ProjectLinks = () => (
-  <div className="bg-dark p-2 flex justify-center items-center w-full">
+  <div className="bg-dark p-2 mb-4 flex justify-center items-center w-full">
     {/* Add the github logo that links to the current repo */}
     <a
       href="https://trello.com/b/TX8T7lWe/%F0%9F%A7%A0-second-brain"
       target="_blank"
       rel="noopener noreferrer"
-      className="text-light font-bold hover:text-dark transition-colors duration-200 mr-4"
+      className="text-acai-white font-bold hover:text-acai-white transition-colors duration-200 mr-4"
     >
       trello
     </a>
@@ -13,7 +13,7 @@ export const ProjectLinks = () => (
       href="https://github.com/artificialcitizens/ava"
       target="_blank"
       rel="noopener noreferrer"
-      className="text-light hover:text-dark transition-colors duration-200"
+      className="text-acai-white hover:text-acai-white transition-colors duration-200"
     >
       <svg
         fill="currentColor"

@@ -302,8 +302,9 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             onChange={handleElevenLabsDropdownChange}
           />
         )}
+
         <span className="flex mb-2 items-start">
-          <label className="text-light ml-2" htmlFor="singleCommandMode">
+          <label className="text-acai-white ml-2" htmlFor="singleCommandMode">
             Single Command
           </label>
           <input
@@ -316,7 +317,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           />
         </span>
         <span className="flex mb-2 items-start">
-          <label className="text-light ml-2" htmlFor="singleCommandMode">
+          <label className="text-acai-white ml-2" htmlFor="singleCommandMode">
             Speech Recognition
           </label>
           <input
@@ -336,12 +337,12 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         content={userTranscript || 'User Transcript'}
       />
       <form
-        className="text-light w-full flex flex-col flex-grow my-2"
+        className="text-acai-white w-full flex flex-col flex-grow my-2"
         onSubmit={handleManualTTS}
       >
         <textarea
           placeholder="Manual TTS"
-          className="rounded bg-base text-light p-4"
+          className="rounded bg-base text-acai-white p-4"
           value={manualTTS}
           onChange={(e) => setManualTTS(e.target.value)}
           onKeyDown={(e: any) => {

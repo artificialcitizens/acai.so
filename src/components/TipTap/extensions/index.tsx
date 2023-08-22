@@ -85,7 +85,7 @@ export const TiptapExtensions = [
   TiptapLink.configure({
     HTMLAttributes: {
       class:
-        'text-light underline underline-offset-[3px] hover:text-stone-600 transition-colors cursor-pointer',
+        'text-acai-white underline underline-offset-[3px] hover:text-stone-600 transition-colors cursor-pointer',
     },
   }),
   TiptapImage.configure({

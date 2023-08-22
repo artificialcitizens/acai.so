@@ -48,10 +48,10 @@ const TabManager: React.FC = () => {
           {workspace.data.tiptap.tabs.map((tab, index) => (
             <Link
               key={tab.id}
-              className={`cursor-pointer p-1 self-center text-light truncate h-full border-2 ${
+              className={`cursor-pointer p-1 self-center text-acai-white truncate h-full border-2 ${
                 tab.id === activeTabId
                   ? ' border-dark rounded-t'
-                  : 'text-dark border-transparent'
+                  : 'text-acai-white border-transparent'
               }`}
               to={`/${workspace.id}/${tab.id}`}
               data-te-sidenav-link-ref
@@ -60,7 +60,7 @@ const TabManager: React.FC = () => {
             >
               <Tab
                 className={`overflow-hidden bg-transparent ${
-                  tab.id === activeTabId ? 'text-light' : 'text-dark'
+                  tab.id === activeTabId ? 'text-acai-white' : 'text-acai-white'
                 }`}
               >
                 {tab.title}

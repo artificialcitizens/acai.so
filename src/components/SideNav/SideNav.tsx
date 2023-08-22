@@ -130,7 +130,7 @@ export const SideNav: React.FC = () => {
         {Object.values(workspaces).map((workspace) => (
           <li className="relative pb-2 !important" key={workspace.id}>
             <div
-              className="flex h-12 cursor-pointer truncate m-auto flex-grow rounded-[5px] px-1 py-4 text-[0.875rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none "
+              className="flex h-12 cursor-pointer truncate m-auto flex-grow rounded-[5px] px-1 py-4 text-[0.875rem] text-acai-white outline-none transition duration-300 ease-linear hover:bg-neutral-900 hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker"
               data-te-sidenav-link-ref
             >
               <span className="font-bold self-center">{workspace.name}</span>
@@ -142,11 +142,11 @@ export const SideNav: React.FC = () => {
             >
               {workspace.data.tiptap.tabs.map((tab) => (
                 <li
-                  className="relative text-ellipsis overflow-hidden px-2 mb-2 "
+                  className="relative text-ellipsis overflow-hidden mb-2"
                   key={tab.id}
                 >
                   <Link
-                    className="flex h-6 cursor-pointer items-center leading-4 text-ellipsis rounded-[5px] py-4 pl-1  text-[0.78rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
+                    className="flex h-6 cursor-pointer px-8 items-center leading-4 text-ellipsis rounded-[5px] py-4 pl-1  text-[0.78rem] text-acai-white outline-none transition duration-300 ease-linear hover:bg-neutral-900 hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-aca active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
                     to={`/${workspace.id}/${tab.id}`}
                     data-te-sidenav-link-ref
                     onClick={() => {
@@ -160,18 +160,18 @@ export const SideNav: React.FC = () => {
                 </li>
               ))}
               <button
-                className="px-4 mb-4 text-dark text-xs w-full text-left"
+                className="rounded-none text-acai-white hover:bg-neutral-900 text-xs w-full text-center"
                 onClick={() => {
                   createTab(workspace.id);
                 }}
               >
-                New Document +
+                +
               </button>
             </ul>
           </li>
         ))}
         <button
-          className="w-full text-dark text-xs pl-2 text-left"
+          className="w-full text-acai-white text-xs hover:bg-neutral-900 pl-2 text-left"
           onClick={createWorkspace}
         >
           New Workspace +

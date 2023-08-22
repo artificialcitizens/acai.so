@@ -24,11 +24,11 @@ export const Dropdown: React.FC<DropDownProps> = ({
 
   return (
     <div className={`flex flex-col mb-2 flex-grow mr-2`}>
-      <label className="ml-1 mb-2 font-medium text-xs text-light">
+      <label className="ml-1 mb-2 font-medium text-xs text-acai-white">
         {label}
       </label>
       <select
-        className="px-3 py-2 text-light bg-darker border border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-400"
+        className="px-3 py-2 text-acai-white bg-darker border border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-400"
         value={value}
         onChange={handleSelectChange}
       >

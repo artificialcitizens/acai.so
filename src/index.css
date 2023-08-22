@@ -6,14 +6,14 @@
 .ProseMirror .is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
-  color: #adb5bd;
+  @apply text-acai-white;
   pointer-events: none;
   height: 0;
 }
 .ProseMirror .is-empty::before {
   content: attr(data-placeholder);
   float: left;
-  color: #adb5bd;
+  @apply text-acai-white;
   pointer-events: none;
   height: 0;
 }
@@ -29,7 +29,7 @@
   }
 
   &.ProseMirror-selectednode {
-    outline: 3px solid #5abbf7;
+    outline: 3px solid #79586c;
     filter: brightness(90%);
   }
 }
@@ -50,7 +50,7 @@ ul[data-type='taskList'] li > label {
 ul[data-type='taskList'] li > label input[type='checkbox'] {
   -webkit-appearance: none;
   appearance: none;
-  background-color: #fff;
+  @apply bg-slate-400;
   margin: 0;
   cursor: pointer;
   width: 1.2em;
@@ -63,11 +63,11 @@ ul[data-type='taskList'] li > label input[type='checkbox'] {
   place-content: center;
 
   &:hover {
-    background-color: #f8f9fa;
+    @apply bg-slate-400;
   }
 
   &:active {
-    background-color: #e9ecef;
+    @apply bg-slate-400;
   }
 
   &::before {
@@ -87,7 +87,7 @@ ul[data-type='taskList'] li > label input[type='checkbox'] {
 }
 
 ul[data-type='taskList'] li[data-checked='true'] > div > p {
-  color: #a8a29e;
+  @apply text-acai-white;
   text-decoration: line-through;
   text-decoration-thickness: 2px;
 }
@@ -97,9 +97,8 @@ ul[data-type='taskList'] li[data-checked='true'] > div > p {
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  @apply text-light;
-  background-color: #121212;
+  @apply text-acai-white;
+  @apply bg-base;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -136,7 +135,7 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  @apply text-acai-white;
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -185,16 +184,15 @@ h6 {
 
 p {
   margin: 0;
-  margin-bottom: 1em;
 }
 
 p {
-  @apply text-light;
+  @apply text-acai-white;
 }
 
 pre,
 code {
-  @apply bg-base text-light !important;
+  @apply bg-base text-acai-white !important;
 }
 
 @media (prefers-color-scheme: light) {

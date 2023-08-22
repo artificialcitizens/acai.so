@@ -70,7 +70,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
 
           <textarea
             value={systemNoteState}
-            className="w-96 rounded-md p-2 bg-base text-light"
+            className="w-96 rounded-md p-2 bg-base text-acai-white"
             placeholder="System Note"
             onChange={(e) => {
               setSystemNoteState(e.target.value);
@@ -83,7 +83,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
             }}
           />
           <button
-            className="p-2 bg-red-900 rounded-md text-light"
+            className="p-2 bg-red-900 rounded-md text-acai-white"
             onClick={async () => {
               setLoading(true);
               send({

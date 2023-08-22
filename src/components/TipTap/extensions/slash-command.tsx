@@ -343,8 +343,8 @@ const CommandList = ({
       {items.map((item: CommandItemProps, index: number) => {
         return (
           <button
-            className={`flex w-full items-center space-x-2 rounded-md px-2 py-1 text-left text-sm text-light hover:bg-darker ${
-              index === selectedIndex ? 'bg-dark text-light' : ''
+            className={`flex w-full items-center space-x-2 rounded-md px-2 py-1 text-left text-sm text-acai-white hover:bg-darker ${
+              index === selectedIndex ? 'bg-dark text-acai-white' : ''
             }`}
             key={index}
             onClick={() => selectItem(index)}
@@ -358,7 +358,7 @@ const CommandList = ({
             </div>
             <div>
               <p className="font-medium">{item.title}</p>
-              <p className="text-xs text-light">{item.description}</p>
+              <p className="text-xs text-acai-white">{item.description}</p>
             </div>
           </button>
         );

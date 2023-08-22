@@ -25,7 +25,7 @@ const CursorDebug: React.FC<CursorDebugProps> = ({ onSubmit }) => {
   );
 
   return (
-    <form className="text-light" onSubmit={handleSubmit}>
+    <form className="text-acai-white" onSubmit={handleSubmit}>
       <select value={selectedElement} onChange={handleSelectChange}>
         <option value="">Select an element</option>
         {avaElements.map((element, index) => (
@@ -34,7 +34,7 @@ const CursorDebug: React.FC<CursorDebugProps> = ({ onSubmit }) => {
           </option>
         ))}
       </select>
-      <button className="text-light" type="submit">
+      <button className="text-acai-white" type="submit">
         Update Cursor Position
       </button>
     </form>
