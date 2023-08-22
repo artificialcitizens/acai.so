@@ -20,7 +20,7 @@ const loadUIState = (): IContext => {
   const savedState = localStorage.getItem('uiState');
   return savedState
     ? JSON.parse(savedState)
-    : { thoughtsOpen: false, sideNavOpen: false, agentChatOpen: false };
+    : { thoughtsOpen: true, sideNavOpen: false, agentChatOpen: true };
 };
 
 // Define the initial context
@@ -74,3 +74,5 @@ export const uiMachine = createMachine<IContext>({
     },
   },
 });
+
+loadUIState();

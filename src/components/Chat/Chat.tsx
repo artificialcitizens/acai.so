@@ -13,8 +13,8 @@ import {
   TypingIndicator,
 } from '@chatscope/chat-ui-kit-react';
 import './Chat.css';
-import Dropzone from '../Dropzone/Dropzone';
-import { toast } from 'react-toastify';
+// import Dropzone from '../Dropzone/Dropzone';
+// import { toast } from 'react-toastify';
 import Linkify from 'react-linkify';
 import {
   GlobalStateContext,
@@ -22,10 +22,11 @@ import {
 } from '../../context/GlobalStateContext';
 import { useActor } from '@xstate/react';
 import { ChatHistory } from '../../state';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { readFileAsText, slugify } from '../../utils/data-utils.ts';
-import { convertDSPTranscript } from '../../utils/ac-langchain/text-splitters/dsp-splitter.ts';
-import yaml from 'js-yaml';
+import { useLocation } from 'react-router-dom';
+import Dropzone from '../Dropzone/Dropzone';
+// import { readFileAsText, slugify } from '../../utils/data-utils.ts';
+// import { convertDSPTranscript } from '../../utils/ac-langchain/text-splitters/dsp-splitter.ts';
+// import yaml from 'js-yaml';
 
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
@@ -174,87 +175,86 @@ const Chat: React.FC<ChatProps> = ({
     ],
   );
 
-  const handleFileDrop = async (files: File[], name: string) => {
-    const conversations: { [key: string]: any } = {};
+  // const handleFileDrop = async (files: File[], name: string) => {
+  //   const conversations: { [key: string]: any } = {};
 
-    for (const file of files) {
-      if (!file) return;
-      console.log(file);
-      toast(`📁 Processing ${file.name}`, {
-        toastId: `${file.name}`,
-        className: 'custom-toast',
-        position: 'top-right',
-        autoClose: false,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: 'dark',
-      });
+  //   for (const file of files) {
+  //     if (!file) return;
+  //     console.log(file);
+  //     toast(`📁 Processing ${file.name}`, {
+  //       toastId: `${file.name}`,
+  //       className: 'custom-toast',
+  //       position: 'top-right',
+  //       autoClose: false,
+  //       hideProgressBar: false,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       theme: 'dark',
+  //     });
 
-      const fileExtension = file.name.split('.').pop();
-      const reader = new FileReader();
+  //     const fileExtension = file.name.split('.').pop();
+  //     const reader = new FileReader();
 
-      switch (fileExtension) {
-        case 'jpg':
-        case 'jpeg':
-        case 'png':
-          reader.onload = () => {
-            toast.update(`${file.name}`, {
-              render: 'Image uploaded successfully',
-              type: 'success',
-              autoClose: 5000,
-            });
-          };
-          reader.readAsDataURL(file);
-          break;
-        default:
-          try {
-            const fileContent = await readFileAsText(file);
+  //     switch (fileExtension) {
+  //       case 'jpg':
+  //       case 'jpeg':
+  //       case 'png':
+  //         reader.onload = () => {
+  //           toast.update(`${file.name}`, {
+  //             render: 'Image uploaded successfully',
+  //             type: 'success',
+  //             autoClose: 5000,
+  //           });
+  //         };
+  //         reader.readAsDataURL(file);
+  //         break;
+  //       default:
+  //         try {
+  //           const fileContent = await readFileAsText(file);
 
-            const conversation = convertDSPTranscript(fileContent);
+  //           const conversation = convertDSPTranscript(fileContent);
 
-            const slugifiedFilename = slugify(file.name);
-            conversations[slugifiedFilename] = conversation;
+  //           const slugifiedFilename = slugify(file.name);
+  //           conversations[slugifiedFilename] = conversation;
 
-            toast.update(`${file.name}`, {
-              render: 'File uploaded successfully',
-              type: 'success',
-              autoClose: 5000,
-            });
-          } catch (error) {
-            console.error('Error processing file:', file, error);
-            toast.update(`${file.name}`, {
-              render: 'Error processing file',
-              type: 'error',
-              autoClose: 5000,
-            });
-          }
-      }
-    }
+  //           toast.update(`${file.name}`, {
+  //             render: 'File uploaded successfully',
+  //             type: 'success',
+  //             autoClose: 5000,
+  //           });
+  //         } catch (error) {
+  //           console.error('Error processing file:', file, error);
+  //           toast.update(`${file.name}`, {
+  //             render: 'Error processing file',
+  //             type: 'error',
+  //             autoClose: 5000,
+  //           });
+  //         }
+  //     }
+  //   }
 
-    // Save as JSON file
-    const jsonContent = JSON.stringify(conversations, null, 2);
-    const jsonFile = new Blob([jsonContent], { type: 'application/json' });
-    const jsonDownloadLink = document.createElement('a');
-    jsonDownloadLink.href = URL.createObjectURL(jsonFile);
-    jsonDownloadLink.download = `${name}.json`;
-    jsonDownloadLink.click();
+  //   // Save as JSON file
+  //   const jsonContent = JSON.stringify(conversations, null, 2);
+  //   const jsonFile = new Blob([jsonContent], { type: 'application/json' });
+  //   const jsonDownloadLink = document.createElement('a');
+  //   jsonDownloadLink.href = URL.createObjectURL(jsonFile);
+  //   jsonDownloadLink.download = `${name}.json`;
+  //   jsonDownloadLink.click();
 
-    // Convert JSON to YAML
-    const yamlContent = yaml.dump(conversations);
+  //   // Convert JSON to YAML
+  //   const yamlContent = yaml.dump(conversations);
 
-    // Save as YAML file
-    const yamlFile = new Blob([yamlContent], { type: 'application/x-yaml' });
-    const yamlDownloadLink = document.createElement('a');
-    yamlDownloadLink.href = URL.createObjectURL(yamlFile);
-    yamlDownloadLink.download = `${name}.yml`;
-    yamlDownloadLink.click();
-  };
+  //   // Save as YAML file
+  //   const yamlFile = new Blob([yamlContent], { type: 'application/x-yaml' });
+  //   const yamlDownloadLink = document.createElement('a');
+  //   yamlDownloadLink.href = URL.createObjectURL(yamlFile);
+  //   yamlDownloadLink.download = `${name}.yml`;
+  //   yamlDownloadLink.click();
+  // };
 
   return (
-    // @TODO: Link up file loader to context
-    <Dropzone onFilesDrop={handleFileDrop}>
+    <Dropzone onFilesDrop={() => console.log('not implemented yet')}>
       <div className="rounded-lg overflow-hidden w-full">
         {/* <div className="rounded-lg overflow-hidden w-full"> */}
         <ChatContainer className="bg-dark">

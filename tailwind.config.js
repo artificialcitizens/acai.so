@@ -30,6 +30,7 @@ export default {
         'acai-dark': '#402B35',
         'acai-darker': '#21171B',
         darker: '#090909',
+        'acai-white': '#E7E9E5',
       },
       borderColor: {
         lighter: '#626262',
