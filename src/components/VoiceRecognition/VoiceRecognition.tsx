@@ -287,7 +287,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           }}
         />
       )}
-      <span className="flex">
+      <span className="flex flex-col">
         <Dropdown
           label="Synthesis Mode"
           options={options}
