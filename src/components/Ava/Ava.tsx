@@ -46,6 +46,7 @@ export const Ava: React.FC<AvaProps> = ({
     ) || '';
   const [avaResponse] = useAva();
   const [uiState] = useActor(uiStateService);
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
 
   const { similaritySearchWithScore, filterAndCombineContent } = useContext(
     VectorStoreContext,
@@ -59,28 +60,41 @@ export const Ava: React.FC<AvaProps> = ({
     uiStateService.send({ type: 'TOGGLE_AGENT_CHAT' });
   };
 
-  return workspaceId === 'docs' ? (
+  const toggleSettings = () => {
+    setSettingsOpen(!settingsOpen);
+  };
+
+  return (
     <SBSidebar>
       <ExpansionPanel
-        title="Chat"
-        className="chat-panel"
-        onChange={() => ''}
-        isOpened={true}
+        title="Settings"
+        onChange={toggleSettings}
+        isOpened={settingsOpen}
       >
-        {workspaceId && (
-          <Chat
-            name="Ava"
-            avatar=".."
-            onSubmitHandler={async (message) => {
-              const response = await avaResponse(message, systemNotes);
-              return response;
-            }}
-          />
-        )}
+        <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
+          Tokens
+        </h5>
+        <TokenManager />
+        <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
+          AVA settings
+        </h5>
+        <ChatModelDropdown workspaceId={workspaceId} />
+        <ScratchPad
+          placeholder="Custom Prompt"
+          content={systemNotes}
+          handleInputChange={(e) => {
+            agentStateService.send({
+              type: 'UPDATE_SYSTEM_NOTES',
+              workspaceId: workspaceId,
+              systemNotes: e.target.value,
+            });
+          }}
+        />
+        <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
+          Custom Agent Server
+        </h5>
+        <SocketManager />
       </ExpansionPanel>
-    </SBSidebar>
-  ) : (
-    <SBSidebar>
       <ExpansionPanel
         data-ava-element="junk-drawer-panel-toggle"
         title="Knowledge"
@@ -114,39 +128,15 @@ export const Ava: React.FC<AvaProps> = ({
           audioContext={audioContext}
         />
       </ExpansionPanel>
-      <ExpansionPanel title="Settings">
-        <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
-          Tokens
-        </h5>
-        <TokenManager />
-        <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
-          AVA settings
-        </h5>
-        <ChatModelDropdown workspaceId={workspaceId} />
-        <ScratchPad
-          placeholder="Custom Prompt"
-          content={systemNotes}
-          handleInputChange={(e) => {
-            agentStateService.send({
-              type: 'UPDATE_SYSTEM_NOTES',
-              workspaceId: workspaceId,
-              systemNotes: e.target.value,
-            });
-          }}
-        />
-        <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
-          Custom Agent Server
-        </h5>
-        <SocketManager />
-      </ExpansionPanel>
+
       <ExpansionPanel
         title="Logs"
         data-ava-element="TOGGLE_AGENT_THOUGHTS"
         onChange={toggleAgentThoughts}
-        isOpened={uiState.context.thoughtsOpen}
+        isOpened={!settingsOpen && uiState.context.thoughtsOpen}
       >
         <NotificationCenter
-          placeholder="A place for AI to ponder 🤔"
+          placeholder="A place for AI to ponder"
           secondaryFilter="agent-thought"
         />
       </ExpansionPanel>
@@ -154,7 +144,7 @@ export const Ava: React.FC<AvaProps> = ({
         title="Chat"
         className="chat-panel"
         onChange={toggleAgentChat}
-        isOpened={uiState.context.agentChatOpen}
+        isOpened={!settingsOpen && uiState.context.agentChatOpen}
       >
         {workspaceId && (
           <Chat
