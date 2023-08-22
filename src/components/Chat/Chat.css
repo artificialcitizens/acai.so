@@ -1,6 +1,6 @@
 .cs-message-input__content-editor,
 .cs-message-input__content-editor-wrapper {
-  @apply bg-base text-dark text-sm !important;
+  @apply bg-base text-acai-white text-sm !important;
 }
 .cs-expansion-panel--open .cs-expansion-panel__content {
   @apply flex flex-grow;
@@ -14,20 +14,20 @@
 }
 .cs-message__html-content,
 .cs-message__custom-content {
-  @apply text-light !important;
+  @apply text-acai-white !important;
 }
 .cs-message__custom-content .cs-message--incoming .cs-message__content {
-  @apply bg-user text-light !important;
+  @apply bg-user text-acai-white !important;
   margin: 0 !important;
 }
 
 .cs-message--outgoing .cs-message__content {
-  @apply bg-user text-light !important;
+  @apply bg-user text-acai-white !important;
   margin: 0 !important;
 }
 
 .cs-message-input__tools > button {
-  @apply text-dark !important;
+  @apply text-acai-white !important;
 }
 
 .cs-typing-indicator {

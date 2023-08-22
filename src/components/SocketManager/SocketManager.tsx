@@ -59,23 +59,23 @@ export const SocketManager: React.FC = () => {
   return (
     <form onSubmit={handleSubmit}>
       <span className="flex mb-2 items-center">
-        <label htmlFor="url" className="text-light pr-2 w-[50%]">
+        <label htmlFor="url" className="text-acai-white pr-2 w-[50%]">
           URL:
         </label>
         <input
           id="url"
-          className="text-light px-[2px]"
+          className="text-acai-white bg-base px-[2px]"
           type="text"
           value={storedUrl}
           onChange={(e) => setStoredUrl(e.target.value)}
         />
       </span>
       <span className="flex mb-2 items-center">
-        <label htmlFor="password" className="text-light pr-2 w-[50%]">
+        <label htmlFor="password" className="text-acai-white pr-2 w-[50%]">
           Password:
         </label>
         <input
-          className="text-light px-[2px]"
+          className="text-acai-white bg-base px-[2px]"
           id="password"
           type="password"
           value={storedPassword}
@@ -85,7 +85,7 @@ export const SocketManager: React.FC = () => {
       <input
         type="submit"
         value="Connect"
-        className="bg-transparent text-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-light focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        className="bg-neutral-900 text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-light focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
       />
     </form>
   );

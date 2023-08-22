@@ -13,6 +13,7 @@ import {
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
 import { ProjectLinks } from '../ProjectLinks/ProjectLinks';
+import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
 
 export const SideNav: React.FC = () => {
   const navigate = useNavigate();
@@ -116,7 +117,7 @@ export const SideNav: React.FC = () => {
     .workspaces as Record<string, Workspace>;
   return (
     <nav
-      className="fixed flex flex-col left-0 top-0 z-[1035] max-h-screen w-60 -translate-x-full overflow-hidden bg-dark shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] data-[te-sidenav-hidden='false']:translate-x-0 dark:bg-zinc-800"
+      className="fixed flex flex-col left-0 top-0 z-[1035] max-h-screen w-60 -translate-x-full overflow-hidden bg-dark shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] data-[te-sidenav-hidden='false']:translate-x-0 dark:bg-dark"
       data-te-sidenav-init
       data-te-sidenav-hidden={!navOpen}
       data-te-sidenav-mode="push"
@@ -124,29 +125,22 @@ export const SideNav: React.FC = () => {
       ref={ref}
     >
       <ul
-        className="relative m-0 list-none px-[0.2rem] flex-grow max-height-[calc(100vh-4rem)] overflow-y-auto"
+        className="relative m-0 list-none flex-grow max-height-[calc(100vh-4rem)] overflow-y-auto"
         data-te-sidenav-menu-ref
       >
         {Object.values(workspaces).map((workspace) => (
-          <li className="relative pb-2 !important" key={workspace.id}>
-            <div
-              className="flex h-12 cursor-pointer truncate m-auto flex-grow rounded-[5px] px-1 py-4 text-[0.875rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none "
-              data-te-sidenav-link-ref
-            >
-              <span className="font-bold self-center">{workspace.name}</span>
-            </div>
-            <ul
-              className="!visible border-b border-solid border-dark pb-8 relative m-0 hidden list-none p-0 data-[te-collapse-show]:block "
-              data-te-sidenav-collapse-ref
-              data-te-collapse-show
+          <div className="relative pb-2" key={workspace.id}>
+            <ExpansionPanel
+              className="border-b border-darker border-b-solid border-l-0 border-r-0 border-t-0"
+              title={workspace.name}
             >
               {workspace.data.tiptap.tabs.map((tab) => (
                 <li
-                  className="relative text-ellipsis overflow-hidden px-2 mb-2 "
+                  className="relative text-ellipsis overflow-hidden mb-2"
                   key={tab.id}
                 >
                   <Link
-                    className="flex h-6 cursor-pointer items-center leading-4 text-ellipsis rounded-[5px] py-4 pl-1  text-[0.78rem] text-light outline-none transition duration-300 ease-linear hover:bg-darker hover:text-inherit hover:outline-none focus:bg-darker focus:text-inherit focus:outline-none active:bg-darker active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none"
+                    className="flex h-6 cursor-pointer items-center leading-4 text-ellipsis rounded-[5px] py-4 text-[0.78rem] text-acai-white outline-none transition duration-300 ease-linear hover:bg-neutral-900 hover:outline-none focus:bg-neutral-900 hover:underline"
                     to={`/${workspace.id}/${tab.id}`}
                     data-te-sidenav-link-ref
                     onClick={() => {
@@ -160,18 +154,18 @@ export const SideNav: React.FC = () => {
                 </li>
               ))}
               <button
-                className="px-4 mb-4 text-dark text-xs w-full text-left"
+                className="rounded-none text-acai-white hover:bg-neutral-900 text-xs w-full text-center transition duration-300 ease-linear"
                 onClick={() => {
                   createTab(workspace.id);
                 }}
               >
-                New Document +
+                +
               </button>
-            </ul>
-          </li>
+            </ExpansionPanel>
+          </div>
         ))}
         <button
-          className="w-full text-dark text-xs pl-2 text-left"
+          className="w-full rounded-none text-acai-white text-xs hover:bg-neutral-900 hover:text-acai-white pl-2 text-left transition duration-300 ease-linear"
           onClick={createWorkspace}
         >
           New Workspace +

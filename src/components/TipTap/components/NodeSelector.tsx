@@ -73,7 +73,7 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
   return (
     <div className="relative h-full">
       <button
-        className="flex h-full items-center gap-1 p-2 text-sm font-medium text-light hover:bg-darker active:bg-darker"
+        className="flex h-full items-center gap-1 p-2 text-sm font-medium text-acai-white hover:bg-darker active:bg-darker"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span>{activeItem?.name}</span>
@@ -91,7 +91,7 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
                 setIsOpen(false);
               }}
               className={cx(
-                'flex items-center justify-between rounded-sm px-2 py-1 text-sm text-light hover:bg-dark',
+                'flex items-center justify-between rounded-sm px-2 py-1 text-sm text-acai-white hover:bg-dark',
                 {
                   'text-blue-600': item.isActive(),
                 },

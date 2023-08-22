@@ -65,7 +65,7 @@ const Whisper: React.FC<MicRecorderProps> = ({
 
   return (
     <span className="flex items-center rounded-md justify-between mb-2">
-      <span className="mr-2 text-light">Whisper</span>
+      <span className="mr-2 text-acai-white">Whisper</span>
       <button
         className={
           isRecording
