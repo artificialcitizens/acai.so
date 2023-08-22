@@ -33,7 +33,7 @@ function App() {
     ];
   const activeTabId = location.pathname.split('/')[2];
   if (!workspace || (workspaceId === 'docs' && !activeTabId))
-    navigate('/docs/welcome');
+    navigate('/docs/introduction');
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined,
   );

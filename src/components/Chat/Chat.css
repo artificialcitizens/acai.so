@@ -6,7 +6,7 @@
   @apply flex flex-grow;
 }
 .cs-message__content {
-  @apply bg-base !important;
+  @apply bg-acai-darker !important;
   font-size: 14px;
   border: 1px solid #565656;
 }
@@ -36,11 +36,11 @@
 }
 
 .cs-typing-indicator > * {
-  color: white;
+  @apply bg-acai-white;
 }
 
 .cs-typing-indicator__dot {
-  background-color: white;
+  @apply bg-acai-white;
 }
 
 .cs-message-list {
@@ -54,4 +54,18 @@
 
 .scrollbar-container .cs-message-list__scroll-wrapper {
   @apply bg-base absolute;
+}
+
+.scrollbar-container {
+  @apply bg-dark;
+}
+
+.ps__rail-y:hover > .ps__thumb-y,
+.ps__rail-y:focus > .ps__thumb-y,
+.ps__rail-y.ps--clicking .ps__thumb-y {
+  @apply bg-light !important;
+}
+
+.ps .ps__rail-y.ps--clicking {
+  @apply bg-lighter !important;
 }
