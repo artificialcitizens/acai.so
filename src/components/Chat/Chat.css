@@ -1,12 +1,13 @@
 .cs-message-input__content-editor,
 .cs-message-input__content-editor-wrapper {
-  @apply bg-base text-acai-white text-sm !important;
+  @apply !bg-base;
+  @apply text-acai-white text-sm;
 }
 .cs-expansion-panel--open .cs-expansion-panel__content {
   @apply flex flex-grow;
 }
 .cs-message__content {
-  @apply bg-acai-darker !important;
+  @apply !bg-base;
   font-size: 14px;
   border: 1px solid #565656;
 }
@@ -16,13 +17,9 @@
 .cs-message__custom-content {
   @apply text-acai-white !important;
 }
-.cs-message__custom-content .cs-message--incoming .cs-message__content {
-  @apply bg-user text-acai-white !important;
-  margin: 0 !important;
-}
 
 .cs-message--outgoing .cs-message__content {
-  @apply bg-user text-acai-white !important;
+  @apply !bg-user text-acai-white !important;
   margin: 0 !important;
 }
 
@@ -36,11 +33,11 @@
 }
 
 .cs-typing-indicator > * {
-  @apply bg-acai-white;
+  @apply !bg-base !text-acai-white;
 }
 
 .cs-typing-indicator__dot {
-  @apply bg-acai-white;
+  @apply !bg-acai-white;
 }
 
 .cs-message-list {
@@ -67,5 +64,9 @@
 }
 
 .ps .ps__rail-y.ps--clicking {
-  @apply bg-lighter !important;
+  @apply bg-dark !important;
+}
+
+.ps__rail-y {
+  @apply bg-dark !important;
 }
