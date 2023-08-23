@@ -247,7 +247,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 
   const options = [
     { value: 'webSpeech', label: 'Web Speech API' },
-    { value: 'bark', label: 'Bark' },
+    import.meta.env.DEV ? { value: 'bark', label: 'Bark' } : undefined,
     { value: 'elevenlabs', label: 'Elevenlabs' },
   ];
 
@@ -294,7 +294,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
       <span className="flex flex-col">
         <Dropdown
           label="Synthesis Mode"
-          options={options}
+          options={options.filter((o) => o !== undefined) as any}
           value={synthesisMode}
           onChange={handleDropdownChange}
         />

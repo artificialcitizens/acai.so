@@ -26,13 +26,9 @@ export const setStatesAndToast = (
   setVoiceRecognitionState: React.Dispatch<React.SetStateAction<VoiceState>>,
   transcript: string,
   recognitionState: VoiceState,
-  toastMessage?: string,
 ) => {
   setUserTranscript(transcript);
   setVoiceRecognitionState(recognitionState);
-  if (toastMessage) {
-    toastifyInfo(toastMessage);
-  }
 };
 
 export const useVoiceCommands = () => {
@@ -71,7 +67,6 @@ export const useVoiceCommands = () => {
           setVoiceRecognitionState,
           '',
           recognitionState,
-          toastMessage,
         )),
     toastMessage,
   });
@@ -97,13 +92,7 @@ export const useVoiceCommands = () => {
     setTimeout(() => {
       navigate(`/${workspaceId}/${newTab.id}`);
     }, 150);
-    setStatesAndToast(
-      setUserTranscript,
-      setVoiceRecognitionState,
-      '',
-      'idle',
-      'Notes being created',
-    );
+    setStatesAndToast(setUserTranscript, setVoiceRecognitionState, '', 'idle');
   };
 
   const config: Command[] = [
