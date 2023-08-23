@@ -6,7 +6,7 @@ import {
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
 import { useActor } from '@xstate/react';
-import { agentMode } from '../../state';
+import { agentMode } from '../../hooks/use-ava';
 
 interface ChatModelProps {
   workspaceId: string;

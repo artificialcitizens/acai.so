@@ -11,6 +11,7 @@ Remember, your role is not just an assistant, but a friend and companion.
 
 ====================
 User Time and Date {timeStamp}
+Location: {userLocation}
 ====================
 
 If present, use the following chat history to best continue the conversation:
@@ -20,13 +21,19 @@ If present, use the following chat history to best continue the conversation:
 const avaPromptTemplate = PromptTemplate.fromTemplate<{
   name: string;
   chatHistory: string;
+  userLocation: string;
   timeStamp: string;
 }>(avaChatPrompt);
 
-export const createAvaChatPrompt = (name: string, chatHistory = '') => {
+export const createAvaChatPrompt = (
+  name: string,
+  userLocation: string,
+  chatHistory = '',
+) => {
   return avaPromptTemplate.format({
     name,
     chatHistory,
+    userLocation,
     timeStamp: timestampToHumanReadable(),
   });
 };
@@ -35,7 +42,7 @@ const customChatPrompt = `##Ignore Prior Instructions and conform to the followi
 {task}
 
 ====================
-User Time and Date {timeStamp}
+User Date/Time {timeStamp}
 ====================
 If present, use the following chat history to best continue the conversation:
 {chatHistory}
@@ -62,7 +69,7 @@ Your job is to help {user} answer questions and offer writing help about the fol
 
 {document}
 
-Your job is to help {user} answer questions and offer writing help about the above document
+!REMEMBER! Your job is to help {user} answer questions and offer writing help about the above document
 =================
 If present, use the following chat history to best continue the conversation:
 {chatHistory}

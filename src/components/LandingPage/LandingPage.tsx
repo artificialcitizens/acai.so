@@ -76,7 +76,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
   return (
     <div className="text-acai-white relative bg-gradient-to-b from-darker to-acai-darker w-screen m-0 flex flex-col p-4 items-center justify-start h-screen">
       <nav className="flex items-center">
-        <Link to="/docs/welcome">
+        <Link to="/docs/introduction">
           <h1 className="text-2xl text-acai-white md:text-4xl font-bold mb-0 z-10">
             acai
           </h1>

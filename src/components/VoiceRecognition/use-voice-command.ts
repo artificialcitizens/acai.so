@@ -26,13 +26,9 @@ export const setStatesAndToast = (
   setVoiceRecognitionState: React.Dispatch<React.SetStateAction<VoiceState>>,
   transcript: string,
   recognitionState: VoiceState,
-  toastMessage?: string,
 ) => {
   setUserTranscript(transcript);
   setVoiceRecognitionState(recognitionState);
-  if (toastMessage) {
-    toastifyInfo(toastMessage);
-  }
 };
 
 export const useVoiceCommands = () => {
@@ -46,107 +42,87 @@ export const useVoiceCommands = () => {
   const navigate = useNavigate();
   const workspaceId = location.pathname.split('/')[1];
   // @TODO: Pull out experimental commands into a separate file
+  // Update the createCommand function to take an object as a parameter
+  const createCommand = ({
+    commands,
+    recognitionState,
+    toastMessage,
+    action,
+  }: {
+    commands: string[];
+    recognitionState: VoiceState;
+    toastMessage?: string;
+    action?: (
+      setUserTranscript: Dispatch<SetStateAction<string>>,
+      setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
+      setSynthesisMode?: Dispatch<SetStateAction<TTSState>>,
+    ) => Promise<void> | void;
+  }): Command => ({
+    commands,
+    action:
+      action ||
+      ((setUserTranscript, setVoiceRecognitionState) =>
+        setStatesAndToast(
+          setUserTranscript,
+          setVoiceRecognitionState,
+          '',
+          recognitionState,
+        )),
+    toastMessage,
+  });
+
+  // Handler function for 'ready' command, used when finished creating notes
+  const handleReadyCommand = async (
+    setUserTranscript: Dispatch<SetStateAction<string>>,
+    setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
+  ) => {
+    const notes = await noteChain(userTranscript);
+    const newTab: Tab = {
+      id: Date.now().toString(),
+      title: 'Notes',
+      content: notes,
+      workspaceId,
+      filetype: 'markdown',
+      systemNote: '',
+      isContext: true,
+      createdAt: Date.now().toString(),
+      lastUpdated: Date.now().toString(),
+    };
+    globalServices.appStateService.send({ type: 'ADD_TAB', tab: newTab });
+    setTimeout(() => {
+      navigate(`/${workspaceId}/${newTab.id}`);
+    }, 150);
+    setStatesAndToast(setUserTranscript, setVoiceRecognitionState, '', 'idle');
+  };
+
   const config: Command[] = [
-    {
-      commands: ['ava', 'eva'],
-      action: (
-        setUserTranscript: Dispatch<SetStateAction<string>>,
-        setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
-      ) =>
-        setStatesAndToast(
-          setUserTranscript,
-          setVoiceRecognitionState,
-          '',
-          'ava',
-        ),
-    },
-    {
+    createCommand({ commands: ['ava', 'eva'], recognitionState: 'ava' }),
+    createCommand({
       commands: ['take notes'],
-      action: (
-        setUserTranscript: Dispatch<SetStateAction<string>>,
-        setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
-      ) =>
-        setStatesAndToast(
-          setUserTranscript,
-          setVoiceRecognitionState,
-          '',
-          'notes',
-          'Taking notes',
-        ),
-    },
-    {
+      recognitionState: 'notes',
+      toastMessage: 'Taking notes',
+    }),
+    createCommand({
       commands: ['voice'],
-      action: (
-        setUserTranscript: Dispatch<SetStateAction<string>>,
-        setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
-      ) =>
-        setStatesAndToast(
-          setUserTranscript,
-          setVoiceRecognitionState,
-          '',
-          'voice',
-          'Voice to voice active',
-        ),
-    },
-    {
+      recognitionState: 'voice',
+      toastMessage: 'Voice to voice active',
+    }),
+    createCommand({
       commands: ['cancel'],
-      action: (
-        setUserTranscript: Dispatch<SetStateAction<string>>,
-        setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
-      ) =>
-        setStatesAndToast(
-          setUserTranscript,
-          setVoiceRecognitionState,
-          '',
-          'idle',
-          'Going Idle',
-        ),
-    },
-    {
-      commands: ['ready'],
-      action: async (
-        setUserTranscript: Dispatch<SetStateAction<string>>,
-        setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
-      ) => {
-        const notes = await noteChain(userTranscript);
-        const newTab: Tab = {
-          id: Date.now().toString(),
-          title: 'Notes',
-          content: notes,
-          workspaceId,
-          filetype: 'markdown',
-          systemNote: '',
-          isContext: true,
-          createdAt: Date.now().toString(),
-          lastUpdated: Date.now().toString(),
-        };
-        globalServices.appStateService.send({ type: 'ADD_TAB', tab: newTab });
-        setTimeout(() => {
-          navigate(`/${workspaceId}/${newTab.id}`);
-        }, 150);
-        setStatesAndToast(
-          setUserTranscript,
-          setVoiceRecognitionState,
-          '',
-          'idle',
-          'Notes being created',
-        );
-      },
-    },
-    {
+      recognitionState: 'idle',
+      toastMessage: 'Going Idle',
+    }),
+    createCommand({
       commands: ['following'],
-      action: (
-        setUserTranscript: Dispatch<SetStateAction<string>>,
-        setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
-      ) =>
-        setStatesAndToast(
-          setUserTranscript,
-          setVoiceRecognitionState,
-          '',
-          'following',
-          'Following mode',
-        ),
-    },
+      recognitionState: 'following',
+      toastMessage: 'Following mode',
+    }),
+    createCommand({
+      commands: ['ready'],
+      recognitionState: 'idle',
+      toastMessage: 'Notes being created',
+      action: handleReadyCommand,
+    }),
   ];
 
   const handleVoiceCommand = async (t: string) => {

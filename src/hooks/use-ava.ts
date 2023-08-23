@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 import { avaChat } from '../utils/ac-langchain/agents/ava';
 import { toastifyAgentLog } from '../components/Toast';
-import { handleCreateTab, agentModeUtterances } from '../state';
+import { handleCreateTab } from '../state';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -11,12 +11,45 @@ import { queryChat } from '../utils/ac-langchain/agents/chat-model';
 import {
   createAvaChatPrompt,
   createCustomPrompt,
-  createWritingPromptTemplate,
+  // createWritingPromptTemplate,
 } from '../utils/ac-langchain/agents/agent.prompts';
 import { useActor } from '@xstate/react';
 import { EditorContext } from '../context/EditorContext';
-import { queryAssistant } from '../utils/ac-langchain/agents/assistant';
-import { queryRouterAgent } from '../utils/ac-langchain/agents/router-agent';
+// import { queryAssistant } from '../utils/ac-langchain/agents/assistant';
+// import { queryRouterAgent } from '../utils/ac-langchain/agents/router-agent';
+import { useLocalStorageKeyValue } from './use-local-storage';
+import axios from 'axios';
+import { getToken } from '../utils/config';
+
+export const agentMode = [
+  'ava',
+  'chat',
+  // 'create',
+  // 'research',
+  // 'writer',
+  // 'custom',
+];
+
+export const agentModeUtterances = {
+  chat: [
+    'Lets chat',
+    'Hey, hows it going?',
+    'Hello!',
+    'I need to talk to someone',
+  ],
+  create: [
+    'Make a set of color tokens based on space',
+    'Generate a story about a man in the woods',
+    'Brainstorm 5 ideas about starting an AI business',
+    'Create all the possible combinations of markdown styles',
+  ],
+  research: [
+    'What is the best way to do x?',
+    'What is the weather in Paris this weekend?',
+    'How safe is a Tesla? What are the safety features?',
+    'Visit acai.so and summarize the features',
+  ],
+};
 
 export const useAva = (): [
   fetchResponse: (message: string, systemMessage: string) => Promise<string>,
@@ -29,6 +62,8 @@ export const useAva = (): [
   const workspaceId = location.pathname.split('/')[1];
   const navigate = useNavigate();
   const [state] = useActor(globalServices.agentStateService);
+  const [userName] = useLocalStorageKeyValue('USER_NAME', '');
+  const [userLocation] = useLocalStorageKeyValue('USER_LOCATION', '');
   const currentAgent = state.context[workspaceId];
   const formattedChatHistory = currentAgent?.recentChatHistory
     .map(
@@ -36,36 +71,45 @@ export const useAva = (): [
         `${chat.type}: ${chat.text}`,
     )
     .join('\n');
-  const formattedActions = Object.entries(agentModeUtterances).map(
-    ([key, value]) => {
-      if (key === 'ava') return;
 
-      return `${key}: \n-${value.join(',\n ')}`;
-    },
-  );
+  // actions formatted with agent utterances to give the agent a better idea of classifications
+  // const formattedActions = Object.entries(agentModeUtterances).map(
+  //   ([key, value]) => {
+  //     if (key === 'ava') return;
+
+  //     return `${key}: \n-${value.join(',\n ')}`;
+  //   },
+  // );
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { editor } = useContext(EditorContext)!;
   const queryAva = async (
     message: string,
-    systemMessage: string,
+    customPrompt: string,
   ): Promise<string> => {
     setLoading(true);
-    let mode = currentAgent.agentMode;
-    if (currentAgent.agentMode === 'ava') {
-      const response = await queryRouterAgent({
-        actions: formattedActions.join('\n'),
-        input: message,
-        chatHistory: formattedChatHistory,
-      });
-      mode = response;
-    }
+
+    const mode = currentAgent.agentMode;
+    // let mode = currentAgent.agentMode;
+    // if the agent is in ava mode we query the router agent to determine the mode
+    // if (currentAgent.agentMode === 'ava') {
+    //   const response = await queryRouterAgent({
+    //     actions: formattedActions.join('\n'),
+    //     input: message,
+    //     chatHistory: formattedChatHistory,
+    //   });
+    //   mode = response;
+    // }
     switch (mode) {
       case 'chat': {
         // if the user has a custom prompt we override the system prompt
-        const sysMessage = systemMessage
-          ? await createCustomPrompt(systemMessage, formattedChatHistory)
+        const sysMessage = customPrompt
+          ? await createCustomPrompt(customPrompt, formattedChatHistory)
           : // @TODO: Update once user profile is implemented
-            await createAvaChatPrompt('Josh', formattedChatHistory);
+            await createAvaChatPrompt(
+              userName || 'User',
+              userLocation || 'Undisclosed',
+              formattedChatHistory,
+            );
         const response = await queryChat({
           systemMessage: sysMessage,
           message,
@@ -74,25 +118,11 @@ export const useAva = (): [
         setLoading(false);
         return response;
       }
-      case 'help': {
-        if (!editor) throw new Error('No editor');
-        const prompt = await createWritingPromptTemplate({
-          user: 'Josh',
-          document: editor.getText(),
-          chatHistory: formattedChatHistory,
-        });
-        const response = await queryAssistant({
-          systemMessage: prompt,
-          message,
-          modelName: currentAgent.openAIChatModel,
-        });
-        setLoading(false);
-        return response;
-      }
-      case 'create': {
+
+      case 'ava': {
         const response = await avaChat({
           input: message,
-          systemMessage,
+          systemMessage: customPrompt,
           chatHistory: formattedChatHistory,
           currentDocument: editor?.getText() || '',
           callbacks: {
@@ -103,10 +133,6 @@ export const useAva = (): [
               title: string;
               content: string;
             }) => {
-              console.log('create document', {
-                title,
-                content,
-              });
               const tab = await handleCreateTab(
                 { title, content },
                 workspaceId,
@@ -128,6 +154,70 @@ export const useAva = (): [
         setLoading(false);
         return response;
       }
+      case 'custom':
+        {
+          const agentPayload = {
+            userMessage: message,
+            userName: userName || 'User',
+            userLocation: userLocation || 'Undisclosed',
+            customPrompt,
+            chatHistory: currentAgent?.recentChatHistory,
+            currentDocument: editor?.getText() || '',
+          };
+          const agentUrl =
+            getToken('CUSTOM_AGENT_URL') ||
+            import.meta.env.VITE_CUSTOM_AGENT_URL;
+
+          if (!agentUrl) {
+            return 'Please set a custom agent URL in the settings menu';
+          }
+
+          setLoading(true); // assuming setLoading is defined somewhere in your code
+          try {
+            const res = await axios.post(`${agentUrl}/v1/agent`, agentPayload, {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+
+            const response = res.data.response;
+            setLoading(false);
+
+            return response;
+          } catch (error: any) {
+            setLoading(false);
+            return error.message;
+          }
+        }
+        // case 'research': {
+        //   const prompt = await createWritingPromptTemplate({
+        //     user: userName || 'User',
+        //     document: editor?.getText() || '',
+        //     chatHistory: formattedChatHistory,
+        //   });
+        //   const response = await queryAssistant({
+        //     systemMessage: prompt,
+        //     message,
+        //     modelName: currentAgent.openAIChatModel,
+        //   });
+        //   setLoading(false);
+        //   return response;
+        // }
+        // case 'writer': {
+        //   const prompt = await createWritingPromptTemplate({
+        //     user: userName || 'User',
+        //     document: editor?.getText() || '',
+        //     chatHistory: formattedChatHistory,
+        //   });
+        //   const response = await queryAssistant({
+        //     systemMessage: prompt,
+        //     message,
+        //     modelName: currentAgent.openAIChatModel,
+        //   });
+        //   setLoading(false);
+        //   return response;
+        // }
+        break;
       default: {
         setLoading(false);
         throw new Error(`Unexpected agentMode: ${currentAgent.agentMode}`);

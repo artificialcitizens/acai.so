@@ -19,6 +19,7 @@ import {
 import { useLocation } from 'react-router-dom';
 import { ChatHistory } from '../../state';
 import Dropdown from '../DropDown';
+import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
@@ -40,7 +41,10 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     'bark' | 'elevenlabs' | 'webSpeech'
   >('elevenlabs');
   const [manualTTS, setManualTTS] = useState<string>('');
-  const [listening, setListening] = useState<boolean>(false);
+  const [listening, setListening] = useLocalStorageKeyValue(
+    'IS_LISTENING',
+    'true',
+  );
   const { synthesizeElevenLabsSpeech, voices } = useElevenlabs();
   const synthesizeBarkSpeech = useBark();
   const synthesizeWebSpeech = useWebSpeechSynthesis();
@@ -66,7 +70,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   };
 
   const handleSpeechChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setListening(event.target.checked);
+    setListening(event.target.checked ? 'true' : 'false');
   };
 
   const normalizedAudioElement = async (
@@ -223,10 +227,10 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     handleVoiceRecognition(updatedUserTranscript);
   };
 
-  // @TODO add a way to turn off voice recognition
   useSpeechRecognition({
     onTranscriptionComplete,
-    active: !ttsLoading && listening,
+    // @TODO: Fix hacky listening state
+    active: !ttsLoading && listening === 'true' ? true : false,
   });
 
   const handleManualTTS = (e: React.FormEvent<HTMLFormElement>) => {
@@ -243,7 +247,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 
   const options = [
     { value: 'webSpeech', label: 'Web Speech API' },
-    { value: 'bark', label: 'Bark' },
+    import.meta.env.DEV ? { value: 'bark', label: 'Bark' } : undefined,
     { value: 'elevenlabs', label: 'Elevenlabs' },
   ];
 
@@ -290,7 +294,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
       <span className="flex flex-col">
         <Dropdown
           label="Synthesis Mode"
-          options={options}
+          options={options.filter((o) => o !== undefined) as any}
           value={synthesisMode}
           onChange={handleDropdownChange}
         />
@@ -325,7 +329,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             type="checkbox"
             id="singleCommandMode"
             name="option"
-            checked={listening}
+            checked={listening === 'true' ? true : false}
             onChange={handleSpeechChange}
           />
         </span>

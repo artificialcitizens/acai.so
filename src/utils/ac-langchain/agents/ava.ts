@@ -49,7 +49,7 @@ import { queryAssistant } from './assistant';
 
 const PREFIX = `###IGNORE PRIOR INSTRUCTIONS:
 You are an intelligent digital worker and you must use the research tools to research the users query
-and then you must use the create-document tool to send the information to the user.
+and then you must use the create-document-or-report tool to send the information to the user.
 ###########
 You must use one of the following tools for your response:`;
 
@@ -68,6 +68,7 @@ Final Answer: the final answer to the original input question`;
 
 const SUFFIX = `YOUR REPLIES MUST USE THE ABOVE FORMAT FORMAT SO THAT IT
 CAN BE PARSED WITH: /Action: (.*)\nAction Input: (.*)/s
+ALWAYS USE THE create-document-or-report TOOL TO SEND THE INFORMATION TO THE USER
 #################
 ADDITIONAL INFO:
 Current Date: {current_date}
@@ -202,7 +203,7 @@ const tools = [
     Input is a short question for the human and the output is the humans response`,
     func: async (question: string) => {
       const answer = prompt(question);
-      return answer || "Josh didn't respond in time, use your best judgement";
+      return answer || "User didn't respond in time, use your best judgement";
     },
   }),
 ];
@@ -277,13 +278,13 @@ const createAgentArtifacts = ({
   });
 
   google.description =
-    'For when you need to find or search information for Josh, you can use this to search Google for the results. Input is query to search for and output is results.';
+    'For when you need to find or search information for User, you can use this to search Google for the results. Input is query to search for and output is results.';
 
   const documentTool = new DynamicTool({
     name: 'create-document-or-report',
-    description: `Use this tool any time Josh wants you to create a document or report, etc. 
+    description: `Use this tool any time User wants you to create a document or report, etc. 
     Input is <title>Title</title> <content>Content</content>
-    DO NOT INCLUDE THIS INFORMATION IN THE RESPONSE, JOSH WILL GET IT AUTOMATICALLY
+    DO NOT INCLUDE THIS INFORMATION IN THE RESPONSE, User WILL GET IT AUTOMATICALLY
     `,
     func: async (input: string) => {
       const titleRegex = /<title>(.*?)<\/title>/s;
@@ -300,25 +301,6 @@ const createAgentArtifacts = ({
     },
     returnDirect: true,
   });
-
-  // const chatTool = new DynamicTool({
-  //   name: 'Talk to User',
-  //   description:
-  //     'For when the user wants to chat. Input is the user message and output is the response.',
-  //   func: async (input: string) => {
-  //     const sysMessage = systemMessage
-  //       ? await createCustomPrompt(systemMessage, chatHistory)
-  //       : // @TODO: Update once user profile is implemented
-  //         await createAvaChatPrompt('Josh', chatHistory);
-  //     const response = await queryChat({
-  //       systemMessage: sysMessage,
-  //       message: input,
-  //       modelName: 'gpt-3.5-turbo',
-  //     });
-  //     return response;
-  //   },
-  //   returnDirect: true,
-  // });
 
   const colorTool = new DynamicTool({
     name: 'create-color-tokens',
@@ -347,6 +329,13 @@ const createAgentArtifacts = ({
     },
     returnDirect: true,
   });
+  const getCurrentDocument = new DynamicTool({
+    name: 'view-users-current-document',
+    description: `returns the users current document/blog/article, etc.`,
+    func: async (string: string): Promise<string> => {
+      return currentDocument || 'No document found';
+    },
+  });
 
   const search = async (url: string) => {
     const targetUrl = encodeURIComponent(url);
@@ -368,12 +357,12 @@ const createAgentArtifacts = ({
 
   // @TODO: update tools to be dynamic based on settings
   // setting.searchTool && tools.push(searchTool);
-  tools.push(searchTool);
-  // tools.push(writingAssistantTool);
+  import.meta.env.DEV && tools.push(searchTool);
   // tools.push(chatTool);
   tools.push(documentTool);
   tools.push(google);
   tools.push(colorTool);
+  tools.push(getCurrentDocument);
 
   const executor = new AgentExecutor({
     agent,

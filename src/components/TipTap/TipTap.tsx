@@ -1,22 +1,22 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { useContext, useEffect, useId, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { Editor } from '@tiptap/core';
 import { TiptapEditorProps } from './props';
 import { TiptapExtensions } from './extensions';
 import { useDebouncedCallback } from 'use-debounce';
 import { EditorBubbleMenu } from './components';
-import { toastifyDefault, toastifyError } from '../Toast';
+// import { toastifyDefault, toastifyError } from '../Toast';
 import { useInterpret } from '@xstate/react';
 import { Tab, appStateMachine } from '../../state';
-import { semanticSearchQueryGeneration } from '../../utils/ac-langchain/chains/semantic-search-query-chain';
+// import { semanticSearchQueryGeneration } from '../../utils/ac-langchain/chains/semantic-search-query-chain';
 import { autoComplete } from '../../utils/ac-langchain/chains/autocomplete-chain';
 import Bottleneck from 'bottleneck';
 import { MenuBar } from './MenuBar';
 import './TipTap.css';
-import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
-import { VectorStoreContext } from '../../context/VectorStoreContext';
+// import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
+// import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { EditorContext } from '../../context/EditorContext';
 interface EditorProps {
   tab: Tab;
@@ -64,12 +64,12 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentContext, setCurrentContext] = useState('');
   const [currentTab, setCurrentTab] = useState<Tab>(tab);
-  const {
-    vectorstore,
-    addDocuments,
-    similaritySearchWithScore,
-    filterAndCombineContent,
-  } = useContext(VectorStoreContext) as ReturnType<typeof useMemoryVectorStore>;
+  // const {
+  //   vectorstore,
+  //   addDocuments,
+  //   similaritySearchWithScore,
+  //   filterAndCombineContent,
+  // } = useContext(VectorStoreContext) as ReturnType<typeof useMemoryVectorStore>;
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { setEditor } = useContext(EditorContext)!;
   useEffect(() => {
@@ -89,7 +89,6 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     if (workspaceId === 'docs' && !import.meta.env.DEV) return;
     setSaveStatus('Unsaved');
     const content = editor.getJSON();
-    console.log('content', content);
     setSaveStatus('Saving...');
     service.send({
       type: 'UPDATE_TAB_CONTENT',
@@ -102,24 +101,24 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     }, 100);
   };
 
-  /**
-   * Creates context for the autocomplete vector search to inform autocomplete
-   */
-  const setAutocompleteContext = async (editorContent: any) => {
-    const context = extractContentFromTipTap(editorContent);
-    const contextArrayLastTen = context.split(' ').slice(-10);
+  // /**
+  //  * Creates context for the autocomplete vector search to inform autocomplete
+  //  */
+  // const setAutocompleteContext = async (editorContent: any) => {
+  //   const context = extractContentFromTipTap(editorContent);
+  //   const contextArrayLastTen = context.split(' ').slice(-10);
 
-    const queryResults = await similaritySearchWithScore(
-      contextArrayLastTen.join(' '),
-    );
+  //   const queryResults = await similaritySearchWithScore(
+  //     contextArrayLastTen.join(' '),
+  //   );
 
-    const pageContent = queryResults.map((result: any) => {
-      if (result.score < 0.79) return;
-      return result[0].pageContent;
-    });
+  //   const pageContent = queryResults.map((result: any) => {
+  //     if (result.score < 0.79) return;
+  //     return result[0].pageContent;
+  //   });
 
-    setCurrentContext(pageContent.join('\n'));
-  };
+  //   setCurrentContext(pageContent.join('\n'));
+  // };
 
   const debouncedUpdates = useDebouncedCallback(async (editor: Editor) => {
     saveContent(editor, currentTab.workspaceId);
@@ -156,7 +155,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
           to: selection.from,
         });
         setIsLoading(true);
-        await setAutocompleteContext(e.editor);
+        // await setAutocompleteContext(e.editor);
         autoComplete({
           context: e.editor.state.doc.textBetween(
             Math.max(0, e.editor.state.selection.from - 5000),

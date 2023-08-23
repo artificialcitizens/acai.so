@@ -17,25 +17,25 @@ export const SocketManager: React.FC = () => {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
-    const newSocket = io(storedUrl, {
-      auth: {
-        password: storedPassword,
-      },
-      autoConnect: false, // Prevent automatic connection
-    });
+    // const newSocket = io(storedUrl, {
+    //   auth: {
+    //     password: storedPassword,
+    //   },
+    //   autoConnect: false, // Prevent automatic connection
+    // });
 
-    newSocket.on('connect_error', (err) => {
-      console.error('Connection Failed', err);
-      if (err.message.includes('xhr poll error')) {
-        toastifyError('Connection failed, be sure that your server is running');
-      } else {
-        toastifyError('Connection failed: ' + err.message);
-      }
-      newSocket.close();
-    });
+    // newSocket.on('connect_error', (err) => {
+    //   console.error('Connection Failed', err);
+    //   if (err.message.includes('xhr poll error')) {
+    //     toastifyError('Connection failed, be sure that your server is running');
+    //   } else {
+    //     toastifyError('Connection failed: ' + err.message);
+    //   }
+    //   newSocket.close();
+    // });
 
-    newSocket.connect();
-    setSocket(newSocket);
+    // newSocket.connect();
+    // setSocket(newSocket);
   };
 
   useEffect(() => {

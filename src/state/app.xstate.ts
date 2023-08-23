@@ -1,6 +1,7 @@
 import { createMachine, assign } from 'xstate';
 import { timestampToHumanReadable } from '../utils/data-utils';
 import { v4 as uuidv4 } from 'uuid';
+import { docsContent } from './fixture/docs';
 
 export type Tab = {
   id: string;
@@ -133,62 +134,7 @@ export const appStateMachine = createMachine<IContext, Event>({
                 id: 'introduction',
                 title: 'Introduction',
                 filetype: 'markdown',
-                content: [
-                  {
-                    type: 'heading',
-                    attrs: {
-                      level: 1,
-                    },
-                    content: [
-                      {
-                        type: 'text',
-                        text: 'WIP',
-                      },
-                    ],
-                  },
-                  {
-                    type: 'paragraph',
-                    content: [
-                      {
-                        type: 'text',
-                        marks: [
-                          {
-                            type: 'code',
-                          },
-                        ],
-                        text: '⚠️ This is an early public preview and is in active development. Stuff will break, I promise ⚠️',
-                      },
-                    ],
-                  },
-                  {
-                    type: 'paragraph',
-                  },
-                  {
-                    type: 'paragraph',
-                    content: [
-                      {
-                        type: 'text',
-                        text: 'Go to settings in the top right and enter your api keys and boom, you are ready to go!',
-                      },
-                      {
-                        type: 'hardBreak',
-                      },
-                      {
-                        type: 'hardBreak',
-                      },
-                      {
-                        type: 'text',
-                        text: '(MORE INFO TO COME)',
-                      },
-                    ],
-                  },
-                  {
-                    type: 'paragraph',
-                  },
-                  {
-                    type: 'paragraph',
-                  },
-                ],
+                content: docsContent,
                 isContext: false,
                 systemNote: '',
                 workspaceId: 'docs',
