@@ -39,7 +39,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const [singleCommandMode, setSingleCommandMode] = useState<boolean>(false);
   const [synthesisMode, setSynthesisMode] = useState<
     'bark' | 'elevenlabs' | 'webSpeech'
-  >('elevenlabs');
+  >('webSpeech');
   const [manualTTS, setManualTTS] = useState<string>('');
   const [listening, setListening] = useLocalStorageKeyValue(
     'IS_LISTENING',

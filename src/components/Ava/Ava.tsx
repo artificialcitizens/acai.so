@@ -87,10 +87,14 @@ export const Ava: React.FC<AvaProps> = ({
             });
           }}
         />
-        <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
-          Custom Agent Server
-        </h5>
-        <SocketManager />
+        {import.meta.env.DEV && (
+          <>
+            <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
+              Custom Agent Server
+            </h5>
+            <SocketManager />
+          </>
+        )}
       </ExpansionPanel>
       {/* <ExpansionPanel
         data-ava-element="junk-drawer-panel-toggle"
