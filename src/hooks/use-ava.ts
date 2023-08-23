@@ -27,7 +27,7 @@ export const agentMode = [
   // 'create',
   // 'research',
   // 'writer',
-  // 'custom',
+  'custom',
 ];
 
 export const agentModeUtterances = {
@@ -174,11 +174,15 @@ export const useAva = (): [
 
           setLoading(true); // assuming setLoading is defined somewhere in your code
           try {
-            const res = await axios.post(`${agentUrl}/v1/agent`, agentPayload, {
-              headers: {
-                'Content-Type': 'application/json',
+            const res = await axios.post(
+              `http://localhost:3000/v1/agent`,
+              agentPayload,
+              {
+                headers: {
+                  'Content-Type': 'application/json',
+                },
               },
-            });
+            );
 
             const response = res.data.response;
             setLoading(false);
