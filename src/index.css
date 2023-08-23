@@ -98,7 +98,7 @@ ul[data-type='taskList'] li[data-checked='true'] > div > p {
   font-weight: 400;
 
   @apply text-acai-white;
-  @apply bg-base;
+  @apply bg-darker;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -121,11 +121,6 @@ body {
   display: flex;
   place-items: center;
   width: 100vw;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
 }
 
 button {
@@ -192,7 +187,7 @@ p {
 
 pre,
 code {
-  @apply bg-base text-acai-white !important;
+  @apply bg-black text-acai-white !important;
 }
 
 /* @media (prefers-color-scheme: light) {

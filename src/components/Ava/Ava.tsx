@@ -20,6 +20,7 @@ import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
 import ChatModelDropdown from '../ChatSettings';
 import { SocketManager } from '../SocketManager';
+import UserProfile from '../UserProfile/UserProfile';
 
 interface AvaProps {
   workspaceId: string;
@@ -32,12 +33,8 @@ export const Ava: React.FC<AvaProps> = ({
   onVoiceActivation,
   audioContext,
 }) => {
-  const {
-    appStateService,
-    uiStateService,
-    agentStateService,
-  }: GlobalStateContextValue = useContext(GlobalStateContext);
-  const navigate = useNavigate();
+  const { uiStateService, agentStateService }: GlobalStateContextValue =
+    useContext(GlobalStateContext);
 
   const systemNotes =
     useSelector(
@@ -95,7 +92,7 @@ export const Ava: React.FC<AvaProps> = ({
         </h5>
         <SocketManager />
       </ExpansionPanel>
-      <ExpansionPanel
+      {/* <ExpansionPanel
         data-ava-element="junk-drawer-panel-toggle"
         title="Knowledge"
       >
@@ -121,6 +118,9 @@ export const Ava: React.FC<AvaProps> = ({
           />
         </div>
         <StorageMeter />
+      </ExpansionPanel> */}
+      <ExpansionPanel title="User">
+        <UserProfile />
       </ExpansionPanel>
       <ExpansionPanel title="Voice Synthesis">
         <VoiceRecognition

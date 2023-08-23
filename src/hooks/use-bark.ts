@@ -13,7 +13,7 @@ export const useBark = () => {
     }) => {
       const options = {
         method: 'POST',
-        url: `http://192.168.4.44:5000/bark-inference`,
+        url: `${import.meta.env.VITE_BARK_SERVER}/bark-inference`,
         headers: {
           'content-type': 'application/json',
         },
