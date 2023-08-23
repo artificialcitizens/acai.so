@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
-import { toastifyError } from '../Toast';
+import { toastifyError, toastifyInfo } from '../Toast';
+import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  GlobalStateContext,
+  GlobalStateContextValue,
+} from '../../context/GlobalStateContext';
+import { handleCreateTab } from '../../state';
 
 export const SocketManager: React.FC = () => {
   const [storedUrl, setStoredUrl] = useLocalStorageKeyValue(
@@ -13,29 +19,51 @@ export const SocketManager: React.FC = () => {
     '',
   );
   const [socket, setSocket] = useState<Socket | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const workspaceId = location.pathname.split('/')[1];
+  const globalServices: GlobalStateContextValue =
+    useContext(GlobalStateContext);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
-    // const newSocket = io(storedUrl, {
-    //   auth: {
-    //     password: storedPassword,
-    //   },
-    //   autoConnect: false, // Prevent automatic connection
-    // });
+    const newSocket = io(storedUrl, {
+      auth: {
+        password: storedPassword,
+      },
+      autoConnect: false, // Prevent automatic connection
+    });
 
-    // newSocket.on('connect_error', (err) => {
-    //   console.error('Connection Failed', err);
-    //   if (err.message.includes('xhr poll error')) {
-    //     toastifyError('Connection failed, be sure that your server is running');
-    //   } else {
-    //     toastifyError('Connection failed: ' + err.message);
-    //   }
-    //   newSocket.close();
-    // });
+    newSocket.on('connect_error', (err) => {
+      console.error('Connection Failed', err);
+      if (err.message.includes('xhr poll error')) {
+        toastifyError('Connection failed, be sure that your server is running');
+      } else {
+        toastifyError('Connection failed: ' + err.message);
+      }
+      newSocket.close();
+    });
 
-    // newSocket.connect();
-    // setSocket(newSocket);
+    newSocket.on('connect', () => {
+      toastifyInfo('Connected to server');
+    });
+
+    newSocket.connect();
+    setSocket(newSocket);
+  };
+
+  const onTabCreate = async (data: { title: string; content: string }) => {
+    const { title, content } = data;
+    if (!workspaceId) return;
+    const tab = await handleCreateTab({ title, content }, workspaceId);
+    globalServices.appStateService.send({
+      type: 'ADD_TAB',
+      tab,
+    });
+    setTimeout(() => {
+      navigate(`/${workspaceId}/${tab.id}`);
+    }, 250);
   };
 
   useEffect(() => {
@@ -44,16 +72,18 @@ export const SocketManager: React.FC = () => {
     const handleConnect = () => console.log(`Connected: ${socket.id}`);
     const handleMessage = (message: string) => console.log(message);
     const handleDisconnect = () => console.log(`Disconnected: ${socket.id}`);
-
+    console.log('socket connected');
     socket.on('connect', handleConnect);
     socket.on('message', handleMessage);
     socket.on('disconnect', handleDisconnect);
+    socket.on('create-tab', onTabCreate);
 
     return () => {
       socket.off('connect', handleConnect);
       socket.off('message', handleMessage);
       socket.off('disconnect', handleDisconnect);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket]);
 
   return (
