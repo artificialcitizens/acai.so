@@ -26,3 +26,18 @@ Start the server using the following command:
 `python main.py`
 
 Now, your server should be running at `http://localhost:5050`.
+
+example agent curl request
+
+```
+curl -X POST -H "Content-Type: application/json" \
+  -d '{
+  "userMessage": "Hello",
+  "userName": "John Doe",
+  "userLocation": "San Francisco",
+  "customPrompt": "Custom Prompt",
+  "chatHistory": "Chat History",
+  "currentDocument": "Current Document"
+}' \
+  http://localhost:5000/v1/agent
+```
