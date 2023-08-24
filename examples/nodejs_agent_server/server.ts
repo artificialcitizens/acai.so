@@ -10,7 +10,11 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'https://www.acai.so'],
+    origin: [
+      'http://localhost:5173',
+      'https://www.acai.so',
+      'http://192.168.4.74:5173',
+    ],
     credentials: true,
   }),
 );
@@ -31,6 +35,8 @@ interface AgentPayload {
 app.post('/v1/agent', async (req, res) => {
   try {
     const agentPayload: AgentPayload = req.body;
+    console.log('Agent Payload:', agentPayload);
+    // Destructure and log the properties of agentPayload
     const {
       userMessage,
       userName,
@@ -39,13 +45,19 @@ app.post('/v1/agent', async (req, res) => {
       chatHistory,
       currentDocument,
     } = agentPayload;
-    console.log('User Message:', userMessage);
-    console.log('User Name:', userName);
-    console.log('User Location:', userLocation);
-    console.log('Custom Prompt:', customPrompt);
-    console.log('Chat History:', chatHistory);
-    console.log('Current Document:', currentDocument);
-    res.status(200).send({ message: 'Payload received and logged' });
+    const formattedPayload = `I'm a tab from the custom agent endpoint! 👍
+    \nUser Message: ${userMessage}
+    \nUser Name: ${userName}
+    \nUser Location: ${userLocation}
+    \nCustom Prompt: ${customPrompt}
+    \nChat History: ${JSON.stringify(chatHistory)}
+    \nCurrent Document: ${currentDocument}
+    `;
+    io.emit('create-tab', {
+      title: 'Hello Tab!',
+      content: formattedPayload,
+    });
+    res.status(200).send({ response: 'Hello from the server side...' });
   } catch (error) {
     console.error(error);
     res
@@ -108,7 +120,11 @@ const httpServer = createServer(app);
 // Use the correct options for creating the socket.io server
 const io = new Server(httpServer, {
   cors: {
-    origin: ['http://localhost:5173', 'https://www.acai.so'],
+    origin: [
+      'http://localhost:5173',
+      'https://www.acai.so',
+      'http://192.168.4.74:5173',
+    ],
     methods: ['GET', 'POST'], // Add this line
     credentials: true, // Add this line if you want to allow credentials
   },

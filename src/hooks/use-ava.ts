@@ -21,6 +21,15 @@ import { useLocalStorageKeyValue } from './use-local-storage';
 import axios from 'axios';
 import { getToken } from '../utils/config';
 
+type MessageType = 'user' | 'ava';
+
+type Message = {
+  id: string;
+  text: string;
+  timestamp: string;
+  type: MessageType;
+};
+
 export const agentMode = [
   'ava',
   'chat',
@@ -160,7 +169,7 @@ export const useAva = (): [
           userName: userName || 'User',
           userLocation: userLocation || 'Undisclosed',
           customPrompt,
-          chatHistory: currentAgent?.recentChatHistory,
+          chatHistory: currentAgent?.recentChatHistory as Message[],
           currentDocument: editor?.getText() || '',
         };
         const agentUrl =

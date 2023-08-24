@@ -39,11 +39,20 @@ Note: this is a work in progress and subject to change, this will be updated as 
 
 This route is used to receive and log payload from the client. The payload should contain the following properties:
 
+```
+type Message = {
+    id: string;
+    text: string;
+    timestamp: string;
+    type: MessageType;
+}
+```
+
 - userMessage: string
 - userName: string
 - userLocation: string
 - customPrompt: string
-- chatHistory: any
+- chatHistory: Message[]
 - currentDocument: string
 
 ```
