@@ -30,7 +30,6 @@ import { WebBrowser } from 'langchain/tools/webbrowser';
 import { Calculator } from 'langchain/tools/calculator';
 import { config } from 'dotenv';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { timestampToHumanReadable } from '../../../second-brain-frontend/src/utils/data-utils';
 import { BufferWindowMemory } from 'langchain/memory';
 import { BaseCallbackHandler } from 'langchain/callbacks';
 
@@ -58,7 +57,6 @@ const SUFFIX = `Relevant pieces of previous conversation:
 {history}
 
 (You do not need to use these pieces of information if not relevant)
-Current Date: ${timestampToHumanReadable(new Date())}
 Question: {input}
 Thought:{agent_scratchpad}`;
 
@@ -132,6 +130,7 @@ class CustomOutputParser extends AgentActionOutputParser {
     throw new Error('Not implemented');
   }
 }
+
 async function processThought(thought) {
   console.log('Processing thought', thought);
   return thought;

@@ -2,7 +2,7 @@ import express from 'express';
 import { Server, Socket } from 'socket.io';
 import { createServer } from 'http';
 import cors from 'cors';
-import { avaChat } from './sb-langchain/agents/ava';
+import { avaChat } from './ava.js';
 import axios from 'axios';
 
 const app = express();
@@ -59,24 +59,24 @@ app.get('/ava', async (req, res) => {
     query: string;
   };
   const callbacks = {
-    onDataReceived: (data) => {
+    onDataReceived: (data: any) => {
       io.emit('data-received', data);
     },
-    onAgentAction: (data) => {
+    onAgentAction: (data: any) => {
       io.emit('agent-action', data);
     },
-    onProcessing: (data) => {
+    onProcessing: (data: any) => {
       io.emit('processing', data);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       io.emit('error', error);
     },
-    onCreateDocument: (data) => {
-      let title = data
+    onCreateDocument: (data: any) => {
+      const title = data
         .split('Title: ')[1]
         .split(', Content:')[0]
         .replace(/"/g, '');
-      let content = data.split(', Content: ')[1].replace(/"/g, '');
+      const content = data.split(', Content: ')[1].replace(/"/g, '');
       io.emit('create-tab', {
         title,
         content,
@@ -86,7 +86,7 @@ app.get('/ava', async (req, res) => {
   try {
     const response = await avaChat(query, callbacks);
     res.send(response);
-  } catch (error) {
+  } catch (error: any) {
     console.log(error);
     io.emit('error', error.message);
     res.send('I had an issue parsing the last message, please try again');
@@ -98,17 +98,19 @@ app.get('/proxy', async (req, res) => {
     const url = req.query.url as string;
     const response = await axios.get(url);
     res.send(response.data);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).send({ error: error.toString() });
   }
 });
 
 const httpServer = createServer(app);
 
-// create socket.io server
+// Use the correct options for creating the socket.io server
 const io = new Server(httpServer, {
   cors: {
     origin: ['http://localhost:5173', 'https://www.acai.so'],
+    methods: ['GET', 'POST'], // Add this line
+    credentials: true, // Add this line if you want to allow credentials
   },
 });
 
@@ -135,6 +137,7 @@ io.on('connection', (socket) => {
 
 const start = async () => {
   httpServer.listen(3000);
+  console.log('Server listening on port 3000');
 };
 
 start();
