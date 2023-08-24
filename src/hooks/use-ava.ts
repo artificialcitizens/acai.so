@@ -172,7 +172,7 @@ export const useAva = (): [
 
         setLoading(true); // assuming setLoading is defined somewhere in your code
         try {
-          const res = await axios.post(`${agentUrl}`, agentPayload, {
+          const res = await axios.post(`${agentUrl}/v1/agent`, agentPayload, {
             headers: {
               'Content-Type': 'application/json',
             },

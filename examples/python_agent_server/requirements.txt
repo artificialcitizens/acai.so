@@ -3,3 +3,4 @@ flask-socketio
 python-dotenv
 simple-websocket
 flask-cors
+requests

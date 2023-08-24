@@ -1,3 +1,4 @@
+import requests
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
@@ -18,6 +19,21 @@ socketio = SocketIO(
         "http://www.acai.so",
     ],
 )
+
+
+@app.route("/proxy", methods=["GET"])
+def proxy():
+    try:
+        url = request.args.get("url")
+        response = requests.get(url, timeout=5)
+        return response.text
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
+
+
+@app.route("/test", methods=["GET"])
+def test():
+    return "Hello world"
 
 
 @app.route("/v1/agent", methods=["POST"])

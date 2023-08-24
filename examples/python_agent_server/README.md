@@ -27,7 +27,24 @@ Start the server using the following command:
 
 Now, your server should be running at `http://localhost:5050`.
 
-example agent curl request
+## Routes
+
+### GET /test
+
+A simple test route that returns "Hello world".
+
+### POST /v1/agent
+
+Note: this is a work in progress and subject to change, this will be updated as the data model progresses
+
+This route is used to receive and log payload from the client. The payload should contain the following properties:
+
+- userMessage: string
+- userName: string
+- userLocation: string
+- customPrompt: string
+- chatHistory: any
+- currentDocument: string
 
 ```
 curl -X POST -H "Content-Type: application/json" \
@@ -36,8 +53,30 @@ curl -X POST -H "Content-Type: application/json" \
   "userName": "John Doe",
   "userLocation": "San Francisco",
   "customPrompt": "Custom Prompt",
-  "chatHistory": "Chat History",
+  "chatHistory": [
+    {
+      "message": "Hello",
+      "sender": "user"
+    },
+    {
+      "message": "Hi",
+      "sender": "ava"
+    }
+  ],
   "currentDocument": "Current Document"
 }' \
   http://localhost:5000/v1/agent
+
+### GET /proxy
+
+This route is used to proxy a GET request to another URL. The URL should be passed as a query parameter.
+
+example request:
+
+```
+
+http://localhost:5000/proxy?url=https://google.com
+
+```
+
 ```
