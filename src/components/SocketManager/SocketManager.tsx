@@ -80,6 +80,7 @@ export const SocketManager: React.FC = () => {
       socket.off('message', handleMessage);
       socket.off('disconnect', handleDisconnect);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket]);
 
   return (

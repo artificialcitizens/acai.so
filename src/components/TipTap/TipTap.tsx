@@ -184,13 +184,14 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
         debouncedUpdates(e.editor);
       }
     },
-    autofocus: 'end',
+    autofocus: 'start',
   });
 
   useEffect(() => {
     if (!currentTab) return;
     if (editor && !hydrated) {
       editor.commands.setContent(currentTab.content);
+      editor.commands.setNodeSelection(0); // Add this line
       setHydrated(true);
     }
   }, [currentTab, editor, hydrated]);
