@@ -18,14 +18,11 @@ Open your terminal and create a new Conda environment using the following comman
 
 ## Step 4: Install the required packages
 
-`pip install fastapi uvicorn python-socketio pydantic`
+`pip install -r requirements.txt`
 
 ## Step 5: Start the server
 
 Start the server using the following command:
-`uvicorn main:app`
+`python main.py`
 
-Now, your server should be running at `http://localhost:8000`.
-
-Note
-Remember to replace `"your_password_here"` in the `authenticate_connect` function with your actual password.
+Now, your server should be running at `http://localhost:5050`.
