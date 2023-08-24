@@ -10,11 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: [
-      'http://192.168.4.44:5173',
-      'http://localhost:5173',
-      'https://www.acai.so',
-    ],
+    origin: ['http://localhost:5173', 'https://www.acai.so'],
     credentials: true,
   }),
 );
@@ -112,11 +108,7 @@ const httpServer = createServer(app);
 // create socket.io server
 const io = new Server(httpServer, {
   cors: {
-    origin: [
-      'http://192.168.4.44:5173',
-      'http://localhost:5173',
-      'https://www.acai.so',
-    ],
+    origin: ['http://localhost:5173', 'https://www.acai.so'],
   },
 });
 
