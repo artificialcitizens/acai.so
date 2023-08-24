@@ -154,74 +154,68 @@ export const useAva = (): [
         setLoading(false);
         return response;
       }
-      case 'custom':
-        {
-          const agentPayload = {
-            userMessage: message,
-            userName: userName || 'User',
-            userLocation: userLocation || 'Undisclosed',
-            customPrompt,
-            chatHistory: currentAgent?.recentChatHistory,
-            currentDocument: editor?.getText() || '',
-          };
-          const agentUrl =
-            getToken('CUSTOM_AGENT_URL') ||
-            import.meta.env.VITE_CUSTOM_AGENT_URL;
+      case 'custom': {
+        const agentPayload = {
+          userMessage: message,
+          userName: userName || 'User',
+          userLocation: userLocation || 'Undisclosed',
+          customPrompt,
+          chatHistory: currentAgent?.recentChatHistory,
+          currentDocument: editor?.getText() || '',
+        };
+        const agentUrl =
+          getToken('CUSTOM_AGENT_URL') || import.meta.env.VITE_CUSTOM_AGENT_URL;
 
-          if (!agentUrl) {
-            return 'Please set a custom agent URL in the settings menu';
-          }
-
-          setLoading(true); // assuming setLoading is defined somewhere in your code
-          try {
-            const res = await axios.post(
-              `http://localhost:3000/v1/agent`,
-              agentPayload,
-              {
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-              },
-            );
-
-            const response = res.data.response;
-            setLoading(false);
-
-            return response;
-          } catch (error: any) {
-            setLoading(false);
-            return error.message;
-          }
+        if (!agentUrl) {
+          return 'Please set a custom agent URL in the settings menu';
         }
-        // case 'research': {
-        //   const prompt = await createWritingPromptTemplate({
-        //     user: userName || 'User',
-        //     document: editor?.getText() || '',
-        //     chatHistory: formattedChatHistory,
-        //   });
-        //   const response = await queryAssistant({
-        //     systemMessage: prompt,
-        //     message,
-        //     modelName: currentAgent.openAIChatModel,
-        //   });
-        //   setLoading(false);
-        //   return response;
-        // }
-        // case 'writer': {
-        //   const prompt = await createWritingPromptTemplate({
-        //     user: userName || 'User',
-        //     document: editor?.getText() || '',
-        //     chatHistory: formattedChatHistory,
-        //   });
-        //   const response = await queryAssistant({
-        //     systemMessage: prompt,
-        //     message,
-        //     modelName: currentAgent.openAIChatModel,
-        //   });
-        //   setLoading(false);
-        //   return response;
-        // }
-        break;
+
+        setLoading(true); // assuming setLoading is defined somewhere in your code
+        try {
+          const res = await axios.post(`${agentUrl}`, agentPayload, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          const response = res.data.response;
+          setLoading(false);
+
+          return response;
+        } catch (error: any) {
+          setLoading(false);
+          return error.message;
+        }
+      }
+      // case 'research': {
+      //   const prompt = await createWritingPromptTemplate({
+      //     user: userName || 'User',
+      //     document: editor?.getText() || '',
+      //     chatHistory: formattedChatHistory,
+      //   });
+      //   const response = await queryAssistant({
+      //     systemMessage: prompt,
+      //     message,
+      //     modelName: currentAgent.openAIChatModel,
+      //   });
+      //   setLoading(false);
+      //   return response;
+      // }
+      // case 'writer': {
+      //   const prompt = await createWritingPromptTemplate({
+      //     user: userName || 'User',
+      //     document: editor?.getText() || '',
+      //     chatHistory: formattedChatHistory,
+      //   });
+      //   const response = await queryAssistant({
+      //     systemMessage: prompt,
+      //     message,
+      //     modelName: currentAgent.openAIChatModel,
+      //   });
+      //   setLoading(false);
+      //   return response;
+      // }
+      // break;
       default: {
         setLoading(false);
         throw new Error(`Unexpected agentMode: ${currentAgent.agentMode}`);
