@@ -2,12 +2,12 @@ import React, { useState, useEffect, useContext } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import { toastifyError, toastifyInfo } from '../Toast';
+import { handleCreateTab } from '../../state';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
-import { handleCreateTab } from '../../state';
 
 export const SocketManager: React.FC = () => {
   const [storedUrl, setStoredUrl] = useLocalStorageKeyValue(
@@ -20,11 +20,10 @@ export const SocketManager: React.FC = () => {
   );
   const [socket, setSocket] = useState<Socket | null>(null);
   const location = useLocation();
-  const navigate = useNavigate();
   const workspaceId = location.pathname.split('/')[1];
+  const navigate = useNavigate();
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
-
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -45,38 +44,36 @@ export const SocketManager: React.FC = () => {
       newSocket.close();
     });
 
-    newSocket.on('connect', () => {
-      toastifyInfo('Connected to server');
-    });
-
     newSocket.connect();
     setSocket(newSocket);
-  };
-
-  const onTabCreate = async (data: { title: string; content: string }) => {
-    const { title, content } = data;
-    if (!workspaceId) return;
-    const tab = await handleCreateTab({ title, content }, workspaceId);
-    globalServices.appStateService.send({
-      type: 'ADD_TAB',
-      tab,
-    });
-    setTimeout(() => {
-      navigate(`/${workspaceId}/${tab.id}`);
-    }, 250);
   };
 
   useEffect(() => {
     if (!socket) return;
 
-    const handleConnect = () => console.log(`Connected: ${socket.id}`);
+    const handleConnect = () => {
+      toastifyInfo('Connected to custom agent');
+      console.log(`Connected: ${socket.id}`);
+    };
     const handleMessage = (message: string) => console.log(message);
     const handleDisconnect = () => console.log(`Disconnected: ${socket.id}`);
-    console.log('socket connected');
+    const handleTab = async (data: { title: string; content: string }) => {
+      if (!workspaceId) toastifyError('No workspace active');
+      const { title, content } = data;
+      handleCreateTab({ title, content }, workspaceId);
+      const tab = await handleCreateTab({ title, content }, workspaceId);
+      globalServices.appStateService.send({
+        type: 'ADD_TAB',
+        tab,
+      });
+      setTimeout(() => {
+        navigate(`/${workspaceId}/${tab.id}`);
+      }, 250);
+    };
     socket.on('connect', handleConnect);
     socket.on('message', handleMessage);
     socket.on('disconnect', handleDisconnect);
-    socket.on('create-tab', onTabCreate);
+    socket.on('create-tab', handleTab);
 
     return () => {
       socket.off('connect', handleConnect);
@@ -120,45 +117,3 @@ export const SocketManager: React.FC = () => {
     </form>
   );
 };
-// old socket code
-// const socket = useContext(SocketContext);
-
-// useEffect(() => {
-//   if (!socket) return;
-
-//   const handleConnect = () => console.log(`Connected: ${socket.id}`);
-//   const handleMessage = (message: string) => console.log(message);
-//   const handleDisconnect = () => console.log(`Disconnected: ${socket.id}`);
-
-//   // const handleAgentObservation = (observation: { content: string }) => {
-//   //   // setCurrentTool(observation.content);
-//   //   // const thought = observation.log.split('Observation:')[0].trim();
-//   //   toastifyAgentObservation(observation.content);
-//   // };
-
-//   socket.on('connect', handleConnect);
-//   socket.on('message', handleMessage);
-//   socket.on('disconnect', handleDisconnect);
-//   socket.on('create-tab', (data) =>
-//     handleCreateTab({ title: data.title, content: data.content }, send, workspace.id),
-//   );
-
-//   return () => {
-//     socket.off('connect', handleConnect);
-//     socket.off('message', handleMessage);
-//     socket.off('disconnect', handleDisconnect);
-//     socket.off('create-tab', (data) =>
-//       handleCreateTab({ title: data.title, content: data.content }, send, workspace.id),
-//     );
-//   };
-
-//   // HERE IS HOW TO USE TOOLS VIA SOCKET BY HAVING THE TOOL SEND THE ACTION THROUGH SOCKET
-//   // socket.on('agent-action', (action: string) => {
-//   //   console.log('agent-action', action);
-//   //   if (action === 'start-listening') {
-//   //     setAvaListening(true);
-//   //   } else if (action === 'stop-listening') {
-//   //     setAvaListening(false);
-//   //   }
-//   // });
-// }, [send, socket, workspace]); // specify the dependencies here

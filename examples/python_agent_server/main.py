@@ -1,68 +1,74 @@
-from fastapi import FastAPI, APIRouter, HTTPException
-from socketio import ASGIApp, Server
-from pydantic import BaseModel
-from datetime import datetime
-from fastapi.middleware.cors import CORSMiddleware
+import requests
+from flask import Flask, request, jsonify
+from flask_socketio import SocketIO, emit
+from flask_cors import CORS
 
-
-class AgentResponse(BaseModel):
-    message: str
-
-
-sio = Server(
+# existing code...
+app = Flask(__name__)
+CORS(app)
+app.config["SECRET_KEY"] = "your_secret_key"
+CORS(
+    app,
+    origins=["http://192.168.4.74:5173", "http://localhost:5173", "http://www.acai.so"],
+)
+socketio = SocketIO(
+    app,
     cors_allowed_origins=[
         "http://192.168.4.74:5173",
         "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "https://acai.so",
+        "http://www.acai.so",
     ],
-    cors_credentials=True,
 )
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
-    allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
-)
-app.mount("/", ASGIApp(socketio_server=sio))
-
-v1_router = APIRouter(prefix="/v1")
 
 
-@v1_router.get("/test")
-async def test_connection():
-    return {"message": "Connection successful"}
+@app.route("/proxy", methods=["GET"])
+def proxy():
+    try:
+        url = request.args.get("url")
+        response = requests.get(url, timeout=5)
+        return response.text
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
 
 
-@v1_router.post("/agent-response")
-async def generate_agent_response(response: AgentResponse):
-    # Emit the agent response to all connected clients
-    sio.emit(
-        "agent-log",
-        {
-            "message": "Agent starting..",
-            "current_time": datetime.now().strftime("%H:%M:%S"),
-        },
-    )
-    return {"message": "Agent response sent"}
+@app.route("/test", methods=["GET"])
+def test():
+    return "Hello world"
 
 
-app.include_router(v1_router)
+@app.route("/v1/agent", methods=["POST"])
+def agent():
+    try:
+        agent_payload = request.get_json()
+
+        print("Agent Payload:", agent_payload)
+
+        user_message = agent_payload.get("userMessage")
+        user_name = agent_payload.get("userName")
+        user_location = agent_payload.get("userLocation")
+        custom_prompt = agent_payload.get("customPrompt")
+        chat_history = agent_payload.get("chatHistory")
+        current_document = agent_payload.get("currentDocument")
+
+        formatted_payload = f"I'm a tab from the custom agent endpoint! 👍\
+            \nUser Message: {user_message}\
+            \nUser Name: {user_name}\
+            \nUser Location: {user_location}\
+            \nCustom Prompt: {custom_prompt}\
+            \nChat History: {chat_history}\
+            \nCurrent Document: {current_document}\
+            "
+
+        socketio.emit(
+            "create-tab", {"title": "Hello Tab!", "content": formatted_payload}
+        )
+
+        return jsonify({"response": "Hello from the server side..."}), 200
+
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "An error occurred while processing the payload"}), 500
 
 
-@sio.event
-def connect(sid, environ):
-    auth = environ.get("asgi.scope").get("headers")
-    auth_dict = dict(auth)
-    password = auth_dict.get(b"authorization").decode("utf-8")
-    if password != "your_password_here":
-        sio.disconnect(sid)
-    else:
-        print("Client connected")
-
-
-@sio.event
-def disconnect(sid):
-    print("Client disconnected")
+if __name__ == "__main__":
+    socketio.run(app, host="0.0.0.0", port=5050)

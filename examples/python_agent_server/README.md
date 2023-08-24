@@ -18,14 +18,74 @@ Open your terminal and create a new Conda environment using the following comman
 
 ## Step 4: Install the required packages
 
-`pip install fastapi uvicorn python-socketio pydantic`
+`pip install -r requirements.txt`
 
 ## Step 5: Start the server
 
 Start the server using the following command:
-`uvicorn main:app`
+`python main.py`
 
-Now, your server should be running at `http://localhost:8000`.
+Now, your server should be running at `http://localhost:5050`.
 
-Note
-Remember to replace `"your_password_here"` in the `authenticate_connect` function with your actual password.
+## Routes
+
+### GET /test
+
+A simple test route that returns "Hello world".
+
+### POST /v1/agent
+
+Note: this is a work in progress and subject to change, this will be updated as the data model progresses
+
+This route is used to receive and log payload from the client. The payload should contain the following properties:
+
+```
+type Message = {
+    id: string;
+    text: string;
+    timestamp: string;
+    type: MessageType;
+}
+```
+
+- userMessage: string
+- userName: string
+- userLocation: string
+- customPrompt: string
+- chatHistory: Message[]
+- currentDocument: string
+
+```
+curl -X POST -H "Content-Type: application/json" \
+  -d '{
+  "userMessage": "Hello",
+  "userName": "John Doe",
+  "userLocation": "San Francisco",
+  "customPrompt": "Custom Prompt",
+  "chatHistory": [
+    {
+      "message": "Hello",
+      "sender": "user"
+    },
+    {
+      "message": "Hi",
+      "sender": "ava"
+    }
+  ],
+  "currentDocument": "Current Document"
+}' \
+  http://localhost:5000/v1/agent
+
+### GET /proxy
+
+This route is used to proxy a GET request to another URL. The URL should be passed as a query parameter.
+
+example request:
+
+```
+
+http://localhost:5000/proxy?url=https://google.com
+
+```
+
+```
