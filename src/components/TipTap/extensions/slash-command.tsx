@@ -78,7 +78,7 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       title: 'Continue writing',
       description: 'Use AI to expand your thoughts.',
       searchTerms: ['gpt'],
-      icon: <Magic className="w-7 text-black" />,
+      icon: <Magic className="w-7 h-7 text-black" />,
     },
     {
       title: 'Send Feedback',
@@ -325,8 +325,17 @@ const CommandList = ({
           // Save current selection
           const { from, to } = editor.state.selection;
           hidePopup();
-          // Restore selection
-          editor.chain().focus().setTextSelection({ from, to }).run();
+          // If Backspace was pressed, delete the '/' character
+          if (e.key === 'Backspace') {
+            editor
+              .chain()
+              .focus()
+              .deleteRange({ from: from - 1, to })
+              .run();
+          } else {
+            // Restore selection
+            editor.chain().focus().setTextSelection({ from, to }).run();
+          }
           return true;
         }
       }

@@ -40,15 +40,11 @@ interface ChatProps {
 }
 const Chat: React.FC<ChatProps> = ({
   onSubmitHandler,
-  height,
   startingValue,
   name = 'Ava',
 }) => {
-  const {
-    uiStateService,
-    agentStateService,
-    appStateService,
-  }: GlobalStateContextValue = useContext(GlobalStateContext);
+  const { agentStateService }: GlobalStateContextValue =
+    useContext(GlobalStateContext);
   const location = useLocation();
   const workspaceId = location.pathname.split('/')[1];
   const inputRef = useRef<HTMLInputElement>(null);
@@ -189,10 +185,10 @@ const Chat: React.FC<ChatProps> = ({
   };
 
   const sanitizeMessage = (message: string) => {
-    const decodedMessage = he.decode(message); // Decode HTML entities
+    const decodedMessage = he.decode(message);
     const sanitizedMessage = DOMPurify.sanitize(decodedMessage, {
-      ALLOWED_TAGS: ['a'], // Allow only 'a' tags
-      ALLOWED_ATTR: ['href', 'target', 'rel'], // Allow specific attributes for 'a' tags
+      ALLOWED_TAGS: ['a'],
+      ALLOWED_ATTR: ['href', 'target', 'rel'],
     });
     return sanitizedMessage;
   };
