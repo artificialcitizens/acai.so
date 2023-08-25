@@ -7,6 +7,7 @@ import {
 } from '../../context/GlobalStateContext';
 import { useActor } from '@xstate/react';
 import { agentMode } from '../../hooks/use-ava';
+import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 
 interface ChatModelProps {
   workspaceId: string;
@@ -16,13 +17,16 @@ export const ChatModelDropdown: React.FC<ChatModelProps> = ({
   workspaceId,
 }) => {
   const [openAIModels, setOpenAIModels] = useState<string[]>([]);
+  const [openAIKey] = useLocalStorageKeyValue(
+    'OPENAI_KEY',
+    import.meta.env.VITE_OPENAI_KEY || '',
+  );
 
   useEffect(() => {
     getOpenAIChatModels().then((res) => {
       setOpenAIModels(res);
     });
-  }, []);
-
+  }, [openAIKey]); // Add openAIKey as a dependency
   const { agentStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const [state, send] = useActor(agentStateService);
