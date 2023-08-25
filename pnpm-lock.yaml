@@ -98,6 +98,9 @@ dependencies:
   d3:
     specifier: ^7.8.5
     version: 7.8.5
+  dompurify:
+    specifier: ^3.0.5
+    version: 3.0.5
   dotenv:
     specifier: ^16.0.3
     version: 16.0.3
@@ -110,12 +113,21 @@ dependencies:
   flowbite-react:
     specifier: ^0.5.0
     version: 0.5.0(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.3.2)
+  he:
+    specifier: ^1.2.0
+    version: 1.2.0
   js-yaml:
     specifier: ^4.1.0
     version: 4.1.0
   langchain:
     specifier: ^0.0.127
     version: 0.0.127(@pinecone-database/pinecone@0.1.5)(@supabase/supabase-js@2.31.0)(axios@1.4.0)(cheerio@1.0.0-rc.12)(pdf-parse@1.1.1)
+  linkify-react:
+    specifier: ^4.1.1
+    version: 4.1.1(linkifyjs@4.1.1)(react@18.2.0)
+  linkifyjs:
+    specifier: ^4.1.1
+    version: 4.1.1
   lodash.isequal:
     specifier: ^4.5.0
     version: 4.5.0
@@ -152,9 +164,6 @@ dependencies:
   react-hotkeys:
     specifier: ^2.0.0
     version: 2.0.0(react@18.2.0)
-  react-linkify:
-    specifier: 1.0.0-alpha
-    version: 1.0.0-alpha
   react-markdown:
     specifier: ^8.0.5
     version: 8.0.5(@types/react@18.0.28)(react@18.2.0)
@@ -205,9 +214,15 @@ devDependencies:
   '@types/d3':
     specifier: ^7.4.0
     version: 7.4.0
+  '@types/dompurify':
+    specifier: ^3.0.2
+    version: 3.0.2
   '@types/express':
     specifier: ^4.17.17
     version: 4.17.17
+  '@types/he':
+    specifier: ^1.2.0
+    version: 1.2.0
   '@types/js-yaml':
     specifier: ^4.0.5
     version: 4.0.5
@@ -1871,6 +1886,12 @@ packages:
       '@types/ms': 0.7.31
     dev: false
 
+  /@types/dompurify@3.0.2:
+    resolution: {integrity: sha512-YBL4ziFebbbfQfH5mlC+QTJsvh0oJUrWbmxKMyEdL7emlHJqGR2Qb34TEFKj+VCayBvjKy3xczMFNhugThUsfQ==}
+    dependencies:
+      '@types/trusted-types': 2.0.3
+    dev: true
+
   /@types/express-serve-static-core@4.17.35:
     resolution: {integrity: sha512-wALWQwrgiB2AWTT91CB62b6Yt0sNHpznUXeZEcnPU3DRdlDIz74x8Qg1UUYKSVFi+va5vKOLYRBI1bRKiLLKIg==}
     dependencies:
@@ -1905,6 +1926,10 @@ packages:
     dependencies:
       '@types/unist': 2.0.6
     dev: false
+
+  /@types/he@1.2.0:
+    resolution: {integrity: sha512-uH2smqTN4uGReAiKedIVzoLUAXIYLBTbSofhx3hbNqj74Ua6KqFsLYszduTrLCMEAEAozF73DbGi/SC1bzQq4g==}
+    dev: true
 
   /@types/js-yaml@4.0.5:
     resolution: {integrity: sha512-FhpRzf927MNQdRZP0J5DLIdTXhjLYzeUTmLAu69mnVksLH9CJY3IuSeEgbKUki7GQZm0WqDkGzyxju2EZGD2wA==}
@@ -2074,6 +2099,10 @@ packages:
   /@types/throttle-debounce@2.1.0:
     resolution: {integrity: sha512-5eQEtSCoESnh2FsiLTxE121IiE60hnMqcb435fShf4bpLRjEu1Eoekht23y6zXS9Ts3l+Szu3TARnTsA0GkOkQ==}
     dev: false
+
+  /@types/trusted-types@2.0.3:
+    resolution: {integrity: sha512-NfQ4gyz38SL8sDNrSixxU2Os1a5xcdFxipAFxYEuLUlvU2uDwS4NUpsImcf1//SlWItCVMMLiylsxbmNMToV/g==}
+    dev: true
 
   /@types/unist@2.0.6:
     resolution: {integrity: sha512-PBjIUxZHOuj0R15/xuwJYjFi+KZdNFrehocChv4g5hu6aFroHue8m0lBP0POdK2nKzbw0cgV1mws8+V/JAcEkQ==}
@@ -3540,6 +3569,10 @@ packages:
       domelementtype: 2.3.0
     dev: false
 
+  /dompurify@3.0.5:
+    resolution: {integrity: sha512-F9e6wPGtY+8KNMRAVfxeCOHU0/NPWMSENNq4pQctuXRqqdEPW7q3CrLbR5Nse044WwacyjHGOMlvNsBe1y6z9A==}
+    dev: false
+
   /domutils@3.1.0:
     resolution: {integrity: sha512-H78uMmQtI2AhgDJjWeQmHwJJ2bLPD3GMmO7Zja/ZZh84wkm+4ut+IUnUdRa8uCGX88DiVx1j6FRe1XfxEgjEZA==}
     dependencies:
@@ -4597,6 +4630,11 @@ packages:
     resolution: {integrity: sha512-nAxA0v8+vXSBDt3AnRUNjyRIQ0rD+ntpbAp4LnPkumc5M9yUbSMa4XDU9Q6etY4f1Wp4bNgvc1yjiZtsTTrSng==}
     dev: false
 
+  /he@1.2.0:
+    resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
+    hasBin: true
+    dev: false
+
   /htmlparser2@8.0.2:
     resolution: {integrity: sha512-GYdjWKDkbRLkZ5geuHs5NY1puJ+PXwP7+fHPRz06Eirsb9ugf6d8kkXav6ADhcODhFFPMIXyxkxSuMf3D6NCFA==}
     dependencies:
@@ -5315,12 +5353,6 @@ packages:
   /lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
 
-  /linkify-it@2.2.0:
-    resolution: {integrity: sha512-GnAl/knGn+i1U/wjBz3akz2stz+HrHLsxMwHQGofCDfPvlf+gDKN58UtfmUquTY4/MXeE2x7k19KQmeoZi94Iw==}
-    dependencies:
-      uc.micro: 1.0.6
-    dev: false
-
   /linkify-it@3.0.3:
     resolution: {integrity: sha512-ynTsyrFSdE5oZ/O9GEf00kPngmOfVwazR5GKDq6EYfhlpFug3J2zybX56a2PRRpc9P+FuSoGNAwjlbDs9jJBPQ==}
     dependencies:
@@ -5331,6 +5363,16 @@ packages:
     resolution: {integrity: sha512-C7bfi1UZmoj8+PQx22XyeXCuBlokoyWQL5pWSP+EI6nzRylyThouddufc2c1NDIcP9k5agmN9fLpA7VNJfIiqw==}
     dependencies:
       uc.micro: 1.0.6
+    dev: false
+
+  /linkify-react@4.1.1(linkifyjs@4.1.1)(react@18.2.0):
+    resolution: {integrity: sha512-2K9Y1cUdvq40dFWqCJ//X+WP19nlzIVITFGI93RjLnA0M7KbnxQ/ffC3AZIZaEIrLangF9Hjt3i0GQ9/anEG5A==}
+    peerDependencies:
+      linkifyjs: ^4.0.0
+      react: '>= 15.0.0'
+    dependencies:
+      linkifyjs: 4.1.1
+      react: 18.2.0
     dev: false
 
   /linkifyjs@4.1.1:
@@ -6734,13 +6776,6 @@ packages:
   /react-is@18.2.0:
     resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
 
-  /react-linkify@1.0.0-alpha:
-    resolution: {integrity: sha512-7gcIUvJkAXXttt1fmBK9cwn+1jTa4hbKLGCZ9J1U6EOkyb2/+LKL1Z28d9rtDLMnpvImlNlLPdTPooorl5cpmg==}
-    dependencies:
-      linkify-it: 2.2.0
-      tlds: 1.239.0
-    dev: false
-
   /react-markdown@8.0.5(@types/react@18.0.28)(react@18.2.0):
     resolution: {integrity: sha512-jGJolWWmOWAvzf+xMdB9zwStViODyyFQhNB/bwCerbBKmrTmgmA599CGiOlP58OId1IMoIRsA8UdI1Lod4zb5A==}
     peerDependencies:
@@ -7460,11 +7495,6 @@ packages:
       markdown-it: 13.0.1
       markdown-it-task-lists: 2.1.1
       prosemirror-markdown: 1.11.0
-    dev: false
-
-  /tlds@1.239.0:
-    resolution: {integrity: sha512-lhiymAloYTizXVGDVnplwjQK2YkiB30k5bbeZlyZ6u2vbG4q7re+fwTlOeliCcfiqvmK3yv9savLIFzfKjAVQg==}
-    hasBin: true
     dev: false
 
   /tmp@0.2.1:

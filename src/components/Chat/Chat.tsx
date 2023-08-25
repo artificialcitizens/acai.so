@@ -13,9 +13,7 @@ import {
   TypingIndicator,
 } from '@chatscope/chat-ui-kit-react';
 import './Chat.css';
-// import Dropzone from '../Dropzone/Dropzone';
 // import { toast } from 'react-toastify';
-import Linkify from 'react-linkify';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -27,6 +25,9 @@ import Dropzone from '../Dropzone/Dropzone';
 // import { readFileAsText, slugify } from '../../utils/data-utils.ts';
 // import { convertDSPTranscript } from '../../utils/ac-langchain/text-splitters/dsp-splitter.ts';
 // import yaml from 'js-yaml';
+import Linkify from 'linkify-react';
+import DOMPurify from 'dompurify';
+import he from 'he';
 
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
@@ -39,15 +40,11 @@ interface ChatProps {
 }
 const Chat: React.FC<ChatProps> = ({
   onSubmitHandler,
-  height,
   startingValue,
   name = 'Ava',
 }) => {
-  const {
-    uiStateService,
-    agentStateService,
-    appStateService,
-  }: GlobalStateContextValue = useContext(GlobalStateContext);
+  const { agentStateService }: GlobalStateContextValue =
+    useContext(GlobalStateContext);
   const location = useLocation();
   const workspaceId = location.pathname.split('/')[1];
   const inputRef = useRef<HTMLInputElement>(null);
@@ -104,18 +101,26 @@ const Chat: React.FC<ChatProps> = ({
     [setMessages],
   );
 
+  const createChatHistory = (
+    workspaceId: string,
+    text: string,
+    type: 'user' | 'ava',
+  ): ChatHistory => {
+    return {
+      id: workspaceId,
+      text: text,
+      timestamp: Math.floor(Date.now() / 1000).toString(),
+      type: type,
+    };
+  };
+
   const handleSend = useCallback(
     async (message: string) => {
       addMessage(message, 'User', 'outgoing');
       setMsgInputValue('');
       inputRef.current?.focus();
 
-      const userChatHistory: ChatHistory = {
-        id: workspaceId,
-        text: message,
-        timestamp: Math.floor(Date.now() / 1000).toString(),
-        type: 'user',
-      };
+      const userChatHistory = createChatHistory(workspaceId, message, 'user');
 
       send({
         type: 'UPDATE_CHAT_HISTORY',
@@ -135,12 +140,11 @@ const Chat: React.FC<ChatProps> = ({
             .join('\n'),
         );
 
-        const assistantChatHistory: ChatHistory = {
-          id: workspaceId,
-          text: answer,
-          timestamp: Math.floor(Date.now() / 1000).toString(),
-          type: 'ava',
-        };
+        const assistantChatHistory = createChatHistory(
+          workspaceId,
+          answer,
+          'ava',
+        );
 
         send({
           type: 'UPDATE_CHAT_HISTORY',
@@ -175,88 +179,30 @@ const Chat: React.FC<ChatProps> = ({
     ],
   );
 
-  // const handleFileDrop = async (files: File[], name: string) => {
-  //   const conversations: { [key: string]: any } = {};
+  const handleInputChange = (innerHTML: string) => {
+    const sanitizedInput = sanitizeMessage(innerHTML);
+    setMsgInputValue(sanitizedInput);
+  };
 
-  //   for (const file of files) {
-  //     if (!file) return;
-  //     console.log(file);
-  //     toast(`📁 Processing ${file.name}`, {
-  //       toastId: `${file.name}`,
-  //       className: 'custom-toast',
-  //       position: 'top-right',
-  //       autoClose: false,
-  //       hideProgressBar: false,
-  //       closeOnClick: true,
-  //       pauseOnHover: true,
-  //       draggable: true,
-  //       theme: 'dark',
-  //     });
+  const sanitizeMessage = (message: string) => {
+    const decodedMessage = he.decode(message);
+    const sanitizedMessage = DOMPurify.sanitize(decodedMessage, {
+      ALLOWED_TAGS: ['a'],
+      ALLOWED_ATTR: ['href', 'target', 'rel'],
+    });
+    return sanitizedMessage;
+  };
 
-  //     const fileExtension = file.name.split('.').pop();
-  //     const reader = new FileReader();
-
-  //     switch (fileExtension) {
-  //       case 'jpg':
-  //       case 'jpeg':
-  //       case 'png':
-  //         reader.onload = () => {
-  //           toast.update(`${file.name}`, {
-  //             render: 'Image uploaded successfully',
-  //             type: 'success',
-  //             autoClose: 5000,
-  //           });
-  //         };
-  //         reader.readAsDataURL(file);
-  //         break;
-  //       default:
-  //         try {
-  //           const fileContent = await readFileAsText(file);
-
-  //           const conversation = convertDSPTranscript(fileContent);
-
-  //           const slugifiedFilename = slugify(file.name);
-  //           conversations[slugifiedFilename] = conversation;
-
-  //           toast.update(`${file.name}`, {
-  //             render: 'File uploaded successfully',
-  //             type: 'success',
-  //             autoClose: 5000,
-  //           });
-  //         } catch (error) {
-  //           console.error('Error processing file:', file, error);
-  //           toast.update(`${file.name}`, {
-  //             render: 'Error processing file',
-  //             type: 'error',
-  //             autoClose: 5000,
-  //           });
-  //         }
-  //     }
-  //   }
-
-  //   // Save as JSON file
-  //   const jsonContent = JSON.stringify(conversations, null, 2);
-  //   const jsonFile = new Blob([jsonContent], { type: 'application/json' });
-  //   const jsonDownloadLink = document.createElement('a');
-  //   jsonDownloadLink.href = URL.createObjectURL(jsonFile);
-  //   jsonDownloadLink.download = `${name}.json`;
-  //   jsonDownloadLink.click();
-
-  //   // Convert JSON to YAML
-  //   const yamlContent = yaml.dump(conversations);
-
-  //   // Save as YAML file
-  //   const yamlFile = new Blob([yamlContent], { type: 'application/x-yaml' });
-  //   const yamlDownloadLink = document.createElement('a');
-  //   yamlDownloadLink.href = URL.createObjectURL(yamlFile);
-  //   yamlDownloadLink.download = `${name}.yml`;
-  //   yamlDownloadLink.click();
-  // };
-
+  const linkProps = {
+    onClick: (event: any) => {
+      event.preventDefault();
+      const url = event.target.href;
+      window.open(url, '_blank');
+    },
+  };
   return (
     <Dropzone onFilesDrop={() => console.log('not implemented yet')}>
       <div className="rounded-lg overflow-hidden w-full">
-        {/* <div className="rounded-lg overflow-hidden w-full"> */}
         <ChatContainer className="bg-dark">
           <MessageList
             className="bg-dark"
@@ -273,23 +219,9 @@ const Chat: React.FC<ChatProps> = ({
                 }}
               >
                 <Message.CustomContent>
-                  <Linkify
-                    componentDecorator={(
-                      decoratedHref: string,
-                      decoratedText: string,
-                      key: React.Key,
-                    ) => (
-                      <a
-                        target="blank"
-                        rel="noopener"
-                        href={decoratedHref}
-                        key={key}
-                      >
-                        {decoratedText}
-                      </a>
-                    )}
-                  >
-                    {message.message}
+                  {/* https://linkify.js.org/docs */}
+                  <Linkify options={{ attributes: linkProps }}>
+                    {sanitizeMessage(message.message)}
                   </Linkify>
                 </Message.CustomContent>
               </Message>
@@ -299,7 +231,7 @@ const Chat: React.FC<ChatProps> = ({
             className="bg-dark border-dark"
             style={{ backgroundColor: 'transparent', padding: '0.5rem' }}
             onSend={handleSend}
-            onChange={setMsgInputValue}
+            onChange={handleInputChange}
             value={msgInputValue}
             ref={inputRef}
             sendOnReturnDisabled={false}
@@ -317,3 +249,81 @@ const Chat: React.FC<ChatProps> = ({
 };
 
 export default Chat;
+
+// const handleFileDrop = async (files: File[], name: string) => {
+//   const conversations: { [key: string]: any } = {};
+
+//   for (const file of files) {
+//     if (!file) return;
+//     console.log(file);
+//     toast(`📁 Processing ${file.name}`, {
+//       toastId: `${file.name}`,
+//       className: 'custom-toast',
+//       position: 'top-right',
+//       autoClose: false,
+//       hideProgressBar: false,
+//       closeOnClick: true,
+//       pauseOnHover: true,
+//       draggable: true,
+//       theme: 'dark',
+//     });
+
+//     const fileExtension = file.name.split('.').pop();
+//     const reader = new FileReader();
+
+//     switch (fileExtension) {
+//       case 'jpg':
+//       case 'jpeg':
+//       case 'png':
+//         reader.onload = () => {
+//           toast.update(`${file.name}`, {
+//             render: 'Image uploaded successfully',
+//             type: 'success',
+//             autoClose: 5000,
+//           });
+//         };
+//         reader.readAsDataURL(file);
+//         break;
+//       default:
+//         try {
+//           const fileContent = await readFileAsText(file);
+
+//           const conversation = convertDSPTranscript(fileContent);
+
+//           const slugifiedFilename = slugify(file.name);
+//           conversations[slugifiedFilename] = conversation;
+
+//           toast.update(`${file.name}`, {
+//             render: 'File uploaded successfully',
+//             type: 'success',
+//             autoClose: 5000,
+//           });
+//         } catch (error) {
+//           console.error('Error processing file:', file, error);
+//           toast.update(`${file.name}`, {
+//             render: 'Error processing file',
+//             type: 'error',
+//             autoClose: 5000,
+//           });
+//         }
+//     }
+//   }
+
+//   // Save as JSON file
+//   const jsonContent = JSON.stringify(conversations, null, 2);
+//   const jsonFile = new Blob([jsonContent], { type: 'application/json' });
+//   const jsonDownloadLink = document.createElement('a');
+//   jsonDownloadLink.href = URL.createObjectURL(jsonFile);
+//   jsonDownloadLink.download = `${name}.json`;
+//   jsonDownloadLink.click();
+
+//   // Convert JSON to YAML
+//   const yamlContent = yaml.dump(conversations);
+
+//   // Save as YAML file
+//   const yamlFile = new Blob([yamlContent], { type: 'application/x-yaml' });
+//   const yamlDownloadLink = document.createElement('a');
+//   yamlDownloadLink.href = URL.createObjectURL(yamlFile);
+//   yamlDownloadLink.download = `${name}.yml`;
+//   yamlDownloadLink.click();
+// };

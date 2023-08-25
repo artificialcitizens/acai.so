@@ -42,7 +42,7 @@ export default {
         light: '#E7E9E5',
         default: '#ffffff',
         dark: '#a8a8a8',
-        acai: '#5F3C4F',
+        'acai-primary': '#5F3C4F',
         'acai-white': '#E7E9E5',
         'acai-light': '#79586C',
         'acai-dark': '#402B35',

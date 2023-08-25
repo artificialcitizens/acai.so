@@ -56,7 +56,10 @@ function App() {
     const newAudioContext = new AudioContext();
     setAudioContext(newAudioContext);
   };
+
   const handleWindowClick = () => {
+    if (!import.meta.env.DEV) return;
+
     if (!audioContext) {
       activateAudioContext();
     }

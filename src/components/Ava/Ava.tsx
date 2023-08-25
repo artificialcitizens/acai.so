@@ -69,32 +69,18 @@ export const Ava: React.FC<AvaProps> = ({
         isOpened={settingsOpen}
       >
         <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
+          User Profile
+        </h5>
+        <p className="text-xs font-medium mb-4">
+          Personalize your AVA interactions
+        </p>
+        <UserProfile />
+        <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
           Tokens
         </h5>
         <TokenManager />
-        <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
-          AVA settings
-        </h5>
-        <ChatModelDropdown workspaceId={workspaceId} />
-        <ScratchPad
-          placeholder="Custom Prompt"
-          content={systemNotes}
-          handleInputChange={(e) => {
-            agentStateService.send({
-              type: 'UPDATE_SYSTEM_NOTES',
-              workspaceId: workspaceId,
-              systemNotes: e.target.value,
-            });
-          }}
-        />
-
-        <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
-          Custom Agent Server
-        </h5>
-        <SocketManager />
       </ExpansionPanel>
       {/* <ExpansionPanel
-        data-ava-element="junk-drawer-panel-toggle"
         title="Knowledge"
       >
         <div className="flex flex-col">
@@ -120,21 +106,39 @@ export const Ava: React.FC<AvaProps> = ({
         </div>
         <StorageMeter />
       </ExpansionPanel> */}
-      <ExpansionPanel title="User">
-        <UserProfile />
-      </ExpansionPanel>
-      <ExpansionPanel title="Voice Synthesis">
-        <VoiceRecognition
-          onVoiceActivation={onVoiceActivation}
-          audioContext={audioContext}
+      {import.meta.env.DEV && (
+        <ExpansionPanel title="Voice Synthesis">
+          <VoiceRecognition
+            onVoiceActivation={onVoiceActivation}
+            audioContext={audioContext}
+          />
+        </ExpansionPanel>
+      )}
+
+      <ExpansionPanel title="AVA">
+        <ChatModelDropdown workspaceId={workspaceId} />
+        <ScratchPad
+          placeholder="Custom Prompt"
+          content={systemNotes}
+          handleInputChange={(e) => {
+            agentStateService.send({
+              type: 'UPDATE_SYSTEM_NOTES',
+              workspaceId: workspaceId,
+              systemNotes: e.target.value,
+            });
+          }}
         />
+        <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
+          Custom Agent Server
+        </h5>
+        <SocketManager />
       </ExpansionPanel>
 
       <ExpansionPanel
         title="Logs"
         data-ava-element="TOGGLE_AGENT_THOUGHTS"
         onChange={toggleAgentThoughts}
-        isOpened={!settingsOpen && uiState.context.thoughtsOpen}
+        isOpened={uiState.context.thoughtsOpen}
       >
         <NotificationCenter
           placeholder="A place for AI to ponder"
@@ -145,7 +149,7 @@ export const Ava: React.FC<AvaProps> = ({
         title="Chat"
         className="chat-panel"
         onChange={toggleAgentChat}
-        isOpened={!settingsOpen && uiState.context.agentChatOpen}
+        isOpened={uiState.context.agentChatOpen}
       >
         {workspaceId && (
           <Chat

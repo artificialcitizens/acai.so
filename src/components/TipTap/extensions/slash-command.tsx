@@ -78,7 +78,7 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       title: 'Continue writing',
       description: 'Use AI to expand your thoughts.',
       searchTerms: ['gpt'],
-      icon: <Magic className="w-7 text-black" />,
+      icon: <Magic className="w-7 h-7 text-black" />,
     },
     {
       title: 'Send Feedback',
@@ -247,11 +247,15 @@ const CommandList = ({
   command,
   editor,
   range,
+  hidePopup,
+  isOpen,
 }: {
   items: CommandItemProps[];
   command: any;
   editor: any;
   range: any;
+  hidePopup: () => void;
+  isOpen: boolean;
 }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -295,34 +299,72 @@ const CommandList = ({
   );
 
   useEffect(() => {
-    const navigationKeys = ['ArrowUp', 'ArrowDown', 'Enter'];
     const onKeyDown = (e: KeyboardEvent) => {
-      if (navigationKeys.includes(e.key)) {
-        e.preventDefault();
-        if (e.key === 'ArrowUp') {
-          setSelectedIndex((selectedIndex + items.length - 1) % items.length);
+      const navigationKeys = ['ArrowUp', 'ArrowDown', 'Enter'];
+      const closeKeys = ['ArrowLeft', 'ArrowRight', 'Backspace', 'Escape'];
+      if (
+        isOpen &&
+        (navigationKeys.includes(e.key) || closeKeys.includes(e.key))
+      ) {
+        if (navigationKeys.includes(e.key)) {
+          e.preventDefault();
+          if (e.key === 'ArrowUp') {
+            setSelectedIndex((selectedIndex + items.length - 1) % items.length);
+            return true;
+          }
+          if (e.key === 'ArrowDown') {
+            setSelectedIndex((selectedIndex + 1) % items.length);
+            return true;
+          }
+          if (e.key === 'Enter') {
+            selectItem(selectedIndex);
+            return true;
+          }
+        }
+        if (closeKeys.includes(e.key)) {
+          // Save current selection
+          const { from, to } = editor.state.selection;
+          hidePopup();
+          // If Backspace was pressed, delete the '/' character
+          if (e.key === 'Backspace') {
+            editor
+              .chain()
+              .focus()
+              .deleteRange({ from: from - 1, to })
+              .run();
+          } else {
+            // Restore selection
+            editor.chain().focus().setTextSelection({ from, to }).run();
+          }
           return true;
         }
-        if (e.key === 'ArrowDown') {
-          setSelectedIndex((selectedIndex + 1) % items.length);
-          return true;
-        }
-        if (e.key === 'Enter') {
-          selectItem(selectedIndex);
-          return true;
-        }
-        return false;
       }
+      return false;
     };
+
     document.addEventListener('keydown', onKeyDown);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [items, selectedIndex, setSelectedIndex, selectItem]);
+  }, [
+    items,
+    selectedIndex,
+    setSelectedIndex,
+    selectItem,
+    hidePopup,
+    isOpen,
+    editor,
+  ]);
 
   useEffect(() => {
     setSelectedIndex(0);
   }, [items]);
+
+  useEffect(() => {
+    const buttons = document.querySelectorAll('#slash-command button');
+    const selectedButton = buttons[selectedIndex] as HTMLElement;
+    selectedButton?.focus();
+  }, [selectedIndex]);
 
   const commandListContainer = useRef<HTMLDivElement>(null);
 
@@ -370,11 +412,20 @@ const CommandList = ({
 const renderItems = () => {
   let component: ReactRenderer | null = null;
   let popup: any | null = null;
+  let isOpen = false;
 
   return {
     onStart: (props: { editor: Editor; clientRect: DOMRect }) => {
+      isOpen = true;
       component = new ReactRenderer(CommandList, {
-        props,
+        props: {
+          ...props,
+          hidePopup: () => {
+            popup?.[0].hide();
+            isOpen = false;
+          },
+          isOpen,
+        },
         editor: props.editor,
       });
 
@@ -387,6 +438,10 @@ const renderItems = () => {
         interactive: true,
         trigger: 'manual',
         placement: 'bottom-start',
+        onShown: (instance) => {
+          const firstItem = instance.popper.querySelector('button');
+          firstItem && firstItem.focus();
+        },
       });
     },
     onUpdate: (props: { editor: Editor; clientRect: DOMRect }) => {
