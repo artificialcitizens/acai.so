@@ -223,6 +223,7 @@ const Chat: React.FC<ChatProps> = ({
                 }}
               >
                 <Message.CustomContent>
+                  {/* https://linkify.js.org/docs */}
                   <Linkify options={{ attributes: linkProps }}>
                     {sanitizeMessage(message.message)}
                   </Linkify>

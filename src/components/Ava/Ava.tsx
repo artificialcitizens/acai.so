@@ -115,7 +115,7 @@ export const Ava: React.FC<AvaProps> = ({
         </ExpansionPanel>
       )}
 
-      <ExpansionPanel title="AVA Settings">
+      <ExpansionPanel title="AVA">
         <ChatModelDropdown workspaceId={workspaceId} />
         <ScratchPad
           placeholder="Custom Prompt"
