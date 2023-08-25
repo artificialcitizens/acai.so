@@ -31,8 +31,8 @@ type Message = {
 };
 
 export const agentMode = [
-  'ava',
   'chat',
+  'ava',
   // 'create',
   // 'research',
   // 'writer',
