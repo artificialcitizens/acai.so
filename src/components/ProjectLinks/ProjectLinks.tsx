@@ -29,7 +29,7 @@ export const ProjectLinks = () => (
       </svg>
     </a>
     <a
-      href="https://github.com/artificialcitizens/ava"
+      href="https://www.artificialcitizens.com/"
       target="_blank"
       rel="noopener noreferrer"
       className="text-xs font-medium text-center mb-2 font-mono hover:text-acai-primary transition-colors duration-200"
