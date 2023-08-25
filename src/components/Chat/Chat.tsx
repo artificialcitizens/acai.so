@@ -27,6 +27,7 @@ import Dropzone from '../Dropzone/Dropzone';
 // import yaml from 'js-yaml';
 import Linkify from 'linkify-react';
 import DOMPurify from 'dompurify';
+import he from 'he';
 
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
@@ -183,7 +184,8 @@ const Chat: React.FC<ChatProps> = ({
   );
 
   const sanitizeMessage = (message: string) => {
-    const sanitizedMessage = DOMPurify.sanitize(message, {
+    const decodedMessage = he.decode(message); // Decode HTML entities
+    const sanitizedMessage = DOMPurify.sanitize(decodedMessage, {
       ALLOWED_TAGS: ['a'], // Allow only 'a' tags
       ALLOWED_ATTR: ['href', 'target', 'rel'], // Allow specific attributes for 'a' tags
     });

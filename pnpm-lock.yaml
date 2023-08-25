@@ -113,6 +113,9 @@ dependencies:
   flowbite-react:
     specifier: ^0.5.0
     version: 0.5.0(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.3.2)
+  he:
+    specifier: ^1.2.0
+    version: 1.2.0
   js-yaml:
     specifier: ^4.1.0
     version: 4.1.0
@@ -217,6 +220,9 @@ devDependencies:
   '@types/express':
     specifier: ^4.17.17
     version: 4.17.17
+  '@types/he':
+    specifier: ^1.2.0
+    version: 1.2.0
   '@types/js-yaml':
     specifier: ^4.0.5
     version: 4.0.5
@@ -1920,6 +1926,10 @@ packages:
     dependencies:
       '@types/unist': 2.0.6
     dev: false
+
+  /@types/he@1.2.0:
+    resolution: {integrity: sha512-uH2smqTN4uGReAiKedIVzoLUAXIYLBTbSofhx3hbNqj74Ua6KqFsLYszduTrLCMEAEAozF73DbGi/SC1bzQq4g==}
+    dev: true
 
   /@types/js-yaml@4.0.5:
     resolution: {integrity: sha512-FhpRzf927MNQdRZP0J5DLIdTXhjLYzeUTmLAu69mnVksLH9CJY3IuSeEgbKUki7GQZm0WqDkGzyxju2EZGD2wA==}
@@ -4618,6 +4628,11 @@ packages:
 
   /hast-util-whitespace@2.0.1:
     resolution: {integrity: sha512-nAxA0v8+vXSBDt3AnRUNjyRIQ0rD+ntpbAp4LnPkumc5M9yUbSMa4XDU9Q6etY4f1Wp4bNgvc1yjiZtsTTrSng==}
+    dev: false
+
+  /he@1.2.0:
+    resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
+    hasBin: true
     dev: false
 
   /htmlparser2@8.0.2:
