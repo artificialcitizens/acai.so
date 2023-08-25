@@ -40,7 +40,7 @@ const TokenManager: React.FC = () => {
         value: googleCSEId,
         setValue: setGoogleCSEId,
       },
-      {
+      import.meta.env.DEV && {
         id: 'ELEVENLABS_API_KEY',
         name: 'Elevenlabs Api Key',
         value: elevenlabsApiKey,
