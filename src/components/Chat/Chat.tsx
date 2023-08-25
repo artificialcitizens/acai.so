@@ -183,6 +183,11 @@ const Chat: React.FC<ChatProps> = ({
     ],
   );
 
+  const handleInputChange = (innerHTML: string) => {
+    const sanitizedInput = sanitizeMessage(innerHTML);
+    setMsgInputValue(sanitizedInput);
+  };
+
   const sanitizeMessage = (message: string) => {
     const decodedMessage = he.decode(message); // Decode HTML entities
     const sanitizedMessage = DOMPurify.sanitize(decodedMessage, {
@@ -229,7 +234,7 @@ const Chat: React.FC<ChatProps> = ({
             className="bg-dark border-dark"
             style={{ backgroundColor: 'transparent', padding: '0.5rem' }}
             onSend={handleSend}
-            onChange={setMsgInputValue}
+            onChange={handleInputChange}
             value={msgInputValue}
             ref={inputRef}
             sendOnReturnDisabled={false}
