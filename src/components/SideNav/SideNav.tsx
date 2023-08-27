@@ -133,6 +133,7 @@ export const SideNav: React.FC = () => {
             <ExpansionPanel
               className="border-b border-darker border-b-solid border-l-0 border-r-0 border-t-0"
               title={workspace.name}
+              isOpened={workspace.id === 'docs' || undefined}
             >
               {workspace.data.tiptap.tabs.map((tab) => (
                 <li
