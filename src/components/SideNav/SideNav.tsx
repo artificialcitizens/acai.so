@@ -136,7 +136,7 @@ export const SideNav: React.FC = () => {
             >
               {workspace.data.tiptap.tabs.map((tab) => (
                 <li
-                  className="relative text-ellipsis overflow-hidden mb-2"
+                  className="relative text-ellipsis overflow-hidden mb-2 group transition duration-300 ease-linear hover:bg-neutral-900 hover:outline-none focus:bg-neutral-900"
                   key={tab.id}
                 >
                   <div className="flex items-center justify-between">
@@ -153,7 +153,7 @@ export const SideNav: React.FC = () => {
                       <span>{tab.title}</span>
                     </Link>
                     <button
-                      className="p-2 bg-red-900 rounded-md text-acai-white"
+                      className="p-0 px-1 flex-grow-0 bg-red-900 rounded-full text-acai-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                       onClick={async () => {
                         const confirmDelete = window.prompt(
                           `Please type the name of the tab to confirm deletion: ${tab.title}`,
@@ -175,7 +175,7 @@ export const SideNav: React.FC = () => {
                         });
                       }}
                     >
-                      Delete
+                      x
                     </button>
                   </div>
                 </li>
