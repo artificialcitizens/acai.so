@@ -21,7 +21,7 @@ export const SideNav: React.FC = () => {
     useContext(GlobalStateContext);
   const [state, send] = useActor(globalServices.uiStateService);
   const navOpen = state.context.sideNavOpen;
-
+  const [docsOpen, setDocsOpen] = React.useState(true);
   const navOpenRef = useRef(navOpen);
   navOpenRef.current = navOpen;
 
@@ -133,7 +133,8 @@ export const SideNav: React.FC = () => {
             <ExpansionPanel
               className="border-b border-darker border-b-solid border-l-0 border-r-0 border-t-0"
               title={workspace.name}
-              isOpened={workspace.id === 'docs' || undefined}
+              onChange={() => setDocsOpen(!docsOpen)}
+              isOpened={docsOpen}
             >
               {workspace.data.tiptap.tabs.map((tab) => (
                 <li
@@ -142,7 +143,7 @@ export const SideNav: React.FC = () => {
                 >
                   <div className="flex items-center justify-between">
                     <Link
-                      className="flex h-6 cursor-pointer items-center leading-4 text-ellipsis rounded-[5px] py-4 text-[0.78rem] text-acai-white outline-none transition duration-300 ease-linear hover:bg-neutral-900 hover:outline-none focus:bg-neutral-900 hover:underline"
+                      className="w-full flex h-6 cursor-pointer items-center leading-4 text-ellipsis rounded-[5px] py-4 text-[0.78rem] text-acai-white outline-none transition duration-300 ease-linear hover:bg-neutral-900 hover:outline-none focus:bg-neutral-900 hover:underline"
                       to={`/${workspace.id}/${tab.id}`}
                       data-te-sidenav-link-ref
                       onClick={() => {
@@ -153,31 +154,35 @@ export const SideNav: React.FC = () => {
                     >
                       <span>{tab.title}</span>
                     </Link>
-                    <button
-                      className="p-0 px-1 flex-grow-0 bg-red-900 rounded-full text-acai-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                      onClick={async () => {
-                        const confirmDelete = window.prompt(
-                          `Please type the name of the tab to confirm deletion: ${tab.title}`,
-                        );
-                        if (confirmDelete !== tab.title) {
-                          alert('Tab name does not match. Deletion cancelled.');
-                          return;
-                        }
-                        globalServices.appStateService.send({
-                          type: 'DELETE_TAB',
-                          id: tab.id,
-                          workspaceId: workspace.id,
-                        });
-                        setTimeout(() => {
-                          navigate(`/${workspace.id}`);
-                        }, 250);
-                        globalServices.uiStateService.send({
-                          type: 'TOGGLE_SIDE_NAV',
-                        });
-                      }}
-                    >
-                      x
-                    </button>
+                    {workspace.id !== 'docs' && (
+                      <button
+                        className="p-0 px-1 flex-grow-0 bg-red-900 rounded-full text-acai-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        onClick={async () => {
+                          const confirmDelete = window.prompt(
+                            `Please type the name of the tab to confirm deletion: ${tab.title}`,
+                          );
+                          if (confirmDelete !== tab.title) {
+                            alert(
+                              'Tab name does not match. Deletion cancelled.',
+                            );
+                            return;
+                          }
+                          globalServices.appStateService.send({
+                            type: 'DELETE_TAB',
+                            id: tab.id,
+                            workspaceId: workspace.id,
+                          });
+                          setTimeout(() => {
+                            navigate(`/${workspace.id}`);
+                          }, 250);
+                          globalServices.uiStateService.send({
+                            type: 'TOGGLE_SIDE_NAV',
+                          });
+                        }}
+                      >
+                        x
+                      </button>
+                    )}
                   </div>
                 </li>
               ))}
