@@ -98,11 +98,39 @@ function App() {
             {/* @TODO: Setup non workspace and tab view */}
             <main className="w-full flex flex-grow ">
               <div className="w-full flex flex-col h-screen">
-                <div className="ml-16">
+                <div className="ml-16 flex items-center group">
                   {workspace && (
                     <h1 className="m-2 text-lg">{workspace.name}</h1>
                   )}
+                  <button
+                    className="p-0 px-1 bg-red-900 rounded-full text-acai-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-4"
+                    onClick={async () => {
+                      const confirmDelete = window.prompt(
+                        `Please type the name of the workspace to confirm deletion: ${workspace?.name}`,
+                      );
+                      if (confirmDelete !== workspace?.name) {
+                        alert(
+                          'Workspace name does not match. Deletion cancelled.',
+                        );
+                        return;
+                      }
+                      globalServices.appStateService.send({
+                        type: 'DELETE_WORKSPACE',
+                        id: workspace?.id,
+                      });
+                      globalServices.agentStateService.send({
+                        type: 'DELETE_AGENT',
+                        workspaceId: workspace?.id,
+                      });
+                      setTimeout(() => {
+                        navigate('/');
+                      }, 250);
+                    }}
+                  >
+                    x
+                  </button>
                 </div>
+
                 {activeTab && <TipTap tab={activeTab} />}
                 {}
               </div>

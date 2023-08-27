@@ -228,30 +228,11 @@ export const appStateMachine = createMachine<IContext, Event>({
         DELETE_WORKSPACE: {
           actions: [
             assign((context, event) => {
-              const workspaceId = event.workspaceId;
-              const tabId = event.id;
-              const workspace = context.workspaces[workspaceId];
-              if (workspace) {
-                // Remove the tab from the tabs array
-                workspace.data.tiptap.tabs = workspace.data.tiptap.tabs.filter(
-                  (tab) => tab.id !== tabId,
-                );
-                // Create a new workspace object with the updated tabs
-                const newWorkspace = {
-                  ...workspace,
-                  data: {
-                    ...workspace.data,
-                    tiptap: {
-                      ...workspace.data.tiptap,
-                      tabs: workspace.data.tiptap.tabs,
-                    },
-                  },
-                };
-                // Create a new workspaces object with the updated workspace
-                const newWorkspaces = {
-                  ...context.workspaces,
-                  [workspaceId]: newWorkspace,
-                };
+              const workspaceId = event.id;
+              if (context.workspaces[workspaceId]) {
+                // Create a new workspaces object without the deleted workspace
+                const newWorkspaces = { ...context.workspaces };
+                delete newWorkspaces[workspaceId];
                 return { ...context, workspaces: newWorkspaces };
               }
               return context;
