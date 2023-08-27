@@ -139,18 +139,45 @@ export const SideNav: React.FC = () => {
                   className="relative text-ellipsis overflow-hidden mb-2"
                   key={tab.id}
                 >
-                  <Link
-                    className="flex h-6 cursor-pointer items-center leading-4 text-ellipsis rounded-[5px] py-4 text-[0.78rem] text-acai-white outline-none transition duration-300 ease-linear hover:bg-neutral-900 hover:outline-none focus:bg-neutral-900 hover:underline"
-                    to={`/${workspace.id}/${tab.id}`}
-                    data-te-sidenav-link-ref
-                    onClick={() => {
-                      globalServices.uiStateService.send({
-                        type: 'TOGGLE_SIDE_NAV',
-                      });
-                    }}
-                  >
-                    <span>{tab.title}</span>
-                  </Link>
+                  <div className="flex items-center justify-between">
+                    <Link
+                      className="flex h-6 cursor-pointer items-center leading-4 text-ellipsis rounded-[5px] py-4 text-[0.78rem] text-acai-white outline-none transition duration-300 ease-linear hover:bg-neutral-900 hover:outline-none focus:bg-neutral-900 hover:underline"
+                      to={`/${workspace.id}/${tab.id}`}
+                      data-te-sidenav-link-ref
+                      onClick={() => {
+                        globalServices.uiStateService.send({
+                          type: 'TOGGLE_SIDE_NAV',
+                        });
+                      }}
+                    >
+                      <span>{tab.title}</span>
+                    </Link>
+                    <button
+                      className="p-2 bg-red-900 rounded-md text-acai-white"
+                      onClick={async () => {
+                        const confirmDelete = window.prompt(
+                          `Please type the name of the tab to confirm deletion: ${tab.title}`,
+                        );
+                        if (confirmDelete !== tab.title) {
+                          alert('Tab name does not match. Deletion cancelled.');
+                          return;
+                        }
+                        globalServices.appStateService.send({
+                          type: 'DELETE_TAB',
+                          id: tab.id,
+                          workspaceId: workspace.id,
+                        });
+                        setTimeout(() => {
+                          navigate(`/${workspace.id}`);
+                        }, 250);
+                        globalServices.uiStateService.send({
+                          type: 'TOGGLE_SIDE_NAV',
+                        });
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </li>
               ))}
               <button
