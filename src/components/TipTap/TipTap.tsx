@@ -141,6 +141,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   const editor = useEditor({
     extensions: TiptapExtensions,
     editorProps: TiptapEditorProps,
+    editable: canEdit,
     onUpdate: async (e) => {
       setSaveStatus('Unsaved');
       const selection = e.editor.state.selection;
