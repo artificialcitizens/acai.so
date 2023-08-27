@@ -272,11 +272,11 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
         {editor && <EditorBubbleMenu editor={editor} />}
         <EditorContent editor={editor} />
       </div>
-      <MenuBar
+      {/* <MenuBar
         editor={editor}
         tipTapEditorId={currentTab.id}
         systemNote={currentTab.systemNote}
-      />
+      /> */}
     </>
   );
 };
