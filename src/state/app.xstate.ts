@@ -65,6 +65,7 @@ type Event =
   | { type: 'UPDATE_TIME'; localTime: string }
   | { type: 'ADD_WORKSPACE'; workspace: Workspace }
   | { type: 'UPDATE_WORKSPACE'; id: string; workspace: Partial<Workspace> }
+  | { type: 'REPLACE_WORKSPACE'; id: string; workspace: Workspace }
   | { type: 'DELETE_WORKSPACE'; id: string; workspaceId: string }
   | { type: 'ADD_TAB'; tab: any }
   | { type: 'DELETE_TAB'; id: string; workspaceId: string }
@@ -79,7 +80,6 @@ type Event =
       type: 'SET_ACTIVE_TAB';
       tabId: string;
     }
-  | { type: 'UPDATE_NOTES'; id: string; notes: string }
   | { type: 'TOGGLE_CONTEXT'; id: string; workspaceId: string }
   | {
       type: 'UPDATE_TAB_SYSTEM_NOTE';
@@ -224,7 +224,20 @@ export const appStateMachine = createMachine<IContext, Event>({
             (context, event) => saveState(context),
           ],
         },
-
+        REPLACE_WORKSPACE: {
+          actions: [
+            assign((context, event) => {
+              const replacedWorkspace = event.workspace;
+              const id = event.id;
+              const updatedWorkspaces = {
+                ...context.workspaces,
+                [id]: replacedWorkspace, // This line completely replaces the workspace with the new one.
+              };
+              return { ...context, workspaces: updatedWorkspaces };
+            }),
+            (context, event) => saveState(context),
+          ],
+        },
         DELETE_WORKSPACE: {
           actions: [
             assign((context, event) => {
@@ -328,58 +341,6 @@ export const appStateMachine = createMachine<IContext, Event>({
             },
           ],
         },
-
-        UPDATE_NOTES: {
-          actions: [
-            assign((context, event) => {
-              const { id, notes } = event;
-              const workspace = context.workspaces[id];
-              if (workspace) {
-                workspace.data.notes = notes;
-              }
-              return { ...context };
-            }),
-            (context, event) => saveState(context),
-          ],
-        },
-
-        TOGGLE_CONTEXT: {
-          actions: [
-            assign((context, event) => {
-              const { id, workspaceId } = event;
-              const workspace = context.workspaces[workspaceId];
-              if (workspace) {
-                const tab = workspace.data.tiptap.tabs.find(
-                  (tab) => tab.id === id,
-                );
-                if (tab) {
-                  tab.isContext = !tab.isContext;
-                }
-              }
-              return context;
-            }),
-            (context, event) => saveState(context),
-          ],
-        },
-
-        UPDATE_TAB_SYSTEM_NOTE: {
-          actions: [
-            assign((context, event) => {
-              const { id, systemNote, workspaceId } = event;
-              const workspace = context.workspaces[workspaceId];
-              if (workspace) {
-                const tab = workspace.data.tiptap.tabs.find(
-                  (tab) => tab.id === id,
-                );
-                if (tab) {
-                  tab.systemNote = systemNote;
-                }
-              }
-              return { ...context };
-            }),
-            (context, event) => saveState(context),
-          ],
-        },
       },
     },
   },
@@ -410,4 +371,44 @@ export const handleCreateTab = async (
     lastUpdated: new Date().toString(),
   };
   return newTab;
+};
+
+export const createWorkspace = ({
+  workspaceName,
+  id,
+  content,
+}: {
+  workspaceName: string;
+  id?: string;
+  content?: Tab[];
+}): Workspace | undefined => {
+  const newId = id || uuidv4().split('-')[0];
+  const tabId = uuidv4().split('-')[0];
+  const newWorkspace: Workspace = {
+    id: newId,
+    name: workspaceName,
+    createdAt: new Date().toString(),
+    lastUpdated: new Date().toString(),
+    private: false,
+    data: {
+      tiptap: {
+        tabs: content || [
+          {
+            id: tabId,
+            title: `Welcome to ${workspaceName}!`,
+            content: '',
+            isContext: false,
+            systemNote: '',
+            workspaceId: newId,
+            createdAt: new Date().toString(),
+            lastUpdated: new Date().toString(),
+            filetype: 'markdown',
+          },
+        ],
+      },
+      notes: '',
+    },
+  };
+
+  return newWorkspace;
 };

@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Ava } from './components/Ava/Ava';
 import { SideNav } from './components/SideNav/SideNav';
 import { FloatingButton } from './components/FloatingButton/FloatingButton';
@@ -11,12 +11,13 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import ToastManager from './components/Toast';
 import TipTap from './components/TipTap/TipTap';
-import { Tab } from './state';
+import { Tab, createWorkspace } from './state';
 import { VectorStoreContext } from './context/VectorStoreContext';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
 import AudioWaveform from './components/AudioWave/AudioWave';
 import { Editor } from '@tiptap/react';
 import { EditorContext } from './context/EditorContext';
+import { createDocs } from './components/TipTap/utils/docs';
 // import useTypeTag from './hooks/ac-langchain/use-type-tag';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 
@@ -47,6 +48,22 @@ function App() {
     similaritySearchWithScore,
     filterAndCombineContent,
   } = useMemoryVectorStore('');
+
+  useEffect(() => {
+    createDocs().then((docs) => {
+      const docsWorkspace = createWorkspace({
+        workspaceName: 'acai.so',
+        id: 'docs',
+        content: docs,
+      });
+      globalServices.appStateService.send({
+        type: 'REPLACE_WORKSPACE',
+        id: 'docs',
+        workspace: docsWorkspace,
+      });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const toggleSideNav = () => {
     globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV' });
@@ -95,7 +112,6 @@ function App() {
             onClick={handleWindowClick}
           >
             <ToastManager />
-            {/* @TODO: Setup non workspace and tab view */}
             <main className="w-full flex flex-grow ">
               <div className="w-full flex flex-col h-screen">
                 <div className="ml-16 flex items-center group">
