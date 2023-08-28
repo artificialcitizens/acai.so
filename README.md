@@ -6,6 +6,8 @@ ACAI is a collection of AI powered tools to help you manage your digital world
 
 Check out our quick start at [acai.so](https://www.acai.so/docs/introduction) to learn more
 
+![acai intro page](./src/assets/acai-intro.png)
+
 ## Technology Stack
 
 - [React](https://reactjs.org/) - A JavaScript library for building user interfaces
