@@ -118,33 +118,35 @@ function App() {
                   {workspace && (
                     <h1 className="m-2 text-lg">{workspace.name}</h1>
                   )}
-                  <button
-                    className="p-0 px-1 bg-red-900 rounded-full text-acai-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-4"
-                    onClick={async () => {
-                      const confirmDelete = window.prompt(
-                        `Please type the name of the workspace to confirm deletion: ${workspace?.name}`,
-                      );
-                      if (confirmDelete !== workspace?.name) {
-                        alert(
-                          'Workspace name does not match. Deletion cancelled.',
+                  {workspaceId !== 'docs' && (
+                    <button
+                      className="p-0 px-1  rounded-full font-medium text-red-900 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-4"
+                      onClick={async () => {
+                        const confirmDelete = window.prompt(
+                          `Please type the name of the workspace to confirm deletion: ${workspace?.name}`,
                         );
-                        return;
-                      }
-                      globalServices.appStateService.send({
-                        type: 'DELETE_WORKSPACE',
-                        id: workspace?.id,
-                      });
-                      globalServices.agentStateService.send({
-                        type: 'DELETE_AGENT',
-                        workspaceId: workspace?.id,
-                      });
-                      setTimeout(() => {
-                        navigate('/');
-                      }, 250);
-                    }}
-                  >
-                    x
-                  </button>
+                        if (confirmDelete !== workspace?.name) {
+                          alert(
+                            'Workspace name does not match. Deletion cancelled.',
+                          );
+                          return;
+                        }
+                        globalServices.appStateService.send({
+                          type: 'DELETE_WORKSPACE',
+                          id: workspace?.id,
+                        });
+                        globalServices.agentStateService.send({
+                          type: 'DELETE_AGENT',
+                          workspaceId: workspace?.id,
+                        });
+                        setTimeout(() => {
+                          navigate('/');
+                        }, 250);
+                      }}
+                    >
+                      x
+                    </button>
+                  )}
                 </div>
 
                 {activeTab && <TipTap tab={activeTab} />}

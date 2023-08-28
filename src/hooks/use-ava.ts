@@ -30,14 +30,16 @@ type Message = {
   type: MessageType;
 };
 
-export const agentMode = [
-  'chat',
-  'ava',
-  // 'create',
-  // 'research',
-  // 'writer',
-  'custom',
-];
+export const agentMode = import.meta.env.DEV
+  ? [
+      'ava',
+      'chat',
+      'custom',
+      // 'create',
+      // 'research',
+      // 'writer',
+    ]
+  : ['chat', 'custom'];
 
 export const agentModeUtterances = {
   chat: [
@@ -179,7 +181,7 @@ export const useAva = (): [
           return 'Please set a custom agent URL in the settings menu';
         }
 
-        setLoading(true); // assuming setLoading is defined somewhere in your code
+        setLoading(true);
         try {
           const res = await axios.post(`${agentUrl}/v1/agent`, agentPayload, {
             headers: {
