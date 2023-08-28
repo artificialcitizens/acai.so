@@ -2,7 +2,8 @@ import axios from 'axios';
 import { Tab } from '../../../state';
 
 export const fetchDocs = async (): Promise<any> => {
-  const ACAI_SERVER = import.meta.env.VITE_ACAI_SERVER;
+  const ACAI_SERVER =
+    import.meta.env.VITE_ACAI_SERVER || process.env.VITE_ACAI_SERVER;
   try {
     const response = await axios.get(`${ACAI_SERVER}/api/docs/`);
     return response.data;
