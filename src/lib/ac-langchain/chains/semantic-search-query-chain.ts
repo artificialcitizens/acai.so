@@ -1,7 +1,7 @@
 import { OpenAI } from 'langchain/llms/openai';
 import { PromptTemplate } from 'langchain/prompts';
 import { CommaSeparatedListOutputParser } from 'langchain/output_parsers';
-import { getToken } from '../../config';
+import { getToken } from '../../../utils/config';
 
 /**
  *  Create a list of comma separated sentences to semantically search a vectorstore with.

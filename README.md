@@ -1,8 +1,8 @@
 # ACAI
 
-ACAI is a collection of AI powered tools to help you manage your digital world
-
 ![acai landing page](./src/assets/landing-page.png)
+
+ACAI is a collection of AI powered tools to help you manage your digital world
 
 Check out our quick start at [acai.so](https://www.acai.so/docs/introduction) to learn more
 

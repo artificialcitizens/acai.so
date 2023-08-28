@@ -10,7 +10,7 @@ import {
 import { z } from 'zod';
 import { loadSummarizationChain } from 'langchain/chains';
 import { Document } from 'langchain/document';
-import { getToken } from '../../config';
+import { getToken } from '../../../utils/config';
 
 export type PartialContentResult = {
   id: number;

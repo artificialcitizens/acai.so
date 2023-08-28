@@ -37,8 +37,8 @@ import {
   mapColorsToEvents,
 } from '../chains/design-token-chain';
 import { OpenAI } from 'langchain/llms/openai';
-import { getToken } from '../../config';
-import { timestampToHumanReadable } from '../../data-utils';
+import { getToken } from '../../../utils/config';
+import { timestampToHumanReadable } from '../../../utils/data-utils';
 import {
   createAvaChatPrompt,
   createCustomPrompt,

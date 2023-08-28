@@ -1,6 +1,6 @@
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
-import { getToken } from '../../config';
+import { getToken } from '../../../utils/config';
 
 /**
  * Generate observations based on the given context

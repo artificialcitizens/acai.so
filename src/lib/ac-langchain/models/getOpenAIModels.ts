@@ -1,5 +1,5 @@
 import { Configuration, OpenAIApi } from 'openai';
-import { getToken } from '../../config';
+import { getToken } from '../../../utils/config';
 
 const configuration = new Configuration({
   apiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,

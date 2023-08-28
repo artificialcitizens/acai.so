@@ -1,6 +1,6 @@
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
-import { getToken } from '../../config';
+import { getToken } from '../../../utils/config';
 
 /**
  * Take notes based on the given transcription

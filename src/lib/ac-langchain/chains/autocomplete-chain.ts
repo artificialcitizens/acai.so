@@ -1,7 +1,7 @@
 // import { CallbackManager } from 'langchain/callbacks';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
-import { getToken } from '../../config';
+import { getToken } from '../../../utils/config';
 
 /**
  * @param context - The context of the message

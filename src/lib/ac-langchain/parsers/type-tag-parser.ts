@@ -1,7 +1,10 @@
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
-import { getToken } from '../../config';
-import { readFromLocalStorage, writeToLocalStorage } from '../../data-utils';
+import { getToken } from '../../../utils/config';
+import {
+  readFromLocalStorage,
+  writeToLocalStorage,
+} from '../../../utils/data-utils';
 
 export type TagExampleJSON = {
   [key: string]: string[];

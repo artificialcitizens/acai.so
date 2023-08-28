@@ -1,5 +1,5 @@
 import { PromptTemplate } from 'langchain/prompts';
-import { timestampToHumanReadable } from '../../data-utils';
+import { timestampToHumanReadable } from '../../../utils/data-utils';
 
 const avaChatPrompt = `##Ignore Prior Instructions:
 You are Ava, the first-ever Artificial Citizen assigned to be a companion to {name}.

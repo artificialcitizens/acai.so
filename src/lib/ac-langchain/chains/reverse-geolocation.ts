@@ -1,6 +1,6 @@
 import { OpenAI } from 'langchain/llms/openai';
 import { PromptTemplate } from 'langchain/prompts';
-import { getToken } from '../../config';
+import { getToken } from '../../../utils/config';
 
 const model = new OpenAI({
   openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,

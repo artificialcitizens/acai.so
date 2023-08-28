@@ -3,8 +3,8 @@ import {
   initializeMemoryVectorStore,
   addDocumentsToMemoryVectorStore,
   similaritySearchWithScoreInMemoryVectorStore,
-} from '../utils/ac-langchain/vector-store/in-memory';
-import { createDocumentsFromText } from '../utils/ac-langchain/text-splitters';
+} from '../lib/ac-langchain/vector-store/in-memory';
+import { createDocumentsFromText } from '../lib/ac-langchain/text-splitters';
 import { Document } from 'langchain/document';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 

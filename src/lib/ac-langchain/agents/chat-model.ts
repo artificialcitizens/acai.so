@@ -1,11 +1,11 @@
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { SystemMessage, HumanMessage } from 'langchain/schema';
-import { getToken } from '../../config';
+import { getToken } from '../../../utils/config';
 
 /**
  * Query OpenAI Chat Model
  */
-export const queryAssistant = async ({
+export const queryChat = async ({
   systemMessage,
   message,
   modelName,

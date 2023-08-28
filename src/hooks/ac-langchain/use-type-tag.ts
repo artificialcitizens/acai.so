@@ -4,7 +4,7 @@ import {
   TypeTagResponse,
   parseTypeTagsResponse,
   getTypeTagResponse,
-} from '../../utils/ac-langchain/parsers/type-tag-parser';
+} from '../../lib/ac-langchain/parsers/type-tag-parser';
 
 const useTypeTagResponse = (data: TagExampleJSON) => {
   const [typeTagResponse, setTypeTagResponse] =

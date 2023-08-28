@@ -4,7 +4,7 @@ import { PlanAndExecuteAgentExecutor } from 'langchain/experimental/plan_and_exe
 import { GoogleCustomSearch, Tool, DynamicTool } from 'langchain/tools';
 
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { getToken } from '../../config';
+import { getToken } from '../../../utils/config';
 
 const model = new ChatOpenAI({
   temperature: 0,

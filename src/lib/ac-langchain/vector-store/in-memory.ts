@@ -2,7 +2,7 @@ import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { Document } from 'langchain/document';
 import { Embeddings } from 'langchain/embeddings/base';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { getToken } from '../../config';
+import { getToken } from '../../../utils/config';
 
 export const initializeMemoryVectorStore = async ({
   docs,
