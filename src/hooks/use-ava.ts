@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { avaChat } from '../utils/ac-langchain/agents/ava';
+import { avaChat } from '../lib/ac-langchain/agents/ava';
 import { toastifyAgentLog } from '../components/Toast';
 import { handleCreateTab } from '../state';
 import {
@@ -7,12 +7,12 @@ import {
   GlobalStateContextValue,
 } from '../context/GlobalStateContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { queryChat } from '../utils/ac-langchain/agents/chat-model';
+import { queryChat } from '../lib/ac-langchain/agents/chat-model';
 import {
   createAvaChatPrompt,
   createCustomPrompt,
   // createWritingPromptTemplate,
-} from '../utils/ac-langchain/agents/agent.prompts';
+} from '../lib/ac-langchain/agents/agent.prompts';
 import { useActor } from '@xstate/react';
 import { EditorContext } from '../context/EditorContext';
 // import { queryAssistant } from '../utils/ac-langchain/agents/assistant';
@@ -30,14 +30,20 @@ type Message = {
   type: MessageType;
 };
 
-export const agentMode = [
-  'chat',
-  'ava',
-  // 'create',
-  // 'research',
-  // 'writer',
-  'custom',
-];
+export const agentMode = import.meta.env.DEV
+  ? [
+      'ava',
+      'chat',
+      // 'create',
+      // 'research',
+      // 'writer',
+      'custom',
+    ]
+  : [
+      'chat',
+      'custom',
+      // 'create
+    ];
 
 export const agentModeUtterances = {
   chat: [

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const tagLines = [
   'Your AI toolkit',
-  'Your Personal Assistant',
+  'Your personal assistant',
   'Your supercharged productivity tool',
   'Your AI powered notebook',
   'Your digital life organizer',
@@ -15,6 +15,7 @@ const tagLines = [
   'Your AI productivity booster',
   'Your smart task organizer',
   'Your automated workflow assistant',
+  'Your AI super tool',
   'Your digital productivity coach',
   'Your smart work accelerator',
   'Your intelligent task manager',
@@ -37,9 +38,7 @@ interface LandingPageProps {
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
-  const [tagLineIndex, setTagLineIndex] = useState(
-    Math.floor(Math.random() * tagLines.length),
-  );
+  const [tagLineIndex, setTagLineIndex] = useState(0);
   const [wordIndex, setWordIndex] = useState(0);
   const [isTaglineComplete, setIsTaglineComplete] = useState(false);
 
@@ -76,7 +75,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
   return (
     <div className="text-acai-white relative bg-gradient-to-b from-darker to-acai-darker w-screen m-0 flex flex-col p-4 items-center justify-start h-screen">
       <nav className="flex items-center">
-        <Link to="/docs/introduction">
+        <Link
+          className="pointer-events-none md:pointer-events-auto"
+          to="/docs/introduction"
+        >
           <h1 className="text-2xl text-acai-white md:text-4xl font-bold mb-0 z-10">
             acai
           </h1>

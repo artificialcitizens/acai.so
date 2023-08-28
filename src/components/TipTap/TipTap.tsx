@@ -11,9 +11,9 @@ import { EditorBubbleMenu } from './components';
 import { useInterpret } from '@xstate/react';
 import { Tab, appStateMachine } from '../../state';
 // import { semanticSearchQueryGeneration } from '../../utils/ac-langchain/chains/semantic-search-query-chain';
-import { autoComplete } from '../../utils/ac-langchain/chains/autocomplete-chain';
+import { autoComplete } from '../../lib/ac-langchain/chains/autocomplete-chain';
 import Bottleneck from 'bottleneck';
-import { MenuBar } from './MenuBar';
+// import { MenuBar } from './MenuBar';
 import './TipTap.css';
 // import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
 // import { VectorStoreContext } from '../../context/VectorStoreContext';
@@ -75,7 +75,6 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   useEffect(() => {
     setCurrentTab(tab);
     setHydrated(false);
-    setCanEdit(tab.workspaceId !== 'docs');
   }, [tab]);
 
   const saveContent = (
@@ -141,6 +140,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   const editor = useEditor({
     extensions: TiptapExtensions,
     editorProps: TiptapEditorProps,
+    editable: canEdit,
     onUpdate: async (e) => {
       setSaveStatus('Unsaved');
       const selection = e.editor.state.selection;
@@ -272,11 +272,11 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
         {editor && <EditorBubbleMenu editor={editor} />}
         <EditorContent editor={editor} />
       </div>
-      <MenuBar
+      {/* <MenuBar
         editor={editor}
         tipTapEditorId={currentTab.id}
         systemNote={currentTab.systemNote}
-      />
+      /> */}
     </>
   );
 };

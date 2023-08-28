@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { getOpenAIChatModels } from '../../utils/ac-langchain/models/getOpenAIModels';
+import { getOpenAIChatModels } from '../../lib/ac-langchain/models/getOpenAIModels';
 import Dropdown from '../DropDown/';
 import {
   GlobalStateContext,

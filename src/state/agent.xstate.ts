@@ -46,7 +46,8 @@ type AgentEvent =
   | { type: 'CREATE_AGENT'; workspaceId: string }
   | { type: 'CLEAR_CHAT_HISTORY'; workspaceId: string }
   | { type: 'SET_OPENAI_CHAT_MODEL'; workspaceId: string; modelName: string }
-  | { type: 'SET_AGENT_MODE'; workspaceId: string; mode: AgentMode };
+  | { type: 'SET_AGENT_MODE'; workspaceId: string; mode: AgentMode }
+  | { type: 'DELETE_AGENT'; workspaceId: string };
 
 /**
  * Save AgentWorkspace to local storage
@@ -224,6 +225,18 @@ export const agentMachine = createMachine<AgentWorkspace, AgentEvent>({
         };
         saveAgentState(updatedContext);
         return updatedContext;
+      }),
+    },
+    DELETE_AGENT: {
+      actions: assign((context, event) => {
+        const workspaceId = event.workspaceId;
+        if (context[workspaceId]) {
+          const updatedContext = { ...context };
+          delete updatedContext[workspaceId];
+          saveAgentState(updatedContext);
+          return updatedContext;
+        }
+        return context;
       }),
     },
     CLEAR_CHAT_HISTORY: {

@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useContext, useState } from 'react';
-import { noteChain } from '../../utils/ac-langchain/chains/notes-chain';
+import { noteChain } from '../../lib/ac-langchain/chains/notes-chain';
 import {
   GlobalStateContext,
   GlobalStateContextValue,

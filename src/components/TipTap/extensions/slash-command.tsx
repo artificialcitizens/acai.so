@@ -301,7 +301,13 @@ const CommandList = ({
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const navigationKeys = ['ArrowUp', 'ArrowDown', 'Enter'];
-      const closeKeys = ['ArrowLeft', 'ArrowRight', 'Backspace', 'Escape'];
+      const closeKeys = [
+        'ArrowLeft',
+        'ArrowRight',
+        'Backspace',
+        'Escape',
+        'Tab',
+      ];
       if (
         isOpen &&
         (navigationKeys.includes(e.key) || closeKeys.includes(e.key))
