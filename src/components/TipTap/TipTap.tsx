@@ -75,7 +75,6 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   useEffect(() => {
     setCurrentTab(tab);
     setHydrated(false);
-    setCanEdit(tab.workspaceId !== 'docs');
   }, [tab]);
 
   const saveContent = (
