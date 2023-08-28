@@ -1,5 +1,9 @@
 # acai.so Python Custom Agent Server Example
 
+## TODO
+
+- Setup agent example
+
 ## Step 1: Install Anaconda or Miniconda
 
 If you haven't installed Anaconda or Miniconda yet, you can download it from the official website:
@@ -26,66 +30,3 @@ Start the server using the following command:
 `python main.py`
 
 Now, your server should be running at `http://localhost:5050`.
-
-## Routes
-
-### GET /test
-
-A simple test route that returns "Hello world".
-
-### POST /v1/agent
-
-Note: this is a work in progress and subject to change, this will be updated as the data model progresses
-
-This route is used to receive and log payload from the client. The payload should contain the following properties:
-
-```
-type Message = {
-    id: string;
-    text: string;
-    timestamp: string;
-    type: MessageType;
-}
-```
-
-- userMessage: string
-- userName: string
-- userLocation: string
-- customPrompt: string
-- chatHistory: Message[]
-- currentDocument: string
-
-```
-curl -X POST -H "Content-Type: application/json" \
-  -d '{
-  "userMessage": "Hello",
-  "userName": "John Doe",
-  "userLocation": "San Francisco",
-  "customPrompt": "Custom Prompt",
-  "chatHistory": [
-    {
-      "message": "Hello",
-      "sender": "user"
-    },
-    {
-      "message": "Hi",
-      "sender": "ava"
-    }
-  ],
-  "currentDocument": "Current Document"
-}' \
-  http://localhost:5000/v1/agent
-
-### GET /proxy
-
-This route is used to proxy a GET request to another URL. The URL should be passed as a query parameter.
-
-example request:
-
-```
-
-http://localhost:5000/proxy?url=https://google.com
-
-```
-
-```

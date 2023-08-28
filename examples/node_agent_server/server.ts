@@ -131,14 +131,14 @@ const io = new Server(httpServer, {
 });
 
 const authenticate = (socket: Socket, next: (_err?: Error) => void) => {
-  const password = socket.handshake.auth.password;
-  // @TODO - set to use payload authentication
-  if (password === 'your_password_here') {
-    console.log('Authenticated');
-    return next();
-  }
+  return next();
+  // const password = socket.handshake.auth.password;
+  // if (password === 'your_password_here') {
+  //   console.log('Authenticated');
+  //   return next();
+  // }
 
-  next(new Error('Authentication error'));
+  // next(new Error('Authentication error'));
 };
 
 io.use(authenticate);
