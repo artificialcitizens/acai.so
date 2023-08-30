@@ -21,6 +21,11 @@ import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import axios from 'axios';
 import { getToken } from '../../utils/config';
 
+export type AvaChatResponse = {
+  response: string;
+  abort: () => void;
+};
+
 type MessageType = 'user' | 'ava';
 
 type Message = {
@@ -66,10 +71,15 @@ export const agentModeUtterances = {
   ],
 };
 
-export const useAva = (): [
-  fetchResponse: (message: string, systemMessage: string) => Promise<string>,
-  loading: boolean,
-] => {
+export const useAva = (): {
+  queryAva: (
+    message: string,
+    systemMessage: string,
+  ) => Promise<AvaChatResponse>;
+  streamingMessage: string;
+  error: string;
+  loading: boolean;
+} => {
   const [loading, setLoading] = useState(false);
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
@@ -80,6 +90,8 @@ export const useAva = (): [
   const [userName] = useLocalStorageKeyValue('USER_NAME', '');
   const [userLocation] = useLocalStorageKeyValue('USER_LOCATION', '');
   const currentAgent = state.context[workspaceId];
+  const [streamingMessage, setStreamingMessage] = useState('');
+  const [error, setError] = useState('');
   const formattedChatHistory = currentAgent?.recentChatHistory
     .map(
       (chat: { type: 'ava' | 'user'; text: string }) =>
@@ -97,10 +109,11 @@ export const useAva = (): [
   // );
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { editor } = useContext(EditorContext)!;
+
   const queryAva = async (
     message: string,
     customPrompt: string,
-  ): Promise<string> => {
+  ): Promise<AvaChatResponse> => {
     setLoading(true);
 
     const mode = currentAgent.agentMode;
@@ -128,46 +141,67 @@ export const useAva = (): [
           systemMessage: sysMessage,
           message,
           modelName: currentAgent.openAIChatModel,
-        });
-        setLoading(false);
-        return response;
-      }
-
-      case 'ava': {
-        const response = await avaChat({
-          input: message,
-          systemMessage: customPrompt,
-          chatHistory: formattedChatHistory,
-          currentDocument: editor?.getText() || '',
           callbacks: {
-            handleCreateDocument: async ({
-              title,
-              content,
-            }: {
-              title: string;
-              content: string;
-            }) => {
-              const tab = await handleCreateTab(
-                { title, content },
-                workspaceId,
-              );
-              globalServices.appStateService.send({
-                type: 'ADD_TAB',
-                tab,
-              });
-              setTimeout(() => {
-                navigate(`/${workspaceId}/${tab.id}`);
-              }, 250);
+            handleLLMStart: (llm, prompts) => {
+              setLoading(true);
+              // console.log({ llm, prompts });
             },
-            handleAgentAction: (action) => {
-              const thought = action.log.split('Action:')[0].trim();
-              toastifyAgentLog(thought);
+            handleLLMNewToken: (token) => {
+              setStreamingMessage((prev) => prev + token);
+              // console.log(token);
+            },
+            handleLLMEnd: (output) => {
+              setLoading(false);
+              // console.log({ output });
+            },
+            handleLLMError: (err) => {
+              setError(err.message);
+              setLoading(false);
+              // console.log({ err });
             },
           },
         });
-        setLoading(false);
-        return response;
+        return {
+          response: response.response,
+          abort: response.abort,
+        };
       }
+
+      // case 'ava': {
+      //   const response = await avaChat({
+      //     input: message,
+      //     systemMessage: customPrompt,
+      //     chatHistory: formattedChatHistory,
+      //     currentDocument: editor?.getText() || '',
+      //     callbacks: {
+      //       handleCreateDocument: async ({
+      //         title,
+      //         content,
+      //       }: {
+      //         title: string;
+      //         content: string;
+      //       }) => {
+      //         const tab = await handleCreateTab(
+      //           { title, content },
+      //           workspaceId,
+      //         );
+      //         globalServices.appStateService.send({
+      //           type: 'ADD_TAB',
+      //           tab,
+      //         });
+      //         setTimeout(() => {
+      //           navigate(`/${workspaceId}/${tab.id}`);
+      //         }, 250);
+      //       },
+      //       handleAgentAction: (action) => {
+      //         const thought = action.log.split('Action:')[0].trim();
+      //         toastifyAgentLog(thought);
+      //       },
+      //     },
+      //   });
+      //   setLoading(false);
+      //   return response;
+      // }
       case 'custom': {
         const agentPayload = {
           userMessage: message,
@@ -181,7 +215,12 @@ export const useAva = (): [
           getToken('CUSTOM_AGENT_URL') || import.meta.env.VITE_CUSTOM_AGENT_URL;
 
         if (!agentUrl) {
-          return 'Please set a custom agent URL in the settings menu';
+          return {
+            response: 'Please set a custom agent URL in the settings menu',
+            abort: () => {
+              return;
+            },
+          };
         }
 
         setLoading(true); // assuming setLoading is defined somewhere in your code
@@ -237,5 +276,5 @@ export const useAva = (): [
     }
   };
 
-  return [queryAva, loading];
+  return { queryAva, loading, streamingMessage, error };
 };

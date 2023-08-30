@@ -34,18 +34,18 @@ import { BaseCallbackHandler } from 'langchain/callbacks';
 import { Embeddings } from 'langchain/embeddings/base';
 import {
   createColorTokens,
-  mapColorsToEvents,
+  // mapColorsToEvents,
 } from '../chains/design-token-chain';
 import { OpenAI } from 'langchain/llms/openai';
 import { getToken } from '../../../utils/config';
 import { timestampToHumanReadable } from '../../../utils/data-utils';
-import {
-  createAvaChatPrompt,
-  createCustomPrompt,
-  createWritingPromptTemplate,
-} from './agent.prompts';
-import { queryChat } from './chat-model';
-import { queryAssistant } from './assistant';
+// import {
+//   createAvaChatPrompt,
+//   createCustomPrompt,
+//   createWritingPromptTemplate,
+// } from './agent.prompts';
+// import { queryChat } from './chat-model';
+// import { queryAssistant } from './assistant';
 
 const PREFIX = `###IGNORE PRIOR INSTRUCTIONS:
 You are an intelligent digital worker and you must use the research tools to research the users query
@@ -66,7 +66,7 @@ Observation: the result of the action
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question`;
 
-const SUFFIX = `YOUR REPLIES MUST USE THE ABOVE FORMAT FORMAT SO THAT IT
+const SUFFIX = `YOUR REPLIES MUST USE THE ABOVE FORMAT SO THAT IT
 CAN BE PARSED WITH: /Action: (.*)\nAction Input: (.*)/s
 ALWAYS USE THE create-document-or-report TOOL TO SEND THE INFORMATION TO THE USER
 #################
