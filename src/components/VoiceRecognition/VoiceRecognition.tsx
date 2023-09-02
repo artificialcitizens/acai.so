@@ -32,7 +32,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   audioContext,
 }) => {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
-  const [fetchAvaResponse, avaLoading] = useAva();
+  const { queryAva, loading } = useAva();
   const [ttsLoading, setTtsLoading] = useState<boolean>(false);
   const elevenlabsKey = getToken('ELEVENLABS_API_KEY');
   const [elevenLabsVoice, setElevenLabsVoice] = useState<string>('');
@@ -119,13 +119,13 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     onVoiceActivation(isOn);
   }, [voiceRecognitionState, onVoiceActivation]);
 
-  const handleVoiceRecognition = (t: string) => {
+  const handleVoiceRecognition = async (t: string) => {
     if (!t || t.split(' ').length < 2) return;
     if (ttsLoading) return;
 
     switch (voiceRecognitionState) {
       case 'voice': {
-        synthesizeAndPlay(Promise.resolve(t));
+        synthesizeAndPlay(t);
         break;
       }
       case 'ava': {
@@ -144,12 +144,12 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           },
         });
         toastifyInfo('Generating Text');
-        const avaResponse = fetchAvaResponse(t, '');
-        synthesizeAndPlay(avaResponse).then(async () => {
-          const response = await Promise.resolve(avaResponse);
+        const { response } = await queryAva(t, '');
+        synthesizeAndPlay(response).then(async () => {
+          const res = await Promise.resolve(response);
           const assistantChatHistory: ChatHistory = {
             id: workspaceId,
-            text: response,
+            text: res,
             timestamp: Math.floor(Date.now() / 1000).toString(),
             type: 'ava',
           };
@@ -172,11 +172,10 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     }
   };
 
-  const synthesizeAndPlay = async (responsePromise: Promise<string>) => {
+  const synthesizeAndPlay = async (response: string) => {
     if (ttsLoading) return;
     setTtsLoading(true);
     try {
-      const response = await responsePromise;
       let audioData;
       toastifyInfo('Generating Audio');
       if (synthesisMode === 'bark') {
@@ -235,7 +234,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 
   const handleManualTTS = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    synthesizeAndPlay(Promise.resolve(manualTTS));
+    synthesizeAndPlay(manualTTS);
     setManualTTS('');
   };
 

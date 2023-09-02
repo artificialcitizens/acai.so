@@ -152,6 +152,7 @@ export const useAva = (): {
             },
             handleLLMEnd: (output) => {
               setLoading(false);
+              setStreamingMessage('');
               // console.log({ output });
             },
             handleLLMError: (err) => {
@@ -223,7 +224,7 @@ export const useAva = (): {
           };
         }
 
-        setLoading(true); // assuming setLoading is defined somewhere in your code
+        setLoading(true);
         try {
           const res = await axios.post(`${agentUrl}/v1/agent`, agentPayload, {
             headers: {

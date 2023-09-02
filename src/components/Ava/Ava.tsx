@@ -41,7 +41,7 @@ export const Ava: React.FC<AvaProps> = ({
       agentStateService,
       (state) => state.context[workspaceId]?.systemNotes,
     ) || '';
-  const [avaResponse] = useAva();
+  const { queryAva, streamingMessage } = useAva();
   const [uiState] = useActor(uiStateService);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
 
@@ -155,8 +155,9 @@ export const Ava: React.FC<AvaProps> = ({
           <Chat
             name="Ava"
             avatar=".."
+            streamingMessage={streamingMessage}
             onSubmitHandler={async (message) => {
-              const response = await avaResponse(message, systemNotes);
+              const { response } = await queryAva(message, systemNotes);
               return response;
             }}
           />
