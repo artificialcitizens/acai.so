@@ -1,5 +1,5 @@
 import { createMachine, assign } from 'xstate';
-import { agentMode } from '../hooks/use-ava';
+import { agentMode } from '../components/Ava/use-ava';
 
 export interface ChatHistory {
   id: string;

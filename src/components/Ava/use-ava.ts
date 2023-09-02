@@ -1,25 +1,25 @@
 import { useContext, useState } from 'react';
-import { avaChat } from '../lib/ac-langchain/agents/ava';
-import { toastifyAgentLog } from '../components/Toast';
-import { handleCreateTab } from '../state';
+import { avaChat } from '../../lib/ac-langchain/agents/ava';
+import { toastifyAgentLog } from '../Toast';
+import { handleCreateTab } from '../../state';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
-} from '../context/GlobalStateContext';
+} from '../../context/GlobalStateContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { queryChat } from '../lib/ac-langchain/agents/chat-model';
+import { queryChat } from '../../lib/ac-langchain/agents/chat-model';
 import {
   createAvaChatPrompt,
   createCustomPrompt,
   // createWritingPromptTemplate,
-} from '../lib/ac-langchain/agents/agent.prompts';
+} from '../../lib/ac-langchain/agents/agent.prompts';
 import { useActor } from '@xstate/react';
-import { EditorContext } from '../context/EditorContext';
+import { EditorContext } from '../../context/EditorContext';
 // import { queryAssistant } from '../utils/ac-langchain/agents/assistant';
 // import { queryRouterAgent } from '../utils/ac-langchain/agents/router-agent';
-import { useLocalStorageKeyValue } from './use-local-storage';
+import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import axios from 'axios';
-import { getToken } from '../utils/config';
+import { getToken } from '../../utils/config';
 
 type MessageType = 'user' | 'ava';
 
@@ -119,8 +119,7 @@ export const useAva = (): [
         // if the user has a custom prompt we override the system prompt
         const sysMessage = customPrompt
           ? await createCustomPrompt(customPrompt, formattedChatHistory)
-          : // @TODO: Update once user profile is implemented
-            await createAvaChatPrompt(
+          : await createAvaChatPrompt(
               userName || 'User',
               userLocation || 'Undisclosed',
               formattedChatHistory,

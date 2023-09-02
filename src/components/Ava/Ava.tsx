@@ -8,7 +8,7 @@ import Chat from '../../components/Chat/Chat';
 import ScratchPad from '../../components/ScratchPad/ScratchPad';
 import TokenManager from '../../components/TokenManager/token-manager';
 import { useActor, useSelector } from '@xstate/react';
-import { useAva } from '../../hooks/use-ava';
+import { useAva } from './use-ava';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
