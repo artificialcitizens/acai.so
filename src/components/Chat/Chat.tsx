@@ -32,6 +32,7 @@ import he from 'he';
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
   onSubmitHandler: (message: string, chatHistory: string) => Promise<string>;
+  streamingMessage?: string;
   height?: string;
   startingValue?: string;
   placeHolder?: string;
@@ -40,6 +41,7 @@ interface ChatProps {
 }
 const Chat: React.FC<ChatProps> = ({
   onSubmitHandler,
+  streamingMessage,
   startingValue,
   name = 'Ava',
 }) => {
@@ -113,6 +115,33 @@ const Chat: React.FC<ChatProps> = ({
       type: type,
     };
   };
+
+  useEffect(() => {
+    if (streamingMessage) {
+      setMessages((prevMessages) => {
+        // Check if the last message was from the assistant
+        const lastMessageIsFromAssistant =
+          prevMessages.length > 0 &&
+          prevMessages[prevMessages.length - 1].direction === 'incoming';
+
+        // If the last message was from the assistant, slice it off
+        const messagesToKeep = lastMessageIsFromAssistant
+          ? prevMessages.slice(0, prevMessages.length - 1)
+          : prevMessages;
+
+        return [
+          ...messagesToKeep,
+          {
+            message: streamingMessage,
+            direction: 'incoming',
+            sender: 'Assistant',
+            position: 'single',
+            sentTime: Math.floor(Date.now() / 1000).toString(),
+          },
+        ];
+      });
+    }
+  }, [streamingMessage, addMessage]);
 
   const handleSend = useCallback(
     async (message: string) => {

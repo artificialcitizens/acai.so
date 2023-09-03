@@ -60,3 +60,59 @@ curl -X POST -H "Content-Type: application/json" \
 }' \
   http://localhost:5000/v1/agent
 ```
+
+## Socket Callbacks
+
+      <!-- socket.off('create-tab', handleTab);
+      socket.off('error', (err: any) => {
+        console.error(err);
+        toastifyError(err.message);
+      });
+      socket.off('agent-log', (data: string) => {
+        toastifyAgentLog(data);
+      });
+      socket.off('info-toast', (err: any) => {
+        console.error(err);
+        toastifyInfo(err.message);
+      }); -->
+
+### create-tab
+
+This callback is used to create a new tab in the ACAI interface.
+
+The payload:
+
+```
+data: { title: string; content: string }
+
+```
+
+### agent-log
+
+Log data in the Log tab of the ACAI interface.
+
+The payload:
+
+```
+data: string
+```
+
+### info-toast
+
+Display a toast notification in the ACAI interface.
+
+The payload:
+
+```
+data: string
+```
+
+### error
+
+Display an error toast notification in the ACAI interface with the error message.
+
+The payload:
+
+```
+data: string
+```

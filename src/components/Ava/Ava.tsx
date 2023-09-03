@@ -8,7 +8,7 @@ import Chat from '../../components/Chat/Chat';
 import ScratchPad from '../../components/ScratchPad/ScratchPad';
 import TokenManager from '../../components/TokenManager/token-manager';
 import { useActor, useSelector } from '@xstate/react';
-import { useAva } from '../../hooks/use-ava';
+import { useAva } from './use-ava';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -21,6 +21,7 @@ import VoiceRecognition from '../VoiceRecognition/VoiceRecognition';
 import ChatModelDropdown from '../ChatSettings';
 import { SocketManager } from '../SocketManager';
 import UserProfile from '../UserProfile/UserProfile';
+import { toastifyError } from '../Toast';
 
 interface AvaProps {
   workspaceId: string;
@@ -41,7 +42,7 @@ export const Ava: React.FC<AvaProps> = ({
       agentStateService,
       (state) => state.context[workspaceId]?.systemNotes,
     ) || '';
-  const [avaResponse] = useAva();
+  const { queryAva, streamingMessage } = useAva();
   const [uiState] = useActor(uiStateService);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
 
@@ -155,9 +156,15 @@ export const Ava: React.FC<AvaProps> = ({
           <Chat
             name="Ava"
             avatar=".."
+            streamingMessage={streamingMessage}
             onSubmitHandler={async (message) => {
-              const response = await avaResponse(message, systemNotes);
-              return response;
+              try {
+                const { response } = await queryAva(message, systemNotes);
+                return response;
+              } catch (e: any) {
+                toastifyError(e.message);
+                return 'Sorry, I had an issue processing your query.';
+              }
             }}
           />
         )}

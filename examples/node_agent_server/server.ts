@@ -57,6 +57,10 @@ app.post('/v1/agent', async (req, res) => {
       title: 'Hello Tab!',
       content: formattedPayload,
     });
+    io.emit('agent-log', {
+      title: 'Hello Tab!',
+      content: formattedPayload,
+    });
     res.status(200).send({ response: 'Hello from the server side...' });
   } catch (error) {
     console.error(error);
@@ -75,7 +79,7 @@ app.get('/ava', async (req, res) => {
       io.emit('data-received', data);
     },
     onAgentAction: (data: any) => {
-      io.emit('agent-action', data);
+      io.emit('agent-log', data);
     },
     onProcessing: (data: any) => {
       io.emit('processing', data);

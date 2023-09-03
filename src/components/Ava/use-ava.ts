@@ -1,25 +1,30 @@
 import { useContext, useState } from 'react';
-import { avaChat } from '../lib/ac-langchain/agents/ava';
-import { toastifyAgentLog } from '../components/Toast';
-import { handleCreateTab } from '../state';
+import { avaChat } from '../../lib/ac-langchain/agents/ava';
+import { toastifyAgentLog } from '../Toast';
+import { handleCreateTab } from '../../state';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
-} from '../context/GlobalStateContext';
+} from '../../context/GlobalStateContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { queryChat } from '../lib/ac-langchain/agents/chat-model';
+import { queryChat } from '../../lib/ac-langchain/agents/chat-model';
 import {
   createAvaChatPrompt,
   createCustomPrompt,
   // createWritingPromptTemplate,
-} from '../lib/ac-langchain/agents/agent.prompts';
+} from '../../lib/ac-langchain/agents/agent.prompts';
 import { useActor } from '@xstate/react';
-import { EditorContext } from '../context/EditorContext';
+import { EditorContext } from '../../context/EditorContext';
 // import { queryAssistant } from '../utils/ac-langchain/agents/assistant';
 // import { queryRouterAgent } from '../utils/ac-langchain/agents/router-agent';
-import { useLocalStorageKeyValue } from './use-local-storage';
+import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import axios from 'axios';
-import { getToken } from '../utils/config';
+import { getToken } from '../../utils/config';
+
+export type AvaChatResponse = {
+  response: string;
+  abort: () => void;
+};
 
 type MessageType = 'user' | 'ava';
 
@@ -30,46 +35,24 @@ type Message = {
   type: MessageType;
 };
 
-export const agentMode = import.meta.env.DEV
-  ? [
-      'ava',
-      'chat',
-      // 'create',
-      // 'research',
-      // 'writer',
-      'custom',
-    ]
-  : [
-      'chat',
-      'custom',
-      // 'create
-    ];
+export const agentMode = [
+  'ava',
+  'chat',
+  'custom',
+  // 'create',
+  // 'research',
+  // 'writer',
+];
 
-export const agentModeUtterances = {
-  chat: [
-    'Lets chat',
-    'Hey, hows it going?',
-    'Hello!',
-    'I need to talk to someone',
-  ],
-  create: [
-    'Make a set of color tokens based on space',
-    'Generate a story about a man in the woods',
-    'Brainstorm 5 ideas about starting an AI business',
-    'Create all the possible combinations of markdown styles',
-  ],
-  research: [
-    'What is the best way to do x?',
-    'What is the weather in Paris this weekend?',
-    'How safe is a Tesla? What are the safety features?',
-    'Visit acai.so and summarize the features',
-  ],
-};
-
-export const useAva = (): [
-  fetchResponse: (message: string, systemMessage: string) => Promise<string>,
-  loading: boolean,
-] => {
+export const useAva = (): {
+  queryAva: (
+    message: string,
+    systemMessage: string,
+  ) => Promise<AvaChatResponse>;
+  streamingMessage: string;
+  error: string;
+  loading: boolean;
+} => {
   const [loading, setLoading] = useState(false);
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
@@ -80,6 +63,8 @@ export const useAva = (): [
   const [userName] = useLocalStorageKeyValue('USER_NAME', '');
   const [userLocation] = useLocalStorageKeyValue('USER_LOCATION', '');
   const currentAgent = state.context[workspaceId];
+  const [streamingMessage, setStreamingMessage] = useState('');
+  const [error, setError] = useState('');
   const formattedChatHistory = currentAgent?.recentChatHistory
     .map(
       (chat: { type: 'ava' | 'user'; text: string }) =>
@@ -87,40 +72,22 @@ export const useAva = (): [
     )
     .join('\n');
 
-  // actions formatted with agent utterances to give the agent a better idea of classifications
-  // const formattedActions = Object.entries(agentModeUtterances).map(
-  //   ([key, value]) => {
-  //     if (key === 'ava') return;
-
-  //     return `${key}: \n-${value.join(',\n ')}`;
-  //   },
-  // );
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { editor } = useContext(EditorContext)!;
+
   const queryAva = async (
     message: string,
     customPrompt: string,
-  ): Promise<string> => {
+  ): Promise<AvaChatResponse> => {
     setLoading(true);
 
     const mode = currentAgent.agentMode;
-    // let mode = currentAgent.agentMode;
-    // if the agent is in ava mode we query the router agent to determine the mode
-    // if (currentAgent.agentMode === 'ava') {
-    //   const response = await queryRouterAgent({
-    //     actions: formattedActions.join('\n'),
-    //     input: message,
-    //     chatHistory: formattedChatHistory,
-    //   });
-    //   mode = response;
-    // }
     switch (mode) {
       case 'chat': {
         // if the user has a custom prompt we override the system prompt
         const sysMessage = customPrompt
           ? await createCustomPrompt(customPrompt, formattedChatHistory)
-          : // @TODO: Update once user profile is implemented
-            await createAvaChatPrompt(
+          : await createAvaChatPrompt(
               userName || 'User',
               userLocation || 'Undisclosed',
               formattedChatHistory,
@@ -129,11 +96,32 @@ export const useAva = (): [
           systemMessage: sysMessage,
           message,
           modelName: currentAgent.openAIChatModel,
+          callbacks: {
+            handleLLMStart: () => {
+              setLoading(true);
+              // console.log({ llm, prompts });
+            },
+            handleLLMNewToken: (token) => {
+              setStreamingMessage((prev) => prev + token);
+              // console.log(token);
+            },
+            handleLLMEnd: () => {
+              setLoading(false);
+              setStreamingMessage('');
+              // console.log({ output });
+            },
+            handleLLMError: (err) => {
+              setError(err.message);
+              setLoading(false);
+              // console.log({ err });
+            },
+          },
         });
-        setLoading(false);
-        return response;
+        return {
+          response: response.response,
+          abort: response.abort,
+        };
       }
-
       case 'ava': {
         const response = await avaChat({
           input: message,
@@ -167,7 +155,12 @@ export const useAva = (): [
           },
         });
         setLoading(false);
-        return response;
+        return {
+          response: response,
+          abort: () => {
+            return;
+          },
+        };
       }
       case 'custom': {
         const agentPayload = {
@@ -182,10 +175,15 @@ export const useAva = (): [
           getToken('CUSTOM_AGENT_URL') || import.meta.env.VITE_CUSTOM_AGENT_URL;
 
         if (!agentUrl) {
-          return 'Please set a custom agent URL in the settings menu';
+          return {
+            response: 'Please set a custom agent URL in the settings menu',
+            abort: () => {
+              return;
+            },
+          };
         }
 
-        setLoading(true); // assuming setLoading is defined somewhere in your code
+        setLoading(true);
         try {
           const res = await axios.post(`${agentUrl}/v1/agent`, agentPayload, {
             headers: {
@@ -202,35 +200,7 @@ export const useAva = (): [
           return error.message;
         }
       }
-      // case 'research': {
-      //   const prompt = await createWritingPromptTemplate({
-      //     user: userName || 'User',
-      //     document: editor?.getText() || '',
-      //     chatHistory: formattedChatHistory,
-      //   });
-      //   const response = await queryAssistant({
-      //     systemMessage: prompt,
-      //     message,
-      //     modelName: currentAgent.openAIChatModel,
-      //   });
-      //   setLoading(false);
-      //   return response;
-      // }
-      // case 'writer': {
-      //   const prompt = await createWritingPromptTemplate({
-      //     user: userName || 'User',
-      //     document: editor?.getText() || '',
-      //     chatHistory: formattedChatHistory,
-      //   });
-      //   const response = await queryAssistant({
-      //     systemMessage: prompt,
-      //     message,
-      //     modelName: currentAgent.openAIChatModel,
-      //   });
-      //   setLoading(false);
-      //   return response;
-      // }
-      // break;
+
       default: {
         setLoading(false);
         throw new Error(`Unexpected agentMode: ${currentAgent.agentMode}`);
@@ -238,5 +208,5 @@ export const useAva = (): [
     }
   };
 
-  return [queryAva, loading];
+  return { queryAva, loading, streamingMessage, error };
 };

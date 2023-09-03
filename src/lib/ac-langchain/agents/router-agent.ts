@@ -1,5 +1,5 @@
 import { PromptTemplate } from 'langchain/prompts';
-import { queryChat } from './chat-model';
+// import { queryChat } from './chat-model';
 
 const actionRouterPrompt = `##Ignore Prior Instructions
 You are tasked with routing the user query to the best action based on the users input.
@@ -53,31 +53,31 @@ export const createWritingPromptTemplate = ({
   });
 };
 
-export const queryRouterAgent = async ({
-  actions,
-  input,
-  chatHistory,
-}: {
-  actions: string;
-  input: string;
-  chatHistory?: string;
-}): Promise<string> => {
-  const prompt = await createWritingPromptTemplate({
-    actions,
-    input,
-    chatHistory,
-  });
-  const response = await queryChat({
-    systemMessage: prompt,
-    message: input,
-    modelName: 'gpt-4',
-  });
-  const regex = /<action>(.*)<\/action>/gm;
-  const match = regex.exec(response);
-  console.log(match);
-  if (match) {
-    return match[1];
-  } else {
-    return 'chat';
-  }
-};
+// export const queryRouterAgent = async ({
+//   actions,
+//   input,
+//   chatHistory,
+// }: {
+//   actions: string;
+//   input: string;
+//   chatHistory?: string;
+// }): Promise<string> => {
+//   const prompt = await createWritingPromptTemplate({
+//     actions,
+//     input,
+//     chatHistory,
+//   });
+//   const response = await queryChat({
+//     systemMessage: prompt,
+//     message: input,
+//     modelName: 'gpt-4',
+//   });
+//   const regex = /<action>(.*)<\/action>/gm;
+//   const match = regex.exec(response);
+//   console.log(match);
+//   if (match) {
+//     return match[1];
+//   } else {
+//     return 'chat';
+//   }
+// };

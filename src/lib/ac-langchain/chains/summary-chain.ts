@@ -7,7 +7,7 @@ import {
   StructuredOutputParser,
   OutputFixingParser,
 } from 'langchain/output_parsers';
-import { z } from 'zod';
+// import { z } from 'zod';
 import { loadSummarizationChain } from 'langchain/chains';
 import { Document } from 'langchain/document';
 import { getToken } from '../../../utils/config';
@@ -31,9 +31,9 @@ const summaryPrompt = PromptTemplate.fromTemplate(
   Be sure to leave in key details and do not embellish or add any information.`,
 );
 
-const parser = StructuredOutputParser.fromZodSchema(
-  z.array(z.string()).describe('Questions in an array of strings'),
-);
+// const parser = StructuredOutputParser.fromZodSchema(
+//   z.array(z.string()).describe('Questions in an array of strings'),
+// );
 
 // https://www.youtube.com/watch?v=7Y6n5zBCzMo
 export const summarySplitter = new TokenTextSplitter({

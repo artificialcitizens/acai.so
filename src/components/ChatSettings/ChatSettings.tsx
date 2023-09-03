@@ -6,7 +6,7 @@ import {
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
 import { useActor } from '@xstate/react';
-import { agentMode } from '../../hooks/use-ava';
+import { agentMode } from '../Ava/use-ava';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 
 interface ChatModelProps {

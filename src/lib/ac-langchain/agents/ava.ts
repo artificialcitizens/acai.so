@@ -26,26 +26,31 @@ import {
   // eslint-disable-next-line import/named
   PartialValues,
 } from 'langchain/schema';
-import { GoogleCustomSearch, Tool, DynamicTool } from 'langchain/tools';
-import { WebBrowser } from 'langchain/tools/webbrowser';
+import { Tool, DynamicTool } from 'langchain/tools';
 import { Calculator } from 'langchain/tools/calculator';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { BaseCallbackHandler } from 'langchain/callbacks';
 import { Embeddings } from 'langchain/embeddings/base';
-import {
-  createColorTokens,
-  mapColorsToEvents,
-} from '../chains/design-token-chain';
+
 import { OpenAI } from 'langchain/llms/openai';
 import { getToken } from '../../../utils/config';
 import { timestampToHumanReadable } from '../../../utils/data-utils';
 import {
-  createAvaChatPrompt,
-  createCustomPrompt,
-  createWritingPromptTemplate,
-} from './agent.prompts';
-import { queryChat } from './chat-model';
-import { queryAssistant } from './assistant';
+  // colorTool,
+  documentTool,
+  getCurrentDocument,
+  humanInTheLoopTool,
+} from './tools/acai-tools';
+// import { browser } from './tools/web-browser';
+import { googleSearch } from './tools/search-engine';
+import { WebBrowser } from 'langchain/tools/webbrowser';
+// import {
+//   createAvaChatPrompt,
+//   createCustomPrompt,
+//   createWritingPromptTemplate,
+// } from './agent.prompts';
+// import { queryChat } from './chat-model';
+// import { queryAssistant } from './assistant';
 
 const PREFIX = `###IGNORE PRIOR INSTRUCTIONS:
 You are an intelligent digital worker and you must use the research tools to research the users query
@@ -66,7 +71,7 @@ Observation: the result of the action
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question`;
 
-const SUFFIX = `YOUR REPLIES MUST USE THE ABOVE FORMAT FORMAT SO THAT IT
+const SUFFIX = `YOUR REPLIES MUST USE THE ABOVE FORMAT SO THAT IT
 CAN BE PARSED WITH: /Action: (.*)\nAction Input: (.*)/s
 ALWAYS USE THE create-document-or-report TOOL TO SEND THE INFORMATION TO THE USER
 #################
@@ -178,41 +183,35 @@ class CustomOutputParser extends AgentActionOutputParser {
 let chatModel: ChatOpenAI;
 let model: OpenAI;
 let embeddings: Embeddings;
-const createModels = (apiKey: string) => {
+const createModels = () => {
   if (chatModel && model && embeddings) return { chatModel, model, embeddings };
+
   chatModel = new ChatOpenAI({
-    openAIApiKey: apiKey,
+    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
     modelName: 'gpt-4-0314',
     temperature: 0.1,
   });
   model = new OpenAI({
-    openAIApiKey: apiKey,
+    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
     temperature: 0.3,
   });
   embeddings = new OpenAIEmbeddings({
-    openAIApiKey: apiKey,
+    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
   });
   return { chatModel, model, embeddings };
 };
 
-const tools = [
-  new Calculator(),
-  new DynamicTool({
-    name: 'human-input',
-    description: `Use this tool for when you need a specific piece of information from a human that only that human would know. 
-    Input is a short question for the human and the output is the humans response`,
-    func: async (question: string) => {
-      const answer = prompt(question);
-      return answer || "User didn't respond in time, use your best judgement";
-    },
-  }),
-];
-
-const createLlmChain = (
-  model: any,
-  systemMessage?: string,
-  chatHistory?: string,
-) => {
+const createLlmChain = ({
+  model,
+  tools,
+  systemMessage,
+  chatHistory,
+}: {
+  model: any;
+  tools: any[];
+  systemMessage?: string;
+  chatHistory?: string;
+}) => {
   const llmChain = new LLMChain({
     prompt: new CustomPromptTemplate({
       tools,
@@ -242,7 +241,6 @@ const createLlmChain = (
 const createAgentArtifacts = ({
   chatModel,
   model,
-  embeddings,
   currentDocument,
   chatHistory,
   systemMessage,
@@ -250,7 +248,6 @@ const createAgentArtifacts = ({
 }: {
   chatModel: ChatOpenAI;
   model: OpenAI;
-  embeddings: Embeddings;
   currentDocument?: string;
   systemMessage?: string;
   chatHistory?: string;
@@ -265,86 +262,23 @@ const createAgentArtifacts = ({
     handleAgentAction: any;
   };
 }) => {
-  const agent = createLlmChain(chatModel, systemMessage, chatHistory);
+  const tools = [];
+
+  const proxyUrl =
+    getToken('PROXY_SERVER_URL') || import.meta.env.VITE_PROXY_SERVER_URL;
+
   const browser = new WebBrowser({
-    model,
-    embeddings,
-  });
-
-  const google = new GoogleCustomSearch({
-    apiKey: getToken('GOOGLE_API_KEY') || import.meta.env.VITE_GOOGLE_API_KEY,
-    googleCSEId:
-      getToken('GOOGLE_CSE_ID') || import.meta.env.VITE_GOOGLE_CSE_ID,
-  });
-
-  google.description =
-    'For when you need to find or search information for User, you can use this to search Google for the results. Input is query to search for and output is results.';
-
-  const documentTool = new DynamicTool({
-    name: 'create-document-or-report',
-    description: `Use this tool any time User wants you to create a document or report, etc. 
-    Input is <title>Title</title> <content>Content</content>
-    DO NOT INCLUDE THIS INFORMATION IN THE RESPONSE, User WILL GET IT AUTOMATICALLY
-    `,
-    func: async (input: string) => {
-      const titleRegex = /<title>(.*?)<\/title>/s;
-      const titleMatch = titleRegex.exec(input);
-      const title = titleMatch ? titleMatch[1] : ''; // extracts 'Title'
-
-      const contentRegex = /<content>(.*?)<\/content>/s;
-      const contentMatch = contentRegex.exec(input);
-      const content = contentMatch ? contentMatch[1] : ''; // extracts 'Content'
-
-      handleCreateDocument({ title, content });
-      // @TODO: update to return url to document
-      return "I've created the document for you.";
-    },
-    returnDirect: true,
-  });
-
-  const colorTool = new DynamicTool({
-    name: 'create-color-tokens',
-    description: `Use this tool to create color tokens based on a given description from the user.
-    Examples Inputs: A palette of colors inspired by the beach,
-      A palette of neutral colors to compliment #df1642 and #ef3de5
-
-    Output is an error or success message to let you know the doc was created successfully.
-
-    DO NOT INCLUDE THIS INFORMATION IN RESPONSE, USER WILL GET IT AUTOMATICALLY
-    `,
-    func: async (string: string): Promise<string> => {
-      const colorTokens = await createColorTokens(string, model);
-      // showing an example of how to map the colors to xstate events
-      // const colorTokenEvent = mapColorsToEvents(colorTokens);
-      const colorString = Object.entries(colorTokens)
-        .map(([key, value]) => `${key}: ${value}`)
-        .join('\n');
-      // @TODO: return the document and workspace id to point the user to the document
-      // create option for whether to navigate to the document or not
-      handleCreateDocument({
-        title: 'Color Tokens',
-        content: '```\n' + colorString + '\n```',
-      });
-      return 'success';
-    },
-    returnDirect: true,
-  });
-  const getCurrentDocument = new DynamicTool({
-    name: 'view-users-current-document',
-    description: `returns the users current document/blog/article, etc.`,
-    func: async (string: string): Promise<string> => {
-      return currentDocument || 'No document found';
-    },
+    model: model,
+    embeddings: embeddings,
   });
 
   const search = async (url: string) => {
     const targetUrl = encodeURIComponent(url);
-    const proxyUrl =
-      getToken('PROXY_SERVER_URL') || import.meta.env.VITE_PROXY_SERVER_URL;
     const result = await browser.call(`${proxyUrl}/proxy?url=${targetUrl}`);
     return result;
   };
 
+  // @TODO: sort out the proxy server for creating the browser tool as in the docs
   const searchTool = new DynamicTool({
     name: 'website-browser',
     description: `Use this tool to search a website for information. 
@@ -357,12 +291,21 @@ const createAgentArtifacts = ({
 
   // @TODO: update tools to be dynamic based on settings
   // setting.searchTool && tools.push(searchTool);
-  import.meta.env.DEV && tools.push(searchTool);
-  // tools.push(chatTool);
-  tools.push(documentTool);
-  tools.push(google);
-  tools.push(colorTool);
-  tools.push(getCurrentDocument);
+  proxyUrl && tools.push(searchTool);
+
+  tools.push(new Calculator());
+  tools.push(humanInTheLoopTool);
+  tools.push(documentTool(handleCreateDocument));
+  // tools.push(colorTool(handleCreateDocument, model));
+  tools.push(getCurrentDocument(currentDocument || ''));
+  tools.push(googleSearch());
+
+  const agent = createLlmChain({
+    model: chatModel,
+    tools,
+    systemMessage,
+    chatHistory,
+  });
 
   const executor = new AgentExecutor({
     agent,
@@ -414,13 +357,10 @@ export const avaChat = async ({
     handleAgentAction: (arg0: AgentAction) => void;
   };
 }) => {
-  const { chatModel, model, embeddings } = createModels(
-    getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
-  );
+  const { chatModel, model } = createModels();
   const { executor, handler } = createAgentArtifacts({
     chatModel,
     model,
-    embeddings,
     chatHistory,
     systemMessage,
     currentDocument,

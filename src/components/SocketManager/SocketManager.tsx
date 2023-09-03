@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
-import { toastifyError, toastifyInfo } from '../Toast';
+import { toastifyAgentLog, toastifyError, toastifyInfo } from '../Toast';
 import { handleCreateTab } from '../../state';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -18,20 +18,39 @@ export const SocketManager: React.FC = () => {
     'CUSTOM_AGENT_SERVER_PASSWORD',
     '',
   );
+  const [url, setUrl] = useState(storedUrl);
+  const [password, setPassword] = useState(storedPassword);
   const [socket, setSocket] = useState<Socket | null>(null);
   const location = useLocation();
   const workspaceId = location.pathname.split('/')[1];
   const navigate = useNavigate();
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
 
+  useEffect(() => {
+    setUrl(storedUrl);
+    setPassword(storedPassword);
+  }, [storedUrl, storedPassword]);
+
+  useEffect(() => {
+    if (!storedUrl) return;
+    handleConnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storedUrl]);
+
+  const handleFormSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    setStoredUrl(url);
+    setStoredPassword(password);
+    handleConnect();
+  };
+
+  const handleConnect = () => {
     const newSocket = io(storedUrl, {
       auth: {
         password: storedPassword,
       },
-      autoConnect: false, // Prevent automatic connection
+      autoConnect: false,
     });
 
     newSocket.on('connect_error', (err) => {
@@ -43,6 +62,7 @@ export const SocketManager: React.FC = () => {
       }
       newSocket.close();
     });
+    console.log('Connecting...');
 
     newSocket.connect();
     setSocket(newSocket);
@@ -51,16 +71,14 @@ export const SocketManager: React.FC = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleConnect = () => {
+    const handleConnectCb = () => {
       toastifyInfo('Connected to custom agent');
       console.log(`Connected: ${socket.id}`);
     };
-    const handleMessage = (message: string) => console.log(message);
     const handleDisconnect = () => console.log(`Disconnected: ${socket.id}`);
     const handleTab = async (data: { title: string; content: string }) => {
       if (!workspaceId) toastifyError('No workspace active');
       const { title, content } = data;
-      handleCreateTab({ title, content }, workspaceId);
       const tab = await handleCreateTab({ title, content }, workspaceId);
       globalServices.appStateService.send({
         type: 'ADD_TAB',
@@ -70,21 +88,42 @@ export const SocketManager: React.FC = () => {
         navigate(`/${workspaceId}/${tab.id}`);
       }, 250);
     };
-    socket.on('connect', handleConnect);
-    socket.on('message', handleMessage);
+    socket.on('connect', handleConnectCb);
     socket.on('disconnect', handleDisconnect);
     socket.on('create-tab', handleTab);
+    socket.on('error', (err: any) => {
+      console.error(err);
+      toastifyError(err.message);
+    });
+    socket.on('agent-log', (data: string) => {
+      toastifyAgentLog(data);
+    });
+    socket.on('info-toast', (err: any) => {
+      console.error(err);
+      toastifyInfo(err.message);
+    });
 
     return () => {
       socket.off('connect', handleConnect);
-      socket.off('message', handleMessage);
       socket.off('disconnect', handleDisconnect);
+      socket.off('create-tab', handleTab);
+      socket.off('error', (err: any) => {
+        console.error(err);
+        toastifyError(err.message);
+      });
+      socket.off('agent-log', (data: string) => {
+        toastifyAgentLog(data);
+      });
+      socket.off('info-toast', (err: any) => {
+        console.error(err);
+        toastifyInfo(err.message);
+      });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket]);
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleFormSubmit}>
       <span className="flex mb-2 items-center">
         <label htmlFor="url" className="text-acai-white pr-2 w-[50%]">
           URL:
@@ -93,8 +132,8 @@ export const SocketManager: React.FC = () => {
           id="url"
           className="text-acai-white bg-base px-[2px]"
           type="text"
-          value={storedUrl}
-          onChange={(e) => setStoredUrl(e.target.value)}
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
         />
       </span>
       <span className="flex mb-2 items-center">
@@ -105,8 +144,8 @@ export const SocketManager: React.FC = () => {
           className="text-acai-white bg-base px-[2px]"
           id="password"
           type="password"
-          value={storedPassword}
-          onChange={(e) => setStoredPassword(e.target.value)}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
       </span>
       <input
