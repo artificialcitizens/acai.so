@@ -36,7 +36,7 @@ type Message = {
 };
 
 export const agentMode = [
-  'ava',
+  import.meta.env.DEV && 'ava',
   'chat',
   'custom',
   // 'create',
