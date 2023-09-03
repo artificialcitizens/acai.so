@@ -36,13 +36,16 @@ type Message = {
 };
 
 export const agentMode = [
-  import.meta.env.DEV && 'ava',
   'chat',
   'custom',
   // 'create',
   // 'research',
   // 'writer',
 ];
+
+if (import.meta.env.DEV) {
+  agentMode.unshift('ava');
+}
 
 export const useAva = (): {
   queryAva: (
