@@ -41,8 +41,9 @@ import {
   getCurrentDocument,
   humanInTheLoopTool,
 } from './tools/acai-tools';
-import { browser } from './tools/web-browser';
+// import { browser } from './tools/web-browser';
 import { googleSearch } from './tools/search-engine';
+import { WebBrowser } from 'langchain/tools/webbrowser';
 // import {
 //   createAvaChatPrompt,
 //   createCustomPrompt,
@@ -263,10 +264,16 @@ const createAgentArtifacts = ({
 }) => {
   const tools = [];
 
+  const proxyUrl =
+    getToken('PROXY_SERVER_URL') || import.meta.env.VITE_PROXY_SERVER_URL;
+
+  const browser = new WebBrowser({
+    model: model,
+    embeddings: embeddings,
+  });
+
   const search = async (url: string) => {
     const targetUrl = encodeURIComponent(url);
-    const proxyUrl =
-      getToken('PROXY_SERVER_URL') || import.meta.env.VITE_PROXY_SERVER_URL;
     const result = await browser.call(`${proxyUrl}/proxy?url=${targetUrl}`);
     return result;
   };
@@ -284,7 +291,7 @@ const createAgentArtifacts = ({
 
   // @TODO: update tools to be dynamic based on settings
   // setting.searchTool && tools.push(searchTool);
-  import.meta.env.DEV && tools.push(searchTool);
+  proxyUrl && tools.push(searchTool);
 
   tools.push(new Calculator());
   tools.push(humanInTheLoopTool);
