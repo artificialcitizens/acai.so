@@ -97,7 +97,7 @@ export const useAva = (): {
           message,
           modelName: currentAgent.openAIChatModel,
           callbacks: {
-            handleLLMStart: (llm, prompts) => {
+            handleLLMStart: () => {
               setLoading(true);
               // console.log({ llm, prompts });
             },
@@ -105,7 +105,7 @@ export const useAva = (): {
               setStreamingMessage((prev) => prev + token);
               // console.log(token);
             },
-            handleLLMEnd: (output) => {
+            handleLLMEnd: () => {
               setLoading(false);
               setStreamingMessage('');
               // console.log({ output });
