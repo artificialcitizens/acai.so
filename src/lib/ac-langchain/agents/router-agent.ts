@@ -53,31 +53,31 @@ export const createWritingPromptTemplate = ({
   });
 };
 
-export const queryRouterAgent = async ({
-  actions,
-  input,
-  chatHistory,
-}: {
-  actions: string;
-  input: string;
-  chatHistory?: string;
-}): Promise<string> => {
-  const prompt = await createWritingPromptTemplate({
-    actions,
-    input,
-    chatHistory,
-  });
-  const response = await queryChat({
-    systemMessage: prompt,
-    message: input,
-    modelName: 'gpt-4',
-  });
-  const regex = /<action>(.*)<\/action>/gm;
-  const match = regex.exec(response);
-  console.log(match);
-  if (match) {
-    return match[1];
-  } else {
-    return 'chat';
-  }
-};
+// export const queryRouterAgent = async ({
+//   actions,
+//   input,
+//   chatHistory,
+// }: {
+//   actions: string;
+//   input: string;
+//   chatHistory?: string;
+// }): Promise<string> => {
+//   const prompt = await createWritingPromptTemplate({
+//     actions,
+//     input,
+//     chatHistory,
+//   });
+//   const response = await queryChat({
+//     systemMessage: prompt,
+//     message: input,
+//     modelName: 'gpt-4',
+//   });
+//   const regex = /<action>(.*)<\/action>/gm;
+//   const match = regex.exec(response);
+//   console.log(match);
+//   if (match) {
+//     return match[1];
+//   } else {
+//     return 'chat';
+//   }
+// };
