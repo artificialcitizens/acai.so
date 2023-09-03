@@ -35,41 +35,14 @@ type Message = {
   type: MessageType;
 };
 
-export const agentMode = import.meta.env.DEV
-  ? [
-      'ava',
-      'chat',
-      // 'create',
-      // 'research',
-      // 'writer',
-      'custom',
-    ]
-  : [
-      'chat',
-      'custom',
-      // 'create
-    ];
-
-export const agentModeUtterances = {
-  chat: [
-    'Lets chat',
-    'Hey, hows it going?',
-    'Hello!',
-    'I need to talk to someone',
-  ],
-  create: [
-    'Make a set of color tokens based on space',
-    'Generate a story about a man in the woods',
-    'Brainstorm 5 ideas about starting an AI business',
-    'Create all the possible combinations of markdown styles',
-  ],
-  research: [
-    'What is the best way to do x?',
-    'What is the weather in Paris this weekend?',
-    'How safe is a Tesla? What are the safety features?',
-    'Visit acai.so and summarize the features',
-  ],
-};
+export const agentMode = [
+  'ava',
+  'chat',
+  'custom',
+  // 'create',
+  // 'research',
+  // 'writer',
+];
 
 export const useAva = (): {
   queryAva: (
@@ -99,14 +72,6 @@ export const useAva = (): {
     )
     .join('\n');
 
-  // actions formatted with agent utterances to give the agent a better idea of classifications
-  // const formattedActions = Object.entries(agentModeUtterances).map(
-  //   ([key, value]) => {
-  //     if (key === 'ava') return;
-
-  //     return `${key}: \n-${value.join(',\n ')}`;
-  //   },
-  // );
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { editor } = useContext(EditorContext)!;
 
@@ -117,16 +82,6 @@ export const useAva = (): {
     setLoading(true);
 
     const mode = currentAgent.agentMode;
-    // let mode = currentAgent.agentMode;
-    // if the agent is in ava mode we query the router agent to determine the mode
-    // if (currentAgent.agentMode === 'ava') {
-    //   const response = await queryRouterAgent({
-    //     actions: formattedActions.join('\n'),
-    //     input: message,
-    //     chatHistory: formattedChatHistory,
-    //   });
-    //   mode = response;
-    // }
     switch (mode) {
       case 'chat': {
         // if the user has a custom prompt we override the system prompt
@@ -167,42 +122,46 @@ export const useAva = (): {
           abort: response.abort,
         };
       }
-
-      // case 'ava': {
-      //   const response = await avaChat({
-      //     input: message,
-      //     systemMessage: customPrompt,
-      //     chatHistory: formattedChatHistory,
-      //     currentDocument: editor?.getText() || '',
-      //     callbacks: {
-      //       handleCreateDocument: async ({
-      //         title,
-      //         content,
-      //       }: {
-      //         title: string;
-      //         content: string;
-      //       }) => {
-      //         const tab = await handleCreateTab(
-      //           { title, content },
-      //           workspaceId,
-      //         );
-      //         globalServices.appStateService.send({
-      //           type: 'ADD_TAB',
-      //           tab,
-      //         });
-      //         setTimeout(() => {
-      //           navigate(`/${workspaceId}/${tab.id}`);
-      //         }, 250);
-      //       },
-      //       handleAgentAction: (action) => {
-      //         const thought = action.log.split('Action:')[0].trim();
-      //         toastifyAgentLog(thought);
-      //       },
-      //     },
-      //   });
-      //   setLoading(false);
-      //   return response;
-      // }
+      case 'ava': {
+        const response = await avaChat({
+          input: message,
+          systemMessage: customPrompt,
+          chatHistory: formattedChatHistory,
+          currentDocument: editor?.getText() || '',
+          callbacks: {
+            handleCreateDocument: async ({
+              title,
+              content,
+            }: {
+              title: string;
+              content: string;
+            }) => {
+              const tab = await handleCreateTab(
+                { title, content },
+                workspaceId,
+              );
+              globalServices.appStateService.send({
+                type: 'ADD_TAB',
+                tab,
+              });
+              setTimeout(() => {
+                navigate(`/${workspaceId}/${tab.id}`);
+              }, 250);
+            },
+            handleAgentAction: (action) => {
+              const thought = action.log.split('Action:')[0].trim();
+              toastifyAgentLog(thought);
+            },
+          },
+        });
+        setLoading(false);
+        return {
+          response: response,
+          abort: () => {
+            return;
+          },
+        };
+      }
       case 'custom': {
         const agentPayload = {
           userMessage: message,
@@ -241,35 +200,7 @@ export const useAva = (): {
           return error.message;
         }
       }
-      // case 'research': {
-      //   const prompt = await createWritingPromptTemplate({
-      //     user: userName || 'User',
-      //     document: editor?.getText() || '',
-      //     chatHistory: formattedChatHistory,
-      //   });
-      //   const response = await queryAssistant({
-      //     systemMessage: prompt,
-      //     message,
-      //     modelName: currentAgent.openAIChatModel,
-      //   });
-      //   setLoading(false);
-      //   return response;
-      // }
-      // case 'writer': {
-      //   const prompt = await createWritingPromptTemplate({
-      //     user: userName || 'User',
-      //     document: editor?.getText() || '',
-      //     chatHistory: formattedChatHistory,
-      //   });
-      //   const response = await queryAssistant({
-      //     systemMessage: prompt,
-      //     message,
-      //     modelName: currentAgent.openAIChatModel,
-      //   });
-      //   setLoading(false);
-      //   return response;
-      // }
-      // break;
+
       default: {
         setLoading(false);
         throw new Error(`Unexpected agentMode: ${currentAgent.agentMode}`);

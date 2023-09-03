@@ -21,6 +21,7 @@ import VoiceRecognition from '../VoiceRecognition/VoiceRecognition';
 import ChatModelDropdown from '../ChatSettings';
 import { SocketManager } from '../SocketManager';
 import UserProfile from '../UserProfile/UserProfile';
+import { toastifyError } from '../Toast';
 
 interface AvaProps {
   workspaceId: string;
@@ -157,8 +158,13 @@ export const Ava: React.FC<AvaProps> = ({
             avatar=".."
             streamingMessage={streamingMessage}
             onSubmitHandler={async (message) => {
-              const { response } = await queryAva(message, systemNotes);
-              return response;
+              try {
+                const { response } = await queryAva(message, systemNotes);
+                return response;
+              } catch (e: any) {
+                toastifyError(e.message);
+                return 'Sorry, I had an issue processing your query.';
+              }
             }}
           />
         )}
