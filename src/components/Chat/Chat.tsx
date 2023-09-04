@@ -30,12 +30,14 @@ import Linkify from 'linkify-react';
 import DOMPurify from 'dompurify';
 import he from 'he';
 import { Button } from '../Button/Button';
-import { AttachIcon, SendIcon, TrashIcon } from '../Icons/Icons';
+import { SendIcon, SpinnerIcon, StopIcon, TrashIcon } from '../Icons/Icons';
 
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
   onSubmitHandler: (message: string, chatHistory: string) => Promise<string>;
+  loading: boolean;
   streamingMessage?: string;
+  abortController: AbortController | null;
   height?: string;
   startingValue?: string;
   placeHolder?: string;
@@ -44,8 +46,10 @@ interface ChatProps {
 }
 const Chat: React.FC<ChatProps> = ({
   onSubmitHandler,
+  loading,
   streamingMessage,
   startingValue,
+  abortController,
   name = 'Ava',
 }) => {
   const { agentStateService }: GlobalStateContextValue =
@@ -55,6 +59,13 @@ const Chat: React.FC<ChatProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [msgInputValue, setMsgInputValue] = useState(startingValue);
   const [state, send] = useActor(agentStateService);
+  const [controller, setController] = useState<AbortController | null>(
+    abortController,
+  );
+
+  useEffect(() => {
+    setController(abortController);
+  }, [abortController]);
 
   const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
   const [messages, setMessages] = useState<any[]>(
@@ -68,7 +79,6 @@ const Chat: React.FC<ChatProps> = ({
       };
     }),
   );
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -162,8 +172,6 @@ const Chat: React.FC<ChatProps> = ({
         },
       });
 
-      setLoading(true);
-
       try {
         const answer = await onSubmitHandler(
           message,
@@ -188,10 +196,8 @@ const Chat: React.FC<ChatProps> = ({
           ],
         });
 
-        setLoading(false);
         addMessage(answer, 'Assistant', 'incoming');
       } catch (error) {
-        setLoading(false);
         addMessage(
           'Sorry, there was an error processing your request. Please try again later.',
           'Assistant',
@@ -201,7 +207,6 @@ const Chat: React.FC<ChatProps> = ({
     },
     [
       addMessage,
-      setLoading,
       inputRef,
       setMsgInputValue,
       onSubmitHandler,
@@ -263,7 +268,7 @@ const Chat: React.FC<ChatProps> = ({
           </ChatContainer>
         </div>
       </Dropzone>
-      <span className="flex w-full">
+      <span className="flex">
         <InputToolbox
           style={{
             backgroundColor: 'transparent',
@@ -301,17 +306,27 @@ const Chat: React.FC<ChatProps> = ({
             marginRight: '0.5rem',
           }}
         >
-          <Button
-            variant="icon"
-            onClick={() =>
-              agentStateService.send({
-                type: 'CLEAR_CHAT_HISTORY',
-                workspaceId,
-              })
-            }
-          >
-            <SendIcon />
-          </Button>
+          {!loading ? (
+            <Button
+              variant="icon"
+              onClick={() => {
+                if (msgInputValue) handleSend(msgInputValue);
+              }}
+            >
+              <SendIcon />
+            </Button>
+          ) : (
+            // update when figure out how to cancel request
+            <Button
+              variant="icon"
+              onClick={() => {
+                // if (controller) controller.abort();
+              }}
+            >
+              {/* <StopIcon /> */}
+              <SpinnerIcon />
+            </Button>
+          )}
         </InputToolbox>
       </span>
     </>

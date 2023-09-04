@@ -20,10 +20,11 @@ import { EditorContext } from '../../context/EditorContext';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import axios from 'axios';
 import { getToken } from '../../utils/config';
+import SocketContext from '../../context/SocketContext';
 
 export type AvaChatResponse = {
   response: string;
-  abort: () => void;
+  abortController: AbortController | null;
 };
 
 type MessageType = 'user' | 'ava';
@@ -55,6 +56,7 @@ export const useAva = (): {
   streamingMessage: string;
   error: string;
   loading: boolean;
+  abortController: AbortController | null;
 } => {
   const [loading, setLoading] = useState(false);
   const globalServices: GlobalStateContextValue =
@@ -68,6 +70,8 @@ export const useAva = (): {
   const currentAgent = state.context[workspaceId];
   const [streamingMessage, setStreamingMessage] = useState('');
   const [error, setError] = useState('');
+  const [abortController, setAbortController] =
+    useState<AbortController | null>(null);
   const formattedChatHistory = currentAgent?.recentChatHistory
     .map(
       (chat: { type: 'ava' | 'user'; text: string }) =>
@@ -120,9 +124,11 @@ export const useAva = (): {
             },
           },
         });
+
+        setAbortController(response.abortController);
         return {
           response: response.response,
-          abort: response.abort,
+          abortController: response.abortController,
         };
       }
       case 'ava': {
@@ -160,9 +166,7 @@ export const useAva = (): {
         setLoading(false);
         return {
           response: response,
-          abort: () => {
-            return;
-          },
+          abortController: null,
         };
       }
       case 'custom': {
@@ -180,9 +184,7 @@ export const useAva = (): {
         if (!agentUrl) {
           return {
             response: 'Please set a custom agent URL in the settings menu',
-            abort: () => {
-              return;
-            },
+            abortController: null,
           };
         }
 
@@ -211,5 +213,5 @@ export const useAva = (): {
     }
   };
 
-  return { queryAva, loading, streamingMessage, error };
+  return { queryAva, loading, streamingMessage, error, abortController };
 };

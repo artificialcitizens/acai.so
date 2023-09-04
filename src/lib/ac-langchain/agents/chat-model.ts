@@ -6,7 +6,6 @@ import { getToken } from '../../../utils/config';
 
 type ChatResponse = {
   response: string;
-  abort: () => void;
 };
 
 /**
@@ -71,6 +70,5 @@ export const queryChat = async ({
   );
   return {
     response: response.content,
-    abort: () => controller.abort(),
   };
 };
