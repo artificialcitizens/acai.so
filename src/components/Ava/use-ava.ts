@@ -24,7 +24,7 @@ import SocketContext from '../../context/SocketContext';
 
 export type AvaChatResponse = {
   response: string;
-  abortController: AbortController | null;
+  // abortController: AbortController | null;
 };
 
 type MessageType = 'user' | 'ava';
@@ -56,7 +56,7 @@ export const useAva = (): {
   streamingMessage: string;
   error: string;
   loading: boolean;
-  abortController: AbortController | null;
+  // abortController: AbortController | null;
 } => {
   const [loading, setLoading] = useState(false);
   const globalServices: GlobalStateContextValue =
@@ -64,10 +64,11 @@ export const useAva = (): {
   const location = useLocation();
   const workspaceId = location.pathname.split('/')[1];
   const navigate = useNavigate();
-  const [state] = useActor(globalServices.agentStateService);
+
+  const [agentState] = useActor(globalServices.agentStateService);
   const [userName] = useLocalStorageKeyValue('USER_NAME', '');
   const [userLocation] = useLocalStorageKeyValue('USER_LOCATION', '');
-  const currentAgent = state.context[workspaceId];
+  const currentAgent = agentState.context[workspaceId];
   const [streamingMessage, setStreamingMessage] = useState('');
   const [error, setError] = useState('');
   const [abortController, setAbortController] =
@@ -125,10 +126,10 @@ export const useAva = (): {
           },
         });
 
-        setAbortController(response.abortController);
+        // setAbortController(response.abortController);
         return {
           response: response.response,
-          abortController: response.abortController,
+          // abortController: response.abortController,
         };
       }
       case 'ava': {
@@ -166,7 +167,7 @@ export const useAva = (): {
         setLoading(false);
         return {
           response: response,
-          abortController: null,
+          // abortController: null,
         };
       }
       case 'custom': {
@@ -184,7 +185,7 @@ export const useAva = (): {
         if (!agentUrl) {
           return {
             response: 'Please set a custom agent URL in the settings menu',
-            abortController: null,
+            // abortController: null,
           };
         }
 
@@ -213,5 +214,5 @@ export const useAva = (): {
     }
   };
 
-  return { queryAva, loading, streamingMessage, error, abortController };
+  return { queryAva, loading, streamingMessage, error };
 };

@@ -42,7 +42,7 @@ export const Ava: React.FC<AvaProps> = ({
       agentStateService,
       (state) => state.context[workspaceId]?.systemNotes,
     ) || '';
-  const { queryAva, streamingMessage, loading, abortController } = useAva();
+  const { queryAva, streamingMessage, loading } = useAva();
   const [uiState] = useActor(uiStateService);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
 
@@ -156,7 +156,7 @@ export const Ava: React.FC<AvaProps> = ({
           <Chat
             name="Ava"
             avatar=".."
-            abortController={abortController}
+            abortController={null}
             loading={loading}
             streamingMessage={streamingMessage}
             onSubmitHandler={async (message) => {

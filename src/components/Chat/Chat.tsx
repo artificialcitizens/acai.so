@@ -14,7 +14,6 @@ import {
   InputToolbox,
 } from '@chatscope/chat-ui-kit-react';
 import './Chat.css';
-// import { toast } from 'react-toastify';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -23,7 +22,7 @@ import { useActor } from '@xstate/react';
 import { ChatHistory } from '../../state';
 import { useLocation } from 'react-router-dom';
 import Dropzone from '../Dropzone/Dropzone';
-// import { readFileAsText, slugify } from '../../utils/data-utils.ts';
+import { readFileAsText, slugify } from '../../utils/data-utils.ts';
 // import { convertDSPTranscript } from '../../utils/ac-langchain/text-splitters/dsp-splitter.ts';
 // import yaml from 'js-yaml';
 import Linkify from 'linkify-react';
@@ -31,6 +30,8 @@ import DOMPurify from 'dompurify';
 import he from 'he';
 import { Button } from '../Button/Button';
 import { SendIcon, SpinnerIcon, StopIcon, TrashIcon } from '../Icons/Icons';
+import { db } from '../../../db';
+import { toastifyError, toastifyInfo } from '../Toast';
 
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
@@ -63,9 +64,9 @@ const Chat: React.FC<ChatProps> = ({
     abortController,
   );
 
-  useEffect(() => {
-    setController(abortController);
-  }, [abortController]);
+  // useEffect(() => {
+  //   setController(abortController);
+  // }, [abortController]);
 
   const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
   const [messages, setMessages] = useState<any[]>(
@@ -230,6 +231,68 @@ const Chat: React.FC<ChatProps> = ({
     return sanitizedMessage;
   };
 
+  const handleFileDrop = async (files: File[], name: string) => {
+    for (const file of files) {
+      if (!file) return;
+      console.log(file);
+
+      const fileExtension = file.name.split('.').pop();
+      // const reader = new FileReader();
+
+      switch (fileExtension) {
+        case 'txt':
+        case 'md':
+          {
+            try {
+              toastifyInfo(`📁 Processing ${file.name}`);
+              const fileContent = await readFileAsText(file);
+              const slugifiedFilename = slugify(file.name);
+
+              console.log(slugifiedFilename, fileContent);
+            } catch (error) {
+              toastifyError(`Error processing file: ${file.name}`);
+            } finally {
+              toastifyInfo(`File uploaded successfully: ${file.name}`);
+            }
+          }
+          break;
+        //       case 'jpg':
+        //       case 'jpeg':
+        //       case 'png':
+        //         reader.onload = () => {
+        //           toast.update(`${file.name}`, {
+        //             render: 'Image uploaded successfully',
+        //             type: 'success',
+        //             autoClose: 5000,
+        //           });
+        //         };
+        //         reader.readAsDataURL(file);
+        //         break;
+        default:
+          toastifyError(`Please upload a .txt or .md file`);
+          break;
+      }
+    }
+
+    // // Save as JSON file
+    // const jsonContent = JSON.stringify(conversations, null, 2);
+    // const jsonFile = new Blob([jsonContent], { type: 'application/json' });
+    // const jsonDownloadLink = document.createElement('a');
+    // jsonDownloadLink.href = URL.createObjectURL(jsonFile);
+    // jsonDownloadLink.download = `${name}.json`;
+    // jsonDownloadLink.click();
+
+    // // Convert JSON to YAML
+    // const yamlContent = yaml.dump(conversations);
+
+    // // Save as YAML file
+    // const yamlFile = new Blob([yamlContent], { type: 'application/x-yaml' });
+    // const yamlDownloadLink = document.createElement('a');
+    // yamlDownloadLink.href = URL.createObjectURL(yamlFile);
+    // yamlDownloadLink.download = `${name}.yml`;
+    // yamlDownloadLink.click();
+  };
+
   const linkProps = {
     onClick: (event: any) => {
       event.preventDefault();
@@ -239,7 +302,7 @@ const Chat: React.FC<ChatProps> = ({
   };
   return (
     <>
-      <Dropzone onFilesDrop={() => console.log('not implemented yet')}>
+      <Dropzone onFilesDrop={handleFileDrop}>
         <div className="rounded-lg overflow-hidden w-full">
           <ChatContainer className="bg-dark">
             <MessageList
