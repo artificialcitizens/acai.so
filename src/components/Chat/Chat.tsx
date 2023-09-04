@@ -11,6 +11,7 @@ import {
   Message,
   MessageInput,
   TypingIndicator,
+  InputToolbox,
 } from '@chatscope/chat-ui-kit-react';
 import './Chat.css';
 // import { toast } from 'react-toastify';
@@ -28,6 +29,8 @@ import Dropzone from '../Dropzone/Dropzone';
 import Linkify from 'linkify-react';
 import DOMPurify from 'dompurify';
 import he from 'he';
+import { Button } from '../Button/Button';
+import { AttachIcon, SendIcon, TrashIcon } from '../Icons/Icons';
 
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
@@ -230,50 +233,88 @@ const Chat: React.FC<ChatProps> = ({
     },
   };
   return (
-    <Dropzone onFilesDrop={() => console.log('not implemented yet')}>
-      <div className="rounded-lg overflow-hidden w-full">
-        <ChatContainer className="bg-dark">
-          <MessageList
-            className="bg-dark"
-            typingIndicator={
-              loading && <TypingIndicator content={`${name} is thinking`} />
-            }
-          >
-            {messages?.map((message) => (
-              <Message
-                key={message.sentTime + message.sender}
-                model={{
-                  direction: message.direction,
-                  position: message.position,
-                }}
-              >
-                <Message.CustomContent>
-                  {/* https://linkify.js.org/docs */}
-                  <Linkify options={{ attributes: linkProps }}>
-                    {sanitizeMessage(message.message)}
-                  </Linkify>
-                </Message.CustomContent>
-              </Message>
-            ))}
-          </MessageList>
-          <MessageInput
-            className="bg-dark border-dark"
-            style={{ backgroundColor: 'transparent', padding: '0.5rem' }}
-            onSend={handleSend}
-            onChange={handleInputChange}
-            value={msgInputValue}
-            ref={inputRef}
-            sendOnReturnDisabled={false}
-            onAttachClick={() => {
+    <>
+      <Dropzone onFilesDrop={() => console.log('not implemented yet')}>
+        <div className="rounded-lg overflow-hidden w-full">
+          <ChatContainer className="bg-dark">
+            <MessageList
+              className="bg-dark"
+              typingIndicator={
+                loading && <TypingIndicator content={`${name} is thinking`} />
+              }
+            >
+              {messages?.map((message) => (
+                <Message
+                  key={message.sentTime + message.sender}
+                  model={{
+                    direction: message.direction,
+                    position: message.position,
+                  }}
+                >
+                  <Message.CustomContent>
+                    {/* https://linkify.js.org/docs */}
+                    <Linkify options={{ attributes: linkProps }}>
+                      {sanitizeMessage(message.message)}
+                    </Linkify>
+                  </Message.CustomContent>
+                </Message>
+              ))}
+            </MessageList>
+          </ChatContainer>
+        </div>
+      </Dropzone>
+      <span className="flex w-full">
+        <InputToolbox
+          style={{
+            backgroundColor: 'transparent',
+            padding: '0.25rem',
+            marginLeft: '0.5rem',
+          }}
+        >
+          <Button
+            variant="icon"
+            onClick={() =>
               agentStateService.send({
                 type: 'CLEAR_CHAT_HISTORY',
                 workspaceId,
-              });
-            }}
-          />
-        </ChatContainer>
-      </div>
-    </Dropzone>
+              })
+            }
+          >
+            <TrashIcon />
+          </Button>
+        </InputToolbox>
+        <MessageInput
+          className="bg-dark border-dark flex-grow max-w-full"
+          style={{ backgroundColor: 'transparent', padding: '0.5rem' }}
+          onSend={handleSend}
+          onChange={handleInputChange}
+          value={msgInputValue}
+          ref={inputRef}
+          sendOnReturnDisabled={false}
+          attachButton={false}
+          sendButton={false}
+        />
+        <InputToolbox
+          style={{
+            backgroundColor: 'transparent',
+            padding: '0.25rem',
+            marginRight: '0.5rem',
+          }}
+        >
+          <Button
+            variant="icon"
+            onClick={() =>
+              agentStateService.send({
+                type: 'CLEAR_CHAT_HISTORY',
+                workspaceId,
+              })
+            }
+          >
+            <SendIcon />
+          </Button>
+        </InputToolbox>
+      </span>
+    </>
   );
 };
 

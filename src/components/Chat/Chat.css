@@ -74,3 +74,7 @@
 .cs-message__custom-content > a {
   @apply text-blue-300 hover:text-blue-400 font-medium underline;
 }
+
+.cs-input-toolbox {
+  @apply mt-1;
+}
