@@ -27,6 +27,7 @@ interface VoiceRecognitionProps {
 }
 
 // @TODO: create xstate machine for voice recognition
+// pass user transcript to useAva hook
 const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   onVoiceActivation,
   audioContext,
