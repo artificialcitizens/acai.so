@@ -3,8 +3,7 @@ import SBSidebar from '../../components/Sidebar';
 import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
 import NotificationCenter from '../../components/NotificationCenter';
 import Chat from '../../components/Chat/Chat';
-// import StorageMeter from '../../components/StorageMeter/StorageMeter';
-// import SBSearch from '../../components/Search/Search';
+import StorageMeter from '../../components/StorageMeter/StorageMeter';
 import ScratchPad from '../../components/ScratchPad/ScratchPad';
 import TokenManager from '../../components/TokenManager/token-manager';
 import { useActor, useSelector } from '@xstate/react';
@@ -13,15 +12,15 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import VoiceRecognition from '../VoiceRecognition/VoiceRecognition';
-// import { Tab } from '../../state';
-// import { VectorStoreContext } from '../../context/VectorStoreContext';
-// import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
 import ChatModelDropdown from '../ChatSettings';
 import { SocketManager } from '../SocketManager';
 import UserProfile from '../UserProfile/UserProfile';
 import { toastifyError } from '../Toast';
+import { VectorStoreContext } from '../../context/VectorStoreContext';
+import SBSearch from '../Search';
+import { Tab } from '../../state';
 
 interface AvaProps {
   workspaceId: string;
@@ -34,9 +33,14 @@ export const Ava: React.FC<AvaProps> = ({
   onVoiceActivation,
   audioContext,
 }) => {
-  const { uiStateService, agentStateService }: GlobalStateContextValue =
-    useContext(GlobalStateContext);
+  const {
+    uiStateService,
+    appStateService,
+    agentStateService,
+  }: GlobalStateContextValue = useContext(GlobalStateContext);
 
+  const vectorContext = useContext(VectorStoreContext);
+  const navigate = useNavigate();
   const systemNotes =
     useSelector(
       agentStateService,
@@ -45,10 +49,6 @@ export const Ava: React.FC<AvaProps> = ({
   const { queryAva, streamingMessage, loading } = useAva();
   const [uiState] = useActor(uiStateService);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
-
-  // const { similaritySearchWithScore, filterAndCombineContent } = useContext(
-  //   VectorStoreContext,
-  // ) as ReturnType<typeof useMemoryVectorStore>;
 
   const toggleAgentThoughts = () => {
     uiStateService.send({ type: 'TOGGLE_AGENT_THOUGHTS' });
@@ -81,14 +81,18 @@ export const Ava: React.FC<AvaProps> = ({
         </h5>
         <TokenManager />
       </ExpansionPanel>
-      {/* <ExpansionPanel
-        title="Knowledge"
-      >
+      <ExpansionPanel title="Knowledge">
         <div className="flex flex-col">
           <SBSearch
             onSubmit={async (val: string) => {
-              const response = await similaritySearchWithScore(val);
-              const results = filterAndCombineContent(response, 0.75);
+              if (!vectorContext) return;
+              const response = await vectorContext.similaritySearchWithScore(
+                val,
+              );
+              const results = vectorContext.filterAndCombineContent(
+                response,
+                0.79,
+              );
               const newTab: Tab = {
                 id: Date.now().toString(),
                 title: val,
@@ -106,7 +110,7 @@ export const Ava: React.FC<AvaProps> = ({
           />
         </div>
         <StorageMeter />
-      </ExpansionPanel> */}
+      </ExpansionPanel>
       {import.meta.env.DEV && (
         <ExpansionPanel title="Voice Synthesis">
           <VoiceRecognition
