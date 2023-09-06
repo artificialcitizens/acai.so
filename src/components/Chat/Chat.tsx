@@ -237,6 +237,8 @@ const Chat: React.FC<ChatProps> = ({
 
   // @TODO: Move logic to Dropzone component
   const handleFileDrop = async (files: File[], name: string) => {
+    if (!import.meta.env.DEV) return;
+
     for (const file of files) {
       if (!file) return;
 

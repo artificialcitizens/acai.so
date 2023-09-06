@@ -268,7 +268,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
       {audioContext && (
         <audio
           ref={audioRef}
-          className="rounded-full p-2"
+          className="rounded-full p-2 w-full"
           controls
           src={audioSrc ? audioSrc : undefined}
           autoPlay
