@@ -27,14 +27,11 @@ export const useMemoryVectorStore = (
       chunkOverlap: chunkOverlap,
     }).then(async (res) => {
       const vectorStore = await initializeMemoryVectorStore({ docs: res });
-      // vectorStore.memoryVectors = memoryVectors.memoryVectors;
+      const vectorSet = new Set(vectorStore.memoryVectors);
       memoryVectors?.forEach((mem) => {
-        vectorStore.memoryVectors = [
-          ...vectorStore.memoryVectors,
-          ...mem.memoryVectors,
-        ];
+        mem.memoryVectors.forEach((vector) => vectorSet.add(vector));
       });
-      // vectorStore.memoryVectors = memoryVectors;
+      vectorStore.memoryVectors = Array.from(vectorSet);
       setVectorStore(vectorStore);
     });
   }, [initialText, chunkSize, chunkOverlap, memoryVectors]);
