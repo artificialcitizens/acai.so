@@ -33,7 +33,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
         onSubmit={async (val: string) => {
           if (!vectorContext) return;
           const response = await vectorContext.similaritySearchWithScore(val);
-          const results = vectorContext.filterAndCombineContent(response, 0.79);
+          const results = vectorContext.filterAndCombineContent(response, 0.75);
           const newTab: Tab = {
             id: Date.now().toString(),
             title: val,
