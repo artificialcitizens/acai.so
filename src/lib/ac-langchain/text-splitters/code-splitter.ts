@@ -17,7 +17,7 @@ type CodeSplitterLang =
   | 'latex'
   | 'html';
 
-export const splitText = async (text: string, lang: CodeSplitterLang) => {
+export const splitCode = async (text: string, lang: CodeSplitterLang) => {
   const splitter = RecursiveCharacterTextSplitter.fromLanguage(lang, {
     chunkSize: 100,
     chunkOverlap: 0,
