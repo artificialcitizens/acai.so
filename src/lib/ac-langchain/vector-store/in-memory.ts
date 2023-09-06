@@ -1,4 +1,5 @@
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
+import { AcaiMemoryVector } from '../../../../db';
 import { Document } from 'langchain/document';
 import { Embeddings } from 'langchain/embeddings/base';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
@@ -24,8 +25,9 @@ export const initializeMemoryVectorStore = async ({
 export const addDocumentsToMemoryVectorStore = async (
   vectorStore: MemoryVectorStore,
   docs: Document[],
-): Promise<void> => {
+): Promise<AcaiMemoryVector[]> => {
   await vectorStore.addDocuments(docs);
+  return vectorStore.memoryVectors;
 };
 
 /**

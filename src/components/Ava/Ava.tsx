@@ -3,7 +3,6 @@ import SBSidebar from '../../components/Sidebar';
 import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
 import NotificationCenter from '../../components/NotificationCenter';
 import Chat from '../../components/Chat/Chat';
-import StorageMeter from '../../components/StorageMeter/StorageMeter';
 import ScratchPad from '../../components/ScratchPad/ScratchPad';
 import TokenManager from '../../components/TokenManager/token-manager';
 import { useActor, useSelector } from '@xstate/react';
@@ -12,15 +11,12 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
-import { useNavigate } from 'react-router-dom';
 import VoiceRecognition from '../VoiceRecognition/VoiceRecognition';
 import ChatModelDropdown from '../ChatSettings';
 import { SocketManager } from '../SocketManager';
 import UserProfile from '../UserProfile/UserProfile';
 import { toastifyError } from '../Toast';
-import { VectorStoreContext } from '../../context/VectorStoreContext';
-import SBSearch from '../Search';
-import { Tab } from '../../state';
+import Knowledge from '../Knowledge/Knowledge';
 
 interface AvaProps {
   workspaceId: string;
@@ -33,14 +29,9 @@ export const Ava: React.FC<AvaProps> = ({
   onVoiceActivation,
   audioContext,
 }) => {
-  const {
-    uiStateService,
-    appStateService,
-    agentStateService,
-  }: GlobalStateContextValue = useContext(GlobalStateContext);
+  const { uiStateService, agentStateService }: GlobalStateContextValue =
+    useContext(GlobalStateContext);
 
-  const vectorContext = useContext(VectorStoreContext);
-  const navigate = useNavigate();
   const systemNotes =
     useSelector(
       agentStateService,
@@ -82,34 +73,7 @@ export const Ava: React.FC<AvaProps> = ({
         <TokenManager />
       </ExpansionPanel>
       <ExpansionPanel title="Knowledge">
-        <div className="flex flex-col">
-          <SBSearch
-            onSubmit={async (val: string) => {
-              if (!vectorContext) return;
-              const response = await vectorContext.similaritySearchWithScore(
-                val,
-              );
-              const results = vectorContext.filterAndCombineContent(
-                response,
-                0.79,
-              );
-              const newTab: Tab = {
-                id: Date.now().toString(),
-                title: val,
-                content: results,
-                workspaceId,
-                isContext: false,
-                createdAt: new Date().toString(),
-                lastUpdated: new Date().toString(),
-                filetype: 'markdown',
-                systemNote: '',
-              };
-              appStateService.send({ type: 'ADD_TAB', tab: newTab });
-              navigate(`/${workspaceId}/${newTab.id}`);
-            }}
-          />
-        </div>
-        <StorageMeter />
+        <Knowledge workspaceId={workspaceId} />
       </ExpansionPanel>
       {import.meta.env.DEV && (
         <ExpansionPanel title="Voice Synthesis">

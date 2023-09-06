@@ -30,8 +30,11 @@ import DOMPurify from 'dompurify';
 import he from 'he';
 import { Button } from '../Button/Button';
 import { SendIcon, SpinnerIcon, StopIcon, TrashIcon } from '../Icons/Icons';
-import { db } from '../../../db';
 import { toastifyError, toastifyInfo } from '../Toast';
+import { VectorStoreContext } from '../../context/VectorStoreContext.tsx';
+import { db } from '../../../db';
+import { v4 as uuidv4 } from 'uuid';
+import { useLiveQuery } from 'dexie-react-hooks';
 
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
@@ -60,9 +63,12 @@ const Chat: React.FC<ChatProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [msgInputValue, setMsgInputValue] = useState(startingValue);
   const [state, send] = useActor(agentStateService);
+
   const [controller, setController] = useState<AbortController | null>(
     abortController,
   );
+
+  const context = useContext(VectorStoreContext);
 
   // useEffect(() => {
   //   setController(abortController);
@@ -231,14 +237,13 @@ const Chat: React.FC<ChatProps> = ({
     return sanitizedMessage;
   };
 
+  // @TODO: Move logic to Dropzone component
   const handleFileDrop = async (files: File[], name: string) => {
     for (const file of files) {
       if (!file) return;
-      console.log(file);
 
       const fileExtension = file.name.split('.').pop();
       // const reader = new FileReader();
-
       switch (fileExtension) {
         case 'txt':
         case 'md':
@@ -247,8 +252,17 @@ const Chat: React.FC<ChatProps> = ({
               toastifyInfo(`📁 Processing ${file.name}`);
               const fileContent = await readFileAsText(file);
               const slugifiedFilename = slugify(file.name);
-
-              console.log(slugifiedFilename, fileContent);
+              if (context) {
+                // need to figure out how to pass metadata to filter by
+                const memoryVectors = await context.addText(fileContent);
+                const id = db.memoryVectors.add({
+                  id: slugifiedFilename,
+                  workspaceId,
+                  memoryVectors: memoryVectors || [],
+                });
+              } else {
+                throw new Error('Context is null');
+              }
             } catch (error) {
               toastifyError(`Error processing file: ${file.name}`);
             } finally {
