@@ -33,8 +33,6 @@ import { SendIcon, SpinnerIcon, StopIcon, TrashIcon } from '../Icons/Icons';
 import { toastifyError, toastifyInfo } from '../Toast';
 import { VectorStoreContext } from '../../context/VectorStoreContext.tsx';
 import { db } from '../../../db';
-import { v4 as uuidv4 } from 'uuid';
-import { useLiveQuery } from 'dexie-react-hooks';
 
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {

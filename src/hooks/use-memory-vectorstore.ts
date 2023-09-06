@@ -19,12 +19,6 @@ export const useMemoryVectorStore = (
     null,
   );
 
-  db.memoryVectors.add({
-    id: 'demo-knowledge-base',
-    workspaceId: 'docs',
-    memoryVectors: [],
-  });
-
   const memoryVectors = useLiveQuery(() => db.memoryVectors.toArray());
   useEffect(() => {
     createDocumentsFromText({
@@ -33,14 +27,12 @@ export const useMemoryVectorStore = (
       chunkOverlap: chunkOverlap,
     }).then(async (res) => {
       const vectorStore = await initializeMemoryVectorStore({ docs: res });
-      console.log({ memoryVectors });
       // vectorStore.memoryVectors = memoryVectors.memoryVectors;
       memoryVectors?.forEach((mem) => {
         vectorStore.memoryVectors = [
           ...vectorStore.memoryVectors,
           ...mem.memoryVectors,
         ];
-        console.log({ mem });
       });
       // vectorStore.memoryVectors = memoryVectors;
       setVectorStore(vectorStore);
