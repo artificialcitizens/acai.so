@@ -27,6 +27,7 @@ interface VoiceRecognitionProps {
 }
 
 // @TODO: create xstate machine for voice recognition
+// pass user transcript to useAva hook
 const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   onVoiceActivation,
   audioContext,
@@ -267,7 +268,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
       {audioContext && (
         <audio
           ref={audioRef}
-          className="rounded-full p-2"
+          className="rounded-full p-2 w-full"
           controls
           src={audioSrc ? audioSrc : undefined}
           autoPlay
@@ -355,7 +356,12 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             }
           }}
         />
-        <button type="submit">Submit</button>
+        <button
+          className="bg-neutral-900 text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-light focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+          type="submit"
+        >
+          Submit
+        </button>
       </form>
     </div>
   );

@@ -11,9 +11,9 @@ import {
   Message,
   MessageInput,
   TypingIndicator,
+  InputToolbox,
 } from '@chatscope/chat-ui-kit-react';
 import './Chat.css';
-// import { toast } from 'react-toastify';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -22,17 +22,24 @@ import { useActor } from '@xstate/react';
 import { ChatHistory } from '../../state';
 import { useLocation } from 'react-router-dom';
 import Dropzone from '../Dropzone/Dropzone';
-// import { readFileAsText, slugify } from '../../utils/data-utils.ts';
+import { readFileAsText, slugify } from '../../utils/data-utils.ts';
 // import { convertDSPTranscript } from '../../utils/ac-langchain/text-splitters/dsp-splitter.ts';
 // import yaml from 'js-yaml';
 import Linkify from 'linkify-react';
 import DOMPurify from 'dompurify';
 import he from 'he';
+import { Button } from '../Button/Button';
+import { SendIcon, SpinnerIcon, StopIcon, TrashIcon } from '../Icons/Icons';
+import { toastifyError, toastifyInfo } from '../Toast';
+import { VectorStoreContext } from '../../context/VectorStoreContext.tsx';
+import { db } from '../../../db';
 
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
   onSubmitHandler: (message: string, chatHistory: string) => Promise<string>;
+  loading: boolean;
   streamingMessage?: string;
+  abortController: AbortController | null;
   height?: string;
   startingValue?: string;
   placeHolder?: string;
@@ -41,8 +48,10 @@ interface ChatProps {
 }
 const Chat: React.FC<ChatProps> = ({
   onSubmitHandler,
+  loading,
   streamingMessage,
   startingValue,
+  abortController,
   name = 'Ava',
 }) => {
   const { agentStateService }: GlobalStateContextValue =
@@ -52,6 +61,16 @@ const Chat: React.FC<ChatProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [msgInputValue, setMsgInputValue] = useState(startingValue);
   const [state, send] = useActor(agentStateService);
+
+  const [controller, setController] = useState<AbortController | null>(
+    abortController,
+  );
+
+  const context = useContext(VectorStoreContext);
+
+  // useEffect(() => {
+  //   setController(abortController);
+  // }, [abortController]);
 
   const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
   const [messages, setMessages] = useState<any[]>(
@@ -65,7 +84,6 @@ const Chat: React.FC<ChatProps> = ({
       };
     }),
   );
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -159,8 +177,6 @@ const Chat: React.FC<ChatProps> = ({
         },
       });
 
-      setLoading(true);
-
       try {
         const answer = await onSubmitHandler(
           message,
@@ -185,10 +201,8 @@ const Chat: React.FC<ChatProps> = ({
           ],
         });
 
-        setLoading(false);
         addMessage(answer, 'Assistant', 'incoming');
       } catch (error) {
-        setLoading(false);
         addMessage(
           'Sorry, there was an error processing your request. Please try again later.',
           'Assistant',
@@ -198,7 +212,6 @@ const Chat: React.FC<ChatProps> = ({
     },
     [
       addMessage,
-      setLoading,
       inputRef,
       setMsgInputValue,
       onSubmitHandler,
@@ -222,6 +235,78 @@ const Chat: React.FC<ChatProps> = ({
     return sanitizedMessage;
   };
 
+  // @TODO: Move logic to Dropzone component
+  const handleFileDrop = async (files: File[], name: string) => {
+    if (!import.meta.env.DEV) return;
+
+    for (const file of files) {
+      if (!file) return;
+
+      const fileExtension = file.name.split('.').pop();
+      // const reader = new FileReader();
+      switch (fileExtension) {
+        case 'txt':
+        case 'md':
+          {
+            try {
+              toastifyInfo(`📁 Processing ${file.name}`);
+              const fileContent = await readFileAsText(file);
+              const slugifiedFilename = slugify(file.name);
+              if (context) {
+                // need to figure out how to pass metadata to filter by
+                const memoryVectors = await context.addText(fileContent);
+                const id = db.memoryVectors.add({
+                  id: slugifiedFilename,
+                  workspaceId,
+                  memoryVectors: memoryVectors || [],
+                });
+              } else {
+                throw new Error('Context is null');
+              }
+            } catch (error) {
+              toastifyError(`Error processing file: ${file.name}`);
+            } finally {
+              toastifyInfo(`File uploaded successfully: ${file.name}`);
+            }
+          }
+          break;
+        //       case 'jpg':
+        //       case 'jpeg':
+        //       case 'png':
+        //         reader.onload = () => {
+        //           toast.update(`${file.name}`, {
+        //             render: 'Image uploaded successfully',
+        //             type: 'success',
+        //             autoClose: 5000,
+        //           });
+        //         };
+        //         reader.readAsDataURL(file);
+        //         break;
+        default:
+          toastifyError(`Please upload a .txt or .md file`);
+          break;
+      }
+    }
+
+    // // Save as JSON file
+    // const jsonContent = JSON.stringify(conversations, null, 2);
+    // const jsonFile = new Blob([jsonContent], { type: 'application/json' });
+    // const jsonDownloadLink = document.createElement('a');
+    // jsonDownloadLink.href = URL.createObjectURL(jsonFile);
+    // jsonDownloadLink.download = `${name}.json`;
+    // jsonDownloadLink.click();
+
+    // // Convert JSON to YAML
+    // const yamlContent = yaml.dump(conversations);
+
+    // // Save as YAML file
+    // const yamlFile = new Blob([yamlContent], { type: 'application/x-yaml' });
+    // const yamlDownloadLink = document.createElement('a');
+    // yamlDownloadLink.href = URL.createObjectURL(yamlFile);
+    // yamlDownloadLink.download = `${name}.yml`;
+    // yamlDownloadLink.click();
+  };
+
   const linkProps = {
     onClick: (event: any) => {
       event.preventDefault();
@@ -230,50 +315,98 @@ const Chat: React.FC<ChatProps> = ({
     },
   };
   return (
-    <Dropzone onFilesDrop={() => console.log('not implemented yet')}>
-      <div className="rounded-lg overflow-hidden w-full">
-        <ChatContainer className="bg-dark">
-          <MessageList
-            className="bg-dark"
-            typingIndicator={
-              loading && <TypingIndicator content={`${name} is thinking`} />
-            }
-          >
-            {messages?.map((message) => (
-              <Message
-                key={message.sentTime + message.sender}
-                model={{
-                  direction: message.direction,
-                  position: message.position,
-                }}
-              >
-                <Message.CustomContent>
-                  {/* https://linkify.js.org/docs */}
-                  <Linkify options={{ attributes: linkProps }}>
-                    {sanitizeMessage(message.message)}
-                  </Linkify>
-                </Message.CustomContent>
-              </Message>
-            ))}
-          </MessageList>
-          <MessageInput
-            className="bg-dark border-dark"
-            style={{ backgroundColor: 'transparent', padding: '0.5rem' }}
-            onSend={handleSend}
-            onChange={handleInputChange}
-            value={msgInputValue}
-            ref={inputRef}
-            sendOnReturnDisabled={false}
-            onAttachClick={() => {
+    <>
+      <Dropzone onFilesDrop={handleFileDrop}>
+        <div className="rounded-lg overflow-hidden w-full">
+          <ChatContainer className="bg-dark">
+            <MessageList
+              className="bg-dark"
+              typingIndicator={
+                loading && <TypingIndicator content={`${name} is thinking`} />
+              }
+            >
+              {messages?.map((message) => (
+                <Message
+                  key={message.sentTime + message.sender}
+                  model={{
+                    direction: message.direction,
+                    position: message.position,
+                  }}
+                >
+                  <Message.CustomContent>
+                    {/* https://linkify.js.org/docs */}
+                    <Linkify options={{ attributes: linkProps }}>
+                      {sanitizeMessage(message.message)}
+                    </Linkify>
+                  </Message.CustomContent>
+                </Message>
+              ))}
+            </MessageList>
+          </ChatContainer>
+        </div>
+      </Dropzone>
+      <span className="flex">
+        <InputToolbox
+          style={{
+            backgroundColor: 'transparent',
+            padding: '0.25rem',
+            marginLeft: '0.5rem',
+          }}
+        >
+          <Button
+            variant="icon"
+            onClick={() =>
               agentStateService.send({
                 type: 'CLEAR_CHAT_HISTORY',
                 workspaceId,
-              });
-            }}
-          />
-        </ChatContainer>
-      </div>
-    </Dropzone>
+              })
+            }
+          >
+            <TrashIcon />
+          </Button>
+        </InputToolbox>
+        <MessageInput
+          className="bg-dark border-dark flex-grow max-w-full"
+          style={{ backgroundColor: 'transparent', padding: '0.5rem' }}
+          onSend={handleSend}
+          onChange={handleInputChange}
+          value={msgInputValue}
+          ref={inputRef}
+          sendOnReturnDisabled={false}
+          attachButton={false}
+          sendButton={false}
+        />
+        <InputToolbox
+          style={{
+            backgroundColor: 'transparent',
+            padding: '0.25rem',
+            marginRight: '0.5rem',
+          }}
+        >
+          {!loading ? (
+            <Button
+              variant="icon"
+              onClick={() => {
+                if (msgInputValue) handleSend(msgInputValue);
+              }}
+            >
+              <SendIcon />
+            </Button>
+          ) : (
+            // update when figure out how to cancel request
+            <Button
+              variant="icon"
+              onClick={() => {
+                // if (controller) controller.abort();
+              }}
+            >
+              {/* <StopIcon /> */}
+              <SpinnerIcon />
+            </Button>
+          )}
+        </InputToolbox>
+      </span>
+    </>
   );
 };
 

@@ -8,6 +8,7 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
+import SocketContext from '../../context/SocketContext';
 
 export const SocketManager: React.FC = () => {
   const [storedUrl, setStoredUrl] = useLocalStorageKeyValue(
@@ -123,36 +124,38 @@ export const SocketManager: React.FC = () => {
   }, [socket]);
 
   return (
-    <form onSubmit={handleFormSubmit}>
-      <span className="flex mb-2 items-center">
-        <label htmlFor="url" className="text-acai-white pr-2 w-[50%]">
-          URL:
-        </label>
+    <SocketContext.Provider value={socket}>
+      <form onSubmit={handleFormSubmit}>
+        <span className="flex mb-2 items-center">
+          <label htmlFor="url" className="text-acai-white pr-2 w-[50%]">
+            URL:
+          </label>
+          <input
+            id="url"
+            className="text-acai-white bg-base px-[2px]"
+            type="text"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+          />
+        </span>
+        <span className="flex mb-2 items-center">
+          <label htmlFor="password" className="text-acai-white pr-2 w-[50%]">
+            Password:
+          </label>
+          <input
+            className="text-acai-white bg-base px-[2px]"
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </span>
         <input
-          id="url"
-          className="text-acai-white bg-base px-[2px]"
-          type="text"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
+          type="submit"
+          value="Connect"
+          className="bg-neutral-900 text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-light focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
         />
-      </span>
-      <span className="flex mb-2 items-center">
-        <label htmlFor="password" className="text-acai-white pr-2 w-[50%]">
-          Password:
-        </label>
-        <input
-          className="text-acai-white bg-base px-[2px]"
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </span>
-      <input
-        type="submit"
-        value="Connect"
-        className="bg-neutral-900 text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-light focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
-      />
-    </form>
+      </form>
+    </SocketContext.Provider>
   );
 };

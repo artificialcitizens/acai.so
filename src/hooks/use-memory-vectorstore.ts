@@ -7,16 +7,19 @@ import {
 import { createDocumentsFromText } from '../lib/ac-langchain/text-splitters';
 import { Document } from 'langchain/document';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
+import { AcaiMemoryVector, db } from '../../db';
+import { useLiveQuery } from 'dexie-react-hooks';
 
 export const useMemoryVectorStore = (
   initialText: string,
-  chunkSize = 750,
-  chunkOverlap = 75,
+  chunkSize = 1250,
+  chunkOverlap = 250,
 ) => {
   const [vectorstore, setVectorStore] = useState<MemoryVectorStore | null>(
     null,
   );
 
+  const memoryVectors = useLiveQuery(() => db.memoryVectors.toArray());
   useEffect(() => {
     createDocumentsFromText({
       text: initialText,
@@ -24,23 +27,37 @@ export const useMemoryVectorStore = (
       chunkOverlap: chunkOverlap,
     }).then(async (res) => {
       const vectorStore = await initializeMemoryVectorStore({ docs: res });
+      const vectorSet = new Set(vectorStore.memoryVectors);
+      memoryVectors?.forEach((mem) => {
+        mem.memoryVectors.forEach((vector) => vectorSet.add(vector));
+      });
+      vectorStore.memoryVectors = Array.from(vectorSet);
       setVectorStore(vectorStore);
     });
-  }, [initialText, chunkSize, chunkOverlap]);
+  }, [initialText, chunkSize, chunkOverlap, memoryVectors]);
 
-  const addDocuments = (docs: Document[]) => {
+  const addDocuments = async (
+    docs: Document[],
+  ): Promise<AcaiMemoryVector[] | undefined> => {
     if (!vectorstore) return;
-    addDocumentsToMemoryVectorStore(vectorstore, docs);
+    const memoryVectors = await addDocumentsToMemoryVectorStore(
+      vectorstore,
+      docs,
+    );
+    return memoryVectors;
   };
 
-  const addText = async (text: string) => {
+  const addText = async (
+    text: string,
+  ): Promise<AcaiMemoryVector[] | undefined> => {
     if (!vectorstore) return;
     const docs = await createDocumentsFromText({
       text,
       chunkSize,
       chunkOverlap,
     });
-    addDocuments(docs);
+    const memoryVectors = await addDocuments(docs);
+    return memoryVectors;
   };
 
   const filterAndCombineContent = (
@@ -55,7 +72,7 @@ export const useMemoryVectorStore = (
     // Map through the filtered data and extract the pageContent
     const pageContents = filteredData.map(([document]) => document.pageContent);
     // Combine the page contents into a single string
-    const combinedContent = pageContents.join('\n\n');
+    const combinedContent = pageContents.join('<br/><hr/><br/>');
 
     return combinedContent;
   };
