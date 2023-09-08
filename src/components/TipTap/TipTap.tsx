@@ -84,8 +84,6 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   ) => {
     if (!currentTab) return;
 
-    // don't save if on prod
-    if (workspaceId === 'docs' && !import.meta.env.DEV) return;
     setSaveStatus('Unsaved');
     const content = editor.getJSON();
     setSaveStatus('Saving...');
@@ -140,7 +138,9 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   const editor = useEditor({
     extensions: TiptapExtensions,
     editorProps: TiptapEditorProps,
-    editable: canEdit,
+    // issue with switching to workspace
+    // editable: canEdit,
+    editable: true,
     onUpdate: async (e) => {
       setSaveStatus('Unsaved');
       const selection = e.editor.state.selection;
