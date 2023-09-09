@@ -21,6 +21,7 @@ import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import axios from 'axios';
 import { getToken } from '../../utils/config';
 import SocketContext from '../../context/SocketContext';
+import { ragAgentResponse } from '../../lib/ac-langchain/agents/rag-agent/rag-agent';
 
 export type AvaChatResponse = {
   response: string;
@@ -38,6 +39,7 @@ type Message = {
 
 export const agentMode = [
   'chat',
+  'rag',
   'custom',
   // 'create',
   // 'research',
@@ -73,6 +75,7 @@ export const useAva = (): {
   const [error, setError] = useState('');
   const [abortController, setAbortController] =
     useState<AbortController | null>(null);
+
   const formattedChatHistory = currentAgent?.recentChatHistory
     .map(
       (chat: { type: 'ava' | 'user'; text: string }) =>
@@ -129,6 +132,39 @@ export const useAva = (): {
         // setAbortController(response.abortController);
         return {
           response: response.response,
+          // abortController: response.abortController,
+        };
+      }
+      case 'rag': {
+        const response = await ragAgentResponse({
+          query: message,
+          chatHistory: formattedChatHistory,
+          context: editor?.getText() || '',
+          callbacks: {
+            handleLLMStart: () => {
+              setLoading(true);
+              // console.log({ llm, prompts });
+            },
+            handleLLMNewToken: (token) => {
+              setStreamingMessage((prev) => prev + token);
+              // console.log(token);
+            },
+            handleLLMEnd: () => {
+              setLoading(false);
+              setStreamingMessage('');
+              // console.log({ output });
+            },
+            handleLLMError: (err) => {
+              setError(err.message);
+              setLoading(false);
+              // console.log({ err });
+            },
+          },
+        });
+
+        // setAbortController(response.abortController);
+        return {
+          response: response.content,
           // abortController: response.abortController,
         };
       }
