@@ -23,8 +23,7 @@ import { ChatHistory } from '../../state';
 import { useLocation } from 'react-router-dom';
 import Dropzone from '../Dropzone/Dropzone';
 import { readFileAsText, slugify } from '../../utils/data-utils.ts';
-// import { convertDSPTranscript } from '../../utils/ac-langchain/text-splitters/dsp-splitter.ts';
-// import yaml from 'js-yaml';
+
 import { marked } from 'marked';
 import { Button } from '../Button/Button';
 import { SendIcon, SpinnerIcon, StopIcon, TrashIcon } from '../Icons/Icons';
@@ -224,14 +223,6 @@ const Chat: React.FC<ChatProps> = ({
     const sanitizedInput = marked(trimmedInput);
     setMsgInputValue(sanitizedInput);
   };
-  // const sanitizeMessage = (message: string) => {
-  //   const decodedMessage = he.decode(message);
-  //   const sanitizedMessage = DOMPurify.sanitize(decodedMessage, {
-  //     ALLOWED_TAGS: ['a'],
-  //     ALLOWED_ATTR: ['href', 'target', 'rel'],
-  //   });
-  //   return sanitizedMessage;
-  // };
 
   // @TODO: Move logic to Dropzone component
   const handleFileDrop = async (files: File[], name: string) => {
@@ -241,7 +232,6 @@ const Chat: React.FC<ChatProps> = ({
       if (!file) return;
 
       const fileExtension = file.name.split('.').pop();
-      // const reader = new FileReader();
       switch (fileExtension) {
         case 'txt':
         case 'md':
@@ -268,50 +258,13 @@ const Chat: React.FC<ChatProps> = ({
             }
           }
           break;
-        //       case 'jpg':
-        //       case 'jpeg':
-        //       case 'png':
-        //         reader.onload = () => {
-        //           toast.update(`${file.name}`, {
-        //             render: 'Image uploaded successfully',
-        //             type: 'success',
-        //             autoClose: 5000,
-        //           });
-        //         };
-        //         reader.readAsDataURL(file);
-        //         break;
         default:
           toastifyError(`Please upload a .txt or .md file`);
           break;
       }
     }
-
-    // // Save as JSON file
-    // const jsonContent = JSON.stringify(conversations, null, 2);
-    // const jsonFile = new Blob([jsonContent], { type: 'application/json' });
-    // const jsonDownloadLink = document.createElement('a');
-    // jsonDownloadLink.href = URL.createObjectURL(jsonFile);
-    // jsonDownloadLink.download = `${name}.json`;
-    // jsonDownloadLink.click();
-
-    // // Convert JSON to YAML
-    // const yamlContent = yaml.dump(conversations);
-
-    // // Save as YAML file
-    // const yamlFile = new Blob([yamlContent], { type: 'application/x-yaml' });
-    // const yamlDownloadLink = document.createElement('a');
-    // yamlDownloadLink.href = URL.createObjectURL(yamlFile);
-    // yamlDownloadLink.download = `${name}.yml`;
-    // yamlDownloadLink.click();
   };
 
-  const linkProps = {
-    onClick: (event: any) => {
-      event.preventDefault();
-      const url = event.target.href;
-      window.open(url, '_blank');
-    },
-  };
   return (
     <>
       <Dropzone onFilesDrop={handleFileDrop}>
