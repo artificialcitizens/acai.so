@@ -79,7 +79,7 @@ export const useMemoryVectorStore = (
 
   const similaritySearchWithScore = async (
     query: string,
-    k = 4,
+    k = 10,
     filter?: any,
   ) => {
     if (!vectorstore) return [];

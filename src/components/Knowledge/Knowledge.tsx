@@ -20,20 +20,22 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
     useContext(GlobalStateContext);
   const vectorContext = useContext(VectorStoreContext);
   const navigate = useNavigate();
+
   const knowledgeItems = useLiveQuery(async () => {
     if (!vectorContext) return;
     return await db.memoryVectors
       .where('workspaceId')
       .equals(workspaceId)
       .toArray();
-  });
+  }, [workspaceId]);
+
   return (
     <div className="flex flex-col">
       <SBSearch
         onSubmit={async (val: string) => {
           if (!vectorContext) return;
           const response = await vectorContext.similaritySearchWithScore(val);
-          const results = vectorContext.filterAndCombineContent(response, 0.75);
+          const results = vectorContext.filterAndCombineContent(response, 0.6);
           const newTab: Tab = {
             id: Date.now().toString(),
             title: val,
@@ -56,7 +58,8 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
               key={item.id}
               className="text-acai-white text-xs font-semibold mb-3 flex justify-between"
             >
-              {item.id}
+              {/* convert example-txt  to example.txt */}
+              {item.id.replace(/-(\w+)$/, '.$1')}
               <button
                 className="p-0 px-1  rounded-full font-medium text-red-900"
                 onClick={async () => {

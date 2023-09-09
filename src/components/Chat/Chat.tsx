@@ -24,7 +24,9 @@ import { useLocation } from 'react-router-dom';
 import Dropzone from '../Dropzone/Dropzone';
 import { readFileAsText, slugify } from '../../utils/data-utils.ts';
 
-import { marked } from 'marked';
+import ReactMarkdown from 'react-markdown';
+import remarkFootnotes from 'remark-footnotes';
+
 import { Button } from '../Button/Button';
 import { SendIcon, SpinnerIcon, StopIcon, TrashIcon } from '../Icons/Icons';
 import { toastifyError, toastifyInfo } from '../Toast';
@@ -220,8 +222,7 @@ const Chat: React.FC<ChatProps> = ({
 
   const handleInputChange = (innerHTML: string) => {
     const trimmedInput = innerHTML.trim();
-    const sanitizedInput = marked(trimmedInput);
-    setMsgInputValue(sanitizedInput);
+    setMsgInputValue(trimmedInput);
   };
 
   // @TODO: Move logic to Dropzone component
@@ -270,12 +271,7 @@ const Chat: React.FC<ChatProps> = ({
       <Dropzone onFilesDrop={handleFileDrop}>
         <div className="rounded-lg overflow-hidden w-full">
           <ChatContainer className="bg-dark">
-            <MessageList
-              className="bg-dark"
-              typingIndicator={
-                loading && <TypingIndicator content={`${name} is thinking`} />
-              }
-            >
+            <MessageList className="bg-dark">
               {messages?.map((message) => (
                 <Message
                   key={message.sentTime + message.sender}
@@ -285,11 +281,9 @@ const Chat: React.FC<ChatProps> = ({
                   }}
                 >
                   <Message.CustomContent>
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: marked(message.message.trim()),
-                      }}
-                    />
+                    <ReactMarkdown remarkPlugins={[remarkFootnotes]}>
+                      {message.message}
+                    </ReactMarkdown>
                   </Message.CustomContent>
                 </Message>
               ))}
