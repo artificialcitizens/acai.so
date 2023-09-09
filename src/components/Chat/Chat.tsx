@@ -25,9 +25,7 @@ import Dropzone from '../Dropzone/Dropzone';
 import { readFileAsText, slugify } from '../../utils/data-utils.ts';
 // import { convertDSPTranscript } from '../../utils/ac-langchain/text-splitters/dsp-splitter.ts';
 // import yaml from 'js-yaml';
-import Linkify from 'linkify-react';
-import DOMPurify from 'dompurify';
-import he from 'he';
+import { marked } from 'marked';
 import { Button } from '../Button/Button';
 import { SendIcon, SpinnerIcon, StopIcon, TrashIcon } from '../Icons/Icons';
 import { toastifyError, toastifyInfo } from '../Toast';
@@ -222,18 +220,18 @@ const Chat: React.FC<ChatProps> = ({
   );
 
   const handleInputChange = (innerHTML: string) => {
-    const sanitizedInput = sanitizeMessage(innerHTML);
+    const trimmedInput = innerHTML.trim();
+    const sanitizedInput = marked(trimmedInput);
     setMsgInputValue(sanitizedInput);
   };
-
-  const sanitizeMessage = (message: string) => {
-    const decodedMessage = he.decode(message);
-    const sanitizedMessage = DOMPurify.sanitize(decodedMessage, {
-      ALLOWED_TAGS: ['a'],
-      ALLOWED_ATTR: ['href', 'target', 'rel'],
-    });
-    return sanitizedMessage;
-  };
+  // const sanitizeMessage = (message: string) => {
+  //   const decodedMessage = he.decode(message);
+  //   const sanitizedMessage = DOMPurify.sanitize(decodedMessage, {
+  //     ALLOWED_TAGS: ['a'],
+  //     ALLOWED_ATTR: ['href', 'target', 'rel'],
+  //   });
+  //   return sanitizedMessage;
+  // };
 
   // @TODO: Move logic to Dropzone component
   const handleFileDrop = async (files: File[], name: string) => {
@@ -334,10 +332,11 @@ const Chat: React.FC<ChatProps> = ({
                   }}
                 >
                   <Message.CustomContent>
-                    {/* https://linkify.js.org/docs */}
-                    <Linkify options={{ attributes: linkProps }}>
-                      {sanitizeMessage(message.message)}
-                    </Linkify>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: marked(message.message.trim()),
+                      }}
+                    />
                   </Message.CustomContent>
                 </Message>
               ))}
