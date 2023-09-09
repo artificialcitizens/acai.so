@@ -12,8 +12,8 @@ import { useLiveQuery } from 'dexie-react-hooks';
 
 export const useMemoryVectorStore = (
   initialText: string,
-  chunkSize = 1250,
-  chunkOverlap = 250,
+  chunkSize = 3000,
+  chunkOverlap = 600,
 ) => {
   const [vectorstore, setVectorStore] = useState<MemoryVectorStore | null>(
     null,

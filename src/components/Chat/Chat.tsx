@@ -10,7 +10,6 @@ import {
   MessageList,
   Message,
   MessageInput,
-  TypingIndicator,
   InputToolbox,
 } from '@chatscope/chat-ui-kit-react';
 import './Chat.css';
