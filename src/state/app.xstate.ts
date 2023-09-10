@@ -13,6 +13,7 @@ export type Tab = {
   systemNote: string;
   createdAt: string;
   lastUpdated: string;
+  autoSave: boolean;
 };
 
 export interface Workspace {
@@ -138,6 +139,7 @@ export const appStateMachine = createMachine<IContext, Event>({
                 isContext: false,
                 systemNote: '',
                 workspaceId: 'docs',
+                autoSave: false,
                 createdAt: timestampToHumanReadable(),
                 lastUpdated: timestampToHumanReadable(),
               },
@@ -284,7 +286,9 @@ export const appStateMachine = createMachine<IContext, Event>({
               }
               return context;
             }),
-            (context, event) => saveState(context),
+            (context, event) => {
+              event.tab.autoSave && saveState(context);
+            },
           ],
         },
         DELETE_TAB: {
@@ -358,6 +362,7 @@ export const handleCreateTab = async (
   args: { title: string; content: string },
   workspaceId: string,
   filetype = 'markdown',
+  autoSave = true,
 ): Promise<Tab> => {
   const newTab = {
     id: uuidv4().split('-')[0],
@@ -366,6 +371,7 @@ export const handleCreateTab = async (
     isContext: false,
     systemNote: '',
     workspaceId,
+    autoSave,
     filetype,
     createdAt: new Date().toString(),
     lastUpdated: new Date().toString(),
@@ -402,6 +408,7 @@ export const createWorkspace = ({
             workspaceId: newId,
             createdAt: new Date().toString(),
             lastUpdated: new Date().toString(),
+            autoSave: false,
             filetype: 'markdown',
           },
         ],

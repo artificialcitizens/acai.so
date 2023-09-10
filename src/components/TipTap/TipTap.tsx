@@ -82,7 +82,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     workspaceId: string,
     extraContent = '',
   ) => {
-    if (!currentTab) return;
+    if (!currentTab || !tab.autoSave) return;
 
     setSaveStatus('Unsaved');
     const content = editor.getJSON();

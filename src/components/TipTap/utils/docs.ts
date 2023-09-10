@@ -22,6 +22,7 @@ export const createDocs = async () => {
       filetype: 'markdown',
       content: doc.content,
       isContext: false,
+      autoSave: false,
       systemNote: '',
       workspaceId: 'docs',
       createdAt: doc.createdAt,

@@ -18,6 +18,8 @@ export type AgentContext = {
   systemNotes: string;
   recentChatHistory: ChatHistory[];
   openAIChatModel: string;
+  returnRagResults: boolean;
+  customAgentVectorSearch: boolean;
   agentLogs: {
     [key: string]: any;
   };
@@ -47,6 +49,12 @@ type AgentEvent =
   | { type: 'CLEAR_CHAT_HISTORY'; workspaceId: string }
   | { type: 'SET_OPENAI_CHAT_MODEL'; workspaceId: string; modelName: string }
   | { type: 'SET_AGENT_MODE'; workspaceId: string; mode: AgentMode }
+  | { type: 'SET_RAG_RESULTS'; workspaceId: string; ragResults: boolean }
+  | {
+      type: 'SET_CUSTOM_AGENT_VECTOR_SEARCH';
+      workspaceId: string;
+      ragResults: boolean;
+    }
   | { type: 'DELETE_AGENT'; workspaceId: string };
 
 /**
@@ -73,6 +81,8 @@ const loadAgentState = (): AgentWorkspace => {
         openAIChatModel: 'gpt-4',
         systemNotes: '',
         recentChatHistory: [],
+        returnRagResults: false,
+        customAgentVectorSearch: false,
         agentLogs: {},
         agentTools: {},
       },
@@ -90,6 +100,8 @@ export const createAgent = (workspaceId: string): AgentContext => {
     agentMode: 'chat',
     systemNotes: '',
     openAIChatModel: 'gpt-4',
+    returnRagResults: false,
+    customAgentVectorSearch: false,
     recentChatHistory: [],
     agentLogs: {},
     agentTools: {},
@@ -279,6 +291,39 @@ export const agentMachine = createMachine<AgentWorkspace, AgentEvent>({
             [event.workspaceId]: {
               ...context[event.workspaceId],
               agentMode: event.mode,
+            },
+          };
+          saveAgentState(updatedContext);
+          return updatedContext;
+        }
+        return context;
+      }),
+    },
+    SET_RAG_RESULTS: {
+      actions: assign((context, event) => {
+        if (event.workspaceId && context[event.workspaceId]) {
+          const updatedContext = {
+            ...context,
+            [event.workspaceId]: {
+              ...context[event.workspaceId],
+              returnRagResults: !context[event.workspaceId].returnRagResults,
+            },
+          };
+          saveAgentState(updatedContext);
+          return updatedContext;
+        }
+        return context;
+      }),
+    },
+    SET_CUSTOM_AGENT_VECTOR_SEARCH: {
+      actions: assign((context, event) => {
+        if (event.workspaceId && context[event.workspaceId]) {
+          const updatedContext = {
+            ...context,
+            [event.workspaceId]: {
+              ...context[event.workspaceId],
+              customAgentVectorSearch:
+                !context[event.workspaceId].customAgentVectorSearch,
             },
           };
           saveAgentState(updatedContext);

@@ -10,7 +10,6 @@ import {
   MessageList,
   Message,
   MessageInput,
-  TypingIndicator,
   InputToolbox,
 } from '@chatscope/chat-ui-kit-react';
 import './Chat.css';
@@ -23,11 +22,10 @@ import { ChatHistory } from '../../state';
 import { useLocation } from 'react-router-dom';
 import Dropzone from '../Dropzone/Dropzone';
 import { readFileAsText, slugify } from '../../utils/data-utils.ts';
-// import { convertDSPTranscript } from '../../utils/ac-langchain/text-splitters/dsp-splitter.ts';
-// import yaml from 'js-yaml';
-import Linkify from 'linkify-react';
-import DOMPurify from 'dompurify';
-import he from 'he';
+
+import ReactMarkdown from 'react-markdown';
+import remarkFootnotes from 'remark-footnotes';
+
 import { Button } from '../Button/Button';
 import { SendIcon, SpinnerIcon, StopIcon, TrashIcon } from '../Icons/Icons';
 import { toastifyError, toastifyInfo } from '../Toast';
@@ -222,17 +220,8 @@ const Chat: React.FC<ChatProps> = ({
   );
 
   const handleInputChange = (innerHTML: string) => {
-    const sanitizedInput = sanitizeMessage(innerHTML);
-    setMsgInputValue(sanitizedInput);
-  };
-
-  const sanitizeMessage = (message: string) => {
-    const decodedMessage = he.decode(message);
-    const sanitizedMessage = DOMPurify.sanitize(decodedMessage, {
-      ALLOWED_TAGS: ['a'],
-      ALLOWED_ATTR: ['href', 'target', 'rel'],
-    });
-    return sanitizedMessage;
+    const trimmedInput = innerHTML.trim();
+    setMsgInputValue(trimmedInput);
   };
 
   // @TODO: Move logic to Dropzone component
@@ -243,7 +232,6 @@ const Chat: React.FC<ChatProps> = ({
       if (!file) return;
 
       const fileExtension = file.name.split('.').pop();
-      // const reader = new FileReader();
       switch (fileExtension) {
         case 'txt':
         case 'md':
@@ -270,61 +258,19 @@ const Chat: React.FC<ChatProps> = ({
             }
           }
           break;
-        //       case 'jpg':
-        //       case 'jpeg':
-        //       case 'png':
-        //         reader.onload = () => {
-        //           toast.update(`${file.name}`, {
-        //             render: 'Image uploaded successfully',
-        //             type: 'success',
-        //             autoClose: 5000,
-        //           });
-        //         };
-        //         reader.readAsDataURL(file);
-        //         break;
         default:
           toastifyError(`Please upload a .txt or .md file`);
           break;
       }
     }
-
-    // // Save as JSON file
-    // const jsonContent = JSON.stringify(conversations, null, 2);
-    // const jsonFile = new Blob([jsonContent], { type: 'application/json' });
-    // const jsonDownloadLink = document.createElement('a');
-    // jsonDownloadLink.href = URL.createObjectURL(jsonFile);
-    // jsonDownloadLink.download = `${name}.json`;
-    // jsonDownloadLink.click();
-
-    // // Convert JSON to YAML
-    // const yamlContent = yaml.dump(conversations);
-
-    // // Save as YAML file
-    // const yamlFile = new Blob([yamlContent], { type: 'application/x-yaml' });
-    // const yamlDownloadLink = document.createElement('a');
-    // yamlDownloadLink.href = URL.createObjectURL(yamlFile);
-    // yamlDownloadLink.download = `${name}.yml`;
-    // yamlDownloadLink.click();
   };
 
-  const linkProps = {
-    onClick: (event: any) => {
-      event.preventDefault();
-      const url = event.target.href;
-      window.open(url, '_blank');
-    },
-  };
   return (
     <>
       <Dropzone onFilesDrop={handleFileDrop}>
         <div className="rounded-lg overflow-hidden w-full">
           <ChatContainer className="bg-dark">
-            <MessageList
-              className="bg-dark"
-              typingIndicator={
-                loading && <TypingIndicator content={`${name} is thinking`} />
-              }
-            >
+            <MessageList className="bg-dark">
               {messages?.map((message) => (
                 <Message
                   key={message.sentTime + message.sender}
@@ -334,10 +280,9 @@ const Chat: React.FC<ChatProps> = ({
                   }}
                 >
                   <Message.CustomContent>
-                    {/* https://linkify.js.org/docs */}
-                    <Linkify options={{ attributes: linkProps }}>
-                      {sanitizeMessage(message.message)}
-                    </Linkify>
+                    <ReactMarkdown remarkPlugins={[remarkFootnotes]}>
+                      {message.message}
+                    </ReactMarkdown>
                   </Message.CustomContent>
                 </Message>
               ))}

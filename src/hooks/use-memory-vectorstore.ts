@@ -9,17 +9,25 @@ import { Document } from 'langchain/document';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { AcaiMemoryVector, db } from '../../db';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useLocation } from 'react-router-dom';
 
 export const useMemoryVectorStore = (
   initialText: string,
-  chunkSize = 1250,
-  chunkOverlap = 250,
+  chunkSize = 2500,
+  chunkOverlap = 500,
 ) => {
   const [vectorstore, setVectorStore] = useState<MemoryVectorStore | null>(
     null,
   );
+  const location = useLocation();
 
-  const memoryVectors = useLiveQuery(() => db.memoryVectors.toArray());
+  const workspaceId = location.pathname.split('/')[1];
+
+  const memoryVectors = useLiveQuery(() => {
+    setVectorStore(null);
+    return db.memoryVectors.where('workspaceId').equals(workspaceId).toArray();
+  }, [workspaceId]);
+
   useEffect(() => {
     createDocumentsFromText({
       text: initialText,
@@ -29,7 +37,11 @@ export const useMemoryVectorStore = (
       const vectorStore = await initializeMemoryVectorStore({ docs: res });
       const vectorSet = new Set(vectorStore.memoryVectors);
       memoryVectors?.forEach((mem) => {
-        mem.memoryVectors.forEach((vector) => vectorSet.add(vector));
+        mem.memoryVectors.forEach((vector) => {
+          if (!vectorSet.has(vector)) {
+            vectorSet.add(vector);
+          }
+        });
       });
       vectorStore.memoryVectors = Array.from(vectorSet);
       setVectorStore(vectorStore);
@@ -79,7 +91,7 @@ export const useMemoryVectorStore = (
 
   const similaritySearchWithScore = async (
     query: string,
-    k = 4,
+    k = 5,
     filter?: any,
   ) => {
     if (!vectorstore) return [];

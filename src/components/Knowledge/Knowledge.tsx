@@ -8,7 +8,7 @@ import {
 } from '../../context/GlobalStateContext';
 import { useNavigate } from 'react-router-dom';
 import SBSearch from '../Search';
-import StorageMeter from '../StorageMeter/StorageMeter';
+// import StorageMeter from '../StorageMeter/StorageMeter';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../db';
 interface KnowledgeProps {
@@ -20,26 +20,29 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
     useContext(GlobalStateContext);
   const vectorContext = useContext(VectorStoreContext);
   const navigate = useNavigate();
+
   const knowledgeItems = useLiveQuery(async () => {
     if (!vectorContext) return;
     return await db.memoryVectors
       .where('workspaceId')
       .equals(workspaceId)
       .toArray();
-  });
+  }, [workspaceId]);
+
   return (
     <div className="flex flex-col">
       <SBSearch
         onSubmit={async (val: string) => {
           if (!vectorContext) return;
           const response = await vectorContext.similaritySearchWithScore(val);
-          const results = vectorContext.filterAndCombineContent(response, 0.75);
+          const results = vectorContext.filterAndCombineContent(response, 0.6);
           const newTab: Tab = {
             id: Date.now().toString(),
             title: val,
             content: results,
             workspaceId,
             isContext: false,
+            autoSave: false,
             createdAt: new Date().toString(),
             lastUpdated: new Date().toString(),
             filetype: 'markdown',
@@ -50,13 +53,14 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
         }}
       />
       {knowledgeItems && knowledgeItems.length > 0 && (
-        <ul className="bg-base rounded-lg p-3 max-h-[50vh]">
+        <ul className="bg-base rounded-lg p-3 max-h-[50vh] overflow-scroll">
           {knowledgeItems?.map((item) => (
             <li
               key={item.id}
               className="text-acai-white text-xs font-semibold mb-3 flex justify-between"
             >
-              {item.id}
+              {/* convert example-txt  to example.txt */}
+              {item.id.replace(/-(\w+)$/, '.$1')}
               <button
                 className="p-0 px-1  rounded-full font-medium text-red-900"
                 onClick={async () => {

@@ -78,3 +78,7 @@
 .cs-input-toolbox {
   @apply mt-1;
 }
+
+.cs-message-input {
+  @apply flex-shrink;
+}

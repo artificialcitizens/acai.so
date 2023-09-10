@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 import { avaChat } from '../../lib/ac-langchain/agents/ava';
 import { toastifyAgentLog } from '../Toast';
-import { handleCreateTab } from '../../state';
+import { Tab, handleCreateTab } from '../../state';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -20,7 +20,11 @@ import { EditorContext } from '../../context/EditorContext';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import axios from 'axios';
 import { getToken } from '../../utils/config';
-import SocketContext from '../../context/SocketContext';
+// import SocketContext from '../../context/SocketContext';
+import { ragAgentResponse } from '../../lib/ac-langchain/agents/rag-agent/rag-agent';
+import { VectorStoreContext } from '../../context/VectorStoreContext';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../../../db';
 
 export type AvaChatResponse = {
   response: string;
@@ -39,12 +43,14 @@ type Message = {
 export const agentMode = [
   'chat',
   'custom',
+  // 'rag',
   // 'create',
   // 'research',
   // 'writer',
 ];
 
 if (import.meta.env.DEV) {
+  agentMode.unshift('rag');
   agentMode.unshift('ava');
 }
 
@@ -61,18 +67,31 @@ export const useAva = (): {
   const [loading, setLoading] = useState(false);
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
+  const vectorContext = useContext(VectorStoreContext);
+
+  // @TODO - Seems to need to be here to get the context to load, why though?
+  const knowledgeItems = useLiveQuery(async () => {
+    if (!vectorContext) return;
+    return await db.memoryVectors
+      .where('workspaceId')
+      .equals(workspaceId)
+      .toArray();
+  });
+
   const location = useLocation();
   const workspaceId = location.pathname.split('/')[1];
   const navigate = useNavigate();
-
+  const { appStateService }: GlobalStateContextValue =
+    useContext(GlobalStateContext);
   const [agentState] = useActor(globalServices.agentStateService);
   const [userName] = useLocalStorageKeyValue('USER_NAME', '');
   const [userLocation] = useLocalStorageKeyValue('USER_LOCATION', '');
   const currentAgent = agentState.context[workspaceId];
   const [streamingMessage, setStreamingMessage] = useState('');
   const [error, setError] = useState('');
-  const [abortController, setAbortController] =
-    useState<AbortController | null>(null);
+  // const [abortController, setAbortController] =
+  //   useState<AbortController | null>(null);
+
   const formattedChatHistory = currentAgent?.recentChatHistory
     .map(
       (chat: { type: 'ava' | 'user'; text: string }) =>
@@ -132,6 +151,70 @@ export const useAva = (): {
           // abortController: response.abortController,
         };
       }
+      case 'rag': {
+        if (!vectorContext) {
+          setError('Vector context not found');
+          setLoading(false);
+          return {
+            response:
+              'The vectorstore is not connected, please try reloading the page.',
+          };
+        }
+        const contextResults = await vectorContext.similaritySearchWithScore(
+          message,
+        );
+        const formattedResults = vectorContext.filterAndCombineContent(
+          contextResults,
+          0.6,
+        );
+        const response = await ragAgentResponse({
+          query: message,
+          chatHistory: formattedChatHistory,
+          context: formattedResults,
+          callbacks: {
+            handleLLMStart: () => {
+              setLoading(true);
+              // console.log({ llm, prompts });
+            },
+            handleLLMNewToken: (token) => {
+              setStreamingMessage((prev) => prev + token);
+              // console.log(token);
+            },
+            handleLLMEnd: () => {
+              setLoading(false);
+              setStreamingMessage('');
+
+              // console.log({ output });
+            },
+            handleLLMError: (err) => {
+              setError(err.message);
+              setLoading(false);
+              // console.log({ err });
+            },
+          },
+        });
+        if (agentState.context[workspaceId].returnRagResults) {
+          const newTab: Tab = {
+            id: Date.now().toString(),
+            title: 'Retrieval Results',
+            content: formattedResults,
+            workspaceId,
+            isContext: false,
+            createdAt: new Date().toString(),
+            lastUpdated: new Date().toString(),
+            filetype: 'markdown',
+            autoSave: false,
+            systemNote: '',
+          };
+          appStateService.send({ type: 'ADD_TAB', tab: newTab });
+          navigate(`/${workspaceId}/${newTab.id}`); // setAbortController(response.abortController);
+        }
+
+        return {
+          response: response.content,
+          // abortController: response.abortController,
+        };
+      }
       case 'ava': {
         const response = await avaChat({
           input: message,
@@ -171,6 +254,17 @@ export const useAva = (): {
         };
       }
       case 'custom': {
+        let knowledge = '';
+        if (vectorContext && currentAgent?.customAgentVectorSearch) {
+          const contextResults = await vectorContext.similaritySearchWithScore(
+            message,
+          );
+          const formattedResults = vectorContext.filterAndCombineContent(
+            contextResults,
+            0.6,
+          );
+          knowledge = formattedResults;
+        }
         const agentPayload = {
           userMessage: message,
           userName: userName || 'User',
@@ -178,6 +272,7 @@ export const useAva = (): {
           customPrompt,
           chatHistory: currentAgent?.recentChatHistory as Message[],
           currentDocument: editor?.getText() || '',
+          similaritySearchResults: knowledge,
         };
         const agentUrl =
           getToken('CUSTOM_AGENT_URL') || import.meta.env.VITE_CUSTOM_AGENT_URL;

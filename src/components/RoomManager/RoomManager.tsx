@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Socket } from 'socket.io-client';
 import SocketContext from '../../context/SocketContext';
 
 const RoomManager: React.FC = () => {
@@ -14,7 +13,6 @@ const RoomManager: React.FC = () => {
 
     if (!socket.hasListeners('data-received')) {
       const handleDataReceived = (data: string) => {
-        console.log('Data received:', data);
         setData(data);
       };
 
