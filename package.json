@@ -42,6 +42,7 @@
     "@types/uuid": "^9.0.2",
     "@uidotdev/usehooks": "^2.0.1",
     "@xstate/react": "^3.2.2",
+    "ai": "^2.2.12",
     "axios": "^1.4.0",
     "bottleneck": "^2.19.5",
     "cheerio": "1.0.0-rc.12",
