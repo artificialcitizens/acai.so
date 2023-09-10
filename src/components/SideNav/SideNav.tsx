@@ -58,6 +58,7 @@ export const SideNav: React.FC = () => {
               title: `Welcome to ${name}!`,
               content: '',
               isContext: false,
+              autoSave: false,
               systemNote: '',
               workspaceId: id,
               createdAt: new Date().toString(),

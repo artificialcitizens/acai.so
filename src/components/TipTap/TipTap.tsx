@@ -82,10 +82,8 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     workspaceId: string,
     extraContent = '',
   ) => {
-    if (!currentTab) return;
+    if (!currentTab || !tab.autoSave) return;
 
-    // don't save if on prod
-    if (workspaceId === 'docs' && !import.meta.env.DEV) return;
     setSaveStatus('Unsaved');
     const content = editor.getJSON();
     setSaveStatus('Saving...');

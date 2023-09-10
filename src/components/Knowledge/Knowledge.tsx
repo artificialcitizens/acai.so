@@ -8,7 +8,7 @@ import {
 } from '../../context/GlobalStateContext';
 import { useNavigate } from 'react-router-dom';
 import SBSearch from '../Search';
-import StorageMeter from '../StorageMeter/StorageMeter';
+// import StorageMeter from '../StorageMeter/StorageMeter';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../db';
 interface KnowledgeProps {
@@ -42,6 +42,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
             content: results,
             workspaceId,
             isContext: false,
+            autoSave: false,
             createdAt: new Date().toString(),
             lastUpdated: new Date().toString(),
             filetype: 'markdown',
