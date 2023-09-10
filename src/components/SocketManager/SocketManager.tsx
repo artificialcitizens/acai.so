@@ -133,7 +133,7 @@ export const SocketManager: React.FC = () => {
           <input
             id="url"
             className="text-acai-white bg-base px-[2px]"
-            type="text"
+            type="password"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
           />

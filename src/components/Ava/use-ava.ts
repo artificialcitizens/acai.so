@@ -193,20 +193,22 @@ export const useAva = (): {
             },
           },
         });
+        if (agentState.context[workspaceId].returnRagResults) {
+          const newTab: Tab = {
+            id: Date.now().toString(),
+            title: 'Retrieval Results',
+            content: formattedResults,
+            workspaceId,
+            isContext: false,
+            createdAt: new Date().toString(),
+            lastUpdated: new Date().toString(),
+            filetype: 'markdown',
+            systemNote: '',
+          };
+          appStateService.send({ type: 'ADD_TAB', tab: newTab });
+          navigate(`/${workspaceId}/${newTab.id}`); // setAbortController(response.abortController);
+        }
 
-        const newTab: Tab = {
-          id: Date.now().toString(),
-          title: 'Retrieval Results',
-          content: formattedResults,
-          workspaceId,
-          isContext: false,
-          createdAt: new Date().toString(),
-          lastUpdated: new Date().toString(),
-          filetype: 'markdown',
-          systemNote: '',
-        };
-        appStateService.send({ type: 'ADD_TAB', tab: newTab });
-        navigate(`/${workspaceId}/${newTab.id}`); // setAbortController(response.abortController);
         return {
           response: response.content,
           // abortController: response.abortController,

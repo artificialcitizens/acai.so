@@ -46,22 +46,45 @@ export const ChatModelDropdown: React.FC<ChatModelProps> = ({
       mode,
     });
   };
-
+  const handleRagStateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    send({
+      type: 'SET_RAG_RESULTS',
+      workspaceId,
+      returnResults: event.target.checked,
+    });
+  };
   return (
-    <span className="flex justify-between">
-      <Dropdown
-        label="Chat Model"
-        options={openAIModels.map((model) => ({ value: model, label: model }))}
-        value={state.context[workspaceId]?.openAIChatModel || ''}
-        onChange={handleModelChange}
-      />
-
+    <span className="flex flex-col justify-between">
       <Dropdown
         label="Agent Mode"
         options={agentMode.map((mode) => ({ value: mode, label: mode }))}
         value={state.context[workspaceId]?.agentMode || ''}
         onChange={handleModeChange}
       />
+      {state.context[workspaceId]?.agentMode === 'chat' && (
+        <Dropdown
+          label="Chat Model"
+          options={openAIModels.map((model) => ({
+            value: model,
+            label: model,
+          }))}
+          value={state.context[workspaceId]?.openAIChatModel || ''}
+          onChange={handleModelChange}
+        />
+      )}
+      {state.context[workspaceId]?.agentMode === 'rag' && (
+        <div className="mt-2">
+          <label className="inline-flex items-center text-acai-white">
+            <span className="mx-2">Return Results</span>
+            <input
+              type="checkbox"
+              className="form-checkbox"
+              checked={state.context[workspaceId]?.ragReturnResults}
+              onChange={handleRagStateChange}
+            />
+          </label>
+        </div>
+      )}
     </span>
   );
 };

@@ -52,7 +52,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
         }}
       />
       {knowledgeItems && knowledgeItems.length > 0 && (
-        <ul className="bg-base rounded-lg p-3 max-h-[50vh]">
+        <ul className="bg-base rounded-lg p-3 max-h-[50vh] overflow-scroll">
           {knowledgeItems?.map((item) => (
             <li
               key={item.id}
