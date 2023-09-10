@@ -79,7 +79,7 @@ export const ChatModelDropdown: React.FC<ChatModelProps> = ({
             <input
               type="checkbox"
               className="form-checkbox"
-              checked={state.context[workspaceId]?.ragReturnResults}
+              checked={state.context[workspaceId]?.returnRagResults}
               onChange={handleRagStateChange}
             />
           </label>
