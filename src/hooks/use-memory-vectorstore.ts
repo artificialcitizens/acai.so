@@ -13,8 +13,8 @@ import { useLocation } from 'react-router-dom';
 
 export const useMemoryVectorStore = (
   initialText: string,
-  chunkSize = 3000,
-  chunkOverlap = 600,
+  chunkSize = 2500,
+  chunkOverlap = 500,
 ) => {
   const [vectorstore, setVectorStore] = useState<MemoryVectorStore | null>(
     null,
