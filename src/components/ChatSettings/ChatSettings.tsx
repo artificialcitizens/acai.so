@@ -53,6 +53,15 @@ export const ChatModelDropdown: React.FC<ChatModelProps> = ({
       returnResults: event.target.checked,
     });
   };
+  const handleCustomKnowledgeChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    send({
+      type: 'SET_CUSTOM_AGENT_VECTOR_SEARCH',
+      workspaceId,
+      returnResults: event.target.checked,
+    });
+  };
   return (
     <span className="flex flex-col justify-between">
       <Dropdown
@@ -85,6 +94,20 @@ export const ChatModelDropdown: React.FC<ChatModelProps> = ({
           </label>
         </div>
       )}
+      {/* @TODO: create example in server for usage */}
+      {/* {state.context[workspaceId]?.agentMode === 'custom' && (
+        <div className="mt-2">
+          <label className="inline-flex items-center text-acai-white">
+            <span className="mx-2">Use Knowledge Search</span>
+            <input
+              type="checkbox"
+              className="form-checkbox"
+              checked={state.context[workspaceId]?.customAgentUseKnowledge}
+              onChange={handleCustomKnowledgeChange}
+            />
+          </label>
+        </div>
+      )} */}
     </span>
   );
 };

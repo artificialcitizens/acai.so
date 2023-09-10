@@ -20,7 +20,7 @@ import { EditorContext } from '../../context/EditorContext';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import axios from 'axios';
 import { getToken } from '../../utils/config';
-import SocketContext from '../../context/SocketContext';
+// import SocketContext from '../../context/SocketContext';
 import { ragAgentResponse } from '../../lib/ac-langchain/agents/rag-agent/rag-agent';
 import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -89,8 +89,8 @@ export const useAva = (): {
   const currentAgent = agentState.context[workspaceId];
   const [streamingMessage, setStreamingMessage] = useState('');
   const [error, setError] = useState('');
-  const [abortController, setAbortController] =
-    useState<AbortController | null>(null);
+  // const [abortController, setAbortController] =
+  //   useState<AbortController | null>(null);
 
   const formattedChatHistory = currentAgent?.recentChatHistory
     .map(
@@ -203,6 +203,7 @@ export const useAva = (): {
             createdAt: new Date().toString(),
             lastUpdated: new Date().toString(),
             filetype: 'markdown',
+            autoSave: false,
             systemNote: '',
           };
           appStateService.send({ type: 'ADD_TAB', tab: newTab });
@@ -253,6 +254,17 @@ export const useAva = (): {
         };
       }
       case 'custom': {
+        let knowledge = '';
+        if (vectorContext && currentAgent?.customAgentVectorSearch) {
+          const contextResults = await vectorContext.similaritySearchWithScore(
+            message,
+          );
+          const formattedResults = vectorContext.filterAndCombineContent(
+            contextResults,
+            0.6,
+          );
+          knowledge = formattedResults;
+        }
         const agentPayload = {
           userMessage: message,
           userName: userName || 'User',
@@ -260,6 +272,7 @@ export const useAva = (): {
           customPrompt,
           chatHistory: currentAgent?.recentChatHistory as Message[],
           currentDocument: editor?.getText() || '',
+          similaritySearchResults: knowledge,
         };
         const agentUrl =
           getToken('CUSTOM_AGENT_URL') || import.meta.env.VITE_CUSTOM_AGENT_URL;
