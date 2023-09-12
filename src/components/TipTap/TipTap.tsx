@@ -52,6 +52,7 @@ export const extractContentFromTipTap = (tipTapContent: any): string => {
   return rawContent;
 };
 
+// @TODO: create left right pagination with arrow and doc title
 const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   const service = useInterpret(appStateMachine);
 

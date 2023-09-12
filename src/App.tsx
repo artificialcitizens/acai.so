@@ -18,6 +18,7 @@ import AudioWaveform from './components/AudioWave/AudioWave';
 import { Editor } from '@tiptap/react';
 import { EditorContext } from './context/EditorContext';
 import { createDocs } from './components/TipTap/utils/docs';
+import EditorDropzone from './components/TipTap/components/EditorDropzone';
 // import useTypeTag from './hooks/ac-langchain/use-type-tag';
 // const [userLocation, setUserLocation] = useState<string>('Portland, OR');
 
@@ -150,6 +151,9 @@ function App() {
                 </div>
 
                 {activeTab && <TipTap tab={activeTab} />}
+                {/* <div className="h-full overflow-scroll">
+                  <EditorDropzone></EditorDropzone>
+                </div> */}
                 {}
               </div>
               <Ava
