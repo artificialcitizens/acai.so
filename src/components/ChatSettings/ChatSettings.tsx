@@ -26,7 +26,8 @@ export const ChatModelDropdown: React.FC<ChatModelProps> = ({
     getOpenAIChatModels().then((res) => {
       setOpenAIModels(res);
     });
-  }, [openAIKey]); // Add openAIKey as a dependency
+  }, [openAIKey]);
+
   const { agentStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const [state, send] = useActor(agentStateService);

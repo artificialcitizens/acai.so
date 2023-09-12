@@ -1,6 +1,8 @@
 import React, { useState, useCallback, ReactNode } from 'react';
 import { slugify } from '../../utils/data-utils';
+import { pdfjs } from 'react-pdf';
 
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 interface DropzoneProps {
   children: ReactNode;
   onFilesDrop: (files: File[], name: string) => void;
@@ -15,17 +17,32 @@ const Dropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
       const items = event.dataTransfer.items;
       const droppedFiles: File[] = [];
 
-      const processEntry = async (
-        entry: any,
-      ): Promise<File[] | File | undefined> => {
+      const processEntry = (entry: any): Promise<File[] | File | undefined> => {
         if (entry.isFile) {
-          return new Promise<File>((resolve) => {
-            entry.file((file: File | PromiseLike<File>) => resolve(file));
+          return new Promise<File>((resolve, reject) => {
+            entry.file((file: File | PromiseLike<File>) => {
+              if (file instanceof File) {
+                if (file.type === 'application/pdf') {
+                  const fileURL = URL.createObjectURL(file);
+                  pdfjs
+                    .getDocument(fileURL)
+                    .promise.then((pdf) => {
+                      console.log(pdf.numPages);
+                      // Process the PDF file using pdf object
+                      // For example, you can get the number of pages using pdf.numPages
+                      resolve(file);
+                    })
+                    .catch(reject);
+                } else {
+                  resolve(file);
+                }
+              }
+            });
           });
         } else if (entry.isDirectory) {
           return readDirectory(entry.createReader());
         }
-        return undefined;
+        return Promise.resolve(undefined);
       };
 
       const readDirectory = async (
@@ -43,7 +60,7 @@ const Dropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
           }
         }
 
-        return folderFiles.length > 0 ? folderFiles : undefined; // modify this line
+        return folderFiles.length > 0 ? folderFiles : undefined;
       };
 
       const readEntries = (reader: any): Promise<any[]> => {
@@ -54,14 +71,16 @@ const Dropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
         });
       };
 
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
+      for (const item of items) {
         if (item.kind === 'file') {
           const fileOrFiles = await processEntry(item.webkitGetAsEntry());
           if (Array.isArray(fileOrFiles)) {
-            droppedFiles.push(...fileOrFiles);
+            droppedFiles.push(
+              ...fileOrFiles.filter((file) => file.type !== ''),
+            );
           } else {
-            if (fileOrFiles) droppedFiles.push(fileOrFiles);
+            if (fileOrFiles && fileOrFiles.type !== '')
+              droppedFiles.push(fileOrFiles);
           }
         }
       }
