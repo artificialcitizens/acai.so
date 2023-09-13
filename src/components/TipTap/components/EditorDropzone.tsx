@@ -83,7 +83,7 @@ const EditorDropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
       // }
       setHighlight(false);
     },
-    [onFilesDrop],
+    [],
   );
 
   const handleDragOver = useCallback(

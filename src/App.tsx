@@ -151,7 +151,7 @@ function App() {
                 </div>
 
                 {activeTab && <TipTap tab={activeTab} />}
-                {/* <div className="h-full overflow-scroll">
+                {/* <div className="max-h-[calc(100vh-2rem)] overflow-scroll">
                   <EditorDropzone></EditorDropzone>
                 </div> */}
                 {}
