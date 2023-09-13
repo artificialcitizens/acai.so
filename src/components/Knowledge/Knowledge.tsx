@@ -50,6 +50,8 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
               const slugifiedFilename = slugify(file.name);
               if (vectorContext) {
                 // need to figure out how to pass metadata to filter by
+                // @TODO: need to figure this out so we can filter the vectors based on the slugifiedFilename and workspaceId
+                // to prevent duplicates
                 const memoryVectors = await vectorContext.addText(fileContent);
                 //@TODO: add a check to see if the file already exists
                 const id = db.memoryVectors.add({
