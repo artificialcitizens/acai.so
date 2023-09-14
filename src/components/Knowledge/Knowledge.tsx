@@ -48,16 +48,24 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
               toastifyInfo(`📁 Processing ${file.name}`);
               const fileContent = await readFileAsText(file);
               const slugifiedFilename = slugify(file.name);
+              const metadata = {
+                id: slugifiedFilename,
+                workspaceId,
+              };
               if (vectorContext) {
-                // need to figure out how to pass metadata to filter by
-                // @TODO: need to figure this out so we can filter the vectors based on the slugifiedFilename and workspaceId
-                // to prevent duplicates
-                const memoryVectors = await vectorContext.addText(fileContent);
-                //@TODO: add a check to see if the file already exists
+                const memoryVectors = await vectorContext.addText(
+                  fileContent,
+                  [metadata],
+                  `DOCUMENT NAME: ${file.name}\n\n---\n\n`,
+                );
+                const filteredMemoryVectors = memoryVectors?.filter(
+                  (item) => item.metadata.id === slugifiedFilename,
+                );
+
                 const id = db.memoryVectors.add({
                   id: slugifiedFilename,
                   workspaceId,
-                  memoryVectors: memoryVectors || [],
+                  memoryVectors: filteredMemoryVectors || [],
                 });
               } else {
                 throw new Error('Context is null');
@@ -135,7 +143,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
           </div>
         )}
         {knowledgeItems && knowledgeItems.length > 0 && (
-          <ul className="bg-base rounded-lg p-3 max-h-[50vh] w-full overflow-scroll">
+          <ul className="bg-base rounded-lg p-3 max-h-[25vh] w-full overflow-scroll">
             {knowledgeItems?.map((item) => (
               <li
                 key={item.id}

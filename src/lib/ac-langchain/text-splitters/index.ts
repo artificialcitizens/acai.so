@@ -5,10 +5,19 @@ export const createDocumentsFromText = async ({
   text,
   chunkSize,
   chunkOverlap,
+  /**
+   * Optional heading to be added to each chunk
+    // https://js.langchain.com/docs/modules/data_connection/document_transformers/text_splitters/contextual_chunk_headers
+   * @example `DOCUMENT NAME: Jim Interview\n\n---\n\n`
+   */
+  chunkHeader,
+  metadata,
 }: {
   text: string;
   chunkSize: number;
   chunkOverlap: number;
+  chunkHeader?: string;
+  metadata?: Record<string, any>[];
 }): Promise<Document<Record<string, any>>[]> => {
   if (!text) return [];
 
@@ -17,7 +26,10 @@ export const createDocumentsFromText = async ({
     chunkOverlap,
   });
 
-  const output = await splitter.createDocuments([text]);
+  const output = await splitter.createDocuments([text], metadata, {
+    chunkHeader,
+    appendChunkOverlapHeader: true,
+  });
   return output;
 };
 

@@ -11,6 +11,25 @@ import { AcaiMemoryVector, db } from '../../db';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useLocation } from 'react-router-dom';
 
+export type VectorStoreContextType = {
+  vectorstore: any; // Replace any with the actual type if available
+  addDocuments: (docs: any[]) => void; // Replace any with the actual type if available
+  addText: (
+    text: string,
+    metadata: Record<string, any>[],
+    chunkHeader: string,
+  ) => Promise<AcaiMemoryVector[] | undefined>;
+  filterAndCombineContent: (
+    data: Array<[Document, number]>,
+    threshold: number,
+  ) => string;
+  similaritySearchWithScore: (
+    query: string,
+    k?: number,
+    filter?: any,
+  ) => Promise<any>; // Replace any with the actual type if available
+};
+
 export const useMemoryVectorStore = (
   initialText: string,
   chunkSize = 2500,
@@ -61,12 +80,16 @@ export const useMemoryVectorStore = (
 
   const addText = async (
     text: string,
+    metadata: Record<string, any>[],
+    chunkHeader: string,
   ): Promise<AcaiMemoryVector[] | undefined> => {
     if (!vectorstore) return;
     const docs = await createDocumentsFromText({
       text,
       chunkSize,
       chunkOverlap,
+      chunkHeader,
+      metadata,
     });
     const memoryVectors = await addDocuments(docs);
     return memoryVectors;
