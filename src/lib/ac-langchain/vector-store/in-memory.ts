@@ -10,10 +10,12 @@ export const initializeMemoryVectorStore = async ({
 }: {
   docs: Document[];
 }) => {
+  const openAIApiKey =
+    getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY;
   const vectorStore = await MemoryVectorStore.fromDocuments(
     docs,
     new OpenAIEmbeddings({
-      openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
+      openAIApiKey,
     }),
   );
   return vectorStore;

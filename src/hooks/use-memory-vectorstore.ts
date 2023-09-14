@@ -10,6 +10,7 @@ import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { AcaiMemoryVector, db } from '../../db';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useLocation } from 'react-router-dom';
+import { getToken } from '../utils/config';
 
 export type VectorStoreContextType = {
   vectorstore: any; // Replace any with the actual type if available
@@ -53,6 +54,9 @@ export const useMemoryVectorStore = (
       chunkSize: chunkSize,
       chunkOverlap: chunkOverlap,
     }).then(async (res) => {
+      const openAIApiKey =
+        getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY;
+      if (!openAIApiKey) return;
       const vectorStore = await initializeMemoryVectorStore({ docs: res });
       const vectorSet = new Set(vectorStore.memoryVectors);
       memoryVectors?.forEach((mem) => {
