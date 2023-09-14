@@ -105,7 +105,9 @@ export const useMemoryVectorStore = (
     );
 
     // Map through the filtered data and extract the pageContent
-    const pageContents = filteredData.map(([document]) => document.pageContent);
+    const pageContents = filteredData.map(
+      ([document]) => `${document.pageContent}\n SRC: ${document.metadata.src}`,
+    );
     // Combine the page contents into a single string
     const combinedContent = pageContents.join('<br/><hr/><br/>');
 

@@ -106,7 +106,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   offset: pageStartOffset,
                   filetype: 'pdf',
                   file,
-                  src: `/knowledge/pdf/${slugifiedFilename}-page-${page.page}`,
+                  src: `/knowledge/pdf/${slugifiedFilename}/${page.page}`,
                   totalPages: pdfData[slugifiedFilename].length,
                   originalFilename: file.name,
                   uploadTimestamp: new Date().toISOString(),
@@ -217,64 +217,9 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
 };
 
 export default Knowledge;
+
 // const handleFileDrop = async (files: File[], name: string) => {
 //   const conversations: { [key: string]: any } = {};
-
-//   for (const file of files) {
-//     if (!file) return;
-//     console.log(file);
-//     toast(`📁 Processing ${file.name}`, {
-//       toastId: `${file.name}`,
-//       className: 'custom-toast',
-//       position: 'top-right',
-//       autoClose: false,
-//       hideProgressBar: false,
-//       closeOnClick: true,
-//       pauseOnHover: true,
-//       draggable: true,
-//       theme: 'dark',
-//     });
-
-//     const fileExtension = file.name.split('.').pop();
-//     const reader = new FileReader();
-
-//     switch (fileExtension) {
-//       case 'jpg':
-//       case 'jpeg':
-//       case 'png':
-//         reader.onload = () => {
-//           toast.update(`${file.name}`, {
-//             render: 'Image uploaded successfully',
-//             type: 'success',
-//             autoClose: 5000,
-//           });
-//         };
-//         reader.readAsDataURL(file);
-//         break;
-//       default:
-//         try {
-//           const fileContent = await readFileAsText(file);
-
-//           const conversation = convertDSPTranscript(fileContent);
-
-//           const slugifiedFilename = slugify(file.name);
-//           conversations[slugifiedFilename] = conversation;
-
-//           toast.update(`${file.name}`, {
-//             render: 'File uploaded successfully',
-//             type: 'success',
-//             autoClose: 5000,
-//           });
-//         } catch (error) {
-//           console.error('Error processing file:', file, error);
-//           toast.update(`${file.name}`, {
-//             render: 'Error processing file',
-//             type: 'error',
-//             autoClose: 5000,
-//           });
-//         }
-//     }
-//   }
 
 //   // Save as JSON file
 //   const jsonContent = JSON.stringify(conversations, null, 2);
