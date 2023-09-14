@@ -1,8 +1,6 @@
 import React, { useState, useCallback, ReactNode } from 'react';
 import { slugify } from '../../utils/data-utils';
-import { pdfjs } from 'react-pdf';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 interface DropzoneProps {
   children: ReactNode;
   onFilesDrop: (files: File[], name: string) => void;
@@ -42,18 +40,7 @@ const Dropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
             entry.file((file: File | PromiseLike<File>) => {
               if (file instanceof File) {
                 if (file.type === 'application/pdf') {
-                  const fileURL = URL.createObjectURL(file);
-                  pdfjs
-                    .getDocument(fileURL)
-                    .promise.then((pdf) => {
-                      getPdfText(pdf, slugify(file.name)).then((pdfData) => {
-                        console.log({ pdfData });
-                      });
-                      // Process the PDF file using pdf object
-                      // For example, you can get the number of pages using pdf.numPages
-                      resolve(file);
-                    })
-                    .catch(reject);
+                  resolve(file);
                 } else {
                   resolve(file);
                 }

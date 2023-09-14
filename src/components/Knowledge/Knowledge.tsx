@@ -1,5 +1,8 @@
 import React, { useContext } from 'react';
 import { Tab } from '../../state';
+import { pdfjs } from 'react-pdf';
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 import { VectorStoreContext } from '../../context/VectorStoreContext';
 import {
@@ -13,7 +16,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../db';
 import { toastifyError, toastifyInfo } from '../Toast';
 import { readFileAsText, slugify } from '../../utils/data-utils';
-import Dropzone from '../Dropzone/Dropzone';
+import Dropzone, { getPdfText } from '../Dropzone/Dropzone';
 interface KnowledgeProps {
   workspaceId: string;
 }
@@ -32,7 +35,6 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
       .toArray();
   }, [workspaceId]);
 
-  // @TODO: Move logic to Dropzone component
   const handleFileDrop = async (files: File[], name: string) => {
     if (!import.meta.env.DEV) return;
 
@@ -48,6 +50,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
               toastifyInfo(`📁 Processing ${file.name}`);
               const fileContent = await readFileAsText(file);
               const slugifiedFilename = slugify(file.name);
+
               const metadata = {
                 id: slugifiedFilename,
                 workspaceId,
@@ -78,22 +81,49 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
           break;
         case 'pdf': {
           try {
+            // some pdfs have prefaced pages with a cover page
+            // this is the offset for returning the correct page number as src
+            // @TODO: make this configurable as a knowledge setting
+            const pageStartOffset = 0;
             toastifyInfo(`📁 Processing ${file.name}`);
-            const fileContent = await readFileAsText(file);
+            const fileURL = URL.createObjectURL(file);
+            const pdfDocument = await pdfjs.getDocument(fileURL).promise;
+            const pdfData = await getPdfText(pdfDocument, slugify(file.name));
+
             const slugifiedFilename = slugify(file.name);
+
             if (vectorContext) {
-              console.log(fileContent);
-              // // need to figure out how to pass metadata to filter by
-              // const memoryVectors = await context.addText(fileContent);
-              // const id = db.memoryVectors.add({
-              //   id: slugifiedFilename,
-              //   workspaceId,
-              //   memoryVectors: memoryVectors || [],
-              // });
-              // toastifyInfo(`File uploaded successfully: ${file.name}`);
+              for (const page of pdfData[slugifiedFilename]) {
+                const metadata = {
+                  id: `${slugifiedFilename}-page-${page.page}`,
+                  workspaceId,
+                  pageNumber: page.page,
+                  offset: pageStartOffset,
+                  src: `/knowledge/pdf/${slugifiedFilename}-page-${page.page}`,
+                };
+
+                const memoryVectors = await vectorContext.addText(
+                  page.content,
+                  [metadata],
+                  `DOCUMENT NAME: ${file.name}\n\nPAGE NUMBER: ${
+                    page.page + pageStartOffset
+                  }\n\n---\n\n`,
+                );
+
+                const filteredMemoryVectors = memoryVectors?.filter(
+                  (item) => item.metadata.id === metadata.id,
+                );
+
+                await db.memoryVectors.add({
+                  id: metadata.id,
+                  workspaceId,
+                  memoryVectors: filteredMemoryVectors || [],
+                });
+              }
             } else {
               throw new Error('Context is null');
             }
+            toastifyInfo(`File uploaded successfully: ${file.name}`);
           } catch (error) {
             toastifyError(`Error processing file: ${file.name}`);
           }
