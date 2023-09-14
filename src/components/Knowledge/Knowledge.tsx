@@ -54,6 +54,11 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
               const metadata = {
                 id: slugifiedFilename,
                 workspaceId,
+                filetype: fileExtension,
+                file,
+                src: `/knowledge/${fileExtension}/${slugifiedFilename}`,
+                originalFilename: file.name,
+                uploadTimestamp: new Date().toISOString(),
               };
               if (vectorContext) {
                 const memoryVectors = await vectorContext.addText(
@@ -99,7 +104,12 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   workspaceId,
                   pageNumber: page.page,
                   offset: pageStartOffset,
+                  filetype: 'pdf',
+                  file,
                   src: `/knowledge/pdf/${slugifiedFilename}-page-${page.page}`,
+                  totalPages: pdfData[slugifiedFilename].length,
+                  originalFilename: file.name,
+                  uploadTimestamp: new Date().toISOString(),
                 };
 
                 const memoryVectors = await vectorContext.addText(
