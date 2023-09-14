@@ -408,7 +408,7 @@ export const createWorkspace = ({
             workspaceId: newId,
             createdAt: new Date().toString(),
             lastUpdated: new Date().toString(),
-            autoSave: false,
+            autoSave: true,
             filetype: 'markdown',
           },
         ],

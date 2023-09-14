@@ -14,7 +14,7 @@ const examples = [
       strategies for using them (like
         <a href=\\"https://css-tricks.com/what-are-design-tokens/\\">
         this one from css-tricks</a>).</p>"\n` +
-      'src: https://www.acai.so/knowledge/css-tricks\n' +
+      'SRC: https://www.acai.so/knowledge/css-tricks\n' +
       `"ACAI runs along-side your coded design system and stores all
       documentation in a JSON based database that's generated and stored in your
       design system's code repository.
@@ -26,7 +26,7 @@ const examples = [
       This gives you the ability to edit the content directly in the data file,
       interact with it via the API, and of course securely store it with your
       versioned, coded patterns.` +
-      'src: https://www.acai.so/docs/main-concepts\n',
+      'SRC: https://www.acai.so/docs/main-concepts\n',
     answer: `A design system helps users maintain a consistent development
 process by providing a centralized standardized set of design and development
 For additional resources checkout [CSS Tricks](https://www.acai.so/knowledge/css-tricks\n)

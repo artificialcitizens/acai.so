@@ -10,6 +10,26 @@ import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { AcaiMemoryVector, db } from '../../db';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useLocation } from 'react-router-dom';
+import { getToken } from '../utils/config';
+
+export type VectorStoreContextType = {
+  vectorstore: any; // Replace any with the actual type if available
+  addDocuments: (docs: any[]) => void; // Replace any with the actual type if available
+  addText: (
+    text: string,
+    metadata: Record<string, any>[],
+    chunkHeader: string,
+  ) => Promise<AcaiMemoryVector[] | undefined>;
+  filterAndCombineContent: (
+    data: Array<[Document, number]>,
+    threshold: number,
+  ) => string;
+  similaritySearchWithScore: (
+    query: string,
+    k?: number,
+    filter?: any,
+  ) => Promise<any>; // Replace any with the actual type if available
+};
 
 export const useMemoryVectorStore = (
   initialText: string,
@@ -34,6 +54,9 @@ export const useMemoryVectorStore = (
       chunkSize: chunkSize,
       chunkOverlap: chunkOverlap,
     }).then(async (res) => {
+      const openAIApiKey =
+        getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY;
+      if (!openAIApiKey) return;
       const vectorStore = await initializeMemoryVectorStore({ docs: res });
       const vectorSet = new Set(vectorStore.memoryVectors);
       memoryVectors?.forEach((mem) => {
@@ -61,12 +84,16 @@ export const useMemoryVectorStore = (
 
   const addText = async (
     text: string,
+    metadata: Record<string, any>[],
+    chunkHeader: string,
   ): Promise<AcaiMemoryVector[] | undefined> => {
     if (!vectorstore) return;
     const docs = await createDocumentsFromText({
       text,
       chunkSize,
       chunkOverlap,
+      chunkHeader,
+      metadata,
     });
     const memoryVectors = await addDocuments(docs);
     return memoryVectors;
@@ -82,7 +109,9 @@ export const useMemoryVectorStore = (
     );
 
     // Map through the filtered data and extract the pageContent
-    const pageContents = filteredData.map(([document]) => document.pageContent);
+    const pageContents = filteredData.map(
+      ([document]) => `${document.pageContent}\n SRC: ${document.metadata.src}`,
+    );
     // Combine the page contents into a single string
     const combinedContent = pageContents.join('<br/><hr/><br/>');
 

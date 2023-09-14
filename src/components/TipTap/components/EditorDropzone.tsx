@@ -1,32 +1,15 @@
 import React, { useState, useCallback, ReactNode } from 'react';
-import { slugify } from '../../utils/data-utils';
+import { slugify } from '../../../utils/data-utils';
+import PDFRenderer from './PdfRender';
 
 interface DropzoneProps {
-  children: ReactNode;
-  onFilesDrop: (files: File[], name: string) => void;
+  children?: ReactNode;
+  onFilesDrop?: (files: File[], name: string) => void;
 }
 
-export const getPdfText = async (
-  pdf: any,
-  filename: string,
-): Promise<{ [filename: string]: { page: number; content: string }[] }> => {
-  const numPages = pdf.numPages;
-  const pageTextPromises = Array.from({ length: numPages }, async (_, i) => {
-    const pageIndex = i + 1;
-    const page = await pdf.getPage(pageIndex);
-    const textContent = await page.getTextContent();
-    const textItems = textContent.items
-      .map((item: any) => ('str' in item ? item.str ?? '' : ''))
-      .join(' ');
-    return { page: pageIndex, content: textItems };
-  });
-
-  const pages = await Promise.all(pageTextPromises);
-  return { [filename]: pages };
-};
-
-const Dropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
+const EditorDropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
   const [highlight, setHighlight] = useState(false);
+  const [fileUrl, setFileUrl] = React.useState<string | null>(null);
 
   const handleDrop = useCallback(
     async (event: React.DragEvent<HTMLDivElement>) => {
@@ -40,7 +23,8 @@ const Dropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
             entry.file((file: File | PromiseLike<File>) => {
               if (file instanceof File) {
                 if (file.type === 'application/pdf') {
-                  resolve(file);
+                  const fileURL = URL.createObjectURL(file);
+                  setFileUrl(fileURL);
                 } else {
                   resolve(file);
                 }
@@ -93,13 +77,13 @@ const Dropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
         }
       }
 
-      if (droppedFiles.length > 0) {
-        const name = slugify(droppedFiles[0].name.split('.')[0]);
-        onFilesDrop(droppedFiles, name);
-      }
+      // if (droppedFiles.length > 0) {
+      //   const name = slugify(droppedFiles[0].name.split('.')[0]);
+      //   onFilesDrop(droppedFiles, name);
+      // }
       setHighlight(false);
     },
-    [onFilesDrop],
+    [],
   );
 
   const handleDragOver = useCallback(
@@ -116,14 +100,27 @@ const Dropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
 
   return (
     <div
-      className="flex flex-grow"
+      className="w-full h-full"
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
     >
-      {children}
+      {!fileUrl && (
+        <div
+          className={`w-full h-full flex flex-col justify-center items-center ${
+            highlight ? 'bg-dark-200' : 'bg-darker'
+          }`}
+        >
+          <div className="text-4xl text-acai-white">
+            <i className="fas fa-file-upload"></i>
+          </div>
+          <div className="text-acai-white">Drop a file to upload</div>
+        </div>
+      )}
+      {fileUrl && <PDFRenderer fileUrl={fileUrl} />}
+      {/* {children} */}
     </div>
   );
 };
 
-export default Dropzone;
+export default EditorDropzone;
