@@ -143,7 +143,8 @@ const EditorDropzone: React.FC<DropzoneProps> = ({
 
   return activeTab && !highlight ? (
     <div
-      className="w-full h-full"
+      className="w-full h-full flex-grow max-h-[calc(100vh-2rem)]"
+      id="editor-dropzone"
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -152,7 +153,8 @@ const EditorDropzone: React.FC<DropzoneProps> = ({
     </div>
   ) : (
     <div
-      className="w-full h-full"
+      className="w-full h-full flex-grow max-h-[calc(100vh-2rem)]"
+      id="editor-dropzone"
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}

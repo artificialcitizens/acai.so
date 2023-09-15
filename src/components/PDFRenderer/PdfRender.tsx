@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import Draggable from 'react-draggable';
 import { Document, Page, pdfjs } from 'react-pdf';
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
@@ -8,10 +9,18 @@ interface PDFRendererProps {
 }
 
 const PDFRenderer: React.FC<PDFRendererProps> = ({ fileUrl, startingPage }) => {
-  const [numPages, setNumPages] = React.useState(0);
-  const [pageNumber, setPageNumber] = React.useState(startingPage || 1);
-  const [scale, setScale] = React.useState(1);
+  const [numPages, setNumPages] = useState(0);
+  const [pageNumber, setPageNumber] = useState(startingPage || 1);
+  const [scale, setScale] = useState(1);
+  const [isDragging, setIsDragging] = useState(false);
 
+  const handleStart = () => {
+    setIsDragging(true);
+  };
+
+  const handleStop = () => {
+    setIsDragging(false);
+  };
   useEffect(() => {
     setPageNumber(startingPage || 1);
   }, [startingPage]);
@@ -31,6 +40,8 @@ const PDFRenderer: React.FC<PDFRendererProps> = ({ fileUrl, startingPage }) => {
     }
   };
 
+  const dragRef = useRef(null);
+
   return (
     <div className="flex relative flex-col h-full w-full">
       <Document
@@ -38,12 +49,19 @@ const PDFRenderer: React.FC<PDFRendererProps> = ({ fileUrl, startingPage }) => {
         onLoadSuccess={onDocumentLoadSuccess}
         className="flex-grow max-w-[calc(100vw-30rem)]"
       >
-        <Page
-          className="max-h-[calc(100vh-3rem)] max-w-[calc(100vw-30rem)] overflow-scroll justify-items-center flex flex-col m-auto items-center"
-          pageNumber={pageNumber}
-          renderTextLayer={false}
-          scale={scale}
-        />
+        <Draggable onStart={handleStart} onStop={handleStop}>
+          <div
+            ref={dragRef}
+            style={{ cursor: isDragging ? 'grab' : 'inherit' }}
+          >
+            <Page
+              className="max-h-[calc(100vh-3rem)] max-w-[calc(100vw-30rem)] justify-items-center flex flex-col m-auto items-center"
+              pageNumber={pageNumber}
+              renderTextLayer={false}
+              scale={scale}
+            />
+          </div>
+        </Draggable>
       </Document>
       <div className="w-full h-full relative">
         <div className="flex w-1/2 md:w-1/3 max-w-72 m-auto fixed justify-around z-100 bg-dark bg-opacity-75 shadow-lg p-2 rounded-2xl bottom-4 right-1/2">
