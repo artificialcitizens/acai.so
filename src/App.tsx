@@ -150,7 +150,7 @@ function App() {
                   )}
                 </div>
 
-                <div className="max-h-[calc(100vh-2rem)] overflow-scroll">
+                <div className="max-h-[calc(100vh-2rem)] flex flex-grow overflow-scroll">
                   <EditorDropzone
                     workspaceId={workspaceId}
                     activeTab={!!activeTab}
