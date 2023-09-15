@@ -15,6 +15,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/:workspaceId/:tabId" element={<App />} />
+          <Route path="knowledge/:workspaceId/:knowledgeId" element={<App />} />
           {/* update with proper 404 with links to docs */}
           <Route path="*" element={<App />} />
         </Routes>

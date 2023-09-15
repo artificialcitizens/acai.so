@@ -48,7 +48,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
           {
             try {
               toastifyInfo(`📁 Processing ${file.name}`);
-              const fileContent = await readFileAsText(file);
+              const fileContent = await readFileAsText(file, '');
               const slugifiedFilename = slugify(file.name);
 
               const metadata = {
@@ -56,7 +56,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                 workspaceId,
                 filetype: fileExtension,
                 file,
-                src: `/knowledge/${fileExtension}/${slugifiedFilename}`,
+                src: `/${workspaceId}/knowledge/${slugifiedFilename}`,
                 originalFilename: file.name,
                 uploadTimestamp: new Date().toISOString(),
               };
@@ -106,7 +106,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   offset: pageStartOffset,
                   filetype: 'pdf',
                   file,
-                  src: `/knowledge/pdf/${slugifiedFilename}/${page.page}`,
+                  src: `/${workspaceId}/knowledge/${slugifiedFilename}/${page.page}`,
                   totalPages: pdfData[slugifiedFilename].length,
                   originalFilename: file.name,
                   uploadTimestamp: new Date().toISOString(),
@@ -140,7 +140,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
           break;
         }
         default:
-          toastifyError(`Please upload a .txt or .md file`);
+          toastifyError(`Please upload a .pdf .txt or .md file`);
           break;
       }
     }

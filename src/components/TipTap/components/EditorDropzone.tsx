@@ -1,15 +1,32 @@
-import React, { useState, useCallback, ReactNode } from 'react';
-import { slugify } from '../../../utils/data-utils';
-import PDFRenderer from './PdfRender';
+import React, { useState, useCallback, ReactNode, useContext } from 'react';
+import { readFileAsText, slugify } from '../../../utils/data-utils';
+import PDFRenderer from '../../PDFRenderer/PdfRender';
+import { useNavigate } from 'react-router-dom';
+import { toastifyError } from '../../Toast';
+import { Tab, handleCreateTab } from '../../../state';
+import {
+  GlobalStateContext,
+  GlobalStateContextValue,
+} from '../../../context/GlobalStateContext';
 
 interface DropzoneProps {
   children?: ReactNode;
+  activeTab: boolean;
+  workspaceId: string;
   onFilesDrop?: (files: File[], name: string) => void;
 }
 
-const EditorDropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
+const EditorDropzone: React.FC<DropzoneProps> = ({
+  children,
+  onFilesDrop,
+  workspaceId,
+  activeTab,
+}) => {
   const [highlight, setHighlight] = useState(false);
   const [fileUrl, setFileUrl] = React.useState<string | null>(null);
+  const globalServices: GlobalStateContextValue =
+    useContext(GlobalStateContext);
+  const navigate = useNavigate();
 
   const handleDrop = useCallback(
     async (event: React.DragEvent<HTMLDivElement>) => {
@@ -22,11 +39,37 @@ const EditorDropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
           return new Promise<File>((resolve, reject) => {
             entry.file((file: File | PromiseLike<File>) => {
               if (file instanceof File) {
-                if (file.type === 'application/pdf') {
-                  const fileURL = URL.createObjectURL(file);
-                  setFileUrl(fileURL);
-                } else {
-                  resolve(file);
+                const fileExtension = file.name.split('.').pop();
+                switch (fileExtension) {
+                  case 'pdf': {
+                    const fileURL = URL.createObjectURL(file);
+                    navigate(`/${workspaceId}/temp/${slugify(file.name)}/`);
+                    setFileUrl(fileURL);
+                    resolve(file);
+                    break;
+                  }
+                  case 'txt':
+                  case 'md': {
+                    const title = file.name.split('.')[0];
+                    readFileAsText(file, fileExtension).then((content) => {
+                      handleCreateTab({ title, content }, workspaceId).then(
+                        (tab: Tab) => {
+                          globalServices.appStateService.send({
+                            type: 'ADD_TAB',
+                            tab,
+                          });
+                          setTimeout(() => {
+                            navigate(`/${workspaceId}/${tab.id}`);
+                          }, 250);
+                          resolve(file);
+                        },
+                      );
+                    });
+                    break;
+                  }
+                  default:
+                    toastifyError('Must be a .pdf, .txt, or .md file');
+                    break;
                 }
               }
             });
@@ -83,7 +126,7 @@ const EditorDropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
       // }
       setHighlight(false);
     },
-    [],
+    [navigate, workspaceId],
   );
 
   const handleDragOver = useCallback(
@@ -98,7 +141,16 @@ const EditorDropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
     setHighlight(false);
   }, []);
 
-  return (
+  return activeTab && !highlight ? (
+    <div
+      className="w-full h-full"
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+    >
+      {children}
+    </div>
+  ) : (
     <div
       className="w-full h-full"
       onDrop={handleDrop}
@@ -118,7 +170,6 @@ const EditorDropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
         </div>
       )}
       {fileUrl && <PDFRenderer fileUrl={fileUrl} />}
-      {/* {children} */}
     </div>
   );
 };

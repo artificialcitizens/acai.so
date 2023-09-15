@@ -150,11 +150,14 @@ function App() {
                   )}
                 </div>
 
-                {activeTab && <TipTap tab={activeTab} />}
-                {/* <div className="max-h-[calc(100vh-2rem)] overflow-scroll">
-                  <EditorDropzone></EditorDropzone>
-                </div> */}
-                {}
+                <div className="max-h-[calc(100vh-2rem)] overflow-scroll">
+                  <EditorDropzone
+                    workspaceId={workspaceId}
+                    activeTab={!!activeTab}
+                  >
+                    {activeTab && <TipTap tab={activeTab} />}
+                  </EditorDropzone>
+                </div>
               </div>
               <Ava
                 workspaceId={workspaceId}
