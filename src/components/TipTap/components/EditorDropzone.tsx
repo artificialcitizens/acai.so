@@ -126,7 +126,7 @@ const EditorDropzone: React.FC<DropzoneProps> = ({
       // }
       setHighlight(false);
     },
-    [navigate, workspaceId],
+    [globalServices.appStateService, navigate, workspaceId],
   );
 
   const handleDragOver = useCallback(
@@ -141,6 +141,24 @@ const EditorDropzone: React.FC<DropzoneProps> = ({
     setHighlight(false);
   }, []);
 
+  const handleCreateNewDocument = async () => {
+    const title = prompt('Enter a title for your new document');
+    if (!title) {
+      toastifyError('Must enter a title');
+      return;
+    }
+    handleCreateTab({ title, content: '' }, workspaceId).then((tab: Tab) => {
+      globalServices.appStateService.send({
+        type: 'ADD_TAB',
+        tab,
+      });
+      setTimeout(() => {
+        navigate(`/${workspaceId}/${tab.id}`);
+      }, 250);
+    });
+  };
+
+  // @TODO - clean up this spaghetti code and move it to an overall editor component
   return activeTab && !highlight ? (
     <div
       className="w-full h-full flex-grow max-h-[calc(100vh-2rem)]"
@@ -168,7 +186,23 @@ const EditorDropzone: React.FC<DropzoneProps> = ({
           <div className="text-4xl text-acai-white">
             <i className="fas fa-file-upload"></i>
           </div>
-          <div className="text-acai-white">Drop a file to upload</div>
+          <div className="text-acai-white">
+            Drop a file to upload{' '}
+            {!highlight && (
+              <>
+                <span className="">
+                  or
+                  <button
+                    className="link mx-1"
+                    onClick={handleCreateNewDocument}
+                  >
+                    create
+                  </button>
+                  a new document
+                </span>
+              </>
+            )}
+          </div>
         </div>
       )}
       {fileUrl && <PDFRenderer fileUrl={fileUrl} />}
