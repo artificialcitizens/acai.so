@@ -50,7 +50,8 @@ export const agentMode = [
 ];
 
 if (import.meta.env.DEV) {
-  agentMode.unshift('rag');
+  // maps to rag agent
+  agentMode.unshift('knowledge');
   agentMode.unshift('ava');
 }
 
@@ -151,7 +152,8 @@ export const useAva = (): {
           // abortController: response.abortController,
         };
       }
-      case 'rag': {
+      // maps to rag agent
+      case 'knowledge': {
         if (!vectorContext) {
           setError('Vector context not found');
           setLoading(false);
