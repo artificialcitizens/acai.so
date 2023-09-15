@@ -118,3 +118,23 @@ export const readFromLocalStorage = (key: string): any => {
   const rawData = localStorage.getItem(key);
   return rawData ? JSON.parse(rawData) : null;
 };
+
+export const getObjectSize = (
+  obj: object,
+  unit: 'KB' | 'MB' = 'KB',
+): number => {
+  const jsonString = JSON.stringify(obj);
+  const objectSizeInBytes = new Blob([jsonString]).size;
+
+  let objectSize: number;
+
+  if (unit === 'KB') {
+    objectSize = objectSizeInBytes / 1024;
+  } else if (unit === 'MB') {
+    objectSize = objectSizeInBytes / (1024 * 1024);
+  } else {
+    throw new Error('Invalid unit specified. Please use "KB" or "MB".');
+  }
+
+  return objectSize;
+};
