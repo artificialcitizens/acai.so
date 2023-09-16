@@ -9,7 +9,13 @@ export interface AcaiMemoryVector {
 export interface Knowledge {
   id: string;
   workspaceId: string;
+  file: File;
+  createdAt: string;
+  lastModified: string;
   memoryVectors: AcaiMemoryVector[];
+  summary?: string;
+  title?: string;
+  tags?: string[];
 }
 
 export class AcaiDexie extends Dexie {
@@ -20,7 +26,8 @@ export class AcaiDexie extends Dexie {
   constructor() {
     super('acaiDb');
     this.version(1).stores({
-      knowledge: '++id, workspaceId, memoryVectors',
+      knowledge:
+        '++id, workspaceId, file, createdAt, lastModified, memoryVectors, summary, title, tags',
     });
   }
 }
