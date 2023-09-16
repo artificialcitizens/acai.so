@@ -21,6 +21,10 @@ interface KnowledgeProps {
   workspaceId: string;
 }
 
+const removePageSuffix = (str: string) => {
+  return str.replace(/-page-\d+$/, '');
+};
+
 const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
   const { appStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
@@ -152,6 +156,55 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
     }
   };
 
+  const renderKnowledgeItems = () => {
+    if (!knowledgeItems) return;
+
+    const parsedIds = Array.from(
+      new Set(knowledgeItems.map((item) => removePageSuffix(item.id))),
+    );
+
+    return parsedIds.map((parsedId) => {
+      const item = knowledgeItems.find(
+        (item) => removePageSuffix(item.id) === parsedId,
+      );
+
+      if (item) {
+        return (
+          <li
+            key={item.id}
+            className="text-acai-white text-xs font-semibold mb-3 flex justify-between"
+          >
+            {/* convert example-txt  to example.txt */}
+            {parsedId.replace(/-(\w+)$/, '.$1')}
+            <button
+              className="p-0 px-1  rounded-full font-medium text-red-900"
+              onClick={async () => {
+                const confirmDelete = window.prompt(
+                  `Please type the name of the piece knowledge to confirm deletion: ${removePageSuffix(
+                    item.id,
+                  )}`,
+                );
+                if (confirmDelete !== removePageSuffix(item.id)) {
+                  alert('Name does not match. Deletion cancelled.');
+                  return;
+                }
+                const itemsToDelete = knowledgeItems.filter((item) =>
+                  item.id.startsWith(parsedId),
+                );
+                for (const item of itemsToDelete) {
+                  await db.knowledge.delete(item.id);
+                }
+              }}
+            >
+              x
+            </button>
+          </li>
+        );
+      }
+      return null;
+    });
+  };
+
   return (
     <div className="flex flex-col">
       <SBSearch
@@ -190,30 +243,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
         )}
         {knowledgeItems && knowledgeItems.length > 0 && (
           <ul className="bg-base rounded-lg p-3 max-h-[25vh] w-full overflow-scroll">
-            {knowledgeItems?.map((item) => (
-              <li
-                key={item.id}
-                className="text-acai-white text-xs font-semibold mb-3 flex justify-between"
-              >
-                {/* convert example-txt  to example.txt */}
-                {item.id.replace(/-(\w+)$/, '.$1')}
-                <button
-                  className="p-0 px-1  rounded-full font-medium text-red-900"
-                  onClick={async () => {
-                    const confirmDelete = window.prompt(
-                      `Please type the name of the piece knowledge to confirm deletion: ${item.id}`,
-                    );
-                    if (confirmDelete !== item.id) {
-                      alert('Name does not match. Deletion cancelled.');
-                      return;
-                    }
-                    await db.knowledge.delete(item.id);
-                  }}
-                >
-                  x
-                </button>
-              </li>
-            ))}
+            {renderKnowledgeItems()}
           </ul>
         )}
       </Dropzone>
