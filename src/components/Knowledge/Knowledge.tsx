@@ -69,11 +69,14 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                 const filteredMemoryVectors = memoryVectors?.filter(
                   (item) => item.metadata.id === slugifiedFilename,
                 );
-
+                // @TODO: Add options for generating summary on upload
                 const id = db.knowledge.add({
                   id: slugifiedFilename,
                   workspaceId,
                   memoryVectors: filteredMemoryVectors || [],
+                  file,
+                  createdAt: new Date().toISOString(),
+                  lastModified: new Date().toISOString(),
                 });
               } else {
                 throw new Error('Context is null');
@@ -128,6 +131,9 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   id: metadata.id,
                   workspaceId,
                   memoryVectors: filteredMemoryVectors || [],
+                  file,
+                  createdAt: new Date().toISOString(),
+                  lastModified: new Date().toISOString(),
                 });
               }
             } else {

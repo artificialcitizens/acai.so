@@ -2,17 +2,30 @@ import React, { useEffect, useRef, useState } from 'react';
 import Draggable from 'react-draggable';
 import { Document, Page, pdfjs } from 'react-pdf';
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-
+import { db } from '../../../db';
+import { useLiveQuery } from 'dexie-react-hooks';
 interface PDFRendererProps {
-  fileUrl: string;
-  startingPage?: number;
+  id: string;
+  startingPage: number;
 }
 
-const PDFRenderer: React.FC<PDFRendererProps> = ({ fileUrl, startingPage }) => {
+const PDFRenderer: React.FC<PDFRendererProps> = ({ id, startingPage }) => {
   const [numPages, setNumPages] = useState(0);
   const [pageNumber, setPageNumber] = useState(startingPage || 1);
   const [scale, setScale] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+
+  const knowledgeItems = useLiveQuery(async () => {
+    return await db.knowledge.where('id').startsWith(id).toArray();
+  }, [id]);
+
+  useEffect(() => {
+    if (!knowledgeItems) return;
+    // create a file url from knowledgeITem.file
+    const fileUrl = URL.createObjectURL(knowledgeItems[0].file);
+    setFileUrl(fileUrl);
+  }, [knowledgeItems]);
 
   const handleStart = () => {
     setIsDragging(true);

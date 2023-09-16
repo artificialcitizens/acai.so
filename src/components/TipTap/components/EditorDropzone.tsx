@@ -7,14 +7,6 @@ import {
   GlobalStateContextValue,
 } from '../../../context/GlobalStateContext';
 
-interface DropzoneProps {
-  children?: ReactNode;
-  activeTab: boolean;
-  workspaceId: string;
-  onFilesDrop: (file: File) => void;
-  onPDFDrop: (file: File) => void;
-}
-
 const DropFileSection: React.FC<{
   highlight: boolean;
   handleCreateNewDocument: () => void;
@@ -37,12 +29,20 @@ const DropFileSection: React.FC<{
   </div>
 );
 
+interface DropzoneProps {
+  children?: ReactNode;
+  workspaceId: string;
+  showHelperText: boolean;
+  onFilesDrop: (file: File) => void;
+  onPDFDrop: (file: File) => void;
+}
+
 const EditorDropzone: React.FC<DropzoneProps> = ({
   children,
   onFilesDrop,
   onPDFDrop,
   workspaceId,
-  activeTab,
+  showHelperText,
 }) => {
   const [highlight, setHighlight] = useState(false);
   const globalServices: GlobalStateContextValue =
@@ -75,6 +75,7 @@ const EditorDropzone: React.FC<DropzoneProps> = ({
                   }
                   default:
                     toastifyError('Must be a .pdf, .txt, or .md file');
+                    reject('Must be a .pdf, .txt, or .md file');
                     break;
                 }
               }
@@ -172,7 +173,7 @@ const EditorDropzone: React.FC<DropzoneProps> = ({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
     >
-      {!activeTab || highlight ? (
+      {showHelperText || highlight ? (
         <DropFileSection
           highlight={highlight}
           handleCreateNewDocument={handleCreateNewDocument}
