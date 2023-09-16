@@ -101,7 +101,7 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
           (item) => item.metadata.id === metadata.id,
         );
 
-        await db.memoryVectors.add({
+        await db.knowledge.add({
           id: metadata.id,
           workspaceId,
           memoryVectors: filteredMemoryVectors || [],

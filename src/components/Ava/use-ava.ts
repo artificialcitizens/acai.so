@@ -80,7 +80,7 @@ export const useAva = (): {
   // @TODO - Seems to need to be here to get the context to load, why though?
   const knowledgeItems = useLiveQuery(async () => {
     if (!vectorContext) return;
-    return await db.memoryVectors
+    return await db.knowledge
       .where('workspaceId')
       .equals(workspaceId)
       .toArray();

@@ -15,12 +15,12 @@ export interface Knowledge {
 export class AcaiDexie extends Dexie {
   // 'embeddings' is added by dexie when declaring the stores()
   // We just tell the typing system this is the case
-  memoryVectors!: Table<Knowledge>;
+  knowledge!: Table<Knowledge>;
 
   constructor() {
     super('acaiDb');
     this.version(1).stores({
-      memoryVectors: '++id, workspaceId, memoryVectors',
+      knowledge: '++id, workspaceId, memoryVectors',
     });
   }
 }

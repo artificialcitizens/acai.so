@@ -50,7 +50,7 @@ export const useMemoryVectorStore = (
 
   const memoryVectors = useLiveQuery(() => {
     setVectorStore(null);
-    return db.memoryVectors.where('workspaceId').equals(workspaceId).toArray();
+    return db.knowledge.where('workspaceId').equals(workspaceId).toArray();
   }, [workspaceId]);
 
   useEffect(() => {

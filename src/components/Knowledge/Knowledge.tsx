@@ -29,7 +29,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
 
   const knowledgeItems = useLiveQuery(async () => {
     if (!vectorContext) return;
-    return await db.memoryVectors
+    return await db.knowledge
       .where('workspaceId')
       .equals(workspaceId)
       .toArray();
@@ -70,7 +70,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   (item) => item.metadata.id === slugifiedFilename,
                 );
 
-                const id = db.memoryVectors.add({
+                const id = db.knowledge.add({
                   id: slugifiedFilename,
                   workspaceId,
                   memoryVectors: filteredMemoryVectors || [],
@@ -124,7 +124,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   (item) => item.metadata.id === metadata.id,
                 );
 
-                await db.memoryVectors.add({
+                await db.knowledge.add({
                   id: metadata.id,
                   workspaceId,
                   memoryVectors: filteredMemoryVectors || [],
@@ -201,7 +201,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                       alert('Name does not match. Deletion cancelled.');
                       return;
                     }
-                    await db.memoryVectors.delete(item.id);
+                    await db.knowledge.delete(item.id);
                   }}
                 >
                   x
