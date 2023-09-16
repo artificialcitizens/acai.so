@@ -91,10 +91,9 @@ export const SideNav: React.FC = () => {
       type: 'CREATE_AGENT',
       workspaceId: id,
     });
-    navigate(`/${id}/${tabId}`);
+    navigate(`/${id}/documents/${tabId}`);
   };
 
-  // Function to create a new tab
   const createTab = async (workspaceId: string) => {
     const title = prompt('Enter a name for your new tab');
     if (!title) return;
@@ -104,15 +103,17 @@ export const SideNav: React.FC = () => {
       tab,
     });
     setTimeout(() => {
-      navigate(`/${workspaceId}/${tab.id}`);
+      navigate(`/${workspaceId}/documents/${tab.id}`);
     }, 250);
     globalServices.uiStateService.send({
       type: 'TOGGLE_SIDE_NAV',
       workspaceId,
     });
   };
+
   const workspaces = globalServices.appStateService.getSnapshot().context
     .workspaces as Record<string, Workspace>;
+
   return (
     <nav
       className="fixed flex flex-col left-0 top-0 z-[1035] max-h-screen w-60 -translate-x-full overflow-hidden bg-dark shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] data-[te-sidenav-hidden='false']:translate-x-0 dark:bg-dark"
@@ -146,7 +147,7 @@ export const SideNav: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <Link
                           className="w-full flex h-6 cursor-pointer items-center leading-4 text-ellipsis rounded-[5px] py-4 text-[0.78rem]  text-acai-white outline-none transition duration-300 ease-linear  hover:outline-none  hover:underline"
-                          to={`/${workspace.id}/${tab.id}`}
+                          to={`/${workspace.id}/documents/${tab.id}`}
                           data-te-sidenav-link-ref
                           onClick={() => {
                             globalServices.uiStateService.send({

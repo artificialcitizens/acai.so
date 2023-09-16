@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import { useInterpret } from '@xstate/react';
 import TipTap from '../TipTap/TipTap';
@@ -6,13 +6,19 @@ import 'react-tabs/style/react-tabs.css';
 import './tabs.css';
 import { appStateMachine } from '../../state/app.xstate';
 import { v4 as uuidv4 } from 'uuid';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 const TabManager: React.FC = () => {
   const service = useInterpret(appStateMachine);
   const navigate = useNavigate();
   const location = useLocation();
-  const activeWorkspaceId = location.pathname.split('/')[1];
+  const { workspaceId: rawWorkspaceId } = useParams<{
+    workspaceId: string;
+    domain: string;
+    id: string;
+  }>();
+
+  const activeWorkspaceId = rawWorkspaceId || 'docs';
   const activeTabId = location.pathname.split('/')[2];
 
   const handleCreateTab = () => {
@@ -26,7 +32,7 @@ const TabManager: React.FC = () => {
     service.send({ type: 'ADD_TAB', tab: newTab });
 
     // Update the URL to the new tab
-    navigate(`/${activeWorkspaceId}/${newTab.id}`);
+    navigate(`/${activeWorkspaceId}/documents/${newTab.id}`);
   };
 
   const workspace = service.getSnapshot().context.workspaces[activeWorkspaceId];

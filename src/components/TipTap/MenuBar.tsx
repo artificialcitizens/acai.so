@@ -7,7 +7,7 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
 
@@ -24,7 +24,13 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
   const [systemNoteState, setSystemNoteState] = useState('');
   const [loading, setLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const workspaceId = location.pathname.split('/')[1];
+  const { workspaceId: rawWorkspaceId } = useParams<{
+    workspaceId: string;
+    domain: string;
+    id: string;
+  }>();
+
+  const workspaceId = rawWorkspaceId || 'docs';
   const tabId = location.pathname.split('/')[2];
   const [state, send] = useActor(appStateService);
   const navigate = useNavigate();

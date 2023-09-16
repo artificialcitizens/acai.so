@@ -2,8 +2,6 @@ import React, { useContext } from 'react';
 import { Tab } from '../../state';
 import { pdfjs } from 'react-pdf';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
-
 import { VectorStoreContext } from '../../context/VectorStoreContext';
 import {
   GlobalStateContext,
@@ -16,7 +14,9 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../db';
 import { toastifyError, toastifyInfo } from '../Toast';
 import { readFileAsText, slugify } from '../../utils/data-utils';
-import Dropzone, { getPdfText } from '../Dropzone/Dropzone';
+import Dropzone from '../Dropzone/Dropzone';
+import { getPdfText } from '../../utils/pdf-utils';
+
 interface KnowledgeProps {
   workspaceId: string;
 }
@@ -166,7 +166,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
             systemNote: '',
           };
           appStateService.send({ type: 'ADD_TAB', tab: newTab });
-          navigate(`/${workspaceId}/${newTab.id}`);
+          navigate(`/${workspaceId}/documents/${newTab.id}`);
         }}
       />
       <Dropzone onFilesDrop={handleFileDrop}>

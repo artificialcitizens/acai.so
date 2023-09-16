@@ -16,7 +16,7 @@ import {
   GlobalStateContextValue,
   GlobalStateContext,
 } from '../../context/GlobalStateContext';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { ChatHistory } from '../../state';
 import Dropdown from '../DropDown';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
@@ -60,7 +60,13 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     useContext(GlobalStateContext);
   const [state, send] = useActor(agentStateService);
   const location = useLocation();
-  const workspaceId = location.pathname.split('/')[1];
+  const { workspaceId: rawWorkspaceId } = useParams<{
+    workspaceId: string;
+    domain: string;
+    id: string;
+  }>();
+
+  const workspaceId = rawWorkspaceId || 'docs';
   const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
   const audioRef = React.useRef<HTMLAudioElement>(null);
   const srcRef = React.useRef<MediaElementAudioSourceNode | null>(null);
@@ -368,6 +374,17 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 };
 
 export default VoiceRecognition;
+
+{
+  /* 
+                <Whisper
+                onRecordingComplete={(blob) => console.log(blob)}
+                onTranscriptionComplete={async (t) => {
+                  console.log('Whisper Server Response', t);
+                }}
+              />
+             */
+}
 
 // import useElementPosition from '../../hooks/use-element-position';
 // import { useHighlightedText } from '../../hooks/use-highlighted-text';

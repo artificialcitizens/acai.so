@@ -6,6 +6,9 @@ import './index.css';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { GlobalStateProvider } from './context/GlobalStateContext';
 import LandingPage from './components/LandingPage/LandingPage';
+import { pdfjs } from 'react-pdf';
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
@@ -14,8 +17,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
       <Router>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/:workspaceId/:tabId" element={<App />} />
-          <Route path="knowledge/:workspaceId/:knowledgeId" element={<App />} />
+          <Route path="/:workspaceId/:domain/:id" element={<App />} />
           {/* update with proper 404 with links to docs */}
           <Route path="*" element={<App />} />
         </Routes>

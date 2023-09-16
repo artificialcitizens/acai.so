@@ -6,7 +6,7 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { queryChat } from '../../lib/ac-langchain/agents/chat-model';
 import {
   createAvaChatPrompt,
@@ -69,6 +69,13 @@ export const useAva = (): {
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const vectorContext = useContext(VectorStoreContext);
+  const { workspaceId: rawWorkspaceId } = useParams<{
+    workspaceId: string;
+    domain: string;
+    id: string;
+  }>();
+
+  const workspaceId = rawWorkspaceId || 'docs';
 
   // @TODO - Seems to need to be here to get the context to load, why though?
   const knowledgeItems = useLiveQuery(async () => {
@@ -79,8 +86,6 @@ export const useAva = (): {
       .toArray();
   });
 
-  const location = useLocation();
-  const workspaceId = location.pathname.split('/')[1];
   const navigate = useNavigate();
   const { appStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
@@ -209,7 +214,7 @@ export const useAva = (): {
             systemNote: '',
           };
           appStateService.send({ type: 'ADD_TAB', tab: newTab });
-          navigate(`/${workspaceId}/${newTab.id}`); // setAbortController(response.abortController);
+          navigate(`/${workspaceId}/documents/${newTab.id}`); // setAbortController(response.abortController);
         }
 
         return {
@@ -240,7 +245,7 @@ export const useAva = (): {
                 tab,
               });
               setTimeout(() => {
-                navigate(`/${workspaceId}/${tab.id}`);
+                navigate(`/${workspaceId}/documents/${tab.id}`);
               }, 250);
             },
             handleAgentAction: (action) => {

@@ -6,7 +6,7 @@ export interface AcaiMemoryVector {
   embedding: number[];
   metadata: Record<string, any>;
 }
-export interface MemoryVectors {
+export interface Knowledge {
   id: string;
   workspaceId: string;
   memoryVectors: AcaiMemoryVector[];
@@ -15,7 +15,7 @@ export interface MemoryVectors {
 export class AcaiDexie extends Dexie {
   // 'embeddings' is added by dexie when declaring the stores()
   // We just tell the typing system this is the case
-  memoryVectors!: Table<MemoryVectors>;
+  memoryVectors!: Table<Knowledge>;
 
   constructor() {
     super('acaiDb');

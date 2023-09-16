@@ -3,7 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import { toastifyAgentLog, toastifyError, toastifyInfo } from '../Toast';
 import { handleCreateTab } from '../../state';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -22,8 +22,13 @@ export const SocketManager: React.FC = () => {
   const [url, setUrl] = useState(storedUrl);
   const [password, setPassword] = useState(storedPassword);
   const [socket, setSocket] = useState<Socket | null>(null);
-  const location = useLocation();
-  const workspaceId = location.pathname.split('/')[1];
+  const { workspaceId: rawWorkspaceId } = useParams<{
+    workspaceId: string;
+    domain: string;
+    id: string;
+  }>();
+
+  const workspaceId = rawWorkspaceId || 'docs';
   const navigate = useNavigate();
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
@@ -86,7 +91,7 @@ export const SocketManager: React.FC = () => {
         tab,
       });
       setTimeout(() => {
-        navigate(`/${workspaceId}/${tab.id}`);
+        navigate(`/${workspaceId}/documents/${tab.id}`);
       }, 250);
     };
     socket.on('connect', handleConnectCb);

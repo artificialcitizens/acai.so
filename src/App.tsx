@@ -8,34 +8,32 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from './context/GlobalStateContext';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import ToastManager from './components/Toast';
-import TipTap from './components/TipTap/TipTap';
-import { Tab, createWorkspace } from './state';
+import { createWorkspace } from './state';
 import { VectorStoreContext } from './context/VectorStoreContext';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
 import AudioWaveform from './components/AudioWave/AudioWave';
 import { Editor } from '@tiptap/react';
 import { EditorContext } from './context/EditorContext';
 import { createDocs } from './components/TipTap/utils/docs';
-import EditorDropzone from './components/TipTap/components/EditorDropzone';
-// import useTypeTag from './hooks/ac-langchain/use-type-tag';
-// const [userLocation, setUserLocation] = useState<string>('Portland, OR');
+import MainView from './components/MainView/MainView';
 
-function App() {
+const App = () => {
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
-  const location = useLocation();
+  const { workspaceId, domain, id } = useParams<{
+    workspaceId: string;
+    domain: 'knowledge' | 'documents' | undefined;
+    id: string;
+  }>();
   const navigate = useNavigate();
-  // if there is no workspace id in the url, redirect to welcome page
-  const workspaceId = location.pathname.split('/')[1];
   const workspace =
     globalServices.appStateService.getSnapshot().context.workspaces[
-      workspaceId
+      workspaceId || 'docs'
     ];
-  const activeTabId = location.pathname.split('/')[2];
-  if (!workspace || (workspaceId === 'docs' && !activeTabId))
-    navigate('/docs/introduction');
+  if (!workspace || !id) navigate('/docs/documents/introduction');
+
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined,
   );
@@ -83,9 +81,6 @@ function App() {
     }
   };
 
-  const activeTab: Tab =
-    workspace &&
-    workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId);
   return (
     globalServices.appStateService && (
       <VectorStoreContext.Provider
@@ -99,85 +94,37 @@ function App() {
       >
         <EditorContext.Provider value={{ editor, setEditor }}>
           <SideNav></SideNav>
-          {audioContext && (
-            <AudioWaveform audioContext={audioContext} isOn={listening} />
-          )}
           <FloatingButton
             handleClick={(e) => {
               e.stopPropagation();
               toggleSideNav();
             }}
           />
+          {audioContext && (
+            <AudioWaveform audioContext={audioContext} isOn={listening} />
+          )}
           <div
             className="w-screen h-screen flex flex-col sm:flex-row flex-wrap sm:flex-nowrap flex-grow p-0"
             onClick={handleWindowClick}
           >
             <ToastManager />
             <main className="w-full flex flex-grow ">
-              <div className="w-full flex flex-col h-screen">
-                <div className="ml-16 flex items-center group">
-                  {workspace && (
-                    <h1 className="m-2 text-lg">{workspace.name}</h1>
-                  )}
-                  {workspaceId !== 'docs' && (
-                    <button
-                      className="p-0 px-1  rounded-full font-medium text-red-900 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-4"
-                      onClick={async () => {
-                        const confirmDelete = window.prompt(
-                          `Please type the name of the workspace to confirm deletion: ${workspace?.name}`,
-                        );
-                        if (confirmDelete !== workspace?.name) {
-                          alert(
-                            'Workspace name does not match. Deletion cancelled.',
-                          );
-                          return;
-                        }
-                        globalServices.appStateService.send({
-                          type: 'DELETE_WORKSPACE',
-                          id: workspace?.id,
-                        });
-                        globalServices.agentStateService.send({
-                          type: 'DELETE_AGENT',
-                          workspaceId: workspace?.id,
-                        });
-                        setTimeout(() => {
-                          navigate('/');
-                        }, 250);
-                      }}
-                    >
-                      x
-                    </button>
-                  )}
-                </div>
-
-                <div className="max-h-[calc(100vh-2rem)] flex flex-grow overflow-scroll">
-                  <EditorDropzone
+              {workspaceId && (
+                <>
+                  <MainView domain={domain} />
+                  <Ava
                     workspaceId={workspaceId}
-                    activeTab={!!activeTab}
-                  >
-                    {activeTab && <TipTap tab={activeTab} />}
-                  </EditorDropzone>
-                </div>
-              </div>
-              <Ava
-                workspaceId={workspaceId}
-                onVoiceActivation={setListening}
-                audioContext={audioContext}
-              />
-              {/* 
-                <Whisper
-                onRecordingComplete={(blob) => console.log(blob)}
-                onTranscriptionComplete={async (t) => {
-                  console.log('Whisper Server Response', t);
-                }}
-              />
-             */}
+                    onVoiceActivation={setListening}
+                    audioContext={audioContext}
+                  />
+                </>
+              )}
             </main>
           </div>{' '}
         </EditorContext.Provider>
       </VectorStoreContext.Provider>
     )
   );
-}
+};
 
 export default App;

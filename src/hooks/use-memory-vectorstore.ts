@@ -9,7 +9,7 @@ import { Document } from 'langchain/document';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { AcaiMemoryVector, db } from '../../db';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { getToken } from '../utils/config';
 
 export type VectorStoreContextType = {
@@ -39,9 +39,14 @@ export const useMemoryVectorStore = (
   const [vectorstore, setVectorStore] = useState<MemoryVectorStore | null>(
     null,
   );
-  const location = useLocation();
 
-  const workspaceId = location.pathname.split('/')[1];
+  const { workspaceId: rawWorkspaceId } = useParams<{
+    workspaceId: string;
+    domain: string;
+    id: string;
+  }>();
+
+  const workspaceId = rawWorkspaceId || 'docs';
 
   const memoryVectors = useLiveQuery(() => {
     setVectorStore(null);
