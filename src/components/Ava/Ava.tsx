@@ -16,7 +16,7 @@ import ChatModelDropdown from '../ChatSettings';
 import { SocketManager } from '../SocketManager';
 import UserProfile from '../UserProfile/UserProfile';
 import { toastifyError } from '../Toast';
-import Knowledge from '../Knowledge/Knowledge';
+import KnowledgeUpload from '../Knowledge/Knowledge';
 
 interface AvaProps {
   workspaceId: string;
@@ -74,7 +74,7 @@ export const Ava: React.FC<AvaProps> = ({
       </ExpansionPanel>
       {import.meta.env.DEV && (
         <ExpansionPanel title="Knowledge">
-          <Knowledge workspaceId={workspaceId} />
+          <KnowledgeUpload workspaceId={workspaceId} />
         </ExpansionPanel>
       )}
       {import.meta.env.DEV && (

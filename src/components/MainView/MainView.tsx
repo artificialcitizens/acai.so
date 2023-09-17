@@ -47,11 +47,11 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     setFileUrl(fileUrl);
   }, [knowledgeItems]);
 
-  const { page: pageNumber, fileType } = useParams<{
-    fileType: string;
-    page: string;
-  }>();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
 
+  const page = queryParams.get('page');
+  const fileType = queryParams.get('fileType');
   const workspace =
     globalServices.appStateService.getSnapshot().context.workspaces[
       workspaceId || 'docs'
@@ -176,7 +176,7 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
           {domain === 'documents' && activeTab && <TipTap tab={activeTab} />}
           {/* clean up this chain */}
           {domain === 'knowledge' && fileUrl && fileType === 'pdf' && (
-            <PDFRenderer startingPage={Number(pageNumber)} fileUrl={fileUrl} />
+            <PDFRenderer startingPage={Number(page)} fileUrl={fileUrl} />
           )}
         </EditorDropzone>
       </div>

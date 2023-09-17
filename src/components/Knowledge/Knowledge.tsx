@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Tab } from '../../state';
+import { Tab, handleCreateTab } from '../../state';
 import { pdfjs } from 'react-pdf';
 
 import { VectorStoreContext } from '../../context/VectorStoreContext';
@@ -11,7 +11,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import SBSearch from '../Search';
 // import StorageMeter from '../StorageMeter/StorageMeter';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../../db';
+import { Knowledge, db } from '../../../db';
 import { toastifyError, toastifyInfo } from '../Toast';
 import { readFileAsText, slugify } from '../../utils/data-utils';
 import Dropzone from '../Dropzone/Dropzone';
@@ -25,7 +25,7 @@ const removePageSuffix = (str: string) => {
   return str.replace(/-page-\d+$/, '');
 };
 
-const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
+const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
   const { appStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const vectorContext = useContext(VectorStoreContext);
@@ -159,6 +159,26 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
     }
   };
 
+  const handleKnowledgeClick = async (item: Knowledge, parsedId: string) => {
+    if (item.fileType === 'pdf') {
+      navigate(
+        `/${workspaceId}/knowledge/${slugify(parsedId)}?fileType=pdf&page=1`,
+      );
+    } else {
+      const tab = await handleCreateTab(
+        { title: item.id, content: item.fullText },
+        workspaceId,
+        fileType,
+        false,
+      );
+      appStateService.send({
+        type: 'ADD_TAB',
+        tab,
+      });
+      navigate(`/${workspaceId}/documents/${tab.id}`);
+    }
+  };
+
   const renderKnowledgeItems = () => {
     if (!knowledgeItems) return;
 
@@ -182,14 +202,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
             {/* convert example-txt  to example.txt */}
             <button
               className="p-0 px-1 rounded-full font-medium text-acai-white hover:underline disabled:hover:no-underline"
-              disabled={item.file.type !== 'application/pdf'}
-              onClick={() => {
-                navigate(
-                  `/${workspaceId}/knowledge/${slugify(
-                    parsedId,
-                  )}?fileType=${fileType}&page=1`,
-                );
-              }}
+              onClick={() => handleKnowledgeClick(item, parsedId)}
             >
               {parsedId.replace(/-(\w+)$/, '.$1')}
             </button>
@@ -269,7 +282,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
   );
 };
 
-export default Knowledge;
+export default KnowledgeUpload;
 
 // const handleFileDrop = async (files: File[], name: string) => {
 //   const conversations: { [key: string]: any } = {};
