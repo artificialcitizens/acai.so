@@ -42,6 +42,8 @@ type Message = {
 
 export const agentMode = [
   'chat',
+  // maps to rag agent
+  'knowledge',
   'custom',
   // 'rag',
   // 'create',
@@ -50,8 +52,6 @@ export const agentMode = [
 ];
 
 if (import.meta.env.DEV) {
-  // maps to rag agent
-  agentMode.unshift('knowledge');
   agentMode.unshift('ava');
 }
 
