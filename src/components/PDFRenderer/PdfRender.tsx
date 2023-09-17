@@ -1,31 +1,26 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Draggable from 'react-draggable';
 import { Document, Page, pdfjs } from 'react-pdf';
+import { useParams } from 'react-router-dom';
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-import { db } from '../../../db';
-import { useLiveQuery } from 'dexie-react-hooks';
+
 interface PDFRendererProps {
-  id: string;
   startingPage: number;
+  fileUrl: string;
+  onUpload?: (file: File) => void;
 }
 
-const PDFRenderer: React.FC<PDFRendererProps> = ({ id, startingPage }) => {
+const PDFRenderer: React.FC<PDFRendererProps> = ({ startingPage, fileUrl }) => {
   const [numPages, setNumPages] = useState(0);
   const [pageNumber, setPageNumber] = useState(startingPage || 1);
   const [scale, setScale] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
-
-  const knowledgeItems = useLiveQuery(async () => {
-    return await db.knowledge.where('id').startsWith(id).toArray();
-  }, [id]);
+  const { page } = useParams<{ page: string }>();
 
   useEffect(() => {
-    if (!knowledgeItems) return;
-    // create a file url from knowledgeITem.file
-    const fileUrl = URL.createObjectURL(knowledgeItems[0].file);
-    setFileUrl(fileUrl);
-  }, [knowledgeItems]);
+    if (!page) return;
+    setPageNumber(Number(page));
+  }, [page]);
 
   const handleStart = () => {
     setIsDragging(true);

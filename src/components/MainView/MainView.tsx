@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import EditorDropzone from '../TipTap/components/EditorDropzone';
 import { Tab, handleCreateTab } from '../../state';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -14,6 +14,7 @@ import {
 import { readFileAsText, slugify } from '../../utils/data-utils';
 import { getPdfText } from '../../utils/pdf-utils';
 import { VectorStoreContext } from '../../context/VectorStoreContext';
+import { useLiveQuery } from 'dexie-react-hooks';
 
 interface MainViewProps {
   domain: 'knowledge' | 'documents' | undefined;
@@ -21,12 +22,8 @@ interface MainViewProps {
 
 const MainView: React.FC<MainViewProps> = ({ domain }) => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
   const vectorContext = useContext(VectorStoreContext);
-  const [fileUrl, setFileUrl] = React.useState<string | null>(null);
-
-  const fileType = queryParams.get('fileType');
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
 
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
@@ -34,6 +31,25 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
   const { workspaceId, id: activeTabId } = useParams<{
     workspaceId: string;
     id: string;
+  }>();
+
+  const knowledgeItems = useLiveQuery(async () => {
+    return await db.knowledge
+      .where('id')
+      .startsWith(activeTabId || '')
+      .toArray();
+  }, [activeTabId]);
+
+  useEffect(() => {
+    if (!knowledgeItems || !knowledgeItems[0]?.file) return;
+    // create a file url from knowledgeITem.file
+    const fileUrl = URL.createObjectURL(knowledgeItems[0].file);
+    setFileUrl(fileUrl);
+  }, [knowledgeItems]);
+
+  const { page: pageNumber, fileType } = useParams<{
+    fileType: string;
+    page: string;
   }>();
 
   const workspace =
@@ -100,32 +116,32 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
           workspaceId,
           pageNumber: page.page,
           offset: pageStartOffset,
-          filetype: 'pdf',
-          file,
-          src: `/${workspaceId}/knowledge/${slugifiedFilename}/${page.page}`,
+          src: `/${workspaceId}/knowledge/${slugifiedFilename}?fileType=pdf&page=1`,
           totalPages: pdfData[slugifiedFilename].length,
           originalFilename: file.name,
         };
 
-        // const memoryVectors = await vectorContext.addText(
-        //   page.content,
-        //   [metadata],
-        //   `DOCUMENT NAME: ${file.name}\n\nPAGE NUMBER: ${
-        //     page.page + pageStartOffset
-        //   }\n\n---\n\n`,
-        // );
+        const memoryVectors = await vectorContext.addText(
+          page.content,
+          [metadata],
+          `DOCUMENT NAME: ${file.name}\n\nPAGE NUMBER: ${
+            page.page + pageStartOffset
+          }\n\n---\n\n`,
+        );
 
-        // const filteredMemoryVectors = memoryVectors?.filter(
-        //   (item) => item.metadata.id === metadata.id,
-        // );
+        const filteredMemoryVectors = memoryVectors?.filter(
+          (item) => item.metadata.id === metadata.id,
+        );
 
         await db.knowledge.add({
           id: metadata.id,
           workspaceId,
           file,
+          fullText: page.content,
           createdAt: new Date().toISOString(),
           lastModified: new Date().toISOString(),
-          memoryVectors: [],
+          fileType: 'pdf',
+          memoryVectors: filteredMemoryVectors || [],
         });
       }
       navigate(
@@ -135,7 +151,6 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     }
   };
 
-  console.log(domain, fileUrl, activeTabId);
   return !workspaceId ? (
     <p>Loading</p>
   ) : (
@@ -155,12 +170,13 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
         <EditorDropzone
           workspaceId={workspaceId}
           onPDFDrop={handlePdfDrop}
-          showHelperText={!activeTabId && !fileUrl}
+          showHelperText={!activeTab && !fileUrl}
           onFilesDrop={handleFilesDrop}
         >
           {domain === 'documents' && activeTab && <TipTap tab={activeTab} />}
-          {domain === 'knowledge' && activeTabId && (
-            <PDFRenderer id={activeTabId} startingPage={1} />
+          {/* clean up this chain */}
+          {domain === 'knowledge' && fileUrl && fileType === 'pdf' && (
+            <PDFRenderer startingPage={Number(pageNumber)} fileUrl={fileUrl} />
           )}
         </EditorDropzone>
       </div>

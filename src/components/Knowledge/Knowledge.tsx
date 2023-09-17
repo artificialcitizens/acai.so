@@ -7,7 +7,7 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import SBSearch from '../Search';
 // import StorageMeter from '../StorageMeter/StorageMeter';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -30,6 +30,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
     useContext(GlobalStateContext);
   const vectorContext = useContext(VectorStoreContext);
   const navigate = useNavigate();
+  const { fileType } = useParams<{ fileType: string }>();
 
   const knowledgeItems = useLiveQuery(async () => {
     if (!vectorContext) return;
@@ -79,6 +80,8 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   workspaceId,
                   memoryVectors: filteredMemoryVectors || [],
                   file,
+                  fileType: fileExtension,
+                  fullText: fileContent,
                   createdAt: new Date().toISOString(),
                   lastModified: new Date().toISOString(),
                 });
@@ -111,12 +114,10 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   workspaceId,
                   pageNumber: page.page,
                   offset: pageStartOffset,
-                  filetype: 'pdf',
                   file,
-                  src: `/${workspaceId}/knowledge/${slugifiedFilename}/${page.page}`,
+                  src: `/${workspaceId}/knowledge/${slugifiedFilename}?fileType=pdf&page=1`,
                   totalPages: pdfData[slugifiedFilename].length,
                   originalFilename: file.name,
-                  uploadTimestamp: new Date().toISOString(),
                 };
 
                 const memoryVectors = await vectorContext.addText(
@@ -136,6 +137,8 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   workspaceId,
                   memoryVectors: filteredMemoryVectors || [],
                   file,
+                  fullText: page.content,
+                  fileType: 'pdf',
                   createdAt: new Date().toISOString(),
                   lastModified: new Date().toISOString(),
                 });
@@ -165,7 +168,9 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
 
     return parsedIds.map((parsedId) => {
       const item = knowledgeItems.find(
-        (item) => removePageSuffix(item.id) === parsedId,
+        (item) =>
+          removePageSuffix(item.id) === parsedId &&
+          item.memoryVectors.length > 0,
       );
 
       if (item) {
@@ -175,7 +180,19 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
             className="text-acai-white text-xs font-semibold mb-3 flex justify-between"
           >
             {/* convert example-txt  to example.txt */}
-            {parsedId.replace(/-(\w+)$/, '.$1')}
+            <button
+              className="p-0 px-1 rounded-full font-medium text-acai-white hover:underline disabled:hover:no-underline"
+              disabled={item.file.type !== 'application/pdf'}
+              onClick={() => {
+                navigate(
+                  `/${workspaceId}/knowledge/${slugify(
+                    parsedId,
+                  )}?fileType=${fileType}&page=1`,
+                );
+              }}
+            >
+              {parsedId.replace(/-(\w+)$/, '.$1')}
+            </button>
             <button
               className="p-0 px-1  rounded-full font-medium text-red-900"
               onClick={async () => {
@@ -221,7 +238,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
             autoSave: false,
             createdAt: new Date().toString(),
             lastUpdated: new Date().toString(),
-            filetype: 'markdown',
+            filetype: 'md',
             systemNote: '',
           };
           appStateService.send({ type: 'ADD_TAB', tab: newTab });
