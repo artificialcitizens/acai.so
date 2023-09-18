@@ -3,7 +3,6 @@ import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { PlanAndExecuteAgentExecutor } from 'langchain/experimental/plan_and_execute';
 import { GoogleCustomSearch, Tool, DynamicTool } from 'langchain/tools';
 
-import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { getToken } from '../../../utils/config';
 
 const model = new ChatOpenAI({
