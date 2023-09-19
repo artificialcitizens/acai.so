@@ -62,11 +62,9 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId);
 
   const handleDeleteWorkspace = () => {
-    const confirmDelete = window.prompt(
-      `Please type the name of the workspace to confirm deletion: ${workspace?.name}`,
-    );
-    if (confirmDelete !== workspace?.name) {
-      alert('Workspace name does not match. Deletion cancelled.');
+    const confirmDelete = window.prompt('Type "delete" to confirm');
+    if (confirmDelete?.toLowerCase() !== 'delete') {
+      alert('Deletion cancelled.');
       return;
     }
     globalServices.appStateService.send({
@@ -104,51 +102,52 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     if (!workspaceId) return;
     const pageStartOffset = 0;
     const fileURL = URL.createObjectURL(file);
-    const pdfDocument = await pdfjs.getDocument(fileURL).promise;
-    const pdfData = await getPdfText(pdfDocument, slugify(file.name));
+    // const pdfDocument = await pdfjs.getDocument(fileURL).promise;
+    // const pdfData = await getPdfText(pdfDocument, slugify(file.name));
 
-    const slugifiedFilename = slugify(file.name);
+    // const slugifiedFilename = slugify(file.name);
 
-    if (vectorContext) {
-      for (const page of pdfData[slugifiedFilename]) {
-        const metadata = {
-          id: `${slugifiedFilename}-page-${page.page}`,
-          workspaceId,
-          pageNumber: page.page,
-          offset: pageStartOffset,
-          src: `/${workspaceId}/knowledge/${slugifiedFilename}?fileType=pdf&page=1`,
-          totalPages: pdfData[slugifiedFilename].length,
-          originalFilename: file.name,
-        };
+    // if (vectorContext) {
+    //   for (const page of pdfData[slugifiedFilename]) {
+    //     const metadata = {
+    //       id: `${slugifiedFilename}-page-${page.page}`,
+    //       workspaceId,
+    //       pageNumber: page.page,
+    //       offset: pageStartOffset,
+    //       src: `/${workspaceId}/knowledge/${slugifiedFilename}?fileType=pdf&page=1`,
+    //       totalPages: pdfData[slugifiedFilename].length,
+    //       originalFilename: file.name,
+    //     };
 
-        const memoryVectors = await vectorContext.addText(
-          page.content,
-          [metadata],
-          `DOCUMENT NAME: ${file.name}\n\nPAGE NUMBER: ${
-            page.page + pageStartOffset
-          }\n\n---\n\n`,
-        );
+    //     const memoryVectors = await vectorContext.addText(
+    //       page.content,
+    //       [metadata],
+    //       `DOCUMENT NAME: ${file.name}\n\nPAGE NUMBER: ${
+    //         page.page + pageStartOffset
+    //       }\n\n---\n\n`,
+    //     );
 
-        const filteredMemoryVectors = memoryVectors?.filter(
-          (item) => item.metadata.id === metadata.id,
-        );
+    //     const filteredMemoryVectors = memoryVectors?.filter(
+    //       (item) => item.metadata.id === metadata.id,
+    //     );
 
-        await db.knowledge.add({
-          id: metadata.id,
-          workspaceId,
-          file,
-          fullText: page.content,
-          createdAt: new Date().toISOString(),
-          lastModified: new Date().toISOString(),
-          fileType: 'pdf',
-          memoryVectors: filteredMemoryVectors || [],
-        });
-      }
-      navigate(
-        `/${workspaceId}/knowledge/${slugify(file.name)}?fileType=pdf&page=1`,
-      );
-      setFileUrl(fileURL);
-    }
+    //     await db.knowledge.add({
+    //       id: metadata.id,
+    //       workspaceId,
+    //       file,
+    //       fullText: page.content,
+    //       createdAt: new Date().toISOString(),
+    //       lastModified: new Date().toISOString(),
+    //       fileType: 'pdf',
+    //       memoryVectors: filteredMemoryVectors || [],
+    //     });
+    //   }
+    //   navigate(
+    //     `/${workspaceId}/knowledge/${slugify(file.name)}?fileType=pdf&page=1`,
+    //   );
+    // setFileUrl(fileURL);
+    // }
+    setFileUrl(fileURL);
   };
 
   return !workspaceId ? (

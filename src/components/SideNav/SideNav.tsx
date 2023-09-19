@@ -162,12 +162,10 @@ export const SideNav: React.FC = () => {
                             className="p-0 px-1 flex-grow-0 text-red-900 rounded-full  opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                             onClick={async () => {
                               const confirmDelete = window.prompt(
-                                `Please type the name of the tab to confirm deletion: ${tab.title}`,
+                                'Type "delete" to confirm',
                               );
-                              if (confirmDelete !== tab.title) {
-                                alert(
-                                  'Tab name does not match. Deletion cancelled.',
-                                );
+                              if (confirmDelete?.toLowerCase() !== 'delete') {
+                                alert('Deletion cancelled.');
                                 return;
                               }
                               globalServices.appStateService.send({
