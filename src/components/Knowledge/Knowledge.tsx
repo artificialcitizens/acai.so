@@ -115,7 +115,7 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   pageNumber: page.page,
                   offset: pageStartOffset,
                   file,
-                  src: `/${workspaceId}/knowledge/${slugifiedFilename}?fileType=pdf&page=1`,
+                  src: `/${workspaceId}/knowledge/${slugifiedFilename}?fileType=pdf&page=${page.page}`,
                   totalPages: pdfData[slugifiedFilename].length,
                   originalFilename: file.name,
                 };
@@ -268,22 +268,32 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
         }}
       />
       <Dropzone onFilesDrop={handleFileDrop}>
-        <div className="w-full h-20 bg-base rounded-lg mb-2">
-          <div
-            className={`w-full h-full flex flex-col justify-center items-center`}
-          >
-            <div className="text-acai-white">
-              Drop a file to{' '}
-              <button className="link" onClick={handleUpload}>
-                upload
-              </button>
+        {!knowledgeItems && (
+          <div className="w-full h-20 bg-base rounded-lg mb-2">
+            <div
+              className={`w-full h-full flex flex-col justify-center items-center`}
+            >
+              <div className="text-acai-white">
+                Drop a file to{' '}
+                <button className="link" onClick={handleUpload}>
+                  upload
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
         {knowledgeItems && knowledgeItems.length > 0 && (
-          <ul className="bg-base rounded-lg p-3 max-h-[25vh] w-full overflow-scroll mb-2">
-            {renderKnowledgeItems()}
-          </ul>
+          <span className="bg-base rounded-lg ">
+            <ul className="p-3 max-h-[25vh] w-full overflow-scroll mb-2">
+              {renderKnowledgeItems()}
+            </ul>
+            <span className="w-full flex justify-center text-acai-white">
+              <p className="mt-2">Drop a file to </p>
+              <button className="link p-2 pl-1 mr-2" onClick={handleUpload}>
+                upload
+              </button>
+            </span>
+          </span>
         )}
       </Dropzone>
       {/* <StorageMeter /> */}

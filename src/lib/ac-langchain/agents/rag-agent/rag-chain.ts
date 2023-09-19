@@ -28,6 +28,7 @@ const formQuestion = async ({
     chatModel = new ChatOpenAI({
       openAIApiKey,
       temperature: 0,
+      modelName: 'gpt-3.5-turbo-16k',
     });
   }
 
