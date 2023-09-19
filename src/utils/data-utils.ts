@@ -88,15 +88,27 @@ export function slugify(str: string) {
     .replace(/^-+|-+$/g, '');
 }
 
-// Helper function to read a file as text
-export function readFileAsText(file: Blob) {
-  return new Promise<string>((resolve, reject) => {
+export const readFileAsText = (
+  file: File,
+  fileType: string,
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (event) => resolve(event.target?.result as string);
+
+    reader.onload = (event) => {
+      if (!event.target) return reject('No target');
+      let text = event.target.result as string;
+      if (fileType === 'txt') {
+        text = text.replace(/\r\n|\n/g, '<br/>');
+      }
+      resolve(text);
+    };
+
     reader.onerror = (error) => reject(error);
+
     reader.readAsText(file);
   });
-}
+};
 
 export const writeToLocalStorage = (key: string, data: any): void => {
   localStorage.setItem(key, JSON.stringify(data));
@@ -105,4 +117,24 @@ export const writeToLocalStorage = (key: string, data: any): void => {
 export const readFromLocalStorage = (key: string): any => {
   const rawData = localStorage.getItem(key);
   return rawData ? JSON.parse(rawData) : null;
+};
+
+export const getObjectSize = (
+  obj: object,
+  unit: 'KB' | 'MB' = 'KB',
+): number => {
+  const jsonString = JSON.stringify(obj);
+  const objectSizeInBytes = new Blob([jsonString]).size;
+
+  let objectSize: number;
+
+  if (unit === 'KB') {
+    objectSize = objectSizeInBytes / 1024;
+  } else if (unit === 'MB') {
+    objectSize = objectSizeInBytes / (1024 * 1024);
+  } else {
+    throw new Error('Invalid unit specified. Please use "KB" or "MB".');
+  }
+
+  return objectSize;
 };

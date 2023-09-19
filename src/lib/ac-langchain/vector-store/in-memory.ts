@@ -4,7 +4,24 @@ import { Document } from 'langchain/document';
 import { Embeddings } from 'langchain/embeddings/base';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { getToken } from '../../../utils/config';
+// import { HuggingFaceTransformersEmbeddings } from 'langchain/embeddings/hf_transformers';
 
+// export const initializeMemoryVectorStore = async ({
+//   docs,
+// }: {
+//   docs: Document[];
+// }) => {
+//   console.log('initializeMemoryVectorStore');
+//   const openAIApiKey =
+//     getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY;
+//   const vectorStore = await MemoryVectorStore.fromDocuments(
+//     docs,
+//     new HuggingFaceTransformersEmbeddings({
+//       modelName: 'Xenova/bge-base-en',
+//     }),
+//   );
+//   return vectorStore;
+// };
 export const initializeMemoryVectorStore = async ({
   docs,
 }: {

@@ -29,6 +29,7 @@ export const ragAgentResponse = async ({
     openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
     streaming: true,
     callbackManager: CallbackManager.fromHandlers(callbacks),
+    modelName: 'gpt-3.5-turbo-16k',
   });
 
   const stream = await streamingModel.call([

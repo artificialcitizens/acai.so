@@ -6,7 +6,7 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { queryChat } from '../../lib/ac-langchain/agents/chat-model';
 import {
   createAvaChatPrompt,
@@ -42,6 +42,8 @@ type Message = {
 
 export const agentMode = [
   'chat',
+  // maps to rag agent
+  'knowledge',
   'custom',
   // 'rag',
   // 'create',
@@ -50,7 +52,6 @@ export const agentMode = [
 ];
 
 if (import.meta.env.DEV) {
-  agentMode.unshift('rag');
   agentMode.unshift('ava');
 }
 
@@ -68,18 +69,23 @@ export const useAva = (): {
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const vectorContext = useContext(VectorStoreContext);
+  const { workspaceId: rawWorkspaceId } = useParams<{
+    workspaceId: string;
+    domain: string;
+    id: string;
+  }>();
+
+  const workspaceId = rawWorkspaceId || 'docs';
 
   // @TODO - Seems to need to be here to get the context to load, why though?
   const knowledgeItems = useLiveQuery(async () => {
     if (!vectorContext) return;
-    return await db.memoryVectors
+    return await db.knowledge
       .where('workspaceId')
       .equals(workspaceId)
       .toArray();
   });
 
-  const location = useLocation();
-  const workspaceId = location.pathname.split('/')[1];
   const navigate = useNavigate();
   const { appStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
@@ -151,7 +157,8 @@ export const useAva = (): {
           // abortController: response.abortController,
         };
       }
-      case 'rag': {
+      // maps to rag agent
+      case 'knowledge': {
         if (!vectorContext) {
           setError('Vector context not found');
           setLoading(false);
@@ -207,7 +214,7 @@ export const useAva = (): {
             systemNote: '',
           };
           appStateService.send({ type: 'ADD_TAB', tab: newTab });
-          navigate(`/${workspaceId}/${newTab.id}`); // setAbortController(response.abortController);
+          navigate(`/${workspaceId}/documents/${newTab.id}`); // setAbortController(response.abortController);
         }
 
         return {
@@ -238,7 +245,7 @@ export const useAva = (): {
                 tab,
               });
               setTimeout(() => {
-                navigate(`/${workspaceId}/${tab.id}`);
+                navigate(`/${workspaceId}/documents/${tab.id}`);
               }, 250);
             },
             handleAgentAction: (action) => {

@@ -1,15 +1,53 @@
-import React, { useState, useCallback, ReactNode } from 'react';
-import { slugify } from '../../../utils/data-utils';
-import PDFRenderer from './PdfRender';
+import React, { useState, useCallback, ReactNode, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toastifyError } from '../../Toast';
+import { Tab, handleCreateTab } from '../../../state';
+import {
+  GlobalStateContext,
+  GlobalStateContextValue,
+} from '../../../context/GlobalStateContext';
+
+const DropFileSection: React.FC<{
+  highlight: boolean;
+  handleCreateNewDocument: () => void;
+}> = ({ highlight, handleCreateNewDocument }) => (
+  <div
+    className={`w-full h-full flex flex-col justify-center items-center ${
+      highlight ? 'bg-dark-200' : 'bg-darker'
+    }`}
+  >
+    <div className="text-acai-white">
+      Drop a file to upload{' '}
+      <span className="">
+        or
+        <button className="link mx-1" onClick={handleCreateNewDocument}>
+          create
+        </button>
+        a new document
+      </span>
+    </div>
+  </div>
+);
 
 interface DropzoneProps {
   children?: ReactNode;
-  onFilesDrop?: (files: File[], name: string) => void;
+  workspaceId: string;
+  showHelperText: boolean;
+  onFilesDrop: (file: File) => void;
+  onPDFDrop: (file: File) => void;
 }
 
-const EditorDropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
+const EditorDropzone: React.FC<DropzoneProps> = ({
+  children,
+  onFilesDrop,
+  onPDFDrop,
+  workspaceId,
+  showHelperText,
+}) => {
   const [highlight, setHighlight] = useState(false);
-  const [fileUrl, setFileUrl] = React.useState<string | null>(null);
+  const globalServices: GlobalStateContextValue =
+    useContext(GlobalStateContext);
+  const navigate = useNavigate();
 
   const handleDrop = useCallback(
     async (event: React.DragEvent<HTMLDivElement>) => {
@@ -22,11 +60,23 @@ const EditorDropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
           return new Promise<File>((resolve, reject) => {
             entry.file((file: File | PromiseLike<File>) => {
               if (file instanceof File) {
-                if (file.type === 'application/pdf') {
-                  const fileURL = URL.createObjectURL(file);
-                  setFileUrl(fileURL);
-                } else {
-                  resolve(file);
+                const fileExtension = file.name.split('.').pop();
+                switch (fileExtension) {
+                  case 'pdf': {
+                    onPDFDrop(file);
+                    resolve(file);
+                    break;
+                  }
+                  case 'txt':
+                  case 'md': {
+                    onFilesDrop(file);
+                    resolve(file);
+                    break;
+                  }
+                  default:
+                    toastifyError('Must be a .pdf, .txt, or .md file');
+                    reject('Must be a .pdf, .txt, or .md file');
+                    break;
                 }
               }
             });
@@ -83,7 +133,7 @@ const EditorDropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
       // }
       setHighlight(false);
     },
-    [],
+    [onFilesDrop, onPDFDrop],
   );
 
   const handleDragOver = useCallback(
@@ -98,27 +148,39 @@ const EditorDropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
     setHighlight(false);
   }, []);
 
+  const handleCreateNewDocument = async () => {
+    const title = prompt('Enter a title for your new document');
+    if (!title) {
+      toastifyError('Must enter a title');
+      return;
+    }
+    handleCreateTab({ title, content: '' }, workspaceId).then((tab: Tab) => {
+      globalServices.appStateService.send({
+        type: 'ADD_TAB',
+        tab,
+      });
+      setTimeout(() => {
+        navigate(`/${workspaceId}/documents/${tab.id}`);
+      }, 250);
+    });
+  };
+
   return (
     <div
-      className="w-full h-full"
+      className="w-full h-full flex-grow max-h-[calc(100vh-2rem)]"
+      id="editor-dropzone"
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
     >
-      {!fileUrl && (
-        <div
-          className={`w-full h-full flex flex-col justify-center items-center ${
-            highlight ? 'bg-dark-200' : 'bg-darker'
-          }`}
-        >
-          <div className="text-4xl text-acai-white">
-            <i className="fas fa-file-upload"></i>
-          </div>
-          <div className="text-acai-white">Drop a file to upload</div>
-        </div>
+      {showHelperText || highlight ? (
+        <DropFileSection
+          highlight={highlight}
+          handleCreateNewDocument={handleCreateNewDocument}
+        />
+      ) : (
+        children
       )}
-      {fileUrl && <PDFRenderer fileUrl={fileUrl} />}
-      {/* {children} */}
     </div>
   );
 };

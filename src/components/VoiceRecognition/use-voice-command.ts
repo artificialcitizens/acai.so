@@ -4,7 +4,7 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { toastifyInfo } from '../Toast';
 import { Tab } from '../../state';
 
@@ -40,7 +40,13 @@ export const useVoiceCommands = () => {
     useContext(GlobalStateContext);
   const location = useLocation();
   const navigate = useNavigate();
-  const workspaceId = location.pathname.split('/')[1];
+  const { workspaceId: rawWorkspaceId } = useParams<{
+    workspaceId: string;
+    domain: string;
+    id: string;
+  }>();
+
+  const workspaceId = rawWorkspaceId || 'docs';
   // @TODO: Pull out experimental commands into a separate file
   // Update the createCommand function to take an object as a parameter
   const createCommand = ({
@@ -91,7 +97,7 @@ export const useVoiceCommands = () => {
     };
     globalServices.appStateService.send({ type: 'ADD_TAB', tab: newTab });
     setTimeout(() => {
-      navigate(`/${workspaceId}/${newTab.id}`);
+      navigate(`/${workspaceId}/documents/${newTab.id}`);
     }, 150);
     setStatesAndToast(setUserTranscript, setVoiceRecognitionState, '', 'idle');
   };

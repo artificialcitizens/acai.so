@@ -82,7 +82,7 @@ export const ChatModelDropdown: React.FC<ChatModelProps> = ({
           onChange={handleModelChange}
         />
       )}
-      {state.context[workspaceId]?.agentMode === 'rag' && (
+      {state.context[workspaceId]?.agentMode === 'knowledge' && (
         <div className="mt-2">
           <label className="inline-flex items-center text-acai-white">
             <span className="mx-2">Return Results</span>

@@ -19,14 +19,13 @@ import {
 } from '../../context/GlobalStateContext';
 import { useActor } from '@xstate/react';
 import { ChatHistory } from '../../state';
-import { useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import ReactMarkdown from 'react-markdown';
 import remarkFootnotes from 'remark-footnotes';
 
 import { Button } from '../Button/Button';
 import { SendIcon, SpinnerIcon, StopIcon, TrashIcon } from '../Icons/Icons';
-import { VectorStoreContext } from '../../context/VectorStoreContext.tsx';
 
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
@@ -50,8 +49,14 @@ const Chat: React.FC<ChatProps> = ({
 }) => {
   const { agentStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
-  const location = useLocation();
-  const workspaceId = location.pathname.split('/')[1];
+  const { workspaceId: rawWorkspaceId } = useParams<{
+    workspaceId: string;
+    domain: string;
+    id: string;
+  }>();
+
+  const workspaceId = rawWorkspaceId || 'docs';
+
   const inputRef = useRef<HTMLInputElement>(null);
   const [msgInputValue, setMsgInputValue] = useState(startingValue);
   const [state, send] = useActor(agentStateService);

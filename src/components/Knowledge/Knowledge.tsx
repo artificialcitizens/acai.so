@@ -1,41 +1,46 @@
 import React, { useContext } from 'react';
-import { Tab } from '../../state';
+import { Tab, handleCreateTab } from '../../state';
 import { pdfjs } from 'react-pdf';
-
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 import { VectorStoreContext } from '../../context/VectorStoreContext';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import SBSearch from '../Search';
 // import StorageMeter from '../StorageMeter/StorageMeter';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../../db';
+import { Knowledge, db } from '../../../db';
 import { toastifyError, toastifyInfo } from '../Toast';
 import { readFileAsText, slugify } from '../../utils/data-utils';
-import Dropzone, { getPdfText } from '../Dropzone/Dropzone';
+import Dropzone from '../Dropzone/Dropzone';
+import { getPdfText } from '../../utils/pdf-utils';
+
 interface KnowledgeProps {
   workspaceId: string;
 }
 
-const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
+const removePageSuffix = (str: string) => {
+  return str.replace(/-page-\d+$/, '');
+};
+
+const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
   const { appStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const vectorContext = useContext(VectorStoreContext);
   const navigate = useNavigate();
+  const { fileType } = useParams<{ fileType: string }>();
 
   const knowledgeItems = useLiveQuery(async () => {
     if (!vectorContext) return;
-    return await db.memoryVectors
+    return await db.knowledge
       .where('workspaceId')
       .equals(workspaceId)
       .toArray();
   }, [workspaceId]);
 
-  const handleFileDrop = async (files: File[], name: string) => {
+  const handleFileDrop = async (files: File[]) => {
     if (!import.meta.env.DEV) return;
 
     for (const file of files) {
@@ -48,7 +53,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
           {
             try {
               toastifyInfo(`📁 Processing ${file.name}`);
-              const fileContent = await readFileAsText(file);
+              const fileContent = await readFileAsText(file, '');
               const slugifiedFilename = slugify(file.name);
 
               const metadata = {
@@ -56,7 +61,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                 workspaceId,
                 filetype: fileExtension,
                 file,
-                src: `/knowledge/${fileExtension}/${slugifiedFilename}`,
+                src: `/${workspaceId}/knowledge/${slugifiedFilename}`,
                 originalFilename: file.name,
                 uploadTimestamp: new Date().toISOString(),
               };
@@ -69,11 +74,16 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                 const filteredMemoryVectors = memoryVectors?.filter(
                   (item) => item.metadata.id === slugifiedFilename,
                 );
-
-                const id = db.memoryVectors.add({
+                // @TODO: Add options for generating summary on upload
+                const id = db.knowledge.add({
                   id: slugifiedFilename,
                   workspaceId,
                   memoryVectors: filteredMemoryVectors || [],
+                  file,
+                  fileType: fileExtension,
+                  fullText: fileContent,
+                  createdAt: new Date().toISOString(),
+                  lastModified: new Date().toISOString(),
                 });
               } else {
                 throw new Error('Context is null');
@@ -104,12 +114,10 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   workspaceId,
                   pageNumber: page.page,
                   offset: pageStartOffset,
-                  filetype: 'pdf',
                   file,
-                  src: `/knowledge/pdf/${slugifiedFilename}/${page.page}`,
+                  src: `/${workspaceId}/knowledge/${slugifiedFilename}?fileType=pdf&page=${page.page}`,
                   totalPages: pdfData[slugifiedFilename].length,
                   originalFilename: file.name,
-                  uploadTimestamp: new Date().toISOString(),
                 };
 
                 const memoryVectors = await vectorContext.addText(
@@ -124,10 +132,15 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   (item) => item.metadata.id === metadata.id,
                 );
 
-                await db.memoryVectors.add({
+                await db.knowledge.add({
                   id: metadata.id,
                   workspaceId,
                   memoryVectors: filteredMemoryVectors || [],
+                  file,
+                  fullText: page.content,
+                  fileType: 'pdf',
+                  createdAt: new Date().toISOString(),
+                  lastModified: new Date().toISOString(),
                 });
               }
             } else {
@@ -140,10 +153,95 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
           break;
         }
         default:
-          toastifyError(`Please upload a .txt or .md file`);
+          toastifyError(`Please upload a .pdf .txt or .md file`);
           break;
       }
     }
+  };
+
+  const handleUpload = async () => {
+    // open file dialog
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.click();
+    // handle files
+    input.onchange = async () => {
+      const files = Array.from(input.files || []);
+      await handleFileDrop(files);
+    };
+  };
+
+  const handleKnowledgeClick = async (item: Knowledge, parsedId: string) => {
+    if (item.fileType === 'pdf') {
+      navigate(
+        `/${workspaceId}/knowledge/${slugify(parsedId)}?fileType=pdf&page=1`,
+      );
+    } else {
+      const tab = await handleCreateTab(
+        { title: item.id, content: item.fullText },
+        workspaceId,
+        fileType,
+        false,
+      );
+      appStateService.send({
+        type: 'ADD_TAB',
+        tab,
+      });
+      navigate(`/${workspaceId}/documents/${tab.id}`);
+    }
+  };
+
+  const renderKnowledgeItems = () => {
+    if (!knowledgeItems) return;
+
+    const parsedIds = Array.from(
+      new Set(knowledgeItems.map((item) => removePageSuffix(item.id))),
+    );
+
+    return parsedIds.map((parsedId) => {
+      const item = knowledgeItems.find(
+        (item) =>
+          removePageSuffix(item.id) === parsedId &&
+          item.memoryVectors.length > 0,
+      );
+
+      if (item) {
+        return (
+          <li
+            key={item.id}
+            className="text-acai-white text-xs font-semibold mb-3 flex justify-between"
+          >
+            <button
+              className="p-0 px-1 rounded-full font-medium text-acai-white hover:underline disabled:hover:no-underline"
+              onClick={() => handleKnowledgeClick(item, parsedId)}
+            >
+              {/* convert example-txt  to example.txt */}
+              {parsedId.replace(/-(\w+)$/, '.$1')}
+            </button>
+            <button
+              className="p-0 px-1  rounded-full font-medium text-red-900"
+              onClick={async () => {
+                const confirmDelete = window.prompt('Type "delete" to confirm');
+                if (confirmDelete?.toLowerCase() !== 'delete') {
+                  alert('Deletion cancelled.');
+                  return;
+                }
+                const itemsToDelete = knowledgeItems.filter((item) =>
+                  item.id.startsWith(parsedId),
+                );
+                for (const item of itemsToDelete) {
+                  await db.knowledge.delete(item.id);
+                }
+              }}
+            >
+              x
+            </button>
+          </li>
+        );
+      }
+      return null;
+    });
   };
 
   return (
@@ -162,53 +260,40 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
             autoSave: false,
             createdAt: new Date().toString(),
             lastUpdated: new Date().toString(),
-            filetype: 'markdown',
+            filetype: 'md',
             systemNote: '',
           };
           appStateService.send({ type: 'ADD_TAB', tab: newTab });
-          navigate(`/${workspaceId}/${newTab.id}`);
+          navigate(`/${workspaceId}/documents/${newTab.id}`);
         }}
       />
       <Dropzone onFilesDrop={handleFileDrop}>
-        {knowledgeItems?.length === 0 && (
-          <div className="w-full h-20 bg-base rounded-lg mb-4">
+        {!knowledgeItems?.length && (
+          <div className="w-full h-20 bg-base rounded-lg mb-2">
             <div
               className={`w-full h-full flex flex-col justify-center items-center`}
             >
-              <div className="text-4xl text-acai-white">
-                <i className="fas fa-file-upload"></i>
+              <div className="text-acai-white">
+                Drop a file to{' '}
+                <button className="link" onClick={handleUpload}>
+                  upload
+                </button>
               </div>
-              <div className="text-acai-white">Drop a file to upload</div>
             </div>
           </div>
         )}
         {knowledgeItems && knowledgeItems.length > 0 && (
-          <ul className="bg-base rounded-lg p-3 max-h-[25vh] w-full overflow-scroll">
-            {knowledgeItems?.map((item) => (
-              <li
-                key={item.id}
-                className="text-acai-white text-xs font-semibold mb-3 flex justify-between"
-              >
-                {/* convert example-txt  to example.txt */}
-                {item.id.replace(/-(\w+)$/, '.$1')}
-                <button
-                  className="p-0 px-1  rounded-full font-medium text-red-900"
-                  onClick={async () => {
-                    const confirmDelete = window.prompt(
-                      `Please type the name of the piece knowledge to confirm deletion: ${item.id}`,
-                    );
-                    if (confirmDelete !== item.id) {
-                      alert('Name does not match. Deletion cancelled.');
-                      return;
-                    }
-                    await db.memoryVectors.delete(item.id);
-                  }}
-                >
-                  x
-                </button>
-              </li>
-            ))}
-          </ul>
+          <span className="bg-base rounded-lg ">
+            <ul className="p-3 max-h-[25vh] w-full overflow-scroll mb-2">
+              {renderKnowledgeItems()}
+            </ul>
+            <span className="w-full flex justify-center text-acai-white">
+              <p className="mt-2">Drop a file to </p>
+              <button className="link p-2 pl-1 mr-2" onClick={handleUpload}>
+                upload
+              </button>
+            </span>
+          </span>
         )}
       </Dropzone>
       {/* <StorageMeter /> */}
@@ -216,7 +301,7 @@ const Knowledge: React.FC<KnowledgeProps> = ({ workspaceId }) => {
   );
 };
 
-export default Knowledge;
+export default KnowledgeUpload;
 
 // const handleFileDrop = async (files: File[], name: string) => {
 //   const conversations: { [key: string]: any } = {};

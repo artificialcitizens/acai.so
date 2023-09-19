@@ -110,7 +110,8 @@ ul[data-type='taskList'] li[data-checked='true'] > div > p {
   }
 }
 
-p > a {
+p > a,
+.link {
   @apply text-blue-300 hover:text-blue-400 !important;
   font-weight: 500;
   text-decoration: inherit;

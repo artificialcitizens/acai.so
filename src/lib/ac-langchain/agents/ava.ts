@@ -31,6 +31,7 @@ import { Calculator } from 'langchain/tools/calculator';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { BaseCallbackHandler } from 'langchain/callbacks';
 import { Embeddings } from 'langchain/embeddings/base';
+// import { HuggingFaceTransformersEmbeddings } from 'langchain/embeddings/hf_transformers';
 
 import { OpenAI } from 'langchain/llms/openai';
 import { getToken } from '../../../utils/config';
@@ -195,6 +196,9 @@ const createModels = () => {
     openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
     temperature: 0.3,
   });
+  // embeddings = new HuggingFaceTransformersEmbeddings({
+  //   modelName: 'Xenova/bge-base-en',
+  // });
   embeddings = new OpenAIEmbeddings({
     openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
   });
