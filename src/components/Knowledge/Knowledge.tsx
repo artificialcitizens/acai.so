@@ -40,7 +40,7 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
       .toArray();
   }, [workspaceId]);
 
-  const handleFileDrop = async (files: File[], name: string) => {
+  const handleFileDrop = async (files: File[]) => {
     if (!import.meta.env.DEV) return;
 
     for (const file of files) {
@@ -159,6 +159,19 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
     }
   };
 
+  const handleUpload = async () => {
+    // open file dialog
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.click();
+    // handle files
+    input.onchange = async () => {
+      const files = Array.from(input.files || []);
+      await handleFileDrop(files);
+    };
+  };
+
   const handleKnowledgeClick = async (item: Knowledge, parsedId: string) => {
     if (item.fileType === 'pdf') {
       navigate(
@@ -199,23 +212,19 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
             key={item.id}
             className="text-acai-white text-xs font-semibold mb-3 flex justify-between"
           >
-            {/* convert example-txt  to example.txt */}
             <button
               className="p-0 px-1 rounded-full font-medium text-acai-white hover:underline disabled:hover:no-underline"
               onClick={() => handleKnowledgeClick(item, parsedId)}
             >
+              {/* convert example-txt  to example.txt */}
               {parsedId.replace(/-(\w+)$/, '.$1')}
             </button>
             <button
               className="p-0 px-1  rounded-full font-medium text-red-900"
               onClick={async () => {
-                const confirmDelete = window.prompt(
-                  `Please type the name of the piece knowledge to confirm deletion: ${removePageSuffix(
-                    item.id,
-                  )}`,
-                );
-                if (confirmDelete !== removePageSuffix(item.id)) {
-                  alert('Name does not match. Deletion cancelled.');
+                const confirmDelete = window.prompt('Type "delete" to confirm');
+                if (confirmDelete?.toLowerCase() !== 'delete') {
+                  alert('Deletion cancelled.');
                   return;
                 }
                 const itemsToDelete = knowledgeItems.filter((item) =>
@@ -259,20 +268,20 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
         }}
       />
       <Dropzone onFilesDrop={handleFileDrop}>
-        {knowledgeItems?.length === 0 && (
-          <div className="w-full h-20 bg-base rounded-lg mb-4">
-            <div
-              className={`w-full h-full flex flex-col justify-center items-center`}
-            >
-              <div className="text-4xl text-acai-white">
-                <i className="fas fa-file-upload"></i>
-              </div>
-              <div className="text-acai-white">Drop a file to upload</div>
+        <div className="w-full h-20 bg-base rounded-lg mb-2">
+          <div
+            className={`w-full h-full flex flex-col justify-center items-center`}
+          >
+            <div className="text-acai-white">
+              Drop a file to{' '}
+              <button className="link" onClick={handleUpload}>
+                upload
+              </button>
             </div>
           </div>
-        )}
+        </div>
         {knowledgeItems && knowledgeItems.length > 0 && (
-          <ul className="bg-base rounded-lg p-3 max-h-[25vh] w-full overflow-scroll">
+          <ul className="bg-base rounded-lg p-3 max-h-[25vh] w-full overflow-scroll mb-2">
             {renderKnowledgeItems()}
           </ul>
         )}

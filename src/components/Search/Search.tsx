@@ -10,7 +10,7 @@ const SBSearch: React.FC<SBSearchProps> = ({ onSubmit }) => {
   const [value, setValue] = useState('');
   return (
     <Search
-      className="w-full mb-4 bg-base"
+      className="w-full mb-2 bg-base"
       placeholder=""
       value={value}
       onChange={(v) => setValue(v)}

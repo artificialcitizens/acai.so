@@ -97,7 +97,7 @@ const Dropzone: React.FC<DropzoneProps> = ({ children, onFilesDrop }) => {
 
   return (
     <div
-      className="flex flex-grow"
+      className="flex flex-grow flex-col"
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
