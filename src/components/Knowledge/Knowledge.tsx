@@ -41,8 +41,6 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
   }, [workspaceId]);
 
   const handleFileDrop = async (files: File[]) => {
-    if (!import.meta.env.DEV) return;
-
     for (const file of files) {
       if (!file) return;
 
