@@ -35,3 +35,7 @@ export class AcaiDexie extends Dexie {
 }
 
 export const db = new AcaiDexie();
+
+db.open().catch((err) => {
+  console.error(err.stack || err);
+});
