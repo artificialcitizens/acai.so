@@ -268,7 +268,7 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
         }}
       />
       <Dropzone onFilesDrop={handleFileDrop}>
-        {!knowledgeItems && (
+        {!knowledgeItems?.length && (
           <div className="w-full h-20 bg-base rounded-lg mb-2">
             <div
               className={`w-full h-full flex flex-col justify-center items-center`}
