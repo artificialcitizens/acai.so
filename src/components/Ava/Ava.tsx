@@ -72,11 +72,9 @@ export const Ava: React.FC<AvaProps> = ({
         </h5>
         <TokenManager />
       </ExpansionPanel>
-      {import.meta.env.DEV && (
-        <ExpansionPanel title="Knowledge">
-          <KnowledgeUpload workspaceId={workspaceId} />
-        </ExpansionPanel>
-      )}
+      <ExpansionPanel title="Knowledge">
+        <KnowledgeUpload workspaceId={workspaceId} />
+      </ExpansionPanel>
       {import.meta.env.DEV && (
         <ExpansionPanel title="Voice Synthesis">
           <VoiceRecognition
