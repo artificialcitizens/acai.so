@@ -64,6 +64,7 @@ export const SideNav: React.FC = () => {
               createdAt: new Date().toString(),
               lastUpdated: new Date().toString(),
               filetype: 'markdown',
+              canEdit: true,
             },
           ],
         },

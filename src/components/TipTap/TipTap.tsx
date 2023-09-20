@@ -73,6 +73,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   // } = useContext(VectorStoreContext) as ReturnType<typeof useMemoryVectorStore>;
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { setEditor } = useContext(EditorContext)!;
+
   useEffect(() => {
     setCurrentTab(tab);
     setHydrated(false);
@@ -136,57 +137,60 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     isProcessing = false;
   };
 
-  const editor = useEditor({
-    extensions: TiptapExtensions,
-    editorProps: TiptapEditorProps,
-    // issue with switching to workspace
-    // editable: canEdit,
-    editable: true,
-    onUpdate: async (e) => {
-      setSaveStatus('Unsaved');
-      const selection = e.editor.state.selection;
-      const lastTwo = e.editor.state.doc.textBetween(
-        selection.from - 2,
-        selection.from,
-        '\n',
-      );
-      if (lastTwo === '++' && !isLoading) {
-        e.editor.commands.deleteRange({
-          from: selection.from - 2,
-          to: selection.from,
-        });
-        setIsLoading(true);
-        // await setAutocompleteContext(e.editor);
-        autoComplete({
-          context: e.editor.state.doc.textBetween(
-            Math.max(0, e.editor.state.selection.from - 5000),
-            e.editor.state.selection.from - 0,
-            '\n',
-          ),
-          relatedInfo: currentContext || '',
-          callbacks: {
-            onMessageStart: () => setIsLoading(true),
-            onMessageError: (error: string) => {
-              console.log(error);
-              setIsLoading(false);
+  const editor = useEditor(
+    {
+      extensions: TiptapExtensions,
+      editorProps: TiptapEditorProps,
+      // issue with switching to workspace
+      // editable: canEdit,
+      editable: tab.canEdit ?? true,
+      onUpdate: async (e) => {
+        setSaveStatus('Unsaved');
+        const selection = e.editor.state.selection;
+        const lastTwo = e.editor.state.doc.textBetween(
+          selection.from - 2,
+          selection.from,
+          '\n',
+        );
+        if (lastTwo === '++' && !isLoading) {
+          e.editor.commands.deleteRange({
+            from: selection.from - 2,
+            to: selection.from,
+          });
+          setIsLoading(true);
+          // await setAutocompleteContext(e.editor);
+          autoComplete({
+            context: e.editor.state.doc.textBetween(
+              Math.max(0, e.editor.state.selection.from - 5000),
+              e.editor.state.selection.from - 0,
+              '\n',
+            ),
+            relatedInfo: currentContext || '',
+            callbacks: {
+              onMessageStart: () => setIsLoading(true),
+              onMessageError: (error: string) => {
+                console.log(error);
+                setIsLoading(false);
+              },
+              onMessageStream: (token: string) => {
+                tokenQueue.push(token);
+                if (!isProcessing) {
+                  processTokens();
+                }
+              },
+              onMessageComplete: (message: string) => {
+                // setIsLoading(false);
+              },
             },
-            onMessageStream: (token: string) => {
-              tokenQueue.push(token);
-              if (!isProcessing) {
-                processTokens();
-              }
-            },
-            onMessageComplete: (message: string) => {
-              // setIsLoading(false);
-            },
-          },
-        }).then((res) => setIsLoading(false));
-      } else {
-        debouncedUpdates(e.editor);
-      }
+          }).then((res) => setIsLoading(false));
+        } else {
+          debouncedUpdates(e.editor);
+        }
+      },
+      autofocus: 'start',
     },
-    autofocus: 'start',
-  });
+    [tab],
+  );
 
   useEffect(() => {
     if (!currentTab) return;
@@ -271,7 +275,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
           {currentTab.title}
         </h2>
         {editor && <EditorBubbleMenu editor={editor} />}
-        <EditorContent editor={editor} />
+        <EditorContent key={currentTab.id} editor={editor} />
       </div>
       {/* <MenuBar
         editor={editor}

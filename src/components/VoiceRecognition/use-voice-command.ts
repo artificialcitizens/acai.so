@@ -90,6 +90,7 @@ export const useVoiceCommands = () => {
       workspaceId,
       filetype: 'markdown',
       autoSave: true,
+      canEdit: true,
       systemNote: '',
       isContext: true,
       createdAt: Date.now().toString(),

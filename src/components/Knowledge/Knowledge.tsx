@@ -181,12 +181,13 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
         workspaceId,
         fileType,
         false,
+        false,
       );
       appStateService.send({
         type: 'ADD_TAB',
         tab,
       });
-      navigate(`/${workspaceId}/documents/${tab.id}`);
+      navigate(`/${workspaceId}/documents/${tab.id}?-knowledge`);
     }
   };
 
@@ -256,6 +257,7 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
             workspaceId,
             isContext: false,
             autoSave: false,
+            canEdit: true,
             createdAt: new Date().toString(),
             lastUpdated: new Date().toString(),
             filetype: 'md',
