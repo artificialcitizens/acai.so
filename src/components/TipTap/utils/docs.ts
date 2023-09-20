@@ -24,6 +24,7 @@ export const createDocs = async () => {
       isContext: false,
       autoSave: false,
       systemNote: '',
+      canEdit: false,
       workspaceId: 'docs',
       createdAt: doc.createdAt,
       lastUpdated: doc.createdAt,

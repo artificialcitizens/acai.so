@@ -14,6 +14,7 @@ export type Tab = {
   createdAt: string;
   lastUpdated: string;
   autoSave: boolean;
+  canEdit: boolean;
 };
 
 export interface Workspace {
@@ -362,6 +363,7 @@ export const handleCreateTab = async (
   workspaceId: string,
   filetype = 'markdown',
   autoSave = true,
+  canEdit = true,
 ): Promise<Tab> => {
   const newTab = {
     id: uuidv4().split('-')[0],
@@ -372,6 +374,7 @@ export const handleCreateTab = async (
     workspaceId,
     autoSave,
     filetype,
+    canEdit,
     createdAt: new Date().toString(),
     lastUpdated: new Date().toString(),
   };
@@ -408,6 +411,7 @@ export const createWorkspace = ({
             createdAt: new Date().toString(),
             lastUpdated: new Date().toString(),
             autoSave: true,
+            canEdit: true,
             filetype: 'markdown',
           },
         ],

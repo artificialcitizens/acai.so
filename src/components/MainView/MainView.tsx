@@ -15,6 +15,7 @@ import { readFileAsText, slugify } from '../../utils/data-utils';
 import { getPdfText } from '../../utils/pdf-utils';
 import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { toastifyInfo } from '../Toast';
 
 interface MainViewProps {
   domain: 'knowledge' | 'documents' | undefined;
@@ -147,7 +148,21 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     //   );
     // setFileUrl(fileURL);
     // }
+    navigate(
+      `/${workspaceId}/knowledge/${slugify(file.name)}?fileType=pdf&page=1`,
+    );
     setFileUrl(fileURL);
+  };
+
+  const knowledgeRender = () => {
+    if (fileType === 'pdf' && fileUrl) {
+      return <PDFRenderer startingPage={Number(page)} fileUrl={fileUrl} />;
+    }
+    if (fileType === 'txt' || fileType === 'md') {
+      toastifyInfo('Not implemented yet');
+      // @TODO: manage these file types for knowledge
+      // navigate(`/${workspaceId}/documents/${id}?-knowledge`);
+    }
   };
 
   return !workspaceId ? (
@@ -173,10 +188,7 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
           onFilesDrop={handleFilesDrop}
         >
           {domain === 'documents' && activeTab && <TipTap tab={activeTab} />}
-          {/* clean up this chain */}
-          {domain === 'knowledge' && fileUrl && fileType === 'pdf' && (
-            <PDFRenderer startingPage={Number(page)} fileUrl={fileUrl} />
-          )}
+          {domain === 'knowledge' && knowledgeRender()}
         </EditorDropzone>
       </div>
     </div>

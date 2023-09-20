@@ -211,6 +211,7 @@ export const useAva = (): {
             lastUpdated: new Date().toString(),
             filetype: 'markdown',
             autoSave: false,
+            canEdit: true,
             systemNote: '',
           };
           appStateService.send({ type: 'ADD_TAB', tab: newTab });
