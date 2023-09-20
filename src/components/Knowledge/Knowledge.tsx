@@ -59,7 +59,7 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                 workspaceId,
                 filetype: fileExtension,
                 file,
-                src: `/${workspaceId}/knowledge/${slugifiedFilename}`,
+                src: `/${workspaceId}/knowledge/${slugifiedFilename}?fileType=${fileExtension}`,
                 originalFilename: file.name,
                 uploadTimestamp: new Date().toISOString(),
               };
