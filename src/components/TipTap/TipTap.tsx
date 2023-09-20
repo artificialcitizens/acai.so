@@ -141,8 +141,6 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     {
       extensions: TiptapExtensions,
       editorProps: TiptapEditorProps,
-      // issue with switching to workspace
-      // editable: canEdit,
       editable: tab.canEdit ?? true,
       onUpdate: async (e) => {
         setSaveStatus('Unsaved');
