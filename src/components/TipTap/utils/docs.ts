@@ -15,22 +15,29 @@ export const fetchDocs = async (): Promise<any> => {
 
 export const createDocs = async () => {
   const response = await fetchDocs();
-  const docs = response.docs.map((doc: any) => {
-    const tab: Tab = {
-      id: doc.title.toLowerCase().replace(/ /g, '-'),
-      title: doc.title,
-      filetype: 'markdown',
-      content: doc.content,
-      isContext: false,
-      autoSave: false,
-      systemNote: '',
-      canEdit: false,
-      workspaceId: 'docs',
-      createdAt: doc.createdAt,
-      lastUpdated: doc.createdAt,
-    };
-    return tab;
-  });
+  const docs = response.docs
+    .map((doc: any) => {
+      const tab: Tab = {
+        id: doc.title.toLowerCase().replace(/ /g, '-'),
+        title: doc.title,
+        filetype: 'markdown',
+        content: doc.content,
+        isContext: false,
+        autoSave: false,
+        systemNote: '',
+        canEdit: import.meta.env.DEV,
+        workspaceId: 'docs',
+        createdAt: doc.createdAt,
+        lastUpdated: doc.createdAt,
+      };
+      return tab;
+    })
+    .sort((a: Tab, b: Tab) => {
+      if (a.title < b.title) {
+        return -1;
+      }
+      return 1;
+    });
 
   return docs;
 };
