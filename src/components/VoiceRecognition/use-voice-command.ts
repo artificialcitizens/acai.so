@@ -4,11 +4,11 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toastifyInfo } from '../Toast';
 import { Tab } from '../../state';
 
-type VoiceState = 'idle' | 'ava' | 'notes' | 'voice' | 'following';
+export type VoiceState = 'idle' | 'ava' | 'notes' | 'voice';
 export type TTSState = 'bark' | 'elevenlabs' | 'webSpeech';
 
 interface Command {
@@ -38,7 +38,6 @@ export const useVoiceCommands = () => {
   const [synthesisMode, setSynthesisMode] = useState<TTSState>('bark');
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
-  const location = useLocation();
   const navigate = useNavigate();
   const { workspaceId: rawWorkspaceId } = useParams<{
     workspaceId: string;
@@ -119,11 +118,6 @@ export const useVoiceCommands = () => {
       commands: ['cancel'],
       recognitionState: 'idle',
       toastMessage: 'Going Idle',
-    }),
-    createCommand({
-      commands: ['following'],
-      recognitionState: 'following',
-      toastMessage: 'Following mode',
     }),
     createCommand({
       commands: ['ready'],
