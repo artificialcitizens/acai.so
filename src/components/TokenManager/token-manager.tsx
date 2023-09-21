@@ -28,36 +28,36 @@ const TokenManager: React.FC = () => {
         value: openAIKey,
         setValue: setOpenAIKey,
       },
+      // {
+      //   id: 'GOOGLE_API_KEY',
+      //   name: 'Google API Key',
+      //   value: googleApiKey,
+      //   setValue: setGoogleApiKey,
+      // },
+      // {
+      //   id: 'GOOGLE_CSE_ID',
+      //   name: 'Google CSE Key',
+      //   value: googleCSEId,
+      //   setValue: setGoogleCSEId,
+      // },
       {
-        id: 'GOOGLE_API_KEY',
-        name: 'Google API Key',
-        value: googleApiKey,
-        setValue: setGoogleApiKey,
-      },
-      {
-        id: 'GOOGLE_CSE_ID',
-        name: 'Google CSE Key',
-        value: googleCSEId,
-        setValue: setGoogleCSEId,
+        id: 'ELEVENLABS_API_KEY',
+        name: 'Elevenlabs Api Key',
+        value: elevenlabsApiKey,
+        setValue: setElevenlabsApiKey,
       },
     ],
     [
       openAIKey,
-      googleApiKey,
-      googleCSEId,
       setOpenAIKey,
-      setGoogleApiKey,
-      setGoogleCSEId,
+      // googleApiKey,
+      // setGoogleApiKey,
+      // googleCSEId,
+      // setGoogleCSEId,
+      elevenlabsApiKey,
+      setElevenlabsApiKey,
     ],
   );
-
-  if (import.meta.env.DEV)
-    keys.push({
-      id: 'ELEVENLABS_API_KEY',
-      name: 'Elevenlabs Api Key',
-      value: elevenlabsApiKey,
-      setValue: setElevenlabsApiKey,
-    });
 
   const [values, setValues] = useState<{ [key: string]: string }>({});
 
