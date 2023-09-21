@@ -77,7 +77,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
       <nav className="flex items-center">
         <Link
           className="pointer-events-none md:pointer-events-auto"
-          to="/docs/introduction"
+          to="/docs/documents/1---introduction"
         >
           <h1 className="text-2xl text-acai-white md:text-4xl font-bold mb-0 z-10">
             acai
