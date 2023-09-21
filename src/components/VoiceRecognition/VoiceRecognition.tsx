@@ -380,7 +380,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         </span>
         <span className="flex mb-2 items-start">
           <label className="text-acai-white ml-2" htmlFor="singleCommandMode">
-            Speech Recognition
+            Voice Commands
           </label>
           <input
             className="mx-1 mt-[0.25rem]"

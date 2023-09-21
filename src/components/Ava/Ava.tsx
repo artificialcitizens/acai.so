@@ -134,8 +134,8 @@ export const Ava: React.FC<AvaProps> = ({
       {workspaceId && (
         <span className="flex flex-col flex-grow">
           <p className="text-xs font-bold p-3">
-            Chat {/* @TODO: create a tag/pill component */}
-            <span
+            Chat {/* @TODO: create a tag component */}
+            {/* <span
               className="ml-2 font-semibold border-lighter border-solid border p-1 px-2 rounded-xl text-[9px]"
               style={{
                 borderColor:
@@ -143,7 +143,7 @@ export const Ava: React.FC<AvaProps> = ({
               }}
             >
               {formatAgentMode(currentAgentMode)}
-            </span>
+            </span> */}
           </p>
           <div className="flex flex-col flex-grow p-2 pt-0">
             <Chat
