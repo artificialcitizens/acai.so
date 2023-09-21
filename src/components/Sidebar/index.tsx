@@ -75,7 +75,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
           aria-valuenow={width}
           tabIndex={0}
           style={{
-            width: '5px',
+            width: '10px',
             cursor: 'ew-resize',
             position: 'absolute',
             height: '100%',

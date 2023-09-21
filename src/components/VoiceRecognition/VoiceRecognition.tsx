@@ -272,24 +272,11 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     setManualTTS('');
   };
 
-  const handleTtsServiceChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    setSynthesisMode(event.target.value as TTSState);
-  };
-
   const options = [
     { value: 'webSpeech', label: 'Web Speech API' },
     { value: 'elevenlabs', label: 'Elevenlabs' },
     import.meta.env.DEV ? { value: 'bark', label: 'Bark' } : undefined,
   ];
-
-  const handleDropdownChange = (value: string) => {
-    handleTtsServiceChange({
-      target: { value },
-    } as React.ChangeEvent<HTMLSelectElement>);
-    setSynthesisMode(value as TTSState);
-  };
 
   const handleElevenLabsDropdownChange = (value: string) => {
     setElevenLabsVoice(value);
@@ -411,6 +398,15 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         readonly
         content={userTranscript || 'User Transcript'}
       />
+      <button
+        className="bg-light text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        type="button"
+        onClick={() => {
+          setUserTranscript('');
+        }}
+      >
+        Clear Transcript
+      </button>
     </div>
   );
 };
