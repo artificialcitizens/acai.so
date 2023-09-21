@@ -97,7 +97,7 @@ const TokenManager: React.FC = () => {
       <input
         type="submit"
         value="Submit"
-        className="bg-neutral-900 text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-light focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        className="bg-light text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
       />
     </form>
   );

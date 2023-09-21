@@ -1,5 +1,5 @@
 .primary {
-  @apply bg-neutral-900 p-1 text-acai-white  rounded-md transition-colors duration-200 ease-in-out hover:bg-light hover:outline-none focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer;
+  @apply bg-light p-1 text-acai-white  rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 hover:outline-none focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer;
   @apply flex;
 }
 
