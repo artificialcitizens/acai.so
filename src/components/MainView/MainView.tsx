@@ -16,6 +16,7 @@ import { getPdfText } from '../../utils/pdf-utils';
 import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { toastifyInfo } from '../Toast';
+import KnowledgeView from '../KnowledgeView/KnowledgeView';
 
 interface MainViewProps {
   domain: 'knowledge' | 'documents' | undefined;
@@ -154,17 +155,6 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     setFileUrl(fileURL);
   };
 
-  const knowledgeRender = () => {
-    if (fileType === 'pdf' && fileUrl) {
-      return <PDFRenderer startingPage={Number(page)} fileUrl={fileUrl} />;
-    }
-    if (fileType === 'txt' || fileType === 'md') {
-      toastifyInfo('Not implemented yet');
-      // @TODO: manage these file types for knowledge
-      // navigate(`/${workspaceId}/documents/${id}?-knowledge`);
-    }
-  };
-
   return !workspaceId ? (
     <p>Loading</p>
   ) : (
@@ -188,7 +178,16 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
           onFilesDrop={handleFilesDrop}
         >
           {domain === 'documents' && activeTab && <TipTap tab={activeTab} />}
-          {domain === 'knowledge' && knowledgeRender()}
+          {domain === 'knowledge' && fileType && (
+            <KnowledgeView
+              workspaceId={workspaceId}
+              filename={activeTabId || 'knowledge'}
+              fileType={fileType as 'pdf' | 'txt' | 'md'}
+              fileUrl={fileUrl?.toString()}
+              content={knowledgeItems?.[0]?.fullText}
+              page={page || '1'}
+            />
+          )}
         </EditorDropzone>
       </div>
     </div>
