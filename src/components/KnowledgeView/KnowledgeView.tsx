@@ -9,7 +9,7 @@ interface KnowledgeViewProps {
   fileType: 'pdf' | 'txt' | 'md';
   fileUrl?: string;
   content?: string;
-  page?: string;
+  page: string;
 }
 
 const knowledgeTab = (workspaceId: string, title: string, content: string) => {
@@ -44,9 +44,7 @@ const KnowledgeView: React.FC<KnowledgeViewProps> = ({
     switch (fileType) {
       case 'pdf':
         if (!fileUrl) return <div>no fileUrl</div>;
-        return (
-          <PDFRenderer startingPage={Number(page) || 1} fileUrl={fileUrl} />
-        );
+        return <PDFRenderer startingPage={Number(page)} fileUrl={fileUrl} />;
       case 'txt':
       case 'md':
         if (!content) return <div>no content</div>;

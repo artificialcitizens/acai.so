@@ -35,7 +35,7 @@ const PDFRenderer: React.FC<PDFRendererProps> = ({ startingPage, fileUrl }) => {
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
-    setPageNumber(1);
+    setPageNumber(startingPage || 1);
   };
 
   const zoomIn = () => {

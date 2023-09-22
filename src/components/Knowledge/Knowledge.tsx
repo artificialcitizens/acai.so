@@ -105,16 +105,21 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
             const pdfData = await getPdfText(pdfDocument, slugify(file.name));
 
             const slugifiedFilename = slugify(file.name);
-            const src = `/${workspaceId}/knowledge/${slugifiedFilename}?fileType=pdf&page=1`;
+            const srcFormat = (pageNumber: string) =>
+              `/${workspaceId}/knowledge/${slugifiedFilename}?fileType=pdf&page=${pageNumber}`;
             if (vectorContext) {
               for (const page of pdfData[slugifiedFilename]) {
+                toastifyInfo(
+                  `Processing page ${page.page} of ${pdfData[slugifiedFilename].length}`,
+                );
+                const p = (page.page + pageStartOffset).toString();
                 const metadata = {
                   id: `${slugifiedFilename}-page-${page.page}`,
                   workspaceId,
                   pageNumber: page.page,
                   offset: pageStartOffset,
                   file,
-                  src,
+                  src: srcFormat(p),
                   totalPages: pdfData[slugifiedFilename].length,
                   originalFilename: file.name,
                 };
@@ -124,7 +129,7 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   [metadata],
                   `DOCUMENT NAME: ${file.name}\n\nSRC: [${slugifiedFilename}](${
                     window.location.origin
-                  }${src})\n\nPAGE NUMBER: ${
+                  }${srcFormat(p)})\n\nPAGE NUMBER: ${
                     page.page + pageStartOffset
                   }\n\n---\n\n`,
                 );
