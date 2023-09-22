@@ -16,7 +16,7 @@ import {
   GlobalStateContextValue,
   GlobalStateContext,
 } from '../../context/GlobalStateContext';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { ChatHistory } from '../../state';
 import Dropdown from '../DropDown';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
@@ -43,14 +43,10 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     voices?.[0]?.value,
   );
   const [singleCommandMode, setSingleCommandMode] = useState<boolean>(false);
-  // const [synthesisMode, setSynthesisMode] = useState<
-  //   'bark' | 'elevenlabs' | 'webSpeech'
-  // >('webSpeech');
   const [synthesisMode, setSynthesisMode] = useLocalStorageKeyValue(
     'VOICE_SYNTHESIS_MODE',
     'elevenlabs',
   );
-  const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [manualTTS, setManualTTS] = useState<string>('');
   const [listening, setListening] = useLocalStorageKeyValue(
     'IS_LISTENING',
