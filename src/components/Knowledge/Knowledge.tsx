@@ -54,12 +54,13 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
               const fileContent = await readFileAsText(file, '');
               const slugifiedFilename = slugify(file.name);
 
+              const src = `/${workspaceId}/knowledge/${slugifiedFilename}?fileType=${fileExtension}`;
               const metadata = {
                 id: slugifiedFilename,
                 workspaceId,
                 filetype: fileExtension,
                 file,
-                src: `/${workspaceId}/knowledge/${slugifiedFilename}?fileType=${fileExtension}`,
+                src,
                 originalFilename: file.name,
                 uploadTimestamp: new Date().toISOString(),
               };
@@ -67,7 +68,7 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                 const memoryVectors = await vectorContext.addText(
                   fileContent,
                   [metadata],
-                  `DOCUMENT NAME: ${file.name}\n\n---\n\n`,
+                  `DOCUMENT NAME: ${file.name}\n\nSRC: [${slugifiedFilename}](${window.location.origin}${src})\n\n---\n\n`,
                 );
                 const filteredMemoryVectors = memoryVectors?.filter(
                   (item) => item.metadata.id === slugifiedFilename,
@@ -104,7 +105,7 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
             const pdfData = await getPdfText(pdfDocument, slugify(file.name));
 
             const slugifiedFilename = slugify(file.name);
-
+            const src = `/${workspaceId}/knowledge/${slugifiedFilename}?fileType=pdf&page=1`;
             if (vectorContext) {
               for (const page of pdfData[slugifiedFilename]) {
                 const metadata = {
@@ -113,7 +114,7 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   pageNumber: page.page,
                   offset: pageStartOffset,
                   file,
-                  src: `/${workspaceId}/knowledge/${slugifiedFilename}?fileType=pdf&page=${page.page}`,
+                  src,
                   totalPages: pdfData[slugifiedFilename].length,
                   originalFilename: file.name,
                 };
@@ -121,7 +122,9 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                 const memoryVectors = await vectorContext.addText(
                   page.content,
                   [metadata],
-                  `DOCUMENT NAME: ${file.name}\n\nPAGE NUMBER: ${
+                  `DOCUMENT NAME: ${file.name}\n\nSRC: [${slugifiedFilename}](${
+                    window.location.origin
+                  }${src})\n\nPAGE NUMBER: ${
                     page.page + pageStartOffset
                   }\n\n---\n\n`,
                 );
@@ -187,7 +190,11 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
         type: 'ADD_TAB',
         tab,
       });
-      navigate(`/${workspaceId}/documents/${tab.id}?-knowledge`);
+      navigate(
+        `/${workspaceId}/knowledge/${slugify(parsedId)}?fileType=${
+          item.fileType
+        }&page=1`,
+      );
     }
   };
 
