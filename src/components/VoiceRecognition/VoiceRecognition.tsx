@@ -7,7 +7,7 @@ import { useBark } from '../../hooks/use-bark';
 
 import { useElevenlabs } from '../../hooks/use-elevenlabs';
 import ScratchPad from '../ScratchPad/ScratchPad';
-import { TTSState, useVoiceCommands } from './use-voice-command';
+import { TTSState, VoiceState, useVoiceCommands } from './use-voice-command';
 import { useWebSpeechSynthesis } from '../../hooks/use-web-tts';
 import { getToken } from '../../utils/config';
 import { toastifyError, toastifyInfo } from '../Toast';
@@ -16,10 +16,11 @@ import {
   GlobalStateContextValue,
   GlobalStateContext,
 } from '../../context/GlobalStateContext';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { ChatHistory } from '../../state';
 import Dropdown from '../DropDown';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
+import { simplifyResponseChain } from '../../lib/ac-langchain/chains/simplify-response-chain';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
@@ -36,17 +37,21 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const { queryAva, loading } = useAva();
   const [ttsLoading, setTtsLoading] = useState<boolean>(false);
   const elevenlabsKey = getToken('ELEVENLABS_API_KEY');
-  const [elevenLabsVoice, setElevenLabsVoice] = useState<string>('');
+  const { synthesizeElevenLabsSpeech, voices } = useElevenlabs();
+  const [elevenLabsVoice, setElevenLabsVoice] = useLocalStorageKeyValue(
+    'ELEVENLABS_VOICE',
+    voices?.[0]?.value,
+  );
   const [singleCommandMode, setSingleCommandMode] = useState<boolean>(false);
-  const [synthesisMode, setSynthesisMode] = useState<
-    'bark' | 'elevenlabs' | 'webSpeech'
-  >('webSpeech');
+  const [synthesisMode, setSynthesisMode] = useLocalStorageKeyValue(
+    'VOICE_SYNTHESIS_MODE',
+    'elevenlabs',
+  );
   const [manualTTS, setManualTTS] = useState<string>('');
   const [listening, setListening] = useLocalStorageKeyValue(
     'IS_LISTENING',
     'true',
   );
-  const { synthesizeElevenLabsSpeech, voices } = useElevenlabs();
   const synthesizeBarkSpeech = useBark();
   const synthesizeWebSpeech = useWebSpeechSynthesis();
   const {
@@ -59,7 +64,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const { agentStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const [state, send] = useActor(agentStateService);
-  const location = useLocation();
+
   const { workspaceId: rawWorkspaceId } = useParams<{
     workspaceId: string;
     domain: string;
@@ -78,6 +83,10 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 
   const handleSpeechChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setListening(event.target.checked ? 'true' : 'false');
+  };
+
+  const handleVoiceStateChange = (voiceState: VoiceState) => {
+    setVoiceRecognitionState(voiceState);
   };
 
   const normalizedAudioElement = async (
@@ -152,7 +161,21 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         });
         toastifyInfo('Generating Text');
         const { response } = await queryAva(t, '');
-        synthesizeAndPlay(response).then(async () => {
+        let voiceResponse;
+        // if response is longer than 2 sentences - accounting for various punctuation - simplify it
+        const sentenceDelimiters = ['.', '?', '!'];
+        const sentenceCount = sentenceDelimiters.reduce(
+          (count, delimiter) => count + response.split(delimiter).length - 1,
+          0,
+        );
+        if (sentenceCount > 3) {
+          voiceResponse = await simplifyResponseChain(
+            `User:${t}\n\nAssistant:${response}\n\nSingle Sentence Response:`,
+          );
+        } else {
+          voiceResponse = response;
+        }
+        synthesizeAndPlay(voiceResponse).then(async () => {
           const res = await Promise.resolve(response);
           const assistantChatHistory: ChatHistory = {
             id: workspaceId,
@@ -245,31 +268,26 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     setManualTTS('');
   };
 
-  const handleTtsServiceChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    setSynthesisMode(event.target.value as TTSState);
-  };
-
   const options = [
     { value: 'webSpeech', label: 'Web Speech API' },
-    import.meta.env.DEV ? { value: 'bark', label: 'Bark' } : undefined,
     { value: 'elevenlabs', label: 'Elevenlabs' },
+    import.meta.env.DEV ? { value: 'bark', label: 'Bark' } : undefined,
   ];
-
-  const handleDropdownChange = (value: string) => {
-    handleTtsServiceChange({
-      target: { value },
-    } as React.ChangeEvent<HTMLSelectElement>);
-  };
 
   const handleElevenLabsDropdownChange = (value: string) => {
     setElevenLabsVoice(value);
   };
 
+  const voiceStateOptions = [
+    { value: 'idle', label: 'Idle' },
+    { value: 'ava', label: 'Ava' },
+    { value: 'notes', label: 'Notes' },
+    { value: 'voice', label: 'Voice' },
+  ];
+
   return (
     <div
-      className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow`}
+      className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow h-full`}
     >
       {audioContext && (
         <audio
@@ -297,12 +315,19 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           }}
         />
       )}
+      <Dropdown
+        label="Synthesis Mode"
+        options={voiceStateOptions}
+        value={voiceRecognitionState}
+        onChange={(e) => handleVoiceStateChange(e as VoiceState)}
+      />
+
       <span className="flex flex-col">
         <Dropdown
-          label="Synthesis Mode"
+          label="TTS Engine"
           options={options.filter((o) => o !== undefined) as any}
           value={synthesisMode}
-          onChange={handleDropdownChange}
+          onChange={(e) => setSynthesisMode(e as TTSState)}
         />
         {synthesisMode === 'elevenlabs' && (
           <Dropdown
@@ -312,6 +337,29 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             onChange={handleElevenLabsDropdownChange}
           />
         )}
+        <form
+          className="text-acai-white w-full flex flex-col flex-grow my-2"
+          onSubmit={handleManualTTS}
+        >
+          <textarea
+            placeholder="Manual TTS"
+            className="rounded bg-base text-acai-white p-4 mb-2"
+            value={manualTTS}
+            onChange={(e) => setManualTTS(e.target.value)}
+            onKeyDown={(e: any) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleManualTTS(e);
+              }
+            }}
+          />
+          <button
+            className="bg-light text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+            type="submit"
+          >
+            Submit
+          </button>
+        </form>
 
         <span className="flex mb-2 items-start">
           <label className="text-acai-white ml-2" htmlFor="singleCommandMode">
@@ -328,7 +376,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         </span>
         <span className="flex mb-2 items-start">
           <label className="text-acai-white ml-2" htmlFor="singleCommandMode">
-            Speech Recognition
+            Voice Commands
           </label>
           <input
             className="mx-1 mt-[0.25rem]"
@@ -346,29 +394,15 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         readonly
         content={userTranscript || 'User Transcript'}
       />
-      <form
-        className="text-acai-white w-full flex flex-col flex-grow my-2"
-        onSubmit={handleManualTTS}
+      <button
+        className="bg-light text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        type="button"
+        onClick={() => {
+          setUserTranscript('');
+        }}
       >
-        <textarea
-          placeholder="Manual TTS"
-          className="rounded bg-base text-acai-white p-4"
-          value={manualTTS}
-          onChange={(e) => setManualTTS(e.target.value)}
-          onKeyDown={(e: any) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              handleManualTTS(e);
-            }
-          }}
-        />
-        <button
-          className="bg-neutral-900 text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-light focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
-          type="submit"
-        >
-          Submit
-        </button>
-      </form>
+        Clear Transcript
+      </button>
     </div>
   );
 };

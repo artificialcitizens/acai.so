@@ -74,9 +74,7 @@ const App = () => {
   };
 
   const handleWindowClick = () => {
-    if (!import.meta.env.DEV) return;
-
-    if (!audioContext) {
+    if (!audioContext && import.meta.env.DEV) {
       activateAudioContext();
     }
   };

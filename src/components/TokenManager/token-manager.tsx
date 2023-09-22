@@ -28,37 +28,39 @@ const TokenManager: React.FC = () => {
         value: openAIKey,
         setValue: setOpenAIKey,
       },
-      {
-        id: 'GOOGLE_API_KEY',
-        name: 'Google API Key',
-        value: googleApiKey,
-        setValue: setGoogleApiKey,
-      },
-      {
-        id: 'GOOGLE_CSE_ID',
-        name: 'Google CSE Key',
-        value: googleCSEId,
-        setValue: setGoogleCSEId,
-      },
+      // {
+      //   id: 'GOOGLE_API_KEY',
+      //   name: 'Google API Key',
+      //   value: googleApiKey,
+      //   setValue: setGoogleApiKey,
+      // },
+      // {
+      //   id: 'GOOGLE_CSE_ID',
+      //   name: 'Google CSE Key',
+      //   value: googleCSEId,
+      //   setValue: setGoogleCSEId,
+      // },
     ],
     [
       openAIKey,
-      googleApiKey,
-      googleCSEId,
       setOpenAIKey,
-      setGoogleApiKey,
-      setGoogleCSEId,
+      // googleApiKey,
+      // setGoogleApiKey,
+      // googleCSEId,
+      // setGoogleCSEId,
+      // elevenlabsApiKey,
+      // setElevenlabsApiKey,
     ],
   );
 
-  if (import.meta.env.DEV)
+  if (import.meta.env.DEV) {
     keys.push({
       id: 'ELEVENLABS_API_KEY',
-      name: 'Elevenlabs Api Key',
+      name: 'Eleven Labs API Key',
       value: elevenlabsApiKey,
       setValue: setElevenlabsApiKey,
     });
-
+  }
   const [values, setValues] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -97,7 +99,7 @@ const TokenManager: React.FC = () => {
       <input
         type="submit"
         value="Submit"
-        className="bg-neutral-900 text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-light focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        className="bg-light text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
       />
     </form>
   );

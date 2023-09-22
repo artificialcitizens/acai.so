@@ -27,7 +27,8 @@
     "src/components/langchain-cc/**/*.ts",
     "vite.config.ts",
     "src/main.tsx",
-    "server.ts"
+    "server.ts",
+    "src/global.d.ts"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

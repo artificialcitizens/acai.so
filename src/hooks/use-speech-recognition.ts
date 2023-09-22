@@ -12,7 +12,7 @@ function useSpeechRecognition({
   const speechRecognitionRef = useRef<any | null>(null);
 
   useEffect(() => {
-    if (!active) return;
+    if (!active || !import.meta.env.DEV) return;
     if (!('webkitSpeechRecognition' in window)) return;
     speechRecognitionRef.current = new (
       window as any

@@ -41,16 +41,26 @@ export const Ava: React.FC<AvaProps> = ({
   const [uiState] = useActor(uiStateService);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
 
+  const currentAgentMode =
+    agentStateService.getSnapshot().context[workspaceId]?.agentMode;
+
   const toggleAgentThoughts = () => {
     uiStateService.send({ type: 'TOGGLE_AGENT_THOUGHTS' });
   };
 
-  const toggleAgentChat = () => {
-    uiStateService.send({ type: 'TOGGLE_AGENT_CHAT' });
-  };
-
   const toggleSettings = () => {
     setSettingsOpen(!settingsOpen);
+  };
+
+  const formatAgentMode = (mode: string) => {
+    switch (mode) {
+      case 'ava':
+        return 'AVA';
+      case 'chat':
+        return '';
+      default:
+        return mode.charAt(0).toUpperCase() + mode.slice(1);
+    }
   };
 
   return (
@@ -72,41 +82,6 @@ export const Ava: React.FC<AvaProps> = ({
         </h5>
         <TokenManager />
       </ExpansionPanel>
-      <ExpansionPanel title="Knowledge">
-        <KnowledgeUpload workspaceId={workspaceId} />
-      </ExpansionPanel>
-      {import.meta.env.DEV && (
-        <ExpansionPanel title="Voice Synthesis">
-          <VoiceRecognition
-            onVoiceActivation={onVoiceActivation}
-            audioContext={audioContext}
-          />
-        </ExpansionPanel>
-      )}
-
-      <ExpansionPanel title="AVA">
-        <ScratchPad
-          placeholder="Custom Prompt"
-          content={systemNotes}
-          handleInputChange={(e) => {
-            agentStateService.send({
-              type: 'UPDATE_SYSTEM_NOTES',
-              workspaceId: workspaceId,
-              systemNotes: e.target.value,
-            });
-          }}
-        />
-        <ChatModelDropdown workspaceId={workspaceId} />
-        {agentStateService.getSnapshot().context[workspaceId]?.agentMode ===
-          'custom' && (
-          <>
-            <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
-              Custom Agent Server
-            </h5>
-            <SocketManager />
-          </>
-        )}
-      </ExpansionPanel>
 
       <ExpansionPanel
         title="Logs"
@@ -119,31 +94,79 @@ export const Ava: React.FC<AvaProps> = ({
           secondaryFilter="agent-thought"
         />
       </ExpansionPanel>
-      <ExpansionPanel
-        title="Chat"
-        className="chat-panel"
-        onChange={toggleAgentChat}
-        isOpened={uiState.context.agentChatOpen}
-      >
-        {workspaceId && (
-          <Chat
-            name="Ava"
-            avatar=".."
-            abortController={null}
-            loading={loading}
-            streamingMessage={streamingMessage}
-            onSubmitHandler={async (message) => {
-              try {
-                const { response } = await queryAva(message, systemNotes);
-                return response;
-              } catch (e: any) {
-                toastifyError(e.message);
-                return 'Sorry, I had an issue processing your query.';
-              }
-            }}
+
+      {import.meta.env.DEV && (
+        <ExpansionPanel title="Voice Synthesis">
+          <VoiceRecognition
+            onVoiceActivation={onVoiceActivation}
+            audioContext={audioContext}
           />
-        )}
+        </ExpansionPanel>
+      )}
+
+      <ExpansionPanel title="Knowledge">
+        <KnowledgeUpload workspaceId={workspaceId} />
       </ExpansionPanel>
+
+      <ExpansionPanel title="AVA">
+        <ChatModelDropdown workspaceId={workspaceId} />
+
+        {agentStateService.getSnapshot().context[workspaceId]?.agentMode ===
+          'custom' && (
+          <>
+            <h5 className="text-acai-white text-xs pb-2 pl-3 font-bold mb-3 border-b border-b-light border-b-solid">
+              Custom Agent Server
+            </h5>
+            <SocketManager />
+          </>
+        )}
+        <ScratchPad
+          placeholder="Custom Prompt"
+          content={systemNotes}
+          handleInputChange={(e) => {
+            agentStateService.send({
+              type: 'UPDATE_SYSTEM_NOTES',
+              workspaceId: workspaceId,
+              systemNotes: e.target.value,
+            });
+          }}
+        />
+      </ExpansionPanel>
+
+      {workspaceId && (
+        <span className="flex flex-col flex-grow">
+          <p className="text-xs font-bold p-3">
+            Chat {/* @TODO: create a tag component */}
+            {/* <span
+              className="ml-2 font-semibold border-lighter border-solid border p-1 px-2 rounded-xl text-[9px]"
+              style={{
+                borderColor:
+                  currentAgentMode === 'chat' ? 'transparent' : 'currentcolor',
+              }}
+            >
+              {formatAgentMode(currentAgentMode)}
+            </span> */}
+          </p>
+          <div className="flex flex-col flex-grow p-2 pt-0">
+            <Chat
+              name="Ava"
+              avatar=".."
+              abortController={null}
+              loading={loading}
+              streamingMessage={streamingMessage}
+              onSubmitHandler={async (message) => {
+                try {
+                  const { response } = await queryAva(message, systemNotes);
+                  return response;
+                } catch (e: any) {
+                  toastifyError(e.message);
+                  return 'Sorry, I had an issue processing your query.';
+                }
+              }}
+            />
+          </div>
+        </span>
+      )}
     </SBSidebar>
   );
 };

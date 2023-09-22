@@ -45,10 +45,6 @@ export const agentMode = [
   // maps to rag agent
   'knowledge',
   'custom',
-  // 'rag',
-  // 'create',
-  // 'research',
-  // 'writer',
 ];
 
 if (import.meta.env.DEV) {
