@@ -40,12 +40,6 @@ const TokenManager: React.FC = () => {
       //   value: googleCSEId,
       //   setValue: setGoogleCSEId,
       // },
-      {
-        id: 'ELEVENLABS_API_KEY',
-        name: 'Elevenlabs Api Key',
-        value: elevenlabsApiKey,
-        setValue: setElevenlabsApiKey,
-      },
     ],
     [
       openAIKey,
@@ -54,11 +48,19 @@ const TokenManager: React.FC = () => {
       // setGoogleApiKey,
       // googleCSEId,
       // setGoogleCSEId,
-      elevenlabsApiKey,
-      setElevenlabsApiKey,
+      // elevenlabsApiKey,
+      // setElevenlabsApiKey,
     ],
   );
 
+  if (import.meta.env.DEV) {
+    keys.push({
+      id: 'ELEVENLABS_API_KEY',
+      name: 'Eleven Labs API Key',
+      value: elevenlabsApiKey,
+      setValue: setElevenlabsApiKey,
+    });
+  }
   const [values, setValues] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
