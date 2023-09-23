@@ -44,6 +44,7 @@ export const agentMode = [
   'chat',
   // maps to rag agent
   'knowledge',
+  'proto',
   'custom',
 ];
 
@@ -83,7 +84,7 @@ export const useAva = (): {
   });
 
   const navigate = useNavigate();
-  const { appStateService }: GlobalStateContextValue =
+  const { appStateService, protoStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const [agentState] = useActor(globalServices.agentStateService);
   const [userName] = useLocalStorageKeyValue('USER_NAME', '');
@@ -251,6 +252,21 @@ export const useAva = (): {
             },
           },
         });
+        setLoading(false);
+        return {
+          response: response,
+          // abortController: null,
+        };
+      }
+      case 'proto': {
+        const response = 'Hello Proto';
+
+        protoStateService.send({
+          type: 'UPDATE_FILE_CONTENT',
+          fileContent:
+            'const App = () => <p>Hello Proto!</p>; export default App',
+        });
+
         setLoading(false);
         return {
           response: response,
