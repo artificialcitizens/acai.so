@@ -45,7 +45,7 @@ async function writeIndexJS(
   await webcontainerInstance.fs.writeFile('src/App.tsx', content);
 }
 
-const instance = await bootWebContainer();
+// const instance = await bootWebContainer();
 
 interface ProtoProps {
   fileContent?: string;
@@ -65,11 +65,21 @@ const Proto: React.FC<ProtoProps> = ({ fileContent }) => {
   const toggleEditMode = () => {
     setEditMode(!isEditMode);
   };
+  const [instance, setInstance] = useState<WebContainer | null>(null);
+
+  useEffect(() => {
+    const bootInstance = async () => {
+      const newInstance = await bootWebContainer();
+      setInstance(newInstance);
+    };
+
+    bootInstance();
+  }, []);
 
   useEffect(() => {
     const mountWebContainer = async (initialContent: string) => {
       if (!iframeRef.current) throw new Error('iframe not found');
-
+      if (!instance) throw new Error('instance not found');
       await instance.mount(files);
 
       toastifyInfo('Installing dependencies');
@@ -95,18 +105,19 @@ const Proto: React.FC<ProtoProps> = ({ fileContent }) => {
 
     setText(initialContent);
     mountWebContainer(initialContent);
-  }, [fileContent]);
-
+  }, [fileContent, instance]);
   useEffect(() => {
     const newValue = protoState.context.fileContent;
+    if (!newValue) return;
     setText(newValue);
     (async () => {
+      // Check if newValue is defined
       if (instance) {
         await writeIndexJS(instance, newValue);
       }
       localStorage.setItem('App.tsx', newValue);
     })();
-  }, [protoState.context.fileContent]);
+  }, [instance, protoState.context.fileContent]);
 
   return (
     <div className="p-8 flex flex-col h-full w-full relative">
@@ -167,7 +178,6 @@ const Proto: React.FC<ProtoProps> = ({ fileContent }) => {
                     if (instance) {
                       await writeIndexJS(instance, newValue);
                     }
-                    localStorage.setItem('App.tsx', newValue);
                   })();
                 }}
               ></textarea>
