@@ -177,6 +177,7 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
           onPDFDrop={handlePdfDrop}
           showHelperText={!activeTab && !fileUrl}
           onFilesDrop={handleFilesDrop}
+          className="flex-grow" // Add this line
         >
           {domain === 'documents' && activeTab && <TipTap tab={activeTab} />}
           {domain === 'knowledge' && fileType && (
