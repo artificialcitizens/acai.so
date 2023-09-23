@@ -1,14 +1,12 @@
 import { WebContainer } from '@webcontainer/api';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
+import { GlobalStateContext } from '../../context/GlobalStateContext';
 import { files } from './vite-files';
 import { toastifyError, toastifyInfo } from '../Toast';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Highlight from '@tiptap/extension-highlight';
 import { PrismAsyncLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import jsx from 'react-syntax-highlighter/dist/esm/languages/prism/jsx';
-import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useActor } from '@xstate/react';
 
 SyntaxHighlighter.registerLanguage('jsx', jsx);
 
@@ -49,7 +47,13 @@ async function writeIndexJS(
 
 const instance = await bootWebContainer();
 
-const Proto = () => {
+interface ProtoProps {
+  fileContent?: string;
+}
+
+const Proto: React.FC<ProtoProps> = ({ fileContent }) => {
+  const { protoStateService } = useContext(GlobalStateContext);
+  const [protoState] = useActor(protoStateService);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const syntaxHighlighterRef = useRef<HTMLDivElement>(null);
@@ -57,34 +61,13 @@ const Proto = () => {
   const [isEditorVisible, setEditorVisible] = useState(true);
   const [isEditMode, setEditMode] = useState(true);
   const [originalText, setOriginalText] = useState<string>('');
-  const editor = useEditor({
-    extensions: [StarterKit, Highlight],
-    content: text,
-  });
 
   const toggleEditMode = () => {
     setEditMode(!isEditMode);
   };
 
   useEffect(() => {
-    if (editor) {
-      editor.commands.setContent(text);
-    }
-  }, [editor, text]);
-
-  useEffect(() => {
-    if (!editor) return;
-    editor.on('update', () => {
-      const json = editor.getJSON();
-      const formattedText = JSON.stringify(json, null, 2);
-      setText(formattedText);
-      instance && writeIndexJS(instance, formattedText);
-      localStorage.setItem('App.tsx', formattedText);
-    });
-  }, [editor]);
-
-  useEffect(() => {
-    const mountWebContainer = async () => {
+    const mountWebContainer = async (initialContent: string) => {
       if (!iframeRef.current) throw new Error('iframe not found');
 
       await instance.mount(files);
@@ -96,20 +79,38 @@ const Proto = () => {
         toastifyError('Error encountered installing dependencies');
         throw new Error('Failed to install dependencies');
       }
-
-      startDevServer(instance, iframeRef.current);
+      if (instance) {
+        await writeIndexJS(instance, initialContent);
+      }
+      startDevServer(instance, iframeRef.current).then(() => {
+        toastifyInfo('Dev server started');
+      });
     };
     const localStorageContent = localStorage.getItem('App.tsx');
     setOriginalText(files.src.directory['App.tsx'].file.contents || '');
-    setText(
-      localStorageContent || files.src.directory['App.tsx'].file.contents,
-    );
-    mountWebContainer();
-  }, []);
+    const initialContent =
+      fileContent ||
+      localStorageContent ||
+      files.src.directory['App.tsx'].file.contents;
+
+    setText(initialContent);
+    mountWebContainer(initialContent);
+  }, [fileContent]);
+
+  useEffect(() => {
+    const newValue = protoState.context.fileContent;
+    setText(newValue);
+    (async () => {
+      if (instance) {
+        await writeIndexJS(instance, newValue);
+      }
+      localStorage.setItem('App.tsx', newValue);
+    })();
+  }, [protoState.context.fileContent]);
 
   return (
     <div className="p-8 flex flex-col h-full w-full relative">
-      <h1 className="text-2xl">WebContainer</h1>
+      <h1 className="text-2xl">Web Container</h1>
       <section className="flex flex-col flex-grow w-full h-full relative">
         <iframe
           title="prototype view"
@@ -158,6 +159,10 @@ const Proto = () => {
                 onChange={(e) => {
                   const newValue = e.target.value;
                   setText(newValue);
+                  protoStateService.send({
+                    type: 'UPDATE_FILE_CONTENT',
+                    fileContent: newValue,
+                  });
                   (async () => {
                     if (instance) {
                       await writeIndexJS(instance, newValue);
