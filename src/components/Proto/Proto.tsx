@@ -56,6 +56,7 @@ const Proto = () => {
   const [text, setText] = useState('');
   const [isEditorVisible, setEditorVisible] = useState(true);
   const [isEditMode, setEditMode] = useState(true);
+  const [originalText, setOriginalText] = useState<string>('');
   const editor = useEditor({
     extensions: [StarterKit, Highlight],
     content: text,
@@ -99,6 +100,7 @@ const Proto = () => {
       startDevServer(instance, iframeRef.current);
     };
     const localStorageContent = localStorage.getItem('App.tsx');
+    setOriginalText(files.src.directory['App.tsx'].file.contents || '');
     setText(
       localStorageContent || files.src.directory['App.tsx'].file.contents,
     );
@@ -121,7 +123,7 @@ const Proto = () => {
             isEditorVisible
               ? { height: '82vh', overflow: 'hidden' }
               : {
-                  height: '2rem',
+                  height: '3rem',
                   overflow: 'hidden',
                   backgroundColor: 'transparent',
                 }
@@ -148,7 +150,7 @@ const Proto = () => {
                   padding: '0',
                   //@TODO: update to theme color
                   caretColor: '#E7E9E5',
-                  height: isEditorVisible ? 'calc(82vh - 2rem)' : '0',
+                  height: isEditorVisible ? 'calc(82vh - 2rem)' : '1rem',
                   maxHeight: 'calc(82vh - 2rem)',
                   position: 'absolute',
                   zIndex: 1,
@@ -196,11 +198,30 @@ const Proto = () => {
               >
                 {isEditMode ? 'View' : 'Edit'}
               </button> */}
+              <button
+                className="absolute top-4 right-12 m-2 text-xs font-bold text-acai-white z-10"
+                onClick={() => {
+                  const resetConfirm = window.prompt(
+                    'This will reset all code to default. Type "reset" to confirm.',
+                  );
+                  if (resetConfirm !== 'reset') return;
+                  setText(originalText);
+                  (async () => {
+                    if (instance) {
+                      await writeIndexJS(instance, originalText);
+                    }
+                    localStorage.setItem('App.tsx', originalText);
+                  })();
+                }}
+              >
+                Reset
+              </button>
             </>
           )}
+
           <button
             onClick={() => setEditorVisible(!isEditorVisible)}
-            className="absolute top-3 right-2 m-2 text-xs font-bold text-acai-white z-10"
+            className="absolute top-4 right-6 m-2 text-xs font-bold text-acai-white z-10"
           >
             {!isEditorVisible ? 'view code' : 'x'}
           </button>
