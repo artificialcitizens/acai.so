@@ -25,6 +25,7 @@ import { ragAgentResponse } from '../../lib/ac-langchain/agents/rag-agent/rag-ag
 import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../db';
+import { protoAgentResponse } from '../../lib/ac-langchain/agents/proto-agent/proto-agent';
 
 export type AvaChatResponse = {
   response: string;
@@ -65,6 +66,7 @@ export const useAva = (): {
   const [loading, setLoading] = useState(false);
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
+  const [protoState] = useActor(globalServices.protoStateService);
   const vectorContext = useContext(VectorStoreContext);
   const { workspaceId: rawWorkspaceId } = useParams<{
     workspaceId: string;
@@ -73,6 +75,7 @@ export const useAva = (): {
   }>();
 
   const workspaceId = rawWorkspaceId || 'docs';
+  const currentProto = localStorage.getItem('App.tsx');
 
   // @TODO - Seems to need to be here to get the context to load, why though?
   const knowledgeItems = useLiveQuery(async () => {
@@ -259,17 +262,42 @@ export const useAva = (): {
         };
       }
       case 'proto': {
-        const response = 'Hello Proto';
+        const response = await protoAgentResponse({
+          query: message,
+          chatHistory: '',
+          context: currentProto || '',
+          callbacks: {
+            handleProtoResponse: (response) => {
+              protoStateService.send({
+                type: 'UPDATE_FILE_CONTENT',
+                fileContent: response,
+              });
+            },
+            handleLLMStart: () => {
+              setLoading(true);
+              // console.log({ llm, prompts });
+            },
+            handleLLMNewToken: (token) => {
+              setStreamingMessage((prev) => prev + token);
+              // console.log(token);
+            },
+            handleLLMEnd: () => {
+              setLoading(false);
+              setStreamingMessage('');
 
-        protoStateService.send({
-          type: 'UPDATE_FILE_CONTENT',
-          fileContent:
-            'const App = () => <p>Hello Proto!</p>; export default App',
+              // console.log({ output });
+            },
+            handleLLMError: (err) => {
+              setError(err.message);
+              setLoading(false);
+              // console.log({ err });
+            },
+          },
         });
 
         setLoading(false);
         return {
-          response: response,
+          response: response.content,
           // abortController: null,
         };
       }
