@@ -78,6 +78,7 @@ const Proto = () => {
       const formattedText = JSON.stringify(json, null, 2);
       setText(formattedText);
       instance && writeIndexJS(instance, formattedText);
+      localStorage.setItem('App.tsx', formattedText);
     });
   }, [editor]);
 
@@ -97,10 +98,11 @@ const Proto = () => {
 
       startDevServer(instance, iframeRef.current);
     };
-
+    const localStorageContent = localStorage.getItem('App.tsx');
+    setText(
+      localStorageContent || files.src.directory['App.tsx'].file.contents,
+    );
     mountWebContainer();
-
-    setText(files.src.directory['App.tsx'].file.contents);
   }, []);
 
   return (
@@ -154,6 +156,7 @@ const Proto = () => {
                 onChange={(e) => {
                   setText(e.target.value);
                   instance && writeIndexJS(instance, e.target.value);
+                  localStorage.setItem('App.tsx', e.target.value);
                 }}
               ></textarea>
               <div
