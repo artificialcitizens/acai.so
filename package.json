@@ -41,6 +41,7 @@
     "@tiptap/suggestion": "^2.0.3",
     "@types/uuid": "^9.0.2",
     "@uidotdev/usehooks": "^2.0.1",
+    "@webcontainer/api": "^1.1.5",
     "@xenova/transformers": "^2.6.0",
     "@xstate/react": "^3.2.2",
     "ai": "^2.2.12",

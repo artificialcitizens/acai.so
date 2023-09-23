@@ -74,6 +74,9 @@ dependencies:
   '@uidotdev/usehooks':
     specifier: ^2.0.1
     version: 2.0.1(react-dom@18.2.0)(react@18.2.0)
+  '@webcontainer/api':
+    specifier: ^1.1.5
+    version: 1.1.5
   '@xenova/transformers':
     specifier: ^2.6.0
     version: 2.6.0
@@ -2417,6 +2420,10 @@ packages:
 
   /@vue/shared@3.3.4:
     resolution: {integrity: sha512-7OjdcV8vQ74eiz1TZLzZP4JwqM5fA94K6yntPS5Z25r9HDuGNzaGdgvwKYq6S+MxwF0TFRwe50fIR/MYnakdkQ==}
+    dev: false
+
+  /@webcontainer/api@1.1.5:
+    resolution: {integrity: sha512-qMJyqO+A8+B8JKW/IW9KVQblAiEQwesq7ka6w8pgm6DXKWCQaPVOco4Zo7FxZ09OmBIX+lnXyfKbQzXiORLGJg==}
     dev: false
 
   /@xenova/transformers@2.6.0:

@@ -17,9 +17,10 @@ import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { toastifyInfo } from '../Toast';
 import KnowledgeView from '../KnowledgeView/KnowledgeView';
+import Proto from '../Proto/Proto';
 
 interface MainViewProps {
-  domain: 'knowledge' | 'documents' | undefined;
+  domain: 'knowledge' | 'documents' | 'proto' | undefined;
 }
 
 const MainView: React.FC<MainViewProps> = ({ domain }) => {
@@ -188,6 +189,7 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
               page={page || '1'}
             />
           )}
+          {domain === 'proto' && <Proto />}
         </EditorDropzone>
       </div>
     </div>
