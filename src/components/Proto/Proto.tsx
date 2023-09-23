@@ -154,9 +154,14 @@ const Proto = () => {
                   zIndex: 1,
                 }}
                 onChange={(e) => {
-                  setText(e.target.value);
-                  instance && writeIndexJS(instance, e.target.value);
-                  localStorage.setItem('App.tsx', e.target.value);
+                  const newValue = e.target.value;
+                  setText(newValue);
+                  (async () => {
+                    if (instance) {
+                      await writeIndexJS(instance, newValue);
+                    }
+                    localStorage.setItem('App.tsx', newValue);
+                  })();
                 }}
               ></textarea>
               <div
