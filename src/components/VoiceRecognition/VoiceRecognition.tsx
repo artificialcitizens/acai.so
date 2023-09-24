@@ -29,7 +29,8 @@ interface VoiceRecognitionProps {
 }
 
 // @TODO: create xstate machine for voice recognition
-// pass user transcript to useAva hook
+// @TODO: separate logic and refactor
+// @TODO: pass user transcript to useAva hook
 const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   onVoiceActivation,
   audioContext,
@@ -49,8 +50,8 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     'elevenlabs',
   );
   const [manualTTS, setManualTTS] = useState<string>('');
-  const [webSpeechOn, setWebSpeechRecognition] = useLocalStorageKeyValue(
-    'WEB_SPEECH_RECOGNITION',
+  const [transcriptionOn, setTranscription] = useLocalStorageKeyValue(
+    'TRANSCRIPTION_ON',
     'true',
   );
   const synthesizeBarkSpeech = useBark();
@@ -87,7 +88,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 
   const toggleWebspeech = (bool: boolean) => {
     const booleanString = bool ? 'true' : 'false';
-    setWebSpeechRecognition(booleanString);
+    setTranscription(booleanString);
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -264,7 +265,9 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   };
 
   const onTranscriptionComplete = async (t: string) => {
-    const updatedUserTranscript = userTranscript + '\n' + t + '\n';
+    const updatedUserTranscript = userTranscript
+      ? userTranscript + '\n' + t
+      : t;
     setUserTranscript(updatedUserTranscript);
     handleVoiceCommand(t);
     handleVoiceRecognition(updatedUserTranscript);
@@ -273,7 +276,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   useSpeechRecognition({
     onTranscriptionComplete,
     // @TODO: Fix hacky listening state
-    active: !ttsLoading && webSpeechOn === 'true' ? true : false,
+    active: !ttsLoading && transcriptionOn === 'true' ? true : false,
   });
 
   const handleManualTTS = (e: React.FormEvent<HTMLFormElement>) => {
@@ -303,38 +306,58 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     <div
       className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow h-full`}
     >
-      {audioContext && (
-        <audio
-          ref={audioRef}
-          className="rounded-full p-2 w-full"
-          controls
-          src={audioSrc ? audioSrc : undefined}
-          autoPlay
-          onPlay={() => {
-            srcRef.current!.connect(gainNodeRef.current!);
-            gainNodeRef.current!.connect(audioContext.destination);
-          }}
-          onEnded={() => {
-            if (singleCommandMode) setVoiceRecognitionState('idle');
-            setUserTranscript('');
-            setTtsLoading(false);
-            srcRef.current!.disconnect(gainNodeRef.current!);
-            gainNodeRef.current!.disconnect(audioContext.destination);
-          }}
-          onError={() => {
-            toastifyError('Error playing audio');
-            setTtsLoading(false);
-            srcRef.current!.disconnect(gainNodeRef.current!);
-            gainNodeRef.current!.disconnect(audioContext.destination);
-          }}
+      <span className="flex mb-2 items-center">
+        <label
+          className="text-xs font-bold text-acai-white ml-2"
+          htmlFor="transcriptionOn"
+        >
+          Transcribe
+        </label>
+        <input
+          className="mx-1 mt-[0.125rem]"
+          type="checkbox"
+          id="transcriptionOn"
+          name="option"
+          checked={transcriptionOn === 'true' ? true : false}
+          onChange={handleSpeechChange}
         />
-      )}
+      </span>
+      <p className="text-acai-white mb-2 ml-2">User Transcript</p>
+      <ScratchPad
+        placeholder="User Transcript"
+        readonly
+        content={userTranscript}
+      />
+      <button
+        className="bg-light text-acai-white px-4 py-2 mb-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        type="button"
+        onClick={() => {
+          setUserTranscript('');
+        }}
+      >
+        Clear Transcript
+      </button>
+      <hr />
       <Dropdown
         label="Synthesis Mode"
         options={voiceStateOptions}
         value={voiceRecognitionState}
         onChange={(e) => handleVoiceStateChange(e as VoiceState)}
       />
+
+      <span className="flex mb-2 items-start">
+        <label className="text-acai-white ml-2" htmlFor="singleCommandMode">
+          Single Command
+        </label>
+        <input
+          className="mx-1 mt-[0.25rem]"
+          type="checkbox"
+          id="singleCommandMode"
+          name="option"
+          checked={singleCommandMode}
+          onChange={handleChange}
+        />
+      </span>
 
       <span className="flex flex-col">
         <Dropdown
@@ -374,49 +397,33 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             Submit
           </button>
         </form>
-
-        <span className="flex mb-2 items-start">
-          <label className="text-acai-white ml-2" htmlFor="singleCommandMode">
-            Single Command
-          </label>
-          <input
-            className="mx-1 mt-[0.25rem]"
-            type="checkbox"
-            id="singleCommandMode"
-            name="option"
-            checked={singleCommandMode}
-            onChange={handleChange}
-          />
-        </span>
-        <span className="flex mb-2 items-start">
-          <label className="text-acai-white ml-2" htmlFor="singleCommandMode">
-            Voice Commands
-          </label>
-          <input
-            className="mx-1 mt-[0.25rem]"
-            type="checkbox"
-            id="singleCommandMode"
-            name="option"
-            checked={webSpeechOn === 'true' ? true : false}
-            onChange={handleSpeechChange}
-          />
-        </span>
       </span>
-      <ScratchPad
-        placeholder="User Transcript"
-        height="24px"
-        readonly
-        content={userTranscript || 'User Transcript'}
-      />
-      <button
-        className="bg-light text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
-        type="button"
-        onClick={() => {
-          setUserTranscript('');
-        }}
-      >
-        Clear Transcript
-      </button>
+      {audioContext && (
+        <audio
+          ref={audioRef}
+          className="rounded-full p-2 w-full"
+          controls
+          src={audioSrc ? audioSrc : undefined}
+          autoPlay
+          onPlay={() => {
+            srcRef.current!.connect(gainNodeRef.current!);
+            gainNodeRef.current!.connect(audioContext.destination);
+          }}
+          onEnded={() => {
+            if (singleCommandMode) setVoiceRecognitionState('idle');
+            setUserTranscript('');
+            setTtsLoading(false);
+            srcRef.current!.disconnect(gainNodeRef.current!);
+            gainNodeRef.current!.disconnect(audioContext.destination);
+          }}
+          onError={() => {
+            toastifyError('Error playing audio');
+            setTtsLoading(false);
+            srcRef.current!.disconnect(gainNodeRef.current!);
+            gainNodeRef.current!.disconnect(audioContext.destination);
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -169,7 +169,7 @@ p {
 
 pre,
 code {
-  @apply bg-black text-acai-white !important;
+  @apply bg-darker text-acai-white !important;
 }
 
 /* @media (prefers-color-scheme: light) {
@@ -184,3 +184,6 @@ code {
     background-color: #f9f9f9;
   }
 } */
+hr {
+  @apply border-lighter my-2;
+}
