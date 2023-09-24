@@ -1,20 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { toastifyError } from '../components/Toast';
 
 const useBroadcastManager = (channelName: string, callBack: () => void) => {
   const [id] = useState(Math.random().toString(36).substring(2)); // Generate a unique ID
-  const [channel, setChannel] = useState<BroadcastChannel | null>(null);
+  const channel = useRef<BroadcastChannel | null>(null);
+  const [isChannelOpen, setIsChannelOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    const newChannel = new BroadcastChannel(channelName);
-    newChannel.onmessage = handleMessage;
-    setChannel(newChannel);
+    if (!channel.current) {
+      channel.current = new BroadcastChannel(channelName);
+      channel.current.onmessage = handleMessage;
+      setIsChannelOpen(true);
+    }
 
     return () => {
-      newChannel.close();
+      if (channel.current) {
+        channel.current.close();
+        setIsChannelOpen(false);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [channelName]);
+  }, []);
 
   const handleMessage = (event: MessageEvent) => {
     if (event.data.type === 'newTabOpened' && event.data.id !== id) {
@@ -26,8 +32,8 @@ const useBroadcastManager = (channelName: string, callBack: () => void) => {
   };
 
   const notifyNewTab = () => {
-    if (channel) {
-      channel.postMessage({ type: 'newTabOpened', id: id });
+    if (channel.current && isChannelOpen) {
+      channel.current.postMessage({ type: 'newTabOpened', id: id });
     }
   };
 

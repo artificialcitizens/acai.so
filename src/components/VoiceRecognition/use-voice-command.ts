@@ -102,6 +102,12 @@ export const useVoiceCommands = () => {
     setStatesAndToast(setUserTranscript, setVoiceRecognitionState, '', 'idle');
   };
 
+  /**
+   * commands: Array of strings that will trigger the command
+   * recognitionState: The state that the voice recognition will be set to when the command is triggered
+   * toastMessage: The message that will be displayed in the toast
+   * action: The function that will be called when the command is triggered
+   */
   const config: Command[] = [
     createCommand({ commands: ['ava', 'eva'], recognitionState: 'ava' }),
     createCommand({
