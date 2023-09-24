@@ -29,7 +29,7 @@ export const protoChain = async ({
 
   const response = model.call([
     new SystemMessage(systemMessage),
-    new HumanMessage(query + '\n Output:'),
+    new HumanMessage(query),
   ]);
 
   return {

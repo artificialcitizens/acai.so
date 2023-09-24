@@ -4,6 +4,11 @@ import { HumanMessage, SystemMessage } from 'langchain/schema';
 import { protoChain } from './proto-chain';
 import { getToken } from '../../../../utils/config';
 
+function extractCode(code: string): string | null {
+  const match = code.match(/```(jsx|js|tsx)([\s\S]*?)```/);
+  return match ? match[2].trim() : code;
+}
+
 export const protoAgentResponse = async ({
   query,
   chatHistory,
@@ -27,7 +32,7 @@ export const protoAgentResponse = async ({
     context,
   });
   const componentResponse = await response;
-  callbacks.handleProtoResponse(componentResponse.content);
+  callbacks.handleProtoResponse(extractCode(componentResponse.content));
 
   const streamingModel = new ChatOpenAI({
     openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
@@ -38,10 +43,10 @@ export const protoAgentResponse = async ({
 
   const stream = await streamingModel.call([
     new SystemMessage(
-      'Only return the response your component is being generated',
+      'Given the two versions of code, give a high level description of the changes you made. Keep it short and simple and in first person prose. If the code is completely new, say so, then give a high level description of the code.',
     ),
     new HumanMessage(
-      'This is a test, only return, Your component is being generated',
+      `Old Code:\n${context}\n\nNew Code:\n${componentResponse.content}`,
     ),
   ]);
 

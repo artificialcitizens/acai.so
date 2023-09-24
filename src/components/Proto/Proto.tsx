@@ -6,7 +6,7 @@ import { toastifyError, toastifyInfo } from '../Toast';
 import { PrismAsyncLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import jsx from 'react-syntax-highlighter/dist/esm/languages/prism/jsx';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { useActor } from '@xstate/react';
+import { useActor, useSelector } from '@xstate/react';
 
 SyntaxHighlighter.registerLanguage('jsx', jsx);
 
@@ -51,37 +51,55 @@ interface ProtoProps {
   fileContent?: string;
 }
 
-const Proto: React.FC<ProtoProps> = ({ fileContent }) => {
+const Proto: React.FC<ProtoProps> = () => {
   const { protoStateService } = useContext(GlobalStateContext);
   const [protoState] = useActor(protoStateService);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const syntaxHighlighterRef = useRef<HTMLDivElement>(null);
-  const [text, setText] = useState('');
   const [isEditorVisible, setEditorVisible] = useState(true);
-  const [isEditMode, setEditMode] = useState(true);
   const [originalText, setOriginalText] = useState<string>('');
+  const [text, setText] = useState('');
+  const fileContent = useSelector(
+    protoStateService,
+    (state) => state.context.fileContent,
+  );
 
-  const toggleEditMode = () => {
-    setEditMode(!isEditMode);
-  };
   const [instance, setInstance] = useState<WebContainer | null>(null);
 
   useEffect(() => {
+    if (!fileContent || !instance) return;
+    setText(fileContent);
+    (async () => {
+      // Check if newValue is defined
+      if (instance) {
+        await writeIndexJS(instance, fileContent);
+      }
+    })();
+  }, [fileContent, instance, protoState.context.fileContent]);
+
+  useEffect(() => {
     const bootInstance = async () => {
-      const newInstance = await bootWebContainer();
-      setInstance(newInstance);
+      if (!instance) {
+        const newInstance = await bootWebContainer();
+        setInstance(newInstance);
+      }
     };
 
     bootInstance();
-  }, []);
+  }, [instance]);
 
   useEffect(() => {
     const mountWebContainer = async (initialContent: string) => {
       if (!iframeRef.current) throw new Error('iframe not found');
       if (!instance) throw new Error('instance not found');
+
       await instance.mount(files);
 
+      if (instance) {
+        await writeIndexJS(instance, initialContent);
+      }
+      setText(initialContent);
       toastifyInfo('Installing dependencies');
       const exitcode = await installDependencies(instance);
 
@@ -89,40 +107,44 @@ const Proto: React.FC<ProtoProps> = ({ fileContent }) => {
         toastifyError('Error encountered installing dependencies');
         throw new Error('Failed to install dependencies');
       }
-      if (instance) {
-        await writeIndexJS(instance, initialContent);
-      }
       startDevServer(instance, iframeRef.current).then(() => {
         toastifyInfo('Dev server started');
       });
     };
-    const localStorageContent = localStorage.getItem('App.tsx');
-    setOriginalText(files.src.directory['App.tsx'].file.contents || '');
-    const initialContent =
-      fileContent ||
-      localStorageContent ||
-      files.src.directory['App.tsx'].file.contents;
 
-    setText(initialContent);
-    mountWebContainer(initialContent);
-  }, [fileContent, instance]);
-  useEffect(() => {
-    const newValue = protoState.context.fileContent;
+    if (
+      instance &&
+      (fileContent || files.src.directory['App.tsx'].file.contents)
+    ) {
+      setOriginalText(files.src.directory['App.tsx'].file.contents);
+
+      const initialContent =
+        fileContent || files.src.directory['App.tsx'].file.contents;
+
+      mountWebContainer(initialContent);
+    }
+  }, [instance, fileContent]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
     if (!newValue) return;
     setText(newValue);
+    // protoStateService.send({
+    //   type: 'UPDATE_FILE_CONTENT',
+    //   fileContent: newValue,
+    // });
     (async () => {
       // Check if newValue is defined
       if (instance) {
         await writeIndexJS(instance, newValue);
       }
-      localStorage.setItem('App.tsx', newValue);
     })();
-  }, [instance, protoState.context.fileContent]);
+  };
 
   return (
     <div className="p-8 flex flex-col h-full w-full relative">
       <h1 className="text-2xl">Web Container</h1>
-      <section className="flex flex-col flex-grow w-full h-full relative">
+      <section className="flex flex-col flex-grow  h-full relative">
         <iframe
           title="prototype view"
           ref={iframeRef}
@@ -133,7 +155,7 @@ const Proto: React.FC<ProtoProps> = ({ fileContent }) => {
           className="p-2 bg-dark w-full rounded-lg opacity-[90] max-h-[82vh] absolute transition-all duration-500 ease-in-out"
           style={
             isEditorVisible
-              ? { height: '82vh', overflow: 'hidden' }
+              ? { height: '82vh', overflow: 'scroll' }
               : {
                   height: '3rem',
                   overflow: 'hidden',
@@ -146,9 +168,7 @@ const Proto: React.FC<ProtoProps> = ({ fileContent }) => {
               <textarea
                 ref={inputRef}
                 spellCheck="false"
-                className={`bg-transparent flex-grow h-full w-full rounded-lg p-4 text-base text-transparent font-mono mt-2 ${
-                  isEditMode ? '' : 'opacity-0 pointer-events-none'
-                }`}
+                className={`bg-transparent h-full w-full rounded-lg p-4 text-base text-transparent font-mono mt-2`}
                 value={text}
                 onScroll={(e) => {
                   if (syntaxHighlighterRef.current) {
@@ -167,18 +187,12 @@ const Proto: React.FC<ProtoProps> = ({ fileContent }) => {
                   position: 'absolute',
                   zIndex: 1,
                 }}
-                onChange={(e) => {
-                  const newValue = e.target.value;
-                  setText(newValue);
+                onChange={handleChange}
+                onBlur={() => {
                   protoStateService.send({
                     type: 'UPDATE_FILE_CONTENT',
-                    fileContent: newValue,
+                    fileContent: text,
                   });
-                  (async () => {
-                    if (instance) {
-                      await writeIndexJS(instance, newValue);
-                    }
-                  })();
                 }}
               ></textarea>
               <div
@@ -192,8 +206,7 @@ const Proto: React.FC<ProtoProps> = ({ fileContent }) => {
                 }}
               >
                 <SyntaxHighlighter
-                  wrapLines={true}
-                  language="jsx"
+                  language="tsx"
                   style={oneDark}
                   customStyle={{
                     fontSize: '1rem',
@@ -220,12 +233,14 @@ const Proto: React.FC<ProtoProps> = ({ fileContent }) => {
                     'This will reset all code to default. Type "reset" to confirm.',
                   );
                   if (resetConfirm !== 'reset') return;
-                  setText(originalText);
+                  protoStateService.send({
+                    type: 'UPDATE_FILE_CONTENT',
+                    fileContent: originalText,
+                  });
                   (async () => {
                     if (instance) {
                       await writeIndexJS(instance, originalText);
                     }
-                    localStorage.setItem('App.tsx', originalText);
                   })();
                 }}
               >

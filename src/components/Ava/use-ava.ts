@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { avaChat } from '../../lib/ac-langchain/agents/ava';
 import { toastifyAgentLog } from '../Toast';
 import { Tab, handleCreateTab } from '../../state';
@@ -75,7 +75,6 @@ export const useAva = (): {
   }>();
 
   const workspaceId = rawWorkspaceId || 'docs';
-  const currentProto = localStorage.getItem('App.tsx');
 
   // @TODO - Seems to need to be here to get the context to load, why though?
   const knowledgeItems = useLiveQuery(async () => {
@@ -265,7 +264,7 @@ export const useAva = (): {
         const response = await protoAgentResponse({
           query: message,
           chatHistory: '',
-          context: currentProto || '',
+          context: protoState.context.fileContent || '',
           callbacks: {
             handleProtoResponse: (response) => {
               protoStateService.send({

@@ -15,25 +15,59 @@ const examplePrompt = new PromptTemplate({
   template: responseTemplate,
 });
 
-const escapedExamples = examples.map((example) => ({
-  ...example,
-  answer: example.answer.replace(/\{/g, 'beep').replace(/\}/g, 'boop'),
-}));
+const example = `query: 'A landing page with 3 pricing cards',
+output:import React from 'react';
 
-/**
- * Generates a prompt using the provided examples to show the LLM the desired
- * format.
- */
-const fewShotPrompt = new FewShotPromptTemplate({
-  /* These are the examples we want to insert into the prompt. */
-  examples,
-  /* This is how we want to format the examples when we insert them into the prompt. */
-  examplePrompt,
-  /*  The prefix is some text that goes before the examples in the prompt. */
-  prefix: `### Ignore prior instructions:
+const PricingCard = ({ title, price, features }) => {
+  return (
+    <div className="flex flex-col items-center p-6 bg-white rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold">{title}</h2>
+      <h3 className="my-4 text-4xl font-bold">\${price}</h3>
+      <ul>
+        {features.map((feature, index) => (
+          <li key={index} className="mb-2 text-center">
+            {feature}
+          </li>
+        ))}
+      </ul>
+      <button className="mt-6 px-6 py-2 text-white bg-blue-500 rounded-lg">Purchase</button>
+    </div>
+  );
+};
+
+const App = () => {
+  const pricingPlans = [
+    { title: 'Basic', price: '10', features: ['Feature 1', 'Feature 2', 'Feature 3'] },
+    { title: 'Pro', price: '20', features: ['Feature 1', 'Feature 2', 'Feature 3', 'Feature 4'] },
+    { title: 'Premium', price: '30', features: ['Feature 1', 'Feature 2', 'Feature 3', 'Feature 4', 'Feature 5'] },
+  ];
+
+  return (
+    <div className="flex justify-center min-h-screen bg-gray-100">
+      <div className="grid gap-6 p-6 mt-24 md:grid-cols-3">
+        {pricingPlans.map((plan, index) => (
+          <PricingCard key={index} {...plan} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default App;`;
+
+const protoPrompt = PromptTemplate.fromTemplate(`### Ignore prior instructions:
 You are tasked with helping build an App React component for a frontend system.
+######
 
-Rules and Coding Standards that you must adhere to:
+Use the following component as a reference unless the user wants a new component:
+Context: {context}
+
+
+###############
+  Given the user query, generate a React component to the specifications. If there is an example component given, attempt to iterate off of the given component.
+  Make sure to include any imports the user has included in their code.
+
+  Rules and Coding Standards that you must adhere to:
 - Strict Typescript checking
 - ES6 syntax
 - Functional components only
@@ -41,28 +75,16 @@ Rules and Coding Standards that you must adhere to:
 - Controlled components are preferred
 - Name of component must be App
 - Only style using tailwind classnames or inline styles
+- DO NOT USING ANY EXTERNAL LIBS OR FILES
 
 Tech Stack
 
 Vite
 React 18
 Tailwind CSS
-
-Use the following prior component as a reference:
-Context: {context}
-Conversation History: {conversation_history}
-`,
-  /* The suffix is some text that goes after the examples in the prompt. Usually, this is where the user input will go */
-  suffix: `
-  Given the user story, generate a React component to the specifications. If there is an example component given, attempt to iterate off of the given component.
-
-  Only output the raw formatted code without any wrapping markdown or explanations, do not use backticks or any other markdown to format the code.
-`,
-  inputVariables: ['context', 'conversation_history'],
-  exampleSeparator: '\n\n',
-  /* The template format is the formatting method to use for the template. Should usually be f-string. */
-  templateFormat: 'f-string',
-});
+  Only output the raw formatted code without any wrapping markdown or explanations.
+DO NOT FORGET TO INCLUDE IMPORTS AND ONLY PROVIDE THE RAW CODE OUTPUT
+`);
 
 /**
  * Creates the proto agent response prompt
@@ -74,7 +96,7 @@ export const protoAgentResponsePrompt = async ({
   context: string;
   conversation_history: string;
 }) => {
-  const prompt = await fewShotPrompt.format({
+  const prompt = await protoPrompt.format({
     context: context,
     conversation_history: conversation_history,
   });
