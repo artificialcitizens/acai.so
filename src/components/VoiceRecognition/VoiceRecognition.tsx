@@ -21,6 +21,7 @@ import { ChatHistory } from '../../state';
 import Dropdown from '../DropDown';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import { simplifyResponseChain } from '../../lib/ac-langchain/chains/simplify-response-chain';
+import useBroadcastManager from '../../hooks/use-broadcast-manager';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
@@ -48,8 +49,8 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     'elevenlabs',
   );
   const [manualTTS, setManualTTS] = useState<string>('');
-  const [listening, setListening] = useLocalStorageKeyValue(
-    'IS_LISTENING',
+  const [webSpeechOn, setWebSpeechRecognition] = useLocalStorageKeyValue(
+    'WEB_SPEECH_RECOGNITION',
     'true',
   );
   const synthesizeBarkSpeech = useBark();
@@ -64,6 +65,9 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const { agentStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const [state, send] = useActor(agentStateService);
+  const tabManager = useBroadcastManager('acai', () => {
+    toggleWebspeech(false);
+  });
 
   const { workspaceId: rawWorkspaceId } = useParams<{
     workspaceId: string;
@@ -77,12 +81,21 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const srcRef = React.useRef<MediaElementAudioSourceNode | null>(null);
   const gainNodeRef = React.useRef<GainNode | null>(null);
 
+  useEffect(() => {
+    tabManager.notifyNewTab();
+  }, [tabManager]);
+
+  const toggleWebspeech = (bool: boolean) => {
+    const booleanString = bool ? 'true' : 'false';
+    setWebSpeechRecognition(booleanString);
+  };
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSingleCommandMode(event.target.checked);
   };
 
   const handleSpeechChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setListening(event.target.checked ? 'true' : 'false');
+    toggleWebspeech(event.target.checked);
   };
 
   const handleVoiceStateChange = (voiceState: VoiceState) => {
@@ -168,7 +181,8 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           (count, delimiter) => count + response.split(delimiter).length - 1,
           0,
         );
-        if (sentenceCount > 3) {
+        // if response is longer than 3 sentences or x characters, simplify it
+        if (sentenceCount > 3 || response.length > 250) {
           voiceResponse = await simplifyResponseChain(
             `User:${t}\n\nAssistant:${response}\n\nSingle Sentence Response:`,
           );
@@ -259,7 +273,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   useSpeechRecognition({
     onTranscriptionComplete,
     // @TODO: Fix hacky listening state
-    active: !ttsLoading && listening === 'true' ? true : false,
+    active: !ttsLoading && webSpeechOn === 'true' ? true : false,
   });
 
   const handleManualTTS = (e: React.FormEvent<HTMLFormElement>) => {
@@ -383,7 +397,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             type="checkbox"
             id="singleCommandMode"
             name="option"
-            checked={listening === 'true' ? true : false}
+            checked={webSpeechOn === 'true' ? true : false}
             onChange={handleSpeechChange}
           />
         </span>

@@ -14,6 +14,7 @@ function useSpeechRecognition({
   useEffect(() => {
     if (!active || !import.meta.env.DEV) return;
     if (!('webkitSpeechRecognition' in window)) return;
+
     speechRecognitionRef.current = new (
       window as any
     ).webkitSpeechRecognition();
@@ -22,6 +23,11 @@ function useSpeechRecognition({
     queue.addCallback(speechRecognitionRef.current.start());
     speechRecognitionRef.current.onend = () => {
       console.log('Speech recognition service disconnected');
+      if (!active) {
+        speechRecognitionRef.current.onend = null;
+        queue.addCallback(speechRecognitionRef.current.stop());
+        return;
+      }
       queue.addCallback(speechRecognitionRef.current.start());
     };
     return () => {
@@ -31,7 +37,7 @@ function useSpeechRecognition({
   }, [active]);
 
   useEffect(() => {
-    if (!speechRecognitionRef.current) return;
+    if (!speechRecognitionRef.current || !active) return;
 
     speechRecognitionRef.current.onresult = async (event: {
       resultIndex: any;
@@ -40,11 +46,12 @@ function useSpeechRecognition({
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
           const transcript = event.results[i][0].transcript.trim();
+          if (!transcript) return;
           onTranscriptionComplete(transcript);
         }
       }
     };
-  }, [onTranscriptionComplete]);
+  }, [active, onTranscriptionComplete]);
 
   return speechRecognitionRef;
 }
