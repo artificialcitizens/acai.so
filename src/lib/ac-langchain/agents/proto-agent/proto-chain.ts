@@ -5,10 +5,7 @@ import { SystemMessage, HumanMessage } from 'langchain/schema';
 
 const openAIApiKey = getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY;
 
-const model = new ChatOpenAI({
-  openAIApiKey,
-  modelName: 'gpt-4',
-});
+let model: ChatOpenAI | null = null;
 
 export const protoChain = async ({
   query,
@@ -26,6 +23,13 @@ export const protoChain = async ({
     context,
     conversation_history: chatHistory,
   });
+
+  if (!model) {
+    model = new ChatOpenAI({
+      openAIApiKey,
+      modelName: 'gpt-4',
+    });
+  }
 
   const response = model.call([
     new SystemMessage(systemMessage),
