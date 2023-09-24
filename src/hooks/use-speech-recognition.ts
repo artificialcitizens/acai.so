@@ -1,7 +1,14 @@
 import { useEffect, useRef } from 'react';
 import CallbackQueue from '../utils/callback-queue';
 const queue = new CallbackQueue();
-
+import { isWebSpeechApiSupported } from '../utils/browser-support';
+import { toastifyError } from '../components/Toast';
+const isWebSpeechSupported = isWebSpeechApiSupported();
+/**
+ * Uses the Web Speech API to listen for speech and transcribe it to text.
+ * Only supported in browsers that support the Web Speech API.
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API
+ */
 function useSpeechRecognition({
   onTranscriptionComplete,
   active,
@@ -13,7 +20,12 @@ function useSpeechRecognition({
 
   useEffect(() => {
     if (!active || !import.meta.env.DEV) return;
-    if (!('webkitSpeechRecognition' in window)) return;
+    if (!isWebSpeechSupported) {
+      toastifyError(
+        'Speech recognition is not supported in this browser. Please use Chrome.',
+      );
+      return;
+    }
 
     speechRecognitionRef.current = new (
       window as any
