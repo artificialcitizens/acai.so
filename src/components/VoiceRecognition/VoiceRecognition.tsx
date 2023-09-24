@@ -175,15 +175,11 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         });
         toastifyInfo('Generating Text');
         const { response } = await queryAva(t, '');
+        const sentenceCount = response.split('.').length - 1;
+
         let voiceResponse;
-        // if response is longer than 2 sentences - accounting for various punctuation - simplify it
-        const sentenceDelimiters = ['.', '?', '!'];
-        const sentenceCount = sentenceDelimiters.reduce(
-          (count, delimiter) => count + response.split(delimiter).length - 1,
-          0,
-        );
-        // if response is longer than 3 sentences or x characters, simplify it
-        if (sentenceCount > 3 || response.length > 250) {
+        // if response is longer than 3 sentences implify it
+        if (sentenceCount > 3) {
           voiceResponse = await simplifyResponseChain(
             `User:${t}\n\nAssistant:${response}\n\nSingle Sentence Response:`,
           );
