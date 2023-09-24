@@ -168,7 +168,7 @@ const Proto: React.FC<ProtoProps> = () => {
               <textarea
                 ref={inputRef}
                 spellCheck="false"
-                className={`bg-transparent h-full w-full rounded-lg p-4 text-base text-transparent font-mono mt-2`}
+                className={`bg-transparent h-full w-full rounded-lg p-4 text-base text-transparent font-mono mt-2 focus:ring-0 focus:ring-acai-purple focus:ring-opacity-50`}
                 value={text}
                 onScroll={(e) => {
                   if (syntaxHighlighterRef.current) {
