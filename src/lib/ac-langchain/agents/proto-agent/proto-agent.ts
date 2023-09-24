@@ -32,7 +32,11 @@ export const protoAgentResponse = async ({
     context,
   });
   const componentResponse = await response;
-  callbacks.handleProtoResponse(extractCode(componentResponse.content));
+
+  const extractedCode = extractCode(componentResponse.content);
+  if (extractedCode !== null) {
+    callbacks.handleProtoResponse(extractedCode);
+  }
 
   const streamingModel = new ChatOpenAI({
     openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
