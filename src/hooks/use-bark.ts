@@ -1,6 +1,7 @@
 // hooks/useBark.ts
 import { useCallback } from 'react';
 import axios from 'axios';
+import { getToken } from '../utils/config';
 
 export const useBark = () => {
   const synthesizeBarkSpeech = useCallback(
@@ -13,7 +14,9 @@ export const useBark = () => {
     }) => {
       const options = {
         method: 'POST',
-        url: `${import.meta.env.VITE_BARK_SERVER}/bark-inference`,
+        url: `${
+          import.meta.env.VITE_BARK_URL || getToken('BARK_URL')
+        }/bark-inference`,
         headers: {
           'content-type': 'application/json',
         },

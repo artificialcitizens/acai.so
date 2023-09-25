@@ -16,17 +16,18 @@ const MarkdownInput: React.FC<MarkdownInputProps> = ({
   height = '24px',
 }) => {
   return (
-    <div className="pt-2 mb-2 border-b-transparent text-acai-white shadow-none w-full">
+    <div className="pt-2 mb-2 max-h-[25vh] overflow-scroll border-b-transparent bg-base text-acai-white shadow-none w-full rounded-lg">
       {!readonly ? (
         <textarea
-          className={`min-h-[${height}] p-3 bg-base rounded w-full`}
+          // set pre-wrap to preserve line breaks
+          className={`min-h-[${height}] p-3 bg-base rounded w-full `}
           placeholder={placeholder}
           value={content}
           onChange={handleInputChange}
         />
       ) : (
         <div
-          className={`min-h-[${height}] p-3 text-acai-white bg-base rounded overflow-y-auto w-full mt-2 `}
+          className={`min-h-[${height}] p-3 text-acai-white bg-base rounded overflow-y-auto w-full mt-2 whitespace-pre`}
           dangerouslySetInnerHTML={{ __html: content }}
         />
       )}

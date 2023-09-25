@@ -21,6 +21,7 @@ import { ChatHistory } from '../../state';
 import Dropdown from '../DropDown';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import { simplifyResponseChain } from '../../lib/ac-langchain/chains/simplify-response-chain';
+import useBroadcastManager from '../../hooks/use-broadcast-manager';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
@@ -28,7 +29,8 @@ interface VoiceRecognitionProps {
 }
 
 // @TODO: create xstate machine for voice recognition
-// pass user transcript to useAva hook
+// @TODO: separate logic and refactor
+// @TODO: pass user transcript to useAva hook
 const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   onVoiceActivation,
   audioContext,
@@ -45,12 +47,18 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const [singleCommandMode, setSingleCommandMode] = useState<boolean>(false);
   const [synthesisMode, setSynthesisMode] = useLocalStorageKeyValue(
     'VOICE_SYNTHESIS_MODE',
-    'elevenlabs',
+    'webSpeech',
   );
   const [manualTTS, setManualTTS] = useState<string>('');
-  const [listening, setListening] = useLocalStorageKeyValue(
-    'IS_LISTENING',
+  const [transcriptionOn, setTranscription] = useLocalStorageKeyValue(
+    'TRANSCRIPTION_ON',
     'true',
+  );
+  const [barkUrl, setBarkUrl] = useLocalStorageKeyValue(
+    'BARK_URL',
+    import.meta.env.VITE_BARK_SERVER ||
+      getToken('BARK_URL') ||
+      'http://localhost:5000',
   );
   const synthesizeBarkSpeech = useBark();
   const synthesizeWebSpeech = useWebSpeechSynthesis();
@@ -64,6 +72,9 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const { agentStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const [state, send] = useActor(agentStateService);
+  const tabManager = useBroadcastManager('acai', () => {
+    toggleWebspeech(false);
+  });
 
   const { workspaceId: rawWorkspaceId } = useParams<{
     workspaceId: string;
@@ -77,16 +88,36 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const srcRef = React.useRef<MediaElementAudioSourceNode | null>(null);
   const gainNodeRef = React.useRef<GainNode | null>(null);
 
+  useEffect(() => {
+    tabManager.notifyNewTab();
+  }, [tabManager]);
+
+  const toggleWebspeech = (bool: boolean) => {
+    const booleanString = bool ? 'true' : 'false';
+    setTranscription(booleanString);
+  };
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSingleCommandMode(event.target.checked);
   };
 
   const handleSpeechChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setListening(event.target.checked ? 'true' : 'false');
+    toggleWebspeech(event.target.checked);
   };
 
   const handleVoiceStateChange = (voiceState: VoiceState) => {
     setVoiceRecognitionState(voiceState);
+  };
+
+  const handleBarkFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!barkUrl) {
+      toastifyError('Missing Bark Server URL');
+      return;
+    }
+    setBarkUrl(barkUrl);
+    //@TODO: update to run a test request
+    toastifyInfo('Connected to Bark Server');
   };
 
   const normalizedAudioElement = async (
@@ -161,13 +192,14 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         });
         toastifyInfo('Generating Text');
         const { response } = await queryAva(t, '');
-        let voiceResponse;
-        // if response is longer than 2 sentences - accounting for various punctuation - simplify it
         const sentenceDelimiters = ['.', '?', '!'];
         const sentenceCount = sentenceDelimiters.reduce(
           (count, delimiter) => count + response.split(delimiter).length - 1,
           0,
         );
+
+        let voiceResponse;
+        // if response is longer than 3 sentences implify it
         if (sentenceCount > 3) {
           voiceResponse = await simplifyResponseChain(
             `User:${t}\n\nAssistant:${response}\n\nSingle Sentence Response:`,
@@ -250,7 +282,9 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   };
 
   const onTranscriptionComplete = async (t: string) => {
-    const updatedUserTranscript = userTranscript + '\n' + t + '\n';
+    const updatedUserTranscript = userTranscript
+      ? userTranscript + '\n' + t
+      : t;
     setUserTranscript(updatedUserTranscript);
     handleVoiceCommand(t);
     handleVoiceRecognition(updatedUserTranscript);
@@ -259,7 +293,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   useSpeechRecognition({
     onTranscriptionComplete,
     // @TODO: Fix hacky listening state
-    active: !ttsLoading && listening === 'true' ? true : false,
+    active: !ttsLoading && transcriptionOn === 'true' ? true : false,
   });
 
   const handleManualTTS = (e: React.FormEvent<HTMLFormElement>) => {
@@ -271,8 +305,8 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const options = [
     { value: 'webSpeech', label: 'Web Speech API' },
     { value: 'elevenlabs', label: 'Elevenlabs' },
-    import.meta.env.DEV ? { value: 'bark', label: 'Bark' } : undefined,
   ];
+  import.meta.env.DEV && options.unshift({ value: 'bark', label: 'Bark' });
 
   const handleElevenLabsDropdownChange = (value: string) => {
     setElevenLabsVoice(value);
@@ -289,6 +323,126 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     <div
       className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow h-full`}
     >
+      <span className="flex mb-2 items-center">
+        <label
+          className="text-xs font-bold text-acai-white ml-2"
+          htmlFor="transcriptionOn"
+        >
+          Transcribe
+        </label>
+        <input
+          className="mx-1 mt-[0.125rem]"
+          type="checkbox"
+          id="transcriptionOn"
+          name="option"
+          checked={transcriptionOn === 'true' ? true : false}
+          onChange={handleSpeechChange}
+        />
+      </span>
+      <p className="text-acai-white mb-2 ml-2">User Transcript</p>
+      <ScratchPad
+        placeholder="User Transcript"
+        readonly
+        content={userTranscript}
+      />
+      <button
+        className="bg-light text-acai-white px-4 py-2 mb-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        type="button"
+        onClick={() => {
+          setUserTranscript('');
+        }}
+      >
+        Clear Transcript
+      </button>
+      <hr />
+      <Dropdown
+        label="Synthesis Mode"
+        options={voiceStateOptions}
+        value={voiceRecognitionState}
+        onChange={(e) => handleVoiceStateChange(e as VoiceState)}
+      />
+
+      <span className="flex mb-2 items-start">
+        <label className="text-acai-white ml-2" htmlFor="singleCommandMode">
+          Single Command
+        </label>
+        <input
+          className="mx-1 mt-[0.25rem]"
+          type="checkbox"
+          id="singleCommandMode"
+          name="option"
+          checked={singleCommandMode}
+          onChange={handleChange}
+        />
+      </span>
+
+      <span className="flex flex-col">
+        <Dropdown
+          label="TTS Engine"
+          options={options.filter((o) => o !== undefined) as any}
+          value={synthesisMode}
+          onChange={(e) => setSynthesisMode(e as TTSState)}
+        />
+        {synthesisMode === 'elevenlabs' && (
+          <Dropdown
+            label="Voice"
+            options={voices}
+            value={elevenLabsVoice || voices?.[0]?.value || ''}
+            onChange={handleElevenLabsDropdownChange}
+          />
+        )}
+        {synthesisMode === 'bark' && (
+          <form className="mb-2" onSubmit={handleBarkFormSubmit}>
+            <span className="flex mb-2 items-center">
+              <label
+                htmlFor="url"
+                className="text-acai-white pr-2 w-[50%] ml-2"
+              >
+                Bark Server URL:
+              </label>
+              <input
+                id="url"
+                className="text-acai-white bg-base px-[2px]"
+                type="password"
+                value={barkUrl}
+                onChange={(e) => setBarkUrl(e.target.value)}
+              />
+            </span>
+            <input
+              type="submit"
+              value="Connect"
+              className="bg-light text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+            />
+          </form>
+        )}
+        <form
+          className="text-acai-white w-full flex flex-col flex-grow my-2"
+          onSubmit={handleManualTTS}
+        >
+          <label className="mb-2 ml-2 text-xs" htmlFor="manualTTS">
+            Manual TTS
+          </label>
+          <textarea
+            placeholder="Enter text to synthesize, press submit or enter to play"
+            id="manualTTS"
+            className="rounded bg-base text-acai-white p-4 mb-2"
+            value={manualTTS}
+            onChange={(e) => setManualTTS(e.target.value)}
+            onKeyDown={(e: any) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleManualTTS(e);
+              }
+            }}
+          />
+          <button
+            className="bg-light text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+            type="submit"
+          >
+            Submit
+          </button>
+        </form>
+      </span>
       {audioContext && (
         <audio
           ref={audioRef}
@@ -315,94 +469,6 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           }}
         />
       )}
-      <Dropdown
-        label="Synthesis Mode"
-        options={voiceStateOptions}
-        value={voiceRecognitionState}
-        onChange={(e) => handleVoiceStateChange(e as VoiceState)}
-      />
-
-      <span className="flex flex-col">
-        <Dropdown
-          label="TTS Engine"
-          options={options.filter((o) => o !== undefined) as any}
-          value={synthesisMode}
-          onChange={(e) => setSynthesisMode(e as TTSState)}
-        />
-        {synthesisMode === 'elevenlabs' && (
-          <Dropdown
-            label="Voice"
-            options={voices}
-            value={elevenLabsVoice || voices?.[0]?.value || ''}
-            onChange={handleElevenLabsDropdownChange}
-          />
-        )}
-        <form
-          className="text-acai-white w-full flex flex-col flex-grow my-2"
-          onSubmit={handleManualTTS}
-        >
-          <textarea
-            placeholder="Manual TTS"
-            className="rounded bg-base text-acai-white p-4 mb-2"
-            value={manualTTS}
-            onChange={(e) => setManualTTS(e.target.value)}
-            onKeyDown={(e: any) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                handleManualTTS(e);
-              }
-            }}
-          />
-          <button
-            className="bg-light text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
-            type="submit"
-          >
-            Submit
-          </button>
-        </form>
-
-        <span className="flex mb-2 items-start">
-          <label className="text-acai-white ml-2" htmlFor="singleCommandMode">
-            Single Command
-          </label>
-          <input
-            className="mx-1 mt-[0.25rem]"
-            type="checkbox"
-            id="singleCommandMode"
-            name="option"
-            checked={singleCommandMode}
-            onChange={handleChange}
-          />
-        </span>
-        <span className="flex mb-2 items-start">
-          <label className="text-acai-white ml-2" htmlFor="singleCommandMode">
-            Voice Commands
-          </label>
-          <input
-            className="mx-1 mt-[0.25rem]"
-            type="checkbox"
-            id="singleCommandMode"
-            name="option"
-            checked={listening === 'true' ? true : false}
-            onChange={handleSpeechChange}
-          />
-        </span>
-      </span>
-      <ScratchPad
-        placeholder="User Transcript"
-        height="24px"
-        readonly
-        content={userTranscript || 'User Transcript'}
-      />
-      <button
-        className="bg-light text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
-        type="button"
-        onClick={() => {
-          setUserTranscript('');
-        }}
-      >
-        Clear Transcript
-      </button>
     </div>
   );
 };
