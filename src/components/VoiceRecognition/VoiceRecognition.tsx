@@ -54,6 +54,12 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     'TRANSCRIPTION_ON',
     'true',
   );
+  const [barkUrl, setBarkUrl] = useLocalStorageKeyValue(
+    'BARK_URL',
+    import.meta.env.VITE_BARK_SERVER ||
+      getToken('BARK_URL') ||
+      'http://localhost:5000',
+  );
   const synthesizeBarkSpeech = useBark();
   const synthesizeWebSpeech = useWebSpeechSynthesis();
   const {
@@ -101,6 +107,15 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 
   const handleVoiceStateChange = (voiceState: VoiceState) => {
     setVoiceRecognitionState(voiceState);
+  };
+
+  const handleBarkFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!barkUrl) {
+      toastifyError('Missing Bark Server URL');
+      return;
+    }
+    setBarkUrl(barkUrl);
   };
 
   const normalizedAudioElement = async (
@@ -373,6 +388,30 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             value={elevenLabsVoice || voices?.[0]?.value || ''}
             onChange={handleElevenLabsDropdownChange}
           />
+        )}
+        {synthesisMode === 'bark' && (
+          <form className="mb-2" onSubmit={handleBarkFormSubmit}>
+            <span className="flex mb-2 items-center">
+              <label
+                htmlFor="url"
+                className="text-acai-white pr-2 w-[50%] ml-2"
+              >
+                Bark Server URL:
+              </label>
+              <input
+                id="url"
+                className="text-acai-white bg-base px-[2px]"
+                type="password"
+                value={barkUrl}
+                onChange={(e) => setBarkUrl(e.target.value)}
+              />
+            </span>
+            <input
+              type="submit"
+              value="Connect"
+              className="bg-light text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+            />
+          </form>
         )}
         <form
           className="text-acai-white w-full flex flex-col flex-grow my-2"
