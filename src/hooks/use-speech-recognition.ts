@@ -19,7 +19,7 @@ function useSpeechRecognition({
   const speechRecognitionRef = useRef<any | null>(null);
 
   useEffect(() => {
-    if (!active || !import.meta.env.DEV) return;
+    if (!active) return;
     if (!isWebSpeechSupported) {
       toastifyError(
         'Speech recognition is not supported in this browser. Please use Chrome.',

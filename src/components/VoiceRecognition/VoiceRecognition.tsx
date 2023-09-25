@@ -288,7 +288,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const options = [
     { value: 'webSpeech', label: 'Web Speech API' },
     { value: 'elevenlabs', label: 'Elevenlabs' },
-    import.meta.env.DEV ? { value: 'bark', label: 'Bark' } : undefined,
+    { value: 'bark', label: 'Bark' },
   ];
 
   const handleElevenLabsDropdownChange = (value: string) => {

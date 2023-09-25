@@ -59,9 +59,6 @@ const TokenManager: React.FC = () => {
     ],
   );
 
-  if (import.meta.env.DEV) {
-    keys.push();
-  }
   const [values, setValues] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
