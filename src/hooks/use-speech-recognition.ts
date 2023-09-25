@@ -34,7 +34,6 @@ function useSpeechRecognition({
     speechRecognitionRef.current.interimResults = true;
     queue.addCallback(speechRecognitionRef.current.start());
     speechRecognitionRef.current.onend = () => {
-      console.log('Speech recognition service disconnected');
       if (!active) {
         speechRecognitionRef.current.onend = null;
         queue.addCallback(speechRecognitionRef.current.stop());
