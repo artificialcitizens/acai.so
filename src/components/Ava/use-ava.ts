@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { avaChat } from '../../lib/ac-langchain/agents/ava';
 import { toastifyAgentLog } from '../Toast';
 import { Tab, handleCreateTab } from '../../state';
@@ -25,6 +25,7 @@ import { ragAgentResponse } from '../../lib/ac-langchain/agents/rag-agent/rag-ag
 import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../db';
+import { protoAgentResponse } from '../../lib/ac-langchain/agents/proto-agent/proto-agent';
 
 export type AvaChatResponse = {
   response: string;
@@ -44,6 +45,7 @@ export const agentMode = [
   'chat',
   // maps to rag agent
   'knowledge',
+  'proto',
   'custom',
 ];
 
@@ -64,6 +66,7 @@ export const useAva = (): {
   const [loading, setLoading] = useState(false);
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
+  const [protoState] = useActor(globalServices.protoStateService);
   const vectorContext = useContext(VectorStoreContext);
   const { workspaceId: rawWorkspaceId } = useParams<{
     workspaceId: string;
@@ -83,7 +86,7 @@ export const useAva = (): {
   });
 
   const navigate = useNavigate();
-  const { appStateService }: GlobalStateContextValue =
+  const { appStateService, protoStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const [agentState] = useActor(globalServices.agentStateService);
   const [userName] = useLocalStorageKeyValue('USER_NAME', '');
@@ -254,6 +257,46 @@ export const useAva = (): {
         setLoading(false);
         return {
           response: response,
+          // abortController: null,
+        };
+      }
+      case 'proto': {
+        const response = await protoAgentResponse({
+          query: message,
+          chatHistory: '',
+          context: protoState.context.fileContent || '',
+          callbacks: {
+            handleProtoResponse: (response) => {
+              protoStateService.send({
+                type: 'UPDATE_FILE_CONTENT',
+                fileContent: response,
+              });
+            },
+            handleLLMStart: () => {
+              setLoading(true);
+              // console.log({ llm, prompts });
+            },
+            handleLLMNewToken: (token) => {
+              setStreamingMessage((prev) => prev + token);
+              // console.log(token);
+            },
+            handleLLMEnd: () => {
+              setLoading(false);
+              setStreamingMessage('');
+
+              // console.log({ output });
+            },
+            handleLLMError: (err) => {
+              setError(err.message);
+              setLoading(false);
+              // console.log({ err });
+            },
+          },
+        });
+
+        setLoading(false);
+        return {
+          response: response.content,
           // abortController: null,
         };
       }
