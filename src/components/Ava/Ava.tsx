@@ -55,11 +55,11 @@ export const Ava: React.FC<AvaProps> = ({
   const formatAgentMode = (mode: string) => {
     switch (mode) {
       case 'ava':
-        return 'AVA';
+        return 'Chat - AVA';
       case 'chat':
-        return '';
+        return 'Chat';
       default:
-        return mode.charAt(0).toUpperCase() + mode.slice(1);
+        return 'Chat - ' + mode.charAt(0).toUpperCase() + mode.slice(1);
     }
   };
 
@@ -95,14 +95,12 @@ export const Ava: React.FC<AvaProps> = ({
         />
       </ExpansionPanel>
 
-      {import.meta.env.DEV && (
-        <ExpansionPanel title="Voice Synthesis">
-          <VoiceRecognition
-            onVoiceActivation={onVoiceActivation}
-            audioContext={audioContext}
-          />
-        </ExpansionPanel>
-      )}
+      <ExpansionPanel title="Voice Synthesis">
+        <VoiceRecognition
+          onVoiceActivation={onVoiceActivation}
+          audioContext={audioContext}
+        />
+      </ExpansionPanel>
 
       <ExpansionPanel title="Knowledge">
         <KnowledgeUpload workspaceId={workspaceId} />
@@ -136,7 +134,8 @@ export const Ava: React.FC<AvaProps> = ({
       {workspaceId && (
         <span className="flex flex-col flex-grow">
           <p className="text-xs font-bold p-3">
-            Chat {/* @TODO: create a tag component */}
+            {formatAgentMode(currentAgentMode)}{' '}
+            {/* @TODO: create a tag component */}
             {/* <span
               className="ml-2 font-semibold border-lighter border-solid border p-1 px-2 rounded-xl text-[9px]"
               style={{

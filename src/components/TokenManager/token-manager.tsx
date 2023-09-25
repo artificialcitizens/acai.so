@@ -28,6 +28,12 @@ const TokenManager: React.FC = () => {
         value: openAIKey,
         setValue: setOpenAIKey,
       },
+      {
+        id: 'ELEVENLABS_API_KEY',
+        name: 'Eleven Labs API Key',
+        value: elevenlabsApiKey,
+        setValue: setElevenlabsApiKey,
+      },
       // {
       //   id: 'GOOGLE_API_KEY',
       //   name: 'Google API Key',
@@ -44,23 +50,15 @@ const TokenManager: React.FC = () => {
     [
       openAIKey,
       setOpenAIKey,
+      elevenlabsApiKey,
+      setElevenlabsApiKey,
       // googleApiKey,
       // setGoogleApiKey,
       // googleCSEId,
       // setGoogleCSEId,
-      // elevenlabsApiKey,
-      // setElevenlabsApiKey,
     ],
   );
 
-  if (import.meta.env.DEV) {
-    keys.push({
-      id: 'ELEVENLABS_API_KEY',
-      name: 'Eleven Labs API Key',
-      value: elevenlabsApiKey,
-      setValue: setElevenlabsApiKey,
-    });
-  }
   const [values, setValues] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -71,7 +69,6 @@ const TokenManager: React.FC = () => {
       }
     });
     setValues(newValues);
-    // keys causes an infinite loop
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openAIKey, googleApiKey, googleCSEId, elevenlabsApiKey]);
 

@@ -32,7 +32,7 @@ const App = () => {
     globalServices.appStateService.getSnapshot().context.workspaces[
       workspaceId || 'docs'
     ];
-  if (!workspace || !id) navigate('/docs/documents/1---introduction');
+  if (!workspace || !id) navigate('/docs/documents/1-introduction');
 
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined,
@@ -74,7 +74,7 @@ const App = () => {
   };
 
   const handleWindowClick = () => {
-    if (!audioContext && import.meta.env.DEV) {
+    if (!audioContext) {
       activateAudioContext();
     }
   };
