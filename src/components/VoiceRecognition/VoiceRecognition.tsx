@@ -175,7 +175,11 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         });
         toastifyInfo('Generating Text');
         const { response } = await queryAva(t, '');
-        const sentenceCount = response.split('.').length - 1;
+        const sentenceDelimiters = ['.', '?', '!'];
+        const sentenceCount = sentenceDelimiters.reduce(
+          (count, delimiter) => count + response.split(delimiter).length - 1,
+          0,
+        );
 
         let voiceResponse;
         // if response is longer than 3 sentences implify it
@@ -374,8 +378,12 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           className="text-acai-white w-full flex flex-col flex-grow my-2"
           onSubmit={handleManualTTS}
         >
+          <label className="mb-2 ml-2 text-xs" htmlFor="manualTTS">
+            Manual TTS
+          </label>
           <textarea
-            placeholder="Manual TTS"
+            placeholder="Enter text to synthesize, press submit or enter to play"
+            id="manualTTS"
             className="rounded bg-base text-acai-white p-4 mb-2"
             value={manualTTS}
             onChange={(e) => setManualTTS(e.target.value)}
