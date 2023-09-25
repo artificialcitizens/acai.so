@@ -94,14 +94,21 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({
       className="fixed w-[150px] h-[150px] transition-opacity duration-500"
       data-ava-element="audio-wave"
       style={{
-        bottom: '0',
-        left: '0',
+        bottom: '-16px',
+        left: '-16px',
         zIndex: 100,
         opacity: isOn ? 1 : 0,
         pointerEvents: isOn ? 'all' : 'none',
       }}
     >
-      <svg ref={ref} width="150" height="150" />
+      <svg ref={ref} width="150" height="150">
+        <circle
+          cx="75"
+          cy="75"
+          r="50"
+          fill="rgba(9, 9, 9, 0.75)" // dark background with slight opacity
+        />
+      </svg>
     </div>
   );
 };
