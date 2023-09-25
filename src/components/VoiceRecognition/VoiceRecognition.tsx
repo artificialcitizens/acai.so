@@ -116,6 +116,8 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
       return;
     }
     setBarkUrl(barkUrl);
+    //@TODO: update to run a test request
+    toastifyInfo('Connected to Bark Server');
   };
 
   const normalizedAudioElement = async (
