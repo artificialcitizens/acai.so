@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { Sidebar } from '@chatscope/chat-ui-kit-react';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import './Sidebar.css';
@@ -9,14 +9,14 @@ interface SBSidebarProps {
 }
 
 const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
-  const [width, setWidth] = useState(30); // initia
   const [storedWidth, setStoredWidth] = useLocalStorageKeyValue(
     'AVA_PANEL_WIDTH',
     '30',
   );
+  const [width, setWidth] = useState(() => parseFloat(storedWidth));
   const [isResizing, setIsResizing] = useState(false);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (storedWidth) {
       setWidth(parseFloat(storedWidth));
     } else {
@@ -48,6 +48,8 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
+
+  if (storedWidth === undefined) return <>{''}</>;
 
   return (
     <div>
