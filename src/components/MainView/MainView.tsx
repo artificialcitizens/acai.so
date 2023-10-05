@@ -3,8 +3,11 @@ import EditorDropzone from '../TipTap/components/EditorDropzone';
 import { Tab, handleCreateTab } from '../../state';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import TipTap from '../TipTap/TipTap';
-import PDFRenderer from '../PDFRenderer/PdfRender';
-import { pdfjs } from 'react-pdf';
+// import PDFRenderer from '../PDFRenderer/PdfRender';
+// import { pdfjs } from 'react-pdf';
+// import { getPdfText } from '../../utils/pdf-utils';
+// import { toastifyInfo } from '../Toast';
+// import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { db } from '../../../db';
 
 import {
@@ -12,10 +15,7 @@ import {
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
 import { readFileAsText, slugify } from '../../utils/data-utils';
-import { getPdfText } from '../../utils/pdf-utils';
-import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { toastifyInfo } from '../Toast';
 import KnowledgeView from '../KnowledgeView/KnowledgeView';
 
 interface MainViewProps {
@@ -24,7 +24,7 @@ interface MainViewProps {
 
 const MainView: React.FC<MainViewProps> = ({ domain }) => {
   const navigate = useNavigate();
-  const vectorContext = useContext(VectorStoreContext);
+  // const vectorContext = useContext(VectorStoreContext);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
 
   const globalServices: GlobalStateContextValue =
@@ -102,7 +102,7 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
 
   const handlePdfDrop = async (file: File) => {
     if (!workspaceId) return;
-    const pageStartOffset = 0;
+    // const pageStartOffset = 0;
     const fileURL = URL.createObjectURL(file);
     // const pdfDocument = await pdfjs.getDocument(fileURL).promise;
     // const pdfData = await getPdfText(pdfDocument, slugify(file.name));
@@ -155,9 +155,37 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     setFileUrl(fileURL);
   };
 
-  return !workspaceId ? (
-    <p>Loading</p>
-  ) : (
+  const domainSwitch = (
+    domain: 'knowledge' | 'documents' | 'search' | undefined,
+  ) => {
+    if (!workspaceId) return;
+
+    switch (domain) {
+      case 'knowledge':
+        if (!fileType) return;
+        return (
+          <KnowledgeView
+            workspaceId={workspaceId}
+            filename={activeTabId || 'knowledge'}
+            fileType={fileType as 'pdf' | 'txt' | 'md'}
+            fileUrl={fileUrl?.toString()}
+            content={knowledgeItems?.[0]?.fullText}
+            page={page || '1'}
+          />
+        );
+      case 'documents':
+        if (!activeTab) return;
+        return <TipTap tab={activeTab} />;
+      case 'search':
+        return 'search';
+      default:
+        return '';
+    }
+  };
+
+  if (!workspaceId) return <div>Workspace not found</div>;
+
+  return (
     <div className="w-full flex flex-col h-screen">
       <div className="ml-16 flex items-center group">
         {workspace && <h1 className="m-2 text-lg">{workspace.name}</h1>}
@@ -177,17 +205,7 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
           showHelperText={!activeTab && !fileUrl}
           onFilesDrop={handleFilesDrop}
         >
-          {domain === 'documents' && activeTab && <TipTap tab={activeTab} />}
-          {domain === 'knowledge' && fileType && (
-            <KnowledgeView
-              workspaceId={workspaceId}
-              filename={activeTabId || 'knowledge'}
-              fileType={fileType as 'pdf' | 'txt' | 'md'}
-              fileUrl={fileUrl?.toString()}
-              content={knowledgeItems?.[0]?.fullText}
-              page={page || '1'}
-            />
-          )}
+          {domainSwitch(domain)}
         </EditorDropzone>
       </div>
     </div>

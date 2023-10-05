@@ -91,7 +91,7 @@ const App = () => {
         }}
       >
         <EditorContext.Provider value={{ editor, setEditor }}>
-          <SideNav></SideNav>
+          <SideNav />
           <FloatingButton
             handleClick={(e) => {
               e.stopPropagation();
