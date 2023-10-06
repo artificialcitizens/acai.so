@@ -3,7 +3,7 @@ import { ReadFileTool, WriteFileTool, SerpAPI } from 'langchain/tools';
 import { InMemoryFileStore } from 'langchain/stores/file/in_memory';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { useAcaiChat } from '../../models/chat';
 
 const store = new InMemoryFileStore();
 
@@ -19,8 +19,9 @@ const tools = [
 
 const vectorStore = new MemoryVectorStore(new OpenAIEmbeddings());
 
+const { chat } = useAcaiChat()
 const autogpt = AutoGPT.fromLLMAndTools(
-  new ChatOpenAI({ temperature: 0 }),
+  chat,
   tools,
   {
     memory: vectorStore.asRetriever(),

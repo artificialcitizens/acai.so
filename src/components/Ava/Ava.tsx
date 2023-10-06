@@ -78,7 +78,7 @@ export const Ava: React.FC<AvaProps> = ({
         </p>
         <UserProfile />
         <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
-          Tokens
+          Access Configuration
         </h5>
         <TokenManager />
       </ExpansionPanel>

@@ -1,11 +1,11 @@
-import { OpenAI } from 'langchain/llms/openai';
 import { ConversationalRetrievalQAChain } from 'langchain/chains';
 import { HNSWLib } from 'langchain/vectorstores/hnswlib';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { BufferMemory } from 'langchain/memory';
+import { useAcaiLLM } from '../models/chat';
 
 /* Initialize the LLM to use to answer the question */
-const model = new OpenAI({});
+const { llm: model } = useAcaiLLM();
 export const docBotChat = async ({
   question,
   docs,

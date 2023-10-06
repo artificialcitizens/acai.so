@@ -1,13 +1,12 @@
 import { Calculator } from 'langchain/tools/calculator';
-import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { PlanAndExecuteAgentExecutor } from 'langchain/experimental/plan_and_execute';
 import { GoogleCustomSearch, Tool, DynamicTool } from 'langchain/tools';
 
 import { getToken } from '../../../utils/config';
+import { useAcaiChat } from '../models/chat';
 
-const model = new ChatOpenAI({
+const { chat: model } = useAcaiChat({
   temperature: 0,
-  openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.OPENAI_KEY,
   modelName: 'gpt-3.5-turbo-16k',
   verbose: false,
 });

@@ -1,6 +1,5 @@
-import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
-import { getToken } from '../../../utils/config';
+import { HumanMessage, SystemMessage } from 'langchain/schema';
+import { useAcaiChat } from '../models/chat';
 
 /**
  * Take notes based on the given transcription
@@ -17,15 +16,14 @@ Here is the previous list of actionable items, update or add as needed:
 ${priorList}
 `;
 
-  const model = new ChatOpenAI({
-    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
+  const { chat: model } = useAcaiChat({
     modelName: 'gpt-3.5-turbo-16k',
     temperature: 0,
   });
 
   const response = await model.call([
-    new SystemChatMessage(prompt),
-    new HumanChatMessage(transcript),
+    new SystemMessage(prompt),
+    new HumanMessage(transcript),
   ]);
 
   return response.text;

@@ -45,6 +45,7 @@ import {
 // import { browser } from './tools/web-browser';
 import { googleSearch } from './tools/search-engine';
 import { WebBrowser } from 'langchain/tools/webbrowser';
+import { useAcaiChat, useAcaiLLM } from '../models/chat';
 // import {
 //   createAvaChatPrompt,
 //   createCustomPrompt,
@@ -187,22 +188,23 @@ let embeddings: Embeddings;
 const createModels = () => {
   if (chatModel && model && embeddings) return { chatModel, model, embeddings };
 
-  chatModel = new ChatOpenAI({
-    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
+  const { chat } = useAcaiChat({
     modelName: 'gpt-4-0314',
     temperature: 0.1,
   });
-  model = new OpenAI({
-    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
+  const { llm } = useAcaiLLM({
     temperature: 0.3,
   });
+
   // embeddings = new HuggingFaceTransformersEmbeddings({
   //   modelName: 'Xenova/bge-base-en',
   // });
+
+  // TODO: Custom embed wrapper for llama cpp endpoint
   embeddings = new OpenAIEmbeddings({
     openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
   });
-  return { chatModel, model, embeddings };
+  return { chatModel: chat, model: llm, embeddings };
 };
 
 const createLlmChain = ({

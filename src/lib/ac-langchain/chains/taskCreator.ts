@@ -1,7 +1,6 @@
-import { OpenAI } from 'langchain/llms/openai';
 import { PromptTemplate } from 'langchain/prompts';
 import { CommaSeparatedListOutputParser } from 'langchain/output_parsers';
-import { getToken } from '../../../utils/config';
+import { useAcaiLLM } from '../models/chat';
 
 /**
  * Create a step by step task list based on given subject.
@@ -23,10 +22,7 @@ export const taskCreator = async ({
     partialVariables: { format_instructions: formatInstructions },
   });
 
-  const model = new OpenAI({
-    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
-    temperature: 0,
-  });
+  const { llm: model } = useAcaiLLM({ temperature: 0 });
 
   const input = await prompt.format({ subject: subject });
   const response = await model.call(input);
@@ -54,7 +50,7 @@ export const brainstormSession = async ({
     partialVariables: { format_instructions: formatInstructions },
   });
 
-  const model = new OpenAI({ openAIApiKey, temperature: 0.7 });
+  const { llm: model } = useAcaiLLM({ temperature: 0.7 });
 
   const input = await prompt.format({ topic: topic });
   const response = await model.call(input);
@@ -77,7 +73,7 @@ export const writingAssistant = async ({
     inputVariables: ['subject'],
   });
 
-  const model = new OpenAI({ openAIApiKey, temperature: 0.5 });
+  const { llm: model } = useAcaiLLM({ temperature: 0.5 });
 
   const input = await prompt.format({ subject: subject });
   const response = await model.call(input);
@@ -101,7 +97,7 @@ export const automatedCodeReview = async ({
     inputVariables: ['codeSnippet'],
   });
 
-  const model = new OpenAI({ openAIApiKey, temperature: 0.3 });
+  const { llm: model } = useAcaiLLM({ temperature: 0.3 });
 
   const input = await prompt.format({ codeSnippet: codeSnippet });
   const response = await model.call(input);
@@ -129,7 +125,7 @@ export const compareContext = async ({
     inputVariables: ['a', 'b'],
   });
 
-  const model = new OpenAI({ openAIApiKey, temperature: 0.5 });
+  const { llm: model } = useAcaiLLM({ temperature: 0.5 });
 
   const input = await prompt.format({ a, b });
   const response = await model.call(input);
@@ -155,7 +151,7 @@ export const extractConflicts = async ({
     inputVariables: ['a', 'b'],
   });
 
-  const model = new OpenAI({ openAIApiKey, temperature: 0.5 });
+  const { llm: model } = useAcaiLLM({ temperature: 0.5 });
 
   const input = await prompt.format({ a, b });
   const response = await model.call(input);
@@ -177,7 +173,7 @@ export const generateQuestions = async ({
     inputVariables: ['conflicts'],
   });
 
-  const model = new OpenAI({ openAIApiKey, temperature: 0.5 });
+  const { llm: model } = useAcaiLLM({ temperature: 0.5 });
 
   const input = await prompt.format({ conflicts: conflicts.join(', ') });
   const response = await model.call(input);
@@ -204,7 +200,7 @@ export const mergeKnowledge = async ({
     inputVariables: ['a', 'b'],
   });
 
-  const model = new OpenAI({ openAIApiKey, temperature: 0.5 });
+  const { llm: model } = useAcaiLLM({ temperature: 0.5 });
 
   const input = await prompt.format({ a, b });
   const response = await model.call(input);
