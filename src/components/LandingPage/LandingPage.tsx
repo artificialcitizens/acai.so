@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './LandingPage.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import useLocationManager from '../../hooks/use-location-manager';
 
 const tagLines = [
   'Your AI toolkit',
@@ -41,6 +42,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
   const [tagLineIndex, setTagLineIndex] = useState(0);
   const [wordIndex, setWordIndex] = useState(0);
   const [isTaglineComplete, setIsTaglineComplete] = useState(false);
+  const navigate = useNavigate();
+  const { location, isLoading } = useLocationManager();
+
+  useEffect(() => {
+    if (location) {
+      navigate(location);
+    }
+  }, [location, navigate]);
 
   const timers = useRef<NodeJS.Timeout[]>([]);
 
@@ -71,6 +80,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
 
     return () => timers.current.forEach(clearTimeout);
   }, [wordIndex, tagLineIndex, singleTagline, isTaglineComplete]);
+
+  if (isLoading || location) {
+    return null;
+  }
 
   return (
     <div className="text-acai-white relative bg-gradient-to-b from-darker to-acai-darker w-screen m-0 flex flex-col p-4 items-center justify-start h-screen">

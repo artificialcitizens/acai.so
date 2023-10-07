@@ -8,7 +8,7 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from './context/GlobalStateContext';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import ToastManager from './components/Toast';
 import { createWorkspace } from './state';
 import { VectorStoreContext } from './context/VectorStoreContext';
@@ -18,6 +18,7 @@ import { Editor } from '@tiptap/react';
 import { EditorContext } from './context/EditorContext';
 import { createDocs } from './components/TipTap/utils/docs';
 import MainView from './components/MainView/MainView';
+import useLocationManager from './hooks/use-location-manager';
 
 const App = () => {
   const globalServices: GlobalStateContextValue =
@@ -38,7 +39,7 @@ const App = () => {
     undefined,
   );
   const [listening, setListening] = useState<boolean>(false);
-
+  const routerLocation = useLocation();
   const [editor, setEditor] = useState<Editor | null>(null);
   const {
     vectorstore,
@@ -47,6 +48,11 @@ const App = () => {
     similaritySearchWithScore,
     filterAndCombineContent,
   } = useMemoryVectorStore('');
+  const { updateLocation } = useLocationManager();
+
+  useEffect(() => {
+    updateLocation(routerLocation.pathname);
+  }, [routerLocation, updateLocation]);
 
   useEffect(() => {
     createDocs().then((docs) => {
