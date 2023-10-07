@@ -323,14 +323,16 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           onChange={handleSpeechChange}
         />
       </span>
-      <p className="text-acai-white mb-2 ml-2">User Transcript</p>
+      <p className="text-acai-white text-sm md:text-xs mb-2 ml-2">
+        User Transcript
+      </p>
       <ScratchPad
         placeholder="User Transcript"
         readonly
         content={userTranscript}
       />
       <button
-        className="bg-light text-acai-white px-4 py-2 mb-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 mb-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
         type="button"
         onClick={() => {
           setUserTranscript('');
@@ -395,7 +397,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             <input
               type="submit"
               value="Connect"
-              className="bg-light text-base md:text-sm text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+              className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
             />
           </form>
         )}
@@ -409,7 +411,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           <textarea
             placeholder="Enter text to synthesize, press submit or enter to play"
             id="manualTTS"
-            className="rounded bg-base text-acai-white text-base md:text-sm p-4 mb-2"
+            className="rounded bg-base text-acai-white text-base md:text-xs p-4 mb-2"
             value={manualTTS}
             onChange={(e) => setManualTTS(e.target.value)}
             onKeyDown={(e: any) => {
@@ -420,7 +422,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             }}
           />
           <button
-            className="bg-light text-base md:text-sm text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+            className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
             type="submit"
           >
             Submit

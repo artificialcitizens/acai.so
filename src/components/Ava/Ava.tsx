@@ -66,21 +66,21 @@ export const Ava: React.FC<AvaProps> = ({
   return (
     <SBSidebar>
       <ExpansionPanel
-        className="pt-8 md:pt-0 text-sm md:text-xs"
+        className="pt-8 md:pt-0"
         title="Settings"
         onChange={toggleSettings}
         isOpened={settingsOpen}
         tabIndex={0}
         onKeyDown={toggleSettings}
       >
-        <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
+        <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-1 md:pl-2 font-bold mb-3 border-b border-b-light border-b-solid">
           User Profile
         </h5>
         <p className="text-xs font-medium mb-4">
           Personalize your AVA interactions
         </p>
         <UserProfile />
-        <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
+        <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-1 md:pl-2 font-bold mb-3 border-b border-b-light border-b-solid">
           Tokens
         </h5>
         <TokenManager />

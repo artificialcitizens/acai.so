@@ -83,5 +83,5 @@
 }
 
 .cs-message-input__content-editor {
-  @apply text-base md:text-sm;
+  @apply text-base md:text-sm min-h-[1.25rem];
 }
