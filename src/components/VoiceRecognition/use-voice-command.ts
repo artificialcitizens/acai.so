@@ -109,7 +109,11 @@ export const useVoiceCommands = () => {
    * action: The function that will be called when the command is triggered
    */
   const config: Command[] = [
-    createCommand({ commands: ['ava', 'eva'], recognitionState: 'ava' }),
+    createCommand({
+      commands: ['ava', 'eva'],
+      recognitionState: 'ava',
+      toastMessage: 'Agent is listening',
+    }),
     createCommand({
       commands: ['take notes'],
       recognitionState: 'notes',
