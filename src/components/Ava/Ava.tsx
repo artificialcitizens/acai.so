@@ -71,7 +71,7 @@ export const Ava: React.FC<AvaProps> = ({
         onChange={toggleSettings}
         isOpened={settingsOpen}
         tabIndex={0}
-        onKeyDown={toggleSettings}
+        // onKeyDown={toggleSettings}
       >
         <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-1 md:pl-2 font-bold mb-3 border-b border-b-light border-b-solid">
           User Profile
