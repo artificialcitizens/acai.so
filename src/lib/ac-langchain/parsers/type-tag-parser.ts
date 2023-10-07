@@ -1,10 +1,9 @@
-import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
-import { getToken } from '../../../utils/config';
+import { HumanMessage, SystemMessage } from 'langchain/schema';
 import {
   readFromLocalStorage,
   writeToLocalStorage,
 } from '../../../utils/data-utils';
+import { useAcaiChat } from '../models/chat';
 
 export type TagExampleJSON = {
   [key: string]: string[];
@@ -97,9 +96,7 @@ ${exampleOutput}
 `;
 };
 
-const chat = new ChatOpenAI({
-  openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
-});
+const { chat } = useAcaiChat()
 
 /**
  * Parses a string of content for specified tags and returns an object
@@ -148,8 +145,8 @@ export const getTypeTagResponse = async (
 
   const examples = convertJsonToTagTypeString(data);
   const response = await chat.call([
-    new SystemChatMessage(typeTagExampleSystemPrompt),
-    new HumanChatMessage(examples),
+    new SystemMessage(typeTagExampleSystemPrompt),
+    new HumanMessage(examples),
   ]);
 
   const typeTagResponse = {

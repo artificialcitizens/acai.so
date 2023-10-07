@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { OpenAI } from 'langchain/llms/openai';
 import { APIChain } from 'langchain/chains';
 import { getToken } from '../../utils/config';
+import { useAcaiLLM } from '../../lib/ac-langchain/models/chat';
 
 const API_DOCS = `...`; // API documentation string
 
@@ -19,8 +19,7 @@ export function useAPIChain(options: UseAPIChainOptions = {}) {
 
   useEffect(() => {
     async function initializeModel() {
-      const openAIModel = new OpenAI({
-        openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
+      const { llm: openAIModel } = useAcaiLLM({
         modelName: 'text-davinci-003',
       });
 

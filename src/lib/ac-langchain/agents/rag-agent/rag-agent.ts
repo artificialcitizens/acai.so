@@ -1,8 +1,7 @@
-import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { CallbackManager } from 'langchain/callbacks';
 import { HumanMessage, SystemMessage } from 'langchain/schema';
 import { ragChain } from './rag-chain';
-import { getToken } from '../../../../utils/config';
+import { useAcaiChat } from '../../models/chat';
 
 export const ragAgentResponse = async ({
   query,
@@ -25,9 +24,7 @@ export const ragAgentResponse = async ({
     chatHistory,
     context,
   });
-  const streamingModel = new ChatOpenAI({
-    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
-    streaming: true,
+  const { chat: streamingModel } = useAcaiChat({
     callbackManager: CallbackManager.fromHandlers(callbacks),
     modelName: 'gpt-3.5-turbo-16k',
   });

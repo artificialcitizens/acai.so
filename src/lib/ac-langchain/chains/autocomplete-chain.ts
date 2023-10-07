@@ -1,7 +1,6 @@
 // import { CallbackManager } from 'langchain/callbacks';
-import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
-import { getToken } from '../../../utils/config';
+import { HumanMessage, SystemMessage } from 'langchain/schema';
+import { useAcaiChat } from '../models/chat';
 
 /**
  * @param context - The context of the message
@@ -26,11 +25,11 @@ export const autoComplete = async ({
     onMessageComplete?: (completion: string) => void;
   };
 }): Promise<string> => {
-  const model = new ChatOpenAI({
-    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
+  const maxTokens = 50
+  const fields = {
     modelName: 'gpt-3.5-turbo-16k',
     temperature: 0.35,
-    streaming: true,
+    maxTokens,
     callbacks: [
       {
         handleLLMStart: async (llm, prompts) => {
@@ -48,32 +47,36 @@ export const autoComplete = async ({
         },
       },
     ],
-  });
+  };
 
-  const systemPrompt = `You are an AI writing assistant that continues existing text based on given from prior text.
-Give more weight/priority to the later characters than the beginning ones
-`;
+  const { chat: model } = useAcaiChat(fields)
+  const systemPrompt = [
+    "You are an AI writing assistant that continues existing text based on given from prior text.",
+    "Give more weight/priority to the later characters than the beginning ones."
+  ].join(" ");
+  const formattedInfo = [
+    "Related information that can be used to help inform the brief autocomplete of the sentence and no more than 50 characters.",
+    `${relatedInfo}`,
+    "Related information that can be used to help inform the brief autocomplete of the sentence and NO MORE THAN 50 CHARACTERS.",
+  ].join("\n\n")
+  const systemMessage = systemPromptOverride ? systemPromptOverride : [
+    systemPrompt, 
+    formattedInfo
+  ].join("\n\n")
+  const messages = [
+    new SystemMessage(systemMessage),
+    new HumanMessage(context),
+  ]
+  console.log(messages)
 
-  const formattedInfo = `
-  Related information that can be used to help inform the brief autocomplete of the sentence and no more than 50 characters.
-  
-  ${relatedInfo}
+  // console.log({
+  //   formattedInfo,
+  //   context,
+  //   systemMessage,
+  //   systemPrompt,
+  //   messages
+  // });
 
-  Related information that can be used to help inform the brief autocomplete of the sentence and NO MORE THAN 50 CHARACTERS
-  `;
-
-  const systemMessage =
-    systemPromptOverride || `${systemPrompt} \n\n ${formattedInfo}`;
-  console.log({
-    formattedInfo,
-    context,
-    systemMessage,
-    systemPrompt,
-  });
-
-  const response = await model.call([
-    new SystemChatMessage(systemMessage),
-    new HumanChatMessage(context),
-  ]);
-  return response.text;
+  const response = await model.call(messages);
+  return response.content;
 };
