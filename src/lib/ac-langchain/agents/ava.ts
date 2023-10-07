@@ -28,7 +28,6 @@ import {
 } from 'langchain/schema';
 import { Tool, DynamicTool } from 'langchain/tools';
 import { Calculator } from 'langchain/tools/calculator';
-import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { BaseCallbackHandler } from 'langchain/callbacks';
 import { Embeddings } from 'langchain/embeddings/base';
 // import { HuggingFaceTransformersEmbeddings } from 'langchain/embeddings/hf_transformers';
@@ -45,7 +44,7 @@ import {
 // import { browser } from './tools/web-browser';
 import { googleSearch } from './tools/search-engine';
 import { WebBrowser } from 'langchain/tools/webbrowser';
-import { useAcaiChat, useAcaiLLM } from '../models/chat';
+import { useAcaiChat, useAcaiEmbeddings, useAcaiLLM } from '../models/chat';
 // import {
 //   createAvaChatPrompt,
 //   createCustomPrompt,
@@ -200,10 +199,7 @@ const createModels = () => {
   //   modelName: 'Xenova/bge-base-en',
   // });
 
-  // TODO: Custom embed wrapper for llama cpp endpoint
-  embeddings = new OpenAIEmbeddings({
-    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
-  });
+  const { embeddings } = useAcaiEmbeddings()
   return { chatModel: chat, model: llm, embeddings };
 };
 

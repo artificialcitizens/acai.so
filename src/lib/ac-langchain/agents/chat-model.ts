@@ -1,8 +1,6 @@
-import { ChatOpenAI } from 'langchain/chat_models/openai';
 // @TODO: figure out why these imports are not working with the linter
 // eslint-disable-next-line import/named
 import { SystemMessage, HumanMessage, LLMResult, BaseMessage } from 'langchain/schema';
-import { getToken } from '../../../utils/config';
 import { useAcaiChat } from '../models/chat';
 
 type ChatResponse = {
