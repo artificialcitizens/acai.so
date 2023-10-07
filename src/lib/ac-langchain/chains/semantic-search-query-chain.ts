@@ -1,6 +1,6 @@
 import { PromptTemplate } from 'langchain/prompts';
 import { CommaSeparatedListOutputParser } from 'langchain/output_parsers';
-import { useAcaiLLM } from '../models/chat';
+import { handleAcaiLLM } from '../models/chat';
 
 /**
  *  Create a list of comma separated sentences to semantically search a vectorstore with.
@@ -17,7 +17,7 @@ export const semanticSearchQueryGeneration = async (
     inputVariables: ['text'],
   });
 
-  const { llm: model } = useAcaiLLM({ temperature: 0.5 });
+  const { llm: model } = handleAcaiLLM({ temperature: 0.5 });
 
   const input = await prompt.format({ text });
   const response = await model.call(input);

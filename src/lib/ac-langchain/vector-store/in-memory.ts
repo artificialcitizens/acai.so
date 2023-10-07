@@ -2,7 +2,7 @@ import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { AcaiMemoryVector } from '../../../../db';
 import { Document } from 'langchain/document';
 import { Embeddings } from 'langchain/embeddings/base';
-import { useAcaiEmbeddings } from '../models/chat';
+import { handleAcaiEmbeddings } from '../models/chat';
 // import { HuggingFaceTransformersEmbeddings } from 'langchain/embeddings/hf_transformers';
 
 // export const initializeMemoryVectorStore = async ({
@@ -26,11 +26,8 @@ export const initializeMemoryVectorStore = async ({
 }: {
   docs: Document[];
 }) => {
-  const { embeddings } = useAcaiEmbeddings()
-  const vectorStore = await MemoryVectorStore.fromDocuments(
-    docs,
-    embeddings,
-  );
+  const { embeddings } = handleAcaiEmbeddings();
+  const vectorStore = await MemoryVectorStore.fromDocuments(docs, embeddings);
   return vectorStore;
 };
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { APIChain } from 'langchain/chains';
 import { getToken } from '../../utils/config';
-import { useAcaiLLM } from '../../lib/ac-langchain/models/chat';
+import { handleAcaiLLM } from '../../lib/ac-langchain/models/chat';
 
 const API_DOCS = `...`; // API documentation string
 
@@ -19,7 +19,7 @@ export function useAPIChain(options: UseAPIChainOptions = {}) {
 
   useEffect(() => {
     async function initializeModel() {
-      const { llm: openAIModel } = useAcaiLLM({
+      const { llm: openAIModel } = handleAcaiLLM({
         modelName: 'text-davinci-003',
       });
 

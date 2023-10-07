@@ -1,5 +1,5 @@
 import { HumanMessage, SystemMessage } from 'langchain/schema';
-import { useAcaiChat } from '../models/chat';
+import { handleAcaiChat } from '../models/chat';
 
 /**
  * Take notes based on the given transcription
@@ -16,7 +16,7 @@ Here is the previous list of actionable items, update or add as needed:
 ${priorList}
 `;
 
-  const { chat: model } = useAcaiChat({
+  const { chat: model } = handleAcaiChat({
     modelName: 'gpt-3.5-turbo-16k',
     temperature: 0,
   });

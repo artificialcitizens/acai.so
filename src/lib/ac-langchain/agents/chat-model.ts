@@ -1,7 +1,12 @@
 // @TODO: figure out why these imports are not working with the linter
 // eslint-disable-next-line import/named
-import { SystemMessage, HumanMessage, LLMResult, BaseMessage } from 'langchain/schema';
-import { useAcaiChat } from '../models/chat';
+import {
+  SystemMessage,
+  HumanMessage,
+  LLMResult,
+  BaseMessage,
+} from 'langchain/schema';
+import { handleAcaiChat } from '../models/chat';
 
 type ChatResponse = {
   response: string;
@@ -36,18 +41,14 @@ export const queryChat = async ({
   };
 }): Promise<ChatResponse> => {
   const controller = new AbortController();
-  const { chat } = useAcaiChat({
+  const { chat } = handleAcaiChat({
     modelName,
     temperature,
     // callbacks, // @TODO: idk why it doesn't let me put callbacks here, but it wasn't there before anyway...
-  })
+  });
 
   const response = await chat.call(
-    [
-      new SystemMessage(systemMessage),
-      ...messages,
-      new HumanMessage(message)
-    ],
+    [new SystemMessage(systemMessage), ...messages, new HumanMessage(message)],
     {
       signal: controller.signal,
       callbacks: [

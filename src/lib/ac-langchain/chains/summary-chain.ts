@@ -9,7 +9,7 @@ import {
 // import { z } from 'zod';
 import { loadSummarizationChain } from 'langchain/chains';
 import { Document } from 'langchain/document';
-import { useAcaiChat } from '../models/chat';
+import { handleAcaiChat } from '../models/chat';
 
 export type PartialContentResult = {
   id: number;
@@ -49,7 +49,7 @@ export const getSummaries = async ({
   const summaries: PartialContentResult[] = [];
   console.log(`Generating Partial Summaries for ${docs.length} chunks of text`);
 
-  const { chat: quickModel } = useAcaiChat()
+  const { chat: quickModel } = handleAcaiChat();
   const summaryPromises = docs.map(async (doc, index) => {
     const formattedSummaryPrompt = await summaryPrompt.format({
       text: doc.pageContent,
@@ -81,10 +81,10 @@ export const getMainSummary = async ({
   summary: string;
   openAIApiKey: string;
 }): Promise<string> => {
-  const { chat: smartModel } = useAcaiChat({
+  const { chat: smartModel } = handleAcaiChat({
     modelName: 'gpt-4',
     temperature: 0.25,
-  })
+  });
 
   const formattedPrompt = await summaryPrompt.format({
     text: summary,

@@ -1,10 +1,10 @@
 import { ConversationalRetrievalQAChain } from 'langchain/chains';
 import { HNSWLib } from 'langchain/vectorstores/hnswlib';
 import { BufferMemory } from 'langchain/memory';
-import { useAcaiEmbeddings, useAcaiLLM } from '../models/chat';
+import { handleAcaiEmbeddings, handleAcaiLLM } from '../models/chat';
 
 /* Initialize the LLM to use to answer the question */
-const { llm: model } = useAcaiLLM();
+const { llm: model } = handleAcaiLLM();
 export const docBotChat = async ({
   question,
   docs,
@@ -15,7 +15,7 @@ export const docBotChat = async ({
   vectorStore?: any;
 }) => {
   if (!vectorStore) {
-    const { embeddings } = useAcaiEmbeddings()
+    const { embeddings } = handleAcaiEmbeddings();
     vectorStore = await HNSWLib.fromDocuments(docs, embeddings);
   }
   const chain = ConversationalRetrievalQAChain.fromLLM(

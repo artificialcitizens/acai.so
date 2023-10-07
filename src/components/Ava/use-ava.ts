@@ -116,20 +116,21 @@ export const useAva = (): {
       case 'chat': {
         // if the user has a custom prompt we override the system prompt
         const sysMessage = customPrompt
-          ? await createCustomPrompt(customPrompt, "") //formattedChatHistory)
+          ? await createCustomPrompt(customPrompt, '') //formattedChatHistory)
           : await createAvaChatPrompt(
               userName || 'User',
               userLocation || 'Undisclosed',
-              ""
+              '',
               // formattedChatHistory,
             );
         // console.log(currentAgent?.recentChatHistory)
         const response = await queryChat({
           systemMessage: sysMessage,
           message,
-          messages: currentAgent?.recentChatHistory.map( msg => msg.type === "user"
-            ? new HumanMessage(msg.text)
-            : new AIMessage(msg.text)
+          messages: currentAgent?.recentChatHistory.map((msg: Message) =>
+            msg.type === 'user'
+              ? new HumanMessage(msg.text)
+              : new AIMessage(msg.text),
           ),
           modelName: currentAgent.openAIChatModel,
           callbacks: {
@@ -307,7 +308,6 @@ export const useAva = (): {
           setLoading(false);
 
           return { response };
-          
         } catch (error: any) {
           setLoading(false);
           return error.message;

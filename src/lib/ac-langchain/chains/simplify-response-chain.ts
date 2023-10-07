@@ -1,5 +1,5 @@
 import { HumanMessage, SystemMessage } from 'langchain/schema';
-import { useAcaiChat } from '../models/chat';
+import { handleAcaiChat } from '../models/chat';
 
 /**
  * Take notes based on the given transcription
@@ -12,7 +12,7 @@ You are tasked with taking the chat history and assistant reply and creating a b
 This will just need to be a quick response because the user will receive the longer response in text form elsewhere
 `;
 
-  const { chat: model } = useAcaiChat({ temperature: 0.5 });
+  const { chat: model } = handleAcaiChat({ temperature: 0.5 });
 
   const response = await model.call([
     new SystemMessage(prompt),
