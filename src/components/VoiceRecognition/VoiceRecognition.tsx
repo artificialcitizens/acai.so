@@ -21,7 +21,7 @@ import { ChatHistory } from '../../state';
 import Dropdown from '../DropDown';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import { simplifyResponseChain } from '../../lib/ac-langchain/chains/simplify-response-chain';
-import useBroadcastManager from '../../hooks/use-broadcast-manager';
+// import useBroadcastManager from '../../hooks/use-broadcast-manager';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
@@ -50,10 +50,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     'webSpeech',
   );
   const [manualTTS, setManualTTS] = useState<string>('');
-  const [transcriptionOn, setTranscription] = useLocalStorageKeyValue(
-    'TRANSCRIPTION_ON',
-    'true',
-  );
+  const [transcriptionOn, setTranscription] = useState<boolean>(false);
   const [barkUrl, setBarkUrl] = useLocalStorageKeyValue(
     'BARK_URL',
     import.meta.env.VITE_BARK_SERVER ||
@@ -72,10 +69,6 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const { agentStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const [state, send] = useActor(agentStateService);
-  const tabManager = useBroadcastManager('acai', () => {
-    toggleWebspeech(false);
-  });
-
   const { workspaceId: rawWorkspaceId } = useParams<{
     workspaceId: string;
     domain: string;
@@ -88,21 +81,12 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const srcRef = React.useRef<MediaElementAudioSourceNode | null>(null);
   const gainNodeRef = React.useRef<GainNode | null>(null);
 
-  useEffect(() => {
-    tabManager.notifyNewTab();
-  }, [tabManager]);
-
-  const toggleWebspeech = (bool: boolean) => {
-    const booleanString = bool ? 'true' : 'false';
-    setTranscription(booleanString);
-  };
-
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSingleCommandMode(event.target.checked);
   };
 
   const handleSpeechChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    toggleWebspeech(event.target.checked);
+    setTranscription(event.target.checked);
   };
 
   const handleVoiceStateChange = (voiceState: VoiceState) => {
@@ -293,7 +277,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   useSpeechRecognition({
     onTranscriptionComplete,
     // @TODO: Fix hacky listening state
-    active: !ttsLoading && transcriptionOn === 'true' ? true : false,
+    active: !ttsLoading && transcriptionOn ? true : false,
   });
 
   const handleManualTTS = (e: React.FormEvent<HTMLFormElement>) => {
@@ -335,7 +319,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           type="checkbox"
           id="transcriptionOn"
           name="option"
-          checked={transcriptionOn === 'true' ? true : false}
+          checked={transcriptionOn}
           onChange={handleSpeechChange}
         />
       </span>

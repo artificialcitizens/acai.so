@@ -16,97 +16,95 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({
 }) => {
   const ref = useRef<SVGSVGElement>(null);
 
-  useEffect(() => {
-    const svg = d3.select(ref.current);
-    const width = +svg.attr('width');
-    const height = +svg.attr('height');
-    const radius = Math.min(width, height) / 2;
+  // useEffect(() => {
+  //   let animationFrameId: number | null = null;
+  //   let source: MediaStreamAudioSourceNode | null = null;
+  //   const svg = d3.select(ref.current);
+  //   const width = +svg.attr('width');
+  //   const height = +svg.attr('height');
+  //   const radius = Math.min(width, height) / 2;
 
-    if (audioContext) {
-      const analyser = audioContext.createAnalyser();
-      if (!navigator.mediaDevices) {
-        console.warn(
-          'No media devices found, please enable audio access if you want to use the voice synthesis',
-        );
-        return;
-      }
-      navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-        const source = audioContext.createMediaStreamSource(stream);
-        source.connect(analyser);
+  //   if (audioContext && isOn) {
+  //     const analyser = audioContext.createAnalyser();
+  //     if (!navigator.mediaDevices) {
+  //       console.warn(
+  //         'No media devices found, please enable audio access if you want to use the voice synthesis',
+  //       );
+  //       return;
+  //     }
+  //     navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+  //       const source = audioContext.createMediaStreamSource(stream);
+  //       source.connect(analyser);
 
-        const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
+  //       const bufferLength = analyser.frequencyBinCount;
+  //       const dataArray = new Uint8Array(bufferLength);
 
-        const radialLine = d3
-          .radialLine()
-          .angle((d, i) => i * ((2 * Math.PI) / bufferLength))
-          .radius((d) => {
-            // Normalize data between 0 and 1
-            const normalizedData = (d as any) / 100;
-            const minLimit = 0.1;
-            const maxLimit = 0.2;
-            // Scale data between minLimit and maxLimit
-            const scaledData =
-              normalizedData * (maxLimit - minLimit) + minLimit;
+  //       const radialLine = d3
+  //         .radialLine()
+  //         .angle((d, i) => i * ((2 * Math.PI) / bufferLength))
+  //         .radius((d) => {
+  //           // Normalize data between 0 and 1
+  //           const normalizedData = (d as any) / 100;
+  //           const minLimit = 0.1;
+  //           const maxLimit = 0.2;
+  //           // Scale data between minLimit and maxLimit
+  //           const scaledData =
+  //             normalizedData * (maxLimit - minLimit) + minLimit;
 
-            // Return scaled data as radius
-            return scaledData * radius;
-          });
+  //           // Return scaled data as radius
+  //           return scaledData * radius;
+  //         });
 
-        function renderFrame() {
-          requestAnimationFrame(renderFrame);
+  //       function renderFrame() {
+  //         requestAnimationFrame(renderFrame);
 
-          analyser.getByteTimeDomainData(dataArray);
+  //         analyser.getByteTimeDomainData(dataArray);
 
-          svg
-            .selectAll('path')
-            .data([dataArray])
-            .join('path')
-            .attr('transform', `translate(${width / 2}, ${height / 2})`)
-            .attr('d', radialLine as any)
-            .attr('stroke', 'white')
-            .attr('stroke-width', 6)
-            .attr('fill', 'none');
-        }
+  //         svg
+  //           .selectAll('path')
+  //           .data([dataArray])
+  //           .join('path')
+  //           .attr('transform', `translate(${width / 2}, ${height / 2})`)
+  //           .attr('d', radialLine as any)
+  //           .attr('stroke', 'white')
+  //           .attr('stroke-width', 6)
+  //           .attr('fill', 'none');
+  //       }
 
-        renderFrame();
-      });
-    } else {
-      // Render a radial line with the radius of the data circle when there's no audio context
-      const radialLine = d3
-        .radialLine()
-        .angle(() => 0)
-        .radius(() => radius);
-
-      svg
-        .selectAll('path')
-        .data([0])
-        .join('path')
-        .attr('transform', `translate(${width / 2}, ${height / 2})`)
-        .attr('d', radialLine as any)
-        .attr('stroke', 'none')
-        .attr('fill', 'none');
-    }
-  }, [isOn, audioContext]);
+  //       renderFrame();
+  //     });
+  //   }
+  //   // Cleanup function
+  //   return () => {
+  //     if (animationFrameId !== null) {
+  //       cancelAnimationFrame(animationFrameId);
+  //     }
+  //     if (source !== null) {
+  //       source.disconnect();
+  //     }
+  //   };
+  // }, [isOn, audioContext]);
 
   return (
     <div
-      className="fixed w-[150px] h-[150px] transition-opacity duration-500"
+      className="absolute w-[150px] h-[150px] transition-opacity duration-500"
       data-ava-element="audio-wave"
       style={{
-        bottom: '-16px',
-        left: '-16px',
+        bottom: '-32px',
+        left: '-32px',
         zIndex: 100,
         opacity: isOn ? 1 : 0,
         pointerEvents: isOn ? 'all' : 'none',
       }}
     >
       <svg ref={ref} width="150" height="150">
+        <circle cx="75" cy="75" r="20" fill="rgba(9, 9, 9, 0.75)" />
         <circle
+          className="animate-pulse"
           cx="75"
           cy="75"
-          r="50"
-          fill="rgba(9, 9, 9, 0.75)" // dark background with slight opacity
+          r="10"
+          fill="#5F3C4F"
         />
       </svg>
     </div>
