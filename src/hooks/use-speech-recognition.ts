@@ -40,7 +40,7 @@ function useSpeechRecognition({
         queue.addCallback(speechRecognitionRef.current.stop());
         return;
       }
-      // queue.addCallback(speechRecognitionRef.current.start());
+      queue.addCallback(speechRecognitionRef.current.start());
     };
 
     speechRecognitionRef.current.onend = onEnd;
