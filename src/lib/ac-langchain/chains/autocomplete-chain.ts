@@ -32,13 +32,13 @@ export const autoComplete = async ({
     maxTokens,
     callbacks: [
       {
-        handleLLMStart: async (llm, prompts) => {
+        handleLLMStart: async (llm: any, prompts: any) => {
           callbacks.onMessageStart && callbacks.onMessageStart('starting');
         },
-        handleLLMNewToken(token, runId, parentRunId) {
+        handleLLMNewToken(token: string, runId: string, parentRunId: string) {
           callbacks.onMessageStream && callbacks.onMessageStream(token);
         },
-        handleLLMEnd: async (output) => {
+        handleLLMEnd: async (output: { generations: { text: any }[][] }) => {
           const { text } = output.generations[0][0];
           callbacks.onMessageComplete && callbacks.onMessageComplete(text);
         },
