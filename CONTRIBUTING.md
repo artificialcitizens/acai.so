@@ -8,9 +8,9 @@ Please read through this document before submitting any issues or pull requests 
 
 - [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) - Code formatter using prettier
 - [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) - Integrates ESLint JavaScript into VS Code.
-- [CodespellChecker](https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker) - Spelling checker for source code
+- [CodeSpellChecker](https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker) - Spelling checker for source code
 - [Tailwind IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) - Intelligent Tailwind CSS tooling for VS Code
-- [Vitetest](https://marketplace.visualstudio.com/items?itemName=ZixuanChen.vitest-explorer) - A test runner for vite
+- [ViteTest](https://marketplace.visualstudio.com/items?itemName=ZixuanChen.vitest-explorer) - A test runner for vite
 
 ## Reporting Bugs/Features
 
