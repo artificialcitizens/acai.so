@@ -3,7 +3,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Ava } from './components/Ava/Ava';
 import { SideNav } from './components/SideNav/SideNav';
-import { FloatingButton } from './components/FloatingButton/FloatingButton';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -19,6 +18,8 @@ import { EditorContext } from './context/EditorContext';
 import { createDocs } from './components/TipTap/utils/docs';
 import MainView from './components/MainView/MainView';
 import useLocationManager from './hooks/use-location-manager';
+
+import { MenuButton } from './components/MenuButton/MenuButton';
 
 const App = () => {
   const globalServices: GlobalStateContextValue =
@@ -97,8 +98,8 @@ const App = () => {
         }}
       >
         <EditorContext.Provider value={{ editor, setEditor }}>
-          <SideNav></SideNav>
-          <FloatingButton
+          <SideNav />
+          <MenuButton
             handleClick={(e) => {
               e.stopPropagation();
               toggleSideNav();
@@ -112,7 +113,7 @@ const App = () => {
             onClick={handleWindowClick}
           >
             <ToastManager />
-            <main className="w-full flex flex-grow ">
+            <main className="w-screen flex flex-grow">
               {workspaceId && (
                 <>
                   <MainView domain={domain} />

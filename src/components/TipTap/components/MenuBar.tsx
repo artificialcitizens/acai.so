@@ -2,7 +2,6 @@ import { Editor } from '@tiptap/react';
 import React, { useState, useEffect, useContext } from 'react';
 import { useActor, useInterpret } from '@xstate/react';
 import { Tab, appStateMachine } from '../../../state';
-import { FloatingButton } from '../../FloatingButton/FloatingButton';
 import {
   GlobalStateContext,
   GlobalStateContextValue,

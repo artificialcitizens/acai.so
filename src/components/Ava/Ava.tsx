@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import SBSidebar from '../../components/Sidebar';
+import SBSidebar from '../Sidebar/SBSidebar';
 import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
 import NotificationCenter from '../../components/NotificationCenter';
 import Chat from '../../components/Chat/Chat';
@@ -66,9 +66,12 @@ export const Ava: React.FC<AvaProps> = ({
   return (
     <SBSidebar>
       <ExpansionPanel
+        className="pt-8"
         title="Settings"
         onChange={toggleSettings}
         isOpened={settingsOpen}
+        tabIndex={0}
+        onKeyDown={toggleSettings}
       >
         <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
           User Profile
