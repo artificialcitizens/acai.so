@@ -2,8 +2,7 @@ import { AutoGPT } from 'langchain/experimental/autogpt';
 import { ReadFileTool, WriteFileTool, SerpAPI } from 'langchain/tools';
 import { InMemoryFileStore } from 'langchain/stores/file/in_memory';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { useAcaiChat } from '../../models/chat';
+import { useAcaiChat, useAcaiEmbeddings } from '../../models/chat';
 
 const store = new InMemoryFileStore();
 
@@ -17,7 +16,8 @@ const tools = [
   }),
 ];
 
-const vectorStore = new MemoryVectorStore(new OpenAIEmbeddings());
+const { embeddings } = useAcaiEmbeddings()
+const vectorStore = new MemoryVectorStore(embeddings);
 
 const { chat } = useAcaiChat()
 const autogpt = AutoGPT.fromLLMAndTools(
