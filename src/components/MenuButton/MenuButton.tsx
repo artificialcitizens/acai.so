@@ -1,3 +1,4 @@
+import { MenuIcon } from 'lucide-react';
 import React from 'react';
 
 interface FloatingButtonProps {
@@ -7,7 +8,7 @@ interface FloatingButtonProps {
   handleClick: (e: any) => void;
 }
 
-export const FloatingButton: React.FC<FloatingButtonProps> = ({
+export const MenuButton: React.FC<FloatingButtonProps> = ({
   variant,
   size,
   label,
