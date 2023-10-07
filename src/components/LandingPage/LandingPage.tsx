@@ -94,7 +94,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
           </h1>
         </Link>
       </nav>
-      <p className="mb-8 font-medium text-xs md:text-xs">powered by AVA</p>
+      <p className="mb-8 font-medium text-xs">powered by AVA</p>
       <div className="relative bg-darker rounded-3xl overflow-hidden w-3/4 h-3/4 z-10 shadow-lg">
         <Link to="/docs/documents/1-introduction">
           <div className="absolute inset-0 bg-gradient-to-t from-darker to-acai-darker bg-opacity-100 flex items-start justify-start p-8 md:p-2 md:items-center md:justify-center transition-opacity duration-500 group-hover:opacity-0">

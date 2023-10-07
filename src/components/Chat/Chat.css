@@ -7,8 +7,7 @@
   @apply flex flex-grow;
 }
 .cs-message__content {
-  @apply !bg-base;
-  font-size: 14px;
+  @apply !bg-base text-lg md:text-base;
   border: 1px solid #565656;
 }
 .cs-message-input__content-editor {
@@ -80,5 +79,9 @@
 }
 
 .cs-message-input {
-  @apply flex-shrink;
+  @apply flex-shrink text-base;
+}
+
+.cs-message-input__content-editor {
+  @apply text-base md:text-sm;
 }

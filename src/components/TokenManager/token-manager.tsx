@@ -84,9 +84,11 @@ const TokenManager: React.FC = () => {
     <form onSubmit={handleSubmit} className="mb-4">
       {keys.map(({ id, name }) => (
         <span className="flex mb-2 items-center" key={id}>
-          <label className="text-acai-white pr-2 w-[50%]">{name}:</label>
+          <label className="text-acai-white pr-2 w-[50%] text-base md:text-sm">
+            {name}:
+          </label>
           <input
-            className="text-acai-white bg-base px-[2px]"
+            className="text-acai-white text-base md:text-sm bg-base px-[2px]"
             type="password"
             value={values[id] || ''}
             onChange={(e) => setValues({ ...values, [id]: e.target.value })}
@@ -96,7 +98,7 @@ const TokenManager: React.FC = () => {
       <input
         type="submit"
         value="Submit"
-        className="bg-light text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        className="bg-light text-acai-white text-base md:text-sm px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
       />
     </form>
   );
