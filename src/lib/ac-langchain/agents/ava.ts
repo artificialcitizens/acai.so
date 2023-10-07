@@ -44,7 +44,11 @@ import {
 // import { browser } from './tools/web-browser';
 import { googleSearch } from './tools/search-engine';
 import { WebBrowser } from 'langchain/tools/webbrowser';
-import { useAcaiChat, useAcaiEmbeddings, useAcaiLLM } from '../models/chat';
+import {
+  handleAcaiChat,
+  handleAcaiEmbeddings,
+  handleAcaiLLM,
+} from '../models/chat';
 // import {
 //   createAvaChatPrompt,
 //   createCustomPrompt,
@@ -181,28 +185,29 @@ class CustomOutputParser extends AgentActionOutputParser {
   }
 }
 
-let chatModel: ChatOpenAI;
-let model: OpenAI;
-let embeddings: Embeddings;
+let chatModel: ChatOpenAI | undefined;
+let model: OpenAI | undefined;
+let embeddings: Embeddings | undefined;
+
 const createModels = () => {
   if (chatModel && model && embeddings) return { chatModel, model, embeddings };
 
-  const { chat } = useAcaiChat({
+  const { chat } = handleAcaiChat({
     modelName: 'gpt-4-0314',
     temperature: 0.1,
   });
-  const { llm } = useAcaiLLM({
+  const { llm } = handleAcaiLLM({
     temperature: 0.3,
   });
 
-  // embeddings = new HuggingFaceTransformersEmbeddings({
-  //   modelName: 'Xenova/bge-base-en',
-  // });
+  const { embeddings: embeddingsFromHook } = handleAcaiEmbeddings();
 
-  const { embeddings } = useAcaiEmbeddings()
-  return { chatModel: chat, model: llm, embeddings };
+  chatModel = chat;
+  model = llm;
+  embeddings = embeddingsFromHook;
+
+  return { chatModel, model, embeddings };
 };
-
 const createLlmChain = ({
   model,
   tools,
@@ -268,6 +273,10 @@ const createAgentArtifacts = ({
 
   const proxyUrl =
     getToken('PROXY_SERVER_URL') || import.meta.env.VITE_PROXY_SERVER_URL;
+
+  if (!embeddings) {
+    throw new Error('Embeddings is undefined');
+  }
 
   const browser = new WebBrowser({
     model: model,

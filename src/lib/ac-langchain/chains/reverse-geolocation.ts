@@ -1,7 +1,7 @@
 import { PromptTemplate } from 'langchain/prompts';
-import { useAcaiLLM } from '../models/chat';
+import { handleAcaiLLM } from '../models/chat';
 
-const { llm: model } = useAcaiLLM();
+const { llm: model } = handleAcaiLLM();
 /**
  * Create a step by step task list based on given subject.
  */

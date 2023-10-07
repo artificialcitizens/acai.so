@@ -1,6 +1,6 @@
 // import { CallbackManager } from 'langchain/callbacks';
 import { HumanMessage, SystemMessage } from 'langchain/schema';
-import { useAcaiChat } from '../models/chat';
+import { handleAcaiChat } from '../models/chat';
 
 /**
  * @param context - The context of the message
@@ -25,20 +25,20 @@ export const autoComplete = async ({
     onMessageComplete?: (completion: string) => void;
   };
 }): Promise<string> => {
-  const maxTokens = 50
+  const maxTokens = 50;
   const fields = {
     modelName: 'gpt-3.5-turbo-16k',
     temperature: 0.35,
     maxTokens,
     callbacks: [
       {
-        handleLLMStart: async (llm, prompts) => {
+        handleLLMStart: async (llm: any, prompts: any) => {
           callbacks.onMessageStart && callbacks.onMessageStart('starting');
         },
-        handleLLMNewToken(token, runId, parentRunId) {
+        handleLLMNewToken(token: string, runId: string, parentRunId: string) {
           callbacks.onMessageStream && callbacks.onMessageStream(token);
         },
-        handleLLMEnd: async (output) => {
+        handleLLMEnd: async (output: { generations: { text: any }[][] }) => {
           const { text } = output.generations[0][0];
           callbacks.onMessageComplete && callbacks.onMessageComplete(text);
         },
@@ -49,25 +49,24 @@ export const autoComplete = async ({
     ],
   };
 
-  const { chat: model } = useAcaiChat(fields)
+  const { chat: model } = handleAcaiChat(fields);
   const systemPrompt = [
-    "You are an AI writing assistant that continues existing text based on given from prior text.",
-    "Give more weight/priority to the later characters than the beginning ones."
-  ].join(" ");
+    'You are an AI writing assistant that continues existing text based on given from prior text.',
+    'Give more weight/priority to the later characters than the beginning ones.',
+  ].join(' ');
   const formattedInfo = [
-    "Related information that can be used to help inform the brief autocomplete of the sentence and no more than 50 characters.",
+    'Related information that can be used to help inform the brief autocomplete of the sentence and no more than 50 characters.',
     `${relatedInfo}`,
-    "Related information that can be used to help inform the brief autocomplete of the sentence and NO MORE THAN 50 CHARACTERS.",
-  ].join("\n\n")
-  const systemMessage = systemPromptOverride ? systemPromptOverride : [
-    systemPrompt, 
-    formattedInfo
-  ].join("\n\n")
+    'Related information that can be used to help inform the brief autocomplete of the sentence and NO MORE THAN 50 CHARACTERS.',
+  ].join('\n\n');
+  const systemMessage = systemPromptOverride
+    ? systemPromptOverride
+    : [systemPrompt, formattedInfo].join('\n\n');
   const messages = [
     new SystemMessage(systemMessage),
     new HumanMessage(context),
-  ]
-  console.log(messages)
+  ];
+  console.log(messages);
 
   // console.log({
   //   formattedInfo,

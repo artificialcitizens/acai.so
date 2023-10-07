@@ -1,7 +1,7 @@
 import { CallbackManager } from 'langchain/callbacks';
 import { HumanMessage, SystemMessage } from 'langchain/schema';
 import { ragChain } from './rag-chain';
-import { useAcaiChat } from '../../models/chat';
+import { handleAcaiChat } from '../../models/chat';
 
 export const ragAgentResponse = async ({
   query,
@@ -24,7 +24,7 @@ export const ragAgentResponse = async ({
     chatHistory,
     context,
   });
-  const { chat: streamingModel } = useAcaiChat({
+  const { chat: streamingModel } = handleAcaiChat({
     callbackManager: CallbackManager.fromHandlers(callbacks),
     modelName: 'gpt-3.5-turbo-16k',
   });

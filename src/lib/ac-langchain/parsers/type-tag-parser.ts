@@ -3,7 +3,7 @@ import {
   readFromLocalStorage,
   writeToLocalStorage,
 } from '../../../utils/data-utils';
-import { useAcaiChat } from '../models/chat';
+import { handleAcaiChat } from '../models/chat';
 
 export type TagExampleJSON = {
   [key: string]: string[];
@@ -96,7 +96,7 @@ ${exampleOutput}
 `;
 };
 
-const { chat } = useAcaiChat()
+const { chat } = handleAcaiChat();
 
 /**
  * Parses a string of content for specified tags and returns an object
