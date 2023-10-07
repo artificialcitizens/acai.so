@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './LandingPage.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import useLocationManager from '../../hooks/use-location-manager';
 
 const tagLines = [
   'Your AI toolkit',
@@ -41,6 +42,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
   const [tagLineIndex, setTagLineIndex] = useState(0);
   const [wordIndex, setWordIndex] = useState(0);
   const [isTaglineComplete, setIsTaglineComplete] = useState(false);
+  const navigate = useNavigate();
+  const { location, isLoading } = useLocationManager();
+
+  useEffect(() => {
+    if (location) {
+      navigate(location);
+    }
+  }, [location, navigate]);
 
   const timers = useRef<NodeJS.Timeout[]>([]);
 
@@ -72,6 +81,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
     return () => timers.current.forEach(clearTimeout);
   }, [wordIndex, tagLineIndex, singleTagline, isTaglineComplete]);
 
+  if (isLoading || location) {
+    return null;
+  }
+
   return (
     <div className="text-acai-white relative bg-gradient-to-b from-darker to-acai-darker w-screen m-0 flex flex-col p-4 items-center justify-start h-screen">
       <nav className="flex items-center">
@@ -86,29 +99,29 @@ const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
       </nav>
       <p className="mb-8 font-medium text-xs md:text-xs">powered by AVA</p>
       <div className="relative bg-darker rounded-3xl overflow-hidden w-3/4 h-3/4 z-10 shadow-lg">
-        <img
-          src={''}
-          alt="App Screenshot"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-darker to-acai-darker bg-opacity-100 flex items-start justify-start p-8 md:p-2 md:items-center md:justify-center transition-opacity duration-500 group-hover:opacity-0">
-          <p className="text-2xl md:text-4xl text-acai-white">
-            {tagLines[tagLineIndex].split(' ').map((word, index) => (
-              <span
-                key={index}
-                className={index < wordIndex ? 'fade-in' : 'fade-out'}
-                style={{
-                  visibility:
-                    index < wordIndex || isTaglineComplete
-                      ? 'visible'
-                      : 'hidden',
-                }}
-              >
-                {word}{' '}
-              </span>
-            ))}
-          </p>
-        </div>
+        <Link
+          className="pointer-events-none md:pointer-events-auto"
+          to="/docs/documents/1-introduction"
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-darker to-acai-darker bg-opacity-100 flex items-start justify-start p-8 md:p-2 md:items-center md:justify-center transition-opacity duration-500 group-hover:opacity-0">
+            <p className="text-2xl md:text-4xl text-acai-white">
+              {tagLines[tagLineIndex].split(' ').map((word, index) => (
+                <span
+                  key={index}
+                  className={index < wordIndex ? 'fade-in' : 'fade-out'}
+                  style={{
+                    visibility:
+                      index < wordIndex || isTaglineComplete
+                        ? 'visible'
+                        : 'hidden',
+                  }}
+                >
+                  {word}{' '}
+                </span>
+              ))}
+            </p>
+          </div>
+        </Link>
       </div>
     </div>
   );
