@@ -21,7 +21,7 @@ import { ChatHistory } from '../../state';
 import Dropdown from '../DropDown';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import { simplifyResponseChain } from '../../lib/ac-langchain/chains/simplify-response-chain';
-import useBroadcastManager from '../../hooks/use-broadcast-manager';
+// import useBroadcastManager from '../../hooks/use-broadcast-manager';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
@@ -50,10 +50,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     'webSpeech',
   );
   const [manualTTS, setManualTTS] = useState<string>('');
-  const [transcriptionOn, setTranscription] = useLocalStorageKeyValue(
-    'TRANSCRIPTION_ON',
-    'true',
-  );
+  const [transcriptionOn, setTranscription] = useState<boolean>(false);
   const [barkUrl, setBarkUrl] = useLocalStorageKeyValue(
     'BARK_URL',
     import.meta.env.VITE_BARK_SERVER ||
@@ -72,10 +69,6 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const { agentStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const [state, send] = useActor(agentStateService);
-  const tabManager = useBroadcastManager('acai', () => {
-    toggleWebspeech(false);
-  });
-
   const { workspaceId: rawWorkspaceId } = useParams<{
     workspaceId: string;
     domain: string;
@@ -88,21 +81,12 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const srcRef = React.useRef<MediaElementAudioSourceNode | null>(null);
   const gainNodeRef = React.useRef<GainNode | null>(null);
 
-  useEffect(() => {
-    tabManager.notifyNewTab();
-  }, [tabManager]);
-
-  const toggleWebspeech = (bool: boolean) => {
-    const booleanString = bool ? 'true' : 'false';
-    setTranscription(booleanString);
-  };
-
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSingleCommandMode(event.target.checked);
   };
 
   const handleSpeechChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    toggleWebspeech(event.target.checked);
+    setTranscription(event.target.checked);
   };
 
   const handleVoiceStateChange = (voiceState: VoiceState) => {
@@ -293,7 +277,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   useSpeechRecognition({
     onTranscriptionComplete,
     // @TODO: Fix hacky listening state
-    active: !ttsLoading && transcriptionOn === 'true' ? true : false,
+    active: !ttsLoading && transcriptionOn ? true : false,
   });
 
   const handleManualTTS = (e: React.FormEvent<HTMLFormElement>) => {
@@ -335,18 +319,20 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           type="checkbox"
           id="transcriptionOn"
           name="option"
-          checked={transcriptionOn === 'true' ? true : false}
+          checked={transcriptionOn}
           onChange={handleSpeechChange}
         />
       </span>
-      <p className="text-acai-white mb-2 ml-2">User Transcript</p>
+      <p className="text-acai-white text-sm md:text-xs mb-2 ml-2">
+        User Transcript
+      </p>
       <ScratchPad
         placeholder="User Transcript"
         readonly
         content={userTranscript}
       />
       <button
-        className="bg-light text-acai-white px-4 py-2 mb-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 mb-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
         type="button"
         onClick={() => {
           setUserTranscript('');
@@ -396,13 +382,13 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             <span className="flex mb-2 items-center">
               <label
                 htmlFor="url"
-                className="text-acai-white pr-2 w-[50%] ml-2"
+                className="text-acai-white pr-2 w-[50%] ml-2 text-base md:text-xs"
               >
                 Bark Server URL:
               </label>
               <input
                 id="url"
-                className="text-acai-white bg-base px-[2px]"
+                className="text-acai-white text-base md:text-sm bg-base px-[2px]"
                 type="password"
                 value={barkUrl}
                 onChange={(e) => setBarkUrl(e.target.value)}
@@ -411,7 +397,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             <input
               type="submit"
               value="Connect"
-              className="bg-light text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+              className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
             />
           </form>
         )}
@@ -419,13 +405,13 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           className="text-acai-white w-full flex flex-col flex-grow my-2"
           onSubmit={handleManualTTS}
         >
-          <label className="mb-2 ml-2 text-xs" htmlFor="manualTTS">
+          <label className="mb-2 ml-2 text-sm md:text-xs" htmlFor="manualTTS">
             Manual TTS
           </label>
           <textarea
             placeholder="Enter text to synthesize, press submit or enter to play"
             id="manualTTS"
-            className="rounded bg-base text-acai-white p-4 mb-2"
+            className="rounded bg-base text-acai-white text-base md:text-xs p-4 mb-2"
             value={manualTTS}
             onChange={(e) => setManualTTS(e.target.value)}
             onKeyDown={(e: any) => {
@@ -436,7 +422,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             }}
           />
           <button
-            className="bg-light text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+            className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
             type="submit"
           >
             Submit

@@ -3,12 +3,11 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Ava } from './components/Ava/Ava';
 import { SideNav } from './components/SideNav/SideNav';
-import { FloatingButton } from './components/FloatingButton/FloatingButton';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from './context/GlobalStateContext';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import ToastManager from './components/Toast';
 import { createWorkspace } from './state';
 import { VectorStoreContext } from './context/VectorStoreContext';
@@ -18,6 +17,9 @@ import { Editor } from '@tiptap/react';
 import { EditorContext } from './context/EditorContext';
 import { createDocs } from './components/TipTap/utils/docs';
 import MainView from './components/MainView/MainView';
+import useLocationManager from './hooks/use-location-manager';
+
+import { MenuButton } from './components/MenuButton/MenuButton';
 
 const App = () => {
   const globalServices: GlobalStateContextValue =
@@ -38,7 +40,7 @@ const App = () => {
     undefined,
   );
   const [listening, setListening] = useState<boolean>(false);
-
+  const routerLocation = useLocation();
   const [editor, setEditor] = useState<Editor | null>(null);
   const {
     vectorstore,
@@ -47,6 +49,11 @@ const App = () => {
     similaritySearchWithScore,
     filterAndCombineContent,
   } = useMemoryVectorStore('');
+  const { updateLocation } = useLocationManager();
+
+  useEffect(() => {
+    updateLocation(routerLocation.pathname);
+  }, [routerLocation, updateLocation]);
 
   useEffect(() => {
     createDocs().then((docs) => {
@@ -91,8 +98,8 @@ const App = () => {
         }}
       >
         <EditorContext.Provider value={{ editor, setEditor }}>
-          <SideNav></SideNav>
-          <FloatingButton
+          <SideNav />
+          <MenuButton
             handleClick={(e) => {
               e.stopPropagation();
               toggleSideNav();
@@ -106,7 +113,7 @@ const App = () => {
             onClick={handleWindowClick}
           >
             <ToastManager />
-            <main className="w-full flex flex-grow ">
+            <main className="w-screen flex flex-grow">
               {workspaceId && (
                 <>
                   <MainView domain={domain} />

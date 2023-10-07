@@ -1,28 +1,44 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sidebar } from '@chatscope/chat-ui-kit-react';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import './Sidebar.css';
-import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
+import { ToggleView } from '../ToggleView/ToggleView';
 
 interface SBSidebarProps {
   children: React.ReactNode;
 }
 
 const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
-  const [storedWidth, setStoredWidth] = useLocalStorageKeyValue(
-    'AVA_PANEL_WIDTH',
-    '30',
-  );
-  const [width, setWidth] = useState(() => parseFloat(storedWidth));
+  const calculatedWidth = window.innerWidth < 640 ? 100 : 30;
+  const minWidth = 1.2;
+  const defaultWidth = calculatedWidth;
+  const [width, setWidth] = useState<number | null>(null);
   const [isResizing, setIsResizing] = useState(false);
+  const [toggled, setToggled] = useState(false);
+
+  const toggleView = () => {
+    setToggled(!toggled);
+    if (toggled) {
+      setWidth(minWidth);
+    } else {
+      setWidth(defaultWidth);
+    }
+  };
 
   useEffect(() => {
+    const storedWidth = localStorage.getItem('AVA_PANEL_WIDTH');
     if (storedWidth) {
       setWidth(parseFloat(storedWidth));
     } else {
-      setWidth(30);
+      setWidth(defaultWidth);
     }
-  }, [storedWidth]);
+  }, [defaultWidth]);
+
+  useEffect(() => {
+    if (width !== null) {
+      localStorage.setItem('AVA_PANEL_WIDTH', width.toString());
+    }
+  }, [width]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -32,11 +48,12 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
     const initialWidth = width;
 
     const handleMouseMove = (moveE: MouseEvent) => {
-      const newWidth =
-        initialWidth - ((moveE.clientX - initialX) / window.innerWidth) * 100;
+      if (initialWidth !== null) {
+        const newWidth =
+          initialWidth - ((moveE.clientX - initialX) / window.innerWidth) * 100;
 
-      setWidth(Math.max(Math.min(newWidth, 50), 25)); // enforce min and max width
-      setStoredWidth(Math.max(Math.min(newWidth, 50), 25).toString());
+        setWidth(Math.max(Math.min(newWidth, 100), minWidth));
+      }
     };
 
     const handleMouseUp = () => {
@@ -49,10 +66,10 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
     document.addEventListener('mouseup', handleMouseUp);
   };
 
-  if (storedWidth === undefined) return <>{''}</>;
+  if (width === null) return <></>;
 
   return (
-    <div>
+    <>
       {isResizing && (
         <div
           style={{
@@ -62,31 +79,44 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
             left: 0,
             right: 0,
             cursor: 'ew-resize',
+            zIndex: 10000,
           }}
         />
       )}
+      <ToggleView
+        toggled={toggled}
+        handleClick={(e) => {
+          e.stopPropagation();
+          toggleView();
+        }}
+      />
       <Sidebar
         position="right"
-        className={`rounded-lg max-h-screen border-r border border-dark`}
-        style={{ width: `${width}vw` }}
+        className={`rounded-lg right-0 fixed md:relative max-h-screen border-r border border-dark transition-transform`}
+        style={{
+          width: `${width}vw`,
+        }}
       >
         <div
           role="slider"
-          aria-valuemin={25}
-          aria-valuemax={50}
+          aria-valuemin={0}
+          aria-valuemax={100}
           aria-valuenow={width}
           tabIndex={0}
+          className="md:hover:bg-acai-darker"
           style={{
-            width: '10px',
+            width: width < 3 ? '20px' : '10px',
             cursor: 'ew-resize',
             position: 'absolute',
             height: '100%',
+            backgroundColor: width < 3 ? '#2f2f2f' : '',
           }}
           onMouseDown={handleMouseDown}
         />
+        {}
         {children}
       </Sidebar>
-    </div>
+    </>
   );
 };
 

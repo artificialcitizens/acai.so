@@ -33,7 +33,8 @@ function useSpeechRecognition({
     speechRecognitionRef.current.continuous = true;
     speechRecognitionRef.current.interimResults = true;
     queue.addCallback(speechRecognitionRef.current.start());
-    speechRecognitionRef.current.onend = () => {
+
+    const onEnd = () => {
       if (!active) {
         speechRecognitionRef.current.onend = null;
         queue.addCallback(speechRecognitionRef.current.stop());
@@ -41,16 +42,20 @@ function useSpeechRecognition({
       }
       queue.addCallback(speechRecognitionRef.current.start());
     };
+
+    speechRecognitionRef.current.onend = onEnd;
+
     return () => {
       speechRecognitionRef.current.onend = null;
       queue.addCallback(speechRecognitionRef.current.stop());
+      speechRecognitionRef.current.removeEventListener('end', onEnd);
     };
   }, [active]);
 
   useEffect(() => {
     if (!speechRecognitionRef.current || !active) return;
 
-    speechRecognitionRef.current.onresult = async (event: {
+    const onResult = async (event: {
       resultIndex: any;
       results: string | any[];
     }) => {
@@ -61,6 +66,12 @@ function useSpeechRecognition({
           onTranscriptionComplete(transcript);
         }
       }
+    };
+
+    speechRecognitionRef.current.onresult = onResult;
+
+    return () => {
+      speechRecognitionRef.current.removeEventListener('result', onResult);
     };
   }, [active, onTranscriptionComplete]);
 
