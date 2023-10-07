@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sidebar } from '@chatscope/chat-ui-kit-react';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import './Sidebar.css';
@@ -9,14 +9,10 @@ interface SBSidebarProps {
 }
 
 const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
-  // const [storedWidth, setStoredWidth] = useLocalStorageKeyValue(
-  //   'AVA_PANEL_WIDTH',
-  //   isMobile ? '100' : '30',
-  // );
   const calculatedWidth = window.innerWidth < 640 ? 100 : 30;
   const minWidth = 1.2;
   const defaultWidth = calculatedWidth;
-  const [width, setWidth] = useState<number>(defaultWidth);
+  const [width, setWidth] = useState<number | null>(null);
   const [isResizing, setIsResizing] = useState(false);
   const [toggled, setToggled] = useState(false);
 
@@ -29,11 +25,20 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
     }
   };
 
-  // useEffect(() => {
-  //   if (storedWidth) {
-  //     setWidth(parseFloat(storedWidth));
-  //   }
-  // }, [storedWidth]);
+  useEffect(() => {
+    const storedWidth = localStorage.getItem('AVA_PANEL_WIDTH');
+    if (storedWidth) {
+      setWidth(parseFloat(storedWidth));
+    } else {
+      setWidth(defaultWidth);
+    }
+  }, [defaultWidth]);
+
+  useEffect(() => {
+    if (width !== null) {
+      localStorage.setItem('AVA_PANEL_WIDTH', width.toString());
+    }
+  }, [width]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -43,10 +48,12 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
     const initialWidth = width;
 
     const handleMouseMove = (moveE: MouseEvent) => {
-      const newWidth =
-        initialWidth - ((moveE.clientX - initialX) / window.innerWidth) * 100;
+      if (initialWidth !== null) {
+        const newWidth =
+          initialWidth - ((moveE.clientX - initialX) / window.innerWidth) * 100;
 
-      setWidth(Math.max(Math.min(newWidth, 100), minWidth));
+        setWidth(Math.max(Math.min(newWidth, 100), minWidth));
+      }
     };
 
     const handleMouseUp = () => {
@@ -58,6 +65,8 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
+
+  if (width === null) return <></>;
 
   return (
     <>
