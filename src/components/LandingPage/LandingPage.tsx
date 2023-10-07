@@ -99,29 +99,29 @@ const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
       </nav>
       <p className="mb-8 font-medium text-xs md:text-xs">powered by AVA</p>
       <div className="relative bg-darker rounded-3xl overflow-hidden w-3/4 h-3/4 z-10 shadow-lg">
-        <img
-          src={''}
-          alt="App Screenshot"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-darker to-acai-darker bg-opacity-100 flex items-start justify-start p-8 md:p-2 md:items-center md:justify-center transition-opacity duration-500 group-hover:opacity-0">
-          <p className="text-2xl md:text-4xl text-acai-white">
-            {tagLines[tagLineIndex].split(' ').map((word, index) => (
-              <span
-                key={index}
-                className={index < wordIndex ? 'fade-in' : 'fade-out'}
-                style={{
-                  visibility:
-                    index < wordIndex || isTaglineComplete
-                      ? 'visible'
-                      : 'hidden',
-                }}
-              >
-                {word}{' '}
-              </span>
-            ))}
-          </p>
-        </div>
+        <Link
+          className="pointer-events-none md:pointer-events-auto"
+          to="/docs/documents/1-introduction"
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-darker to-acai-darker bg-opacity-100 flex items-start justify-start p-8 md:p-2 md:items-center md:justify-center transition-opacity duration-500 group-hover:opacity-0">
+            <p className="text-2xl md:text-4xl text-acai-white">
+              {tagLines[tagLineIndex].split(' ').map((word, index) => (
+                <span
+                  key={index}
+                  className={index < wordIndex ? 'fade-in' : 'fade-out'}
+                  style={{
+                    visibility:
+                      index < wordIndex || isTaglineComplete
+                        ? 'visible'
+                        : 'hidden',
+                  }}
+                >
+                  {word}{' '}
+                </span>
+              ))}
+            </p>
+          </div>
+        </Link>
       </div>
     </div>
   );
