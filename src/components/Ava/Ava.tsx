@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import SBSidebar from '../../components/Sidebar';
+import SBSidebar from '../Sidebar/SBSidebar';
 import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
 import NotificationCenter from '../../components/NotificationCenter';
 import Chat from '../../components/Chat/Chat';
@@ -66,18 +66,21 @@ export const Ava: React.FC<AvaProps> = ({
   return (
     <SBSidebar>
       <ExpansionPanel
+        className="pt-8 md:pt-0"
         title="Settings"
         onChange={toggleSettings}
         isOpened={settingsOpen}
+        tabIndex={0}
+        onKeyDown={toggleSettings}
       >
-        <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
+        <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-1 md:pl-2 font-bold mb-3 border-b border-b-light border-b-solid">
           User Profile
         </h5>
         <p className="text-xs font-medium mb-4">
           Personalize your AVA interactions
         </p>
         <UserProfile />
-        <h5 className="text-acai-white text-xs pb-2 pl-4 font-bold mb-3 border-b border-b-light border-b-solid">
+        <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-1 md:pl-2 font-bold mb-3 border-b border-b-light border-b-solid">
           Tokens
         </h5>
         <TokenManager />
@@ -112,7 +115,7 @@ export const Ava: React.FC<AvaProps> = ({
         {agentStateService.getSnapshot().context[workspaceId]?.agentMode ===
           'custom' && (
           <>
-            <h5 className="text-acai-white text-xs pb-2 pl-3 font-bold mb-3 border-b border-b-light border-b-solid">
+            <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-3 font-bold mb-3 border-b border-b-light border-b-solid">
               Custom Agent Server
             </h5>
             <SocketManager />
@@ -133,7 +136,7 @@ export const Ava: React.FC<AvaProps> = ({
 
       {workspaceId && (
         <span className="flex flex-col flex-grow">
-          <p className="text-xs font-bold p-3">
+          <p className="text-sm md:text-xs font-bold p-3">
             {formatAgentMode(currentAgentMode)}{' '}
             {/* @TODO: create a tag component */}
             {/* <span
