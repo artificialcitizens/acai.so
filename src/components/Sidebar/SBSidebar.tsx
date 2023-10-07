@@ -14,7 +14,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
   const defaultWidth = calculatedWidth;
   const [width, setWidth] = useState<number | null>(null);
   const [isResizing, setIsResizing] = useState(false);
-  const [toggled, setToggled] = useState(false);
+  const [toggled, setToggled] = useState(true);
 
   const toggleView = () => {
     setToggled(!toggled);
