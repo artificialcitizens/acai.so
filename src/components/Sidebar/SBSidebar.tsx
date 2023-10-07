@@ -1,14 +1,7 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Sidebar } from '@chatscope/chat-ui-kit-react';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import './Sidebar.css';
-import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
-import {
-  // BrowserView,
-  // MobileView,
-  // isBrowser,
-  isMobile,
-} from 'react-device-detect';
 import { ToggleView } from '../ToggleView/ToggleView';
 
 interface SBSidebarProps {
@@ -20,7 +13,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
   //   'AVA_PANEL_WIDTH',
   //   isMobile ? '100' : '30',
   // );
-  const calculatedWidth = isMobile ? 100 : 30;
+  const calculatedWidth = window.innerWidth < 640 ? 100 : 30;
   const minWidth = 1.2;
   const defaultWidth = calculatedWidth;
   const [width, setWidth] = useState<number>(defaultWidth);
@@ -90,8 +83,11 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
       />
       <Sidebar
         position="right"
-        className={`rounded-lg max-h-screen border-r border border-dark transition-transform`}
-        style={{ width: `${width}vw`, right: 0, position: 'fixed' }}
+        className={`rounded-lg right-0 fixed md:relative max-h-screen border-r border border-dark transition-transform`}
+        style={{
+          width: `${width}vw`,
+          position: '',
+        }}
       >
         <div
           role="slider"
