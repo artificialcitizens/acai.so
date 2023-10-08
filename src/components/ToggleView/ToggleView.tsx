@@ -13,10 +13,10 @@ export const ToggleView: React.FC<ToggleViewProps> = ({
 }) => {
   return (
     <button
-      className="z-10 absolute top-0 right-0 inline-block rounded px-6 py-2.5 text-xs font-medium uppercase leading-tight text-white z-index-10"
+      className="z-10 absolute top-0 right-0 inline-block rounded px-6 py-2.5 text-xs font-medium uppercase leading-tight text-white z-index-10 "
       onMouseDown={handleClick}
     >
-      <span className="block [&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-acai-white">
+      <span className="block [&>svg]:h-5 [&>svg]:w-5 md:[&>svg]:h-4 md:[&>svg]:w-4 [&>svg]:text-acai-white hover:pointer">
         {toggled ? <SidebarRightIcon /> : <SidebarLeftIcon />}
       </span>
     </button>
