@@ -42,8 +42,11 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
   });
 
   useEffect(() => {
-    if (inputRef.current && askAiPopover) {
+    if (!inputRef.current) return;
+    if (askAiPopover) {
       inputRef.current.focus();
+    } else {
+      setAskAi('');
     }
   }, [askAiPopover]);
   const items: BubbleMenuItem[] = [
@@ -123,12 +126,13 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
   return (
     <>
       <div
+        {...bubbleMenuProps}
         className={`fixed bg-light left-0 rounded-none w-screen md:w-[25vw] md:rounded-lg border border-solid border-light transition-opacity ${
           !askAiPopover
             ? 'opacity-0 pointer-events-none'
             : 'opacity-1 pointer-events-auto'
         }`}
-        style={{ left: calculatedLeft, top: cursorCoords.y, zIndex: 10000 }}
+        style={{ left: calculatedLeft, top: cursorCoords.y + 5, zIndex: 10000 }}
       >
         <p className="text-xs p-2 max-h-12 overflow-auto hidden md:inherit">
           {selectedText}
@@ -197,7 +201,9 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
             });
 
             setAskAiPopover(true);
-            inputRef.current?.focus();
+            setTimeout(() => {
+              inputRef.current?.focus();
+            }, 100);
           }}
           className="p-2 text-acai-white hover:bg-darker active:bg-darker"
         >

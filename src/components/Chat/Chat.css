@@ -70,6 +70,11 @@
   @apply bg-dark !important;
 }
 
+.cs-message__custom-content,
+.cs-message__custom-content > a {
+  @apply text-sm;
+}
+
 .cs-message__custom-content > a {
   @apply text-blue-300 hover:text-blue-400 font-medium underline;
 }
