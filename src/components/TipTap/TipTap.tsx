@@ -267,7 +267,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
         onClick={() => {
           editor?.chain().focus().run();
         }}
-        className="overflow-scroll w-full mb-12 p-12 px-8  border-none sm:rounded-lg sm:border sm:px-12 flex-grow"
+        className="overflow-scroll w-full mb-12 p-12 px-8 border-none sm:rounded-lg sm:border sm:px-12 flex-grow"
       >
         <h2 className=" text-sm mb-4 pb-2 font-medium border-b border-solid border-dark text-acai-white">
           {currentTab.title}
