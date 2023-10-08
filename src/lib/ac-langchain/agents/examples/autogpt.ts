@@ -2,8 +2,7 @@ import { AutoGPT } from 'langchain/experimental/autogpt';
 import { ReadFileTool, WriteFileTool, SerpAPI } from 'langchain/tools';
 import { InMemoryFileStore } from 'langchain/stores/file/in_memory';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { handleAcaiChat, handleAcaiEmbeddings } from '../../models/chat';
 
 const store = new InMemoryFileStore();
 
@@ -17,16 +16,14 @@ const tools = [
   }),
 ];
 
-const vectorStore = new MemoryVectorStore(new OpenAIEmbeddings());
+const { embeddings } = handleAcaiEmbeddings();
+const vectorStore = new MemoryVectorStore(embeddings);
 
-const autogpt = AutoGPT.fromLLMAndTools(
-  new ChatOpenAI({ temperature: 0 }),
-  tools,
-  {
-    memory: vectorStore.asRetriever(),
-    aiName: 'Tom',
-    aiRole: 'Assistant',
-  },
-);
+const { chat } = handleAcaiChat();
+const autogpt = AutoGPT.fromLLMAndTools(chat, tools, {
+  memory: vectorStore.asRetriever(),
+  aiName: 'Tom',
+  aiRole: 'Assistant',
+});
 
 await autogpt.run(['write a weather report for SF today']);

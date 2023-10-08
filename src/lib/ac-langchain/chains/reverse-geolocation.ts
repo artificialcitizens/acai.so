@@ -1,11 +1,7 @@
-import { OpenAI } from 'langchain/llms/openai';
 import { PromptTemplate } from 'langchain/prompts';
-import { getToken } from '../../../utils/config';
+import { handleAcaiLLM } from '../models/chat';
 
-const model = new OpenAI({
-  openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
-  temperature: 0,
-});
+const { llm: model } = handleAcaiLLM();
 /**
  * Create a step by step task list based on given subject.
  */

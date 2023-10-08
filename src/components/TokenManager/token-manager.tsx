@@ -7,6 +7,10 @@ const TokenManager: React.FC = () => {
     'OPENAI_KEY',
     import.meta.env.VITE_OPENAI_KEY || '',
   );
+  const [openAIBase, setOpenAIBase] = useLocalStorageKeyValue(
+    'OPENAI_API_BASE',
+    import.meta.env.VITE_OPENAI_API_BASE || 'https://api.openai.com/v1',
+  );
   const [googleApiKey, setGoogleApiKey] = useLocalStorageKeyValue(
     'GOOGLE_API_KEY',
     import.meta.env.VITE_GOOGLE_API_KEY || '',
@@ -23,16 +27,25 @@ const TokenManager: React.FC = () => {
   const keys = useMemo(
     () => [
       {
+        id: 'OPENAI_API_BASE',
+        name: 'OpenAI API Base URL',
+        value: openAIBase,
+        setValue: setOpenAIBase,
+        type: "text",
+      },
+      {
         id: 'OPENAI_KEY',
         name: 'OpenAI API Key',
         value: openAIKey,
         setValue: setOpenAIKey,
+        type: "password",
       },
       {
         id: 'ELEVENLABS_API_KEY',
         name: 'Eleven Labs API Key',
         value: elevenlabsApiKey,
         setValue: setElevenlabsApiKey,
+        type: "password",
       },
       // {
       //   id: 'GOOGLE_API_KEY',
@@ -82,14 +95,14 @@ const TokenManager: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit} className="mb-4">
-      {keys.map(({ id, name }) => (
+      {keys.map(({ id, name, type }) => (
         <span className="flex mb-2 items-center" key={id}>
           <label className="text-acai-white pr-2 w-[50%] text-sm md:text-xs">
             {name}:
           </label>
           <input
+            type={type}
             className="text-acai-white text-sm md:text-xs bg-base px-[2px]"
-            type="password"
             value={values[id] || ''}
             onChange={(e) => setValues({ ...values, [id]: e.target.value })}
           />
