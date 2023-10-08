@@ -9,17 +9,17 @@ interface SBSidebarProps {
 }
 
 const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
-  const calculatedWidth = window.innerWidth < 640 ? 100 : 30;
-  const minWidth = 1.2;
+  const calculatedWidth = window.innerWidth < 640 ? 100 : 50;
+  const minWidth = 0;
   const defaultWidth = calculatedWidth;
   const [width, setWidth] = useState<number | null>(null);
   const [isResizing, setIsResizing] = useState(false);
-  const [toggled, setToggled] = useState(false);
+  const [toggled, setToggled] = useState(true);
 
   const toggleView = () => {
     setToggled(!toggled);
     if (toggled) {
-      setWidth(minWidth);
+      setWidth(0);
     } else {
       setWidth(defaultWidth);
     }
@@ -37,6 +37,11 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
   useEffect(() => {
     if (width !== null) {
       localStorage.setItem('AVA_PANEL_WIDTH', width.toString());
+      if (width === 0) {
+        setToggled(false);
+      } else {
+        setToggled(true);
+      }
     }
   }, [width]);
 

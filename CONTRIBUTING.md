@@ -4,6 +4,14 @@ Thank you for your interest in contributing to our project. Whether it's a bug r
 
 Please read through this document before submitting any issues or pull requests to ensure we have all the necessary information to effectively respond to your bug report or contribution.
 
+## Recommended Extensions
+
+- [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) - Code formatter using prettier
+- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) - Integrates ESLint JavaScript into VS Code.
+- [CodeSpellChecker](https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker) - Spelling checker for source code
+- [Tailwind IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) - Intelligent Tailwind CSS tooling for VS Code
+- [ViteTest](https://marketplace.visualstudio.com/items?itemName=ZixuanChen.vitest-explorer) - A test runner for vite
+
 ## Reporting Bugs/Features
 
 We use GitHub Issues to track public bugs and features. Report a bug by opening a new issue; it's that easy!
