@@ -7,9 +7,11 @@ import {
   UnderlineIcon,
   StrikethroughIcon,
   CodeIcon,
+  SparklesIcon,
 } from 'lucide-react';
 
 import { NodeSelector } from './NodeSelector';
+import { toastifyInfo } from '../../Toast';
 
 export interface BubbleMenuItem {
   name: string;
@@ -67,13 +69,25 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
   return (
     <BubbleMenu
       {...bubbleMenuProps}
-      className="flex overflow-hidden rounded border border-lighter bg-dark shadow-xl"
+      className="flex overflow-hidden rounded border border-lighter bg-dark shadow-xl top-8"
     >
       <NodeSelector
         editor={props.editor}
         isOpen={isNodeSelectorOpen}
         setIsOpen={setIsNodeSelectorOpen}
       />
+      <button
+        key={'ask-ai'}
+        onClick={() => toastifyInfo('Ask AI')}
+        className="p-2 text-acai-white hover:bg-darker active:bg-darker"
+      >
+        <SparklesIcon
+          className={cx('h-4 w-4', {
+            // @TODO: update this to use a state variable
+            'text-blue-500': true,
+          })}
+        />
+      </button>
 
       {items.map((item, index) => (
         <button
