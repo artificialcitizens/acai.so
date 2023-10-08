@@ -28,7 +28,6 @@ import {
 } from 'langchain/schema';
 import { Tool, DynamicTool } from 'langchain/tools';
 import { Calculator } from 'langchain/tools/calculator';
-import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { BaseCallbackHandler } from 'langchain/callbacks';
 import { Embeddings } from 'langchain/embeddings/base';
 // import { HuggingFaceTransformersEmbeddings } from 'langchain/embeddings/hf_transformers';
@@ -45,6 +44,11 @@ import {
 // import { browser } from './tools/web-browser';
 import { googleSearch } from './tools/search-engine';
 import { WebBrowser } from 'langchain/tools/webbrowser';
+import {
+  handleAcaiChat,
+  handleAcaiEmbeddings,
+  handleAcaiLLM,
+} from '../models/chat';
 // import {
 //   createAvaChatPrompt,
 //   createCustomPrompt,
@@ -181,30 +185,29 @@ class CustomOutputParser extends AgentActionOutputParser {
   }
 }
 
-let chatModel: ChatOpenAI;
-let model: OpenAI;
-let embeddings: Embeddings;
+let chatModel: ChatOpenAI | undefined;
+let model: OpenAI | undefined;
+let embeddings: Embeddings | undefined;
+
 const createModels = () => {
   if (chatModel && model && embeddings) return { chatModel, model, embeddings };
 
-  chatModel = new ChatOpenAI({
-    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
+  const { chat } = handleAcaiChat({
     modelName: 'gpt-4-0314',
     temperature: 0.1,
   });
-  model = new OpenAI({
-    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
+  const { llm } = handleAcaiLLM({
     temperature: 0.3,
   });
-  // embeddings = new HuggingFaceTransformersEmbeddings({
-  //   modelName: 'Xenova/bge-base-en',
-  // });
-  embeddings = new OpenAIEmbeddings({
-    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
-  });
+
+  const { embeddings: embeddingsFromHook } = handleAcaiEmbeddings();
+
+  chatModel = chat;
+  model = llm;
+  embeddings = embeddingsFromHook;
+
   return { chatModel, model, embeddings };
 };
-
 const createLlmChain = ({
   model,
   tools,
@@ -270,6 +273,10 @@ const createAgentArtifacts = ({
 
   const proxyUrl =
     getToken('PROXY_SERVER_URL') || import.meta.env.VITE_PROXY_SERVER_URL;
+
+  if (!embeddings) {
+    throw new Error('Embeddings is undefined');
+  }
 
   const browser = new WebBrowser({
     model: model,

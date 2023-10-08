@@ -4,9 +4,7 @@ import {
   noContextPrompt,
   ragAgentResponsePrompt,
 } from './rag-prompts';
-import { getToken } from '../../../../utils/config';
-
-const openAIApiKey = getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY;
+import { handleAcaiChat } from '../../models/chat';
 
 let chatModel: ChatOpenAI | null = null;
 
@@ -25,11 +23,10 @@ const formQuestion = async ({
   const messages = questionPromptTemplate.toChatMessages();
 
   if (!chatModel) {
-    chatModel = new ChatOpenAI({
-      openAIApiKey,
-      temperature: 0,
+    const { chat } = handleAcaiChat({
       modelName: 'gpt-3.5-turbo-16k',
     });
+    chatModel = chat;
   }
 
   const chatResponse = await chatModel.call(messages);

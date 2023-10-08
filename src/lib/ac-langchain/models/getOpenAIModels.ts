@@ -3,6 +3,7 @@ import { getToken } from '../../../utils/config';
 
 const configuration = new Configuration({
   apiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
+  basePath: getToken('OPENAI_API_BASE') || (import.meta.env.VITE_OPENAI_API_BASE || 'https://api.openai.com/v1'),
 });
 const openai = new OpenAIApi(configuration);
 

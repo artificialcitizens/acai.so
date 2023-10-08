@@ -1,8 +1,12 @@
-import { ChatOpenAI } from 'langchain/chat_models/openai';
 // @TODO: figure out why these imports are not working with the linter
 // eslint-disable-next-line import/named
-import { SystemMessage, HumanMessage, LLMResult } from 'langchain/schema';
-import { getToken } from '../../../utils/config';
+import {
+  SystemMessage,
+  HumanMessage,
+  LLMResult,
+  BaseMessage,
+} from 'langchain/schema';
+import { handleAcaiChat } from '../models/chat';
 
 type ChatResponse = {
   response: string;
@@ -14,6 +18,7 @@ type ChatResponse = {
 export const queryChat = async ({
   systemMessage,
   message,
+  messages,
   modelName,
   temperature = 0.5,
   callbacks: {
@@ -27,6 +32,7 @@ export const queryChat = async ({
   message: string;
   modelName: string;
   temperature?: number;
+  messages: BaseMessage[];
   callbacks: {
     handleLLMStart: (llm: any, prompts: string[]) => void;
     handleLLMEnd: (output: LLMResult) => void;
@@ -35,14 +41,14 @@ export const queryChat = async ({
   };
 }): Promise<ChatResponse> => {
   const controller = new AbortController();
-  const chat = new ChatOpenAI({
-    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
+  const { chat } = handleAcaiChat({
     modelName,
-    temperature: temperature,
-    streaming: true,
+    temperature,
+    // callbacks, // @TODO: idk why it doesn't let me put callbacks here, but it wasn't there before anyway...
   });
+
   const response = await chat.call(
-    [new SystemMessage(systemMessage), new HumanMessage(message)],
+    [new SystemMessage(systemMessage), ...messages, new HumanMessage(message)],
     {
       signal: controller.signal,
       callbacks: [

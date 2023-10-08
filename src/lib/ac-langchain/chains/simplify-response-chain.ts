@@ -1,6 +1,5 @@
-import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { HumanMessage, SystemMessage } from 'langchain/schema';
-import { getToken } from '../../../utils/config';
+import { handleAcaiChat } from '../models/chat';
 
 /**
  * Take notes based on the given transcription
@@ -13,11 +12,7 @@ You are tasked with taking the chat history and assistant reply and creating a b
 This will just need to be a quick response because the user will receive the longer response in text form elsewhere
 `;
 
-  const model = new ChatOpenAI({
-    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
-    modelName: 'gpt-3.5-turbo',
-    temperature: 0.5,
-  });
+  const { chat: model } = handleAcaiChat({ temperature: 0.5 });
 
   const response = await model.call([
     new SystemMessage(prompt),

@@ -1,6 +1,5 @@
-import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { HumanChatMessage, SystemChatMessage } from 'langchain/schema';
-import { getToken } from '../../../utils/config';
+import { HumanMessage, SystemMessage } from 'langchain/schema';
+import { handleAcaiChat } from '../models/chat';
 
 /**
  * Generate observations based on the given context
@@ -20,15 +19,14 @@ Here is the previous list of observations
 ${priorObservations}
 `;
 
-  const model = new ChatOpenAI({
-    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
+  const { chat: model } = handleAcaiChat({
     modelName: 'gpt-4',
     temperature: 0,
   });
   console.log('context', context);
   const response = await model.call([
-    new SystemChatMessage(prompt),
-    new HumanChatMessage(context),
+    new SystemMessage(prompt),
+    new HumanMessage(context),
   ]);
 
   return response.text;

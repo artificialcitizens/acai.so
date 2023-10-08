@@ -2,8 +2,7 @@ import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { AcaiMemoryVector } from '../../../../db';
 import { Document } from 'langchain/document';
 import { Embeddings } from 'langchain/embeddings/base';
-import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { getToken } from '../../../utils/config';
+import { handleAcaiEmbeddings } from '../models/chat';
 // import { HuggingFaceTransformersEmbeddings } from 'langchain/embeddings/hf_transformers';
 
 // export const initializeMemoryVectorStore = async ({
@@ -27,14 +26,8 @@ export const initializeMemoryVectorStore = async ({
 }: {
   docs: Document[];
 }) => {
-  const openAIApiKey =
-    getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY;
-  const vectorStore = await MemoryVectorStore.fromDocuments(
-    docs,
-    new OpenAIEmbeddings({
-      openAIApiKey,
-    }),
-  );
+  const { embeddings } = handleAcaiEmbeddings();
+  const vectorStore = await MemoryVectorStore.fromDocuments(docs, embeddings);
   return vectorStore;
 };
 

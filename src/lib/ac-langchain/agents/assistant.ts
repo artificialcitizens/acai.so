@@ -1,6 +1,5 @@
-import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { SystemMessage, HumanMessage } from 'langchain/schema';
-import { getToken } from '../../../utils/config';
+import { handleAcaiChat } from '../models/chat';
 
 /**
  * Query OpenAI Chat Model
@@ -16,8 +15,7 @@ export const queryAssistant = async ({
   modelName: string;
   temperature?: number;
 }): Promise<string> => {
-  const chat = new ChatOpenAI({
-    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
+  const { chat } = handleAcaiChat({
     modelName,
     temperature: temperature,
   });

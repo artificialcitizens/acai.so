@@ -25,6 +25,7 @@ import { ragAgentResponse } from '../../lib/ac-langchain/agents/rag-agent/rag-ag
 import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../db';
+import { AIMessage, HumanMessage } from 'langchain/schema';
 
 export type AvaChatResponse = {
   response: string;
@@ -115,15 +116,22 @@ export const useAva = (): {
       case 'chat': {
         // if the user has a custom prompt we override the system prompt
         const sysMessage = customPrompt
-          ? await createCustomPrompt(customPrompt, formattedChatHistory)
+          ? await createCustomPrompt(customPrompt, '') //formattedChatHistory)
           : await createAvaChatPrompt(
               userName || 'User',
               userLocation || 'Undisclosed',
-              formattedChatHistory,
+              '',
+              // formattedChatHistory,
             );
+        // console.log(currentAgent?.recentChatHistory)
         const response = await queryChat({
           systemMessage: sysMessage,
           message,
+          messages: currentAgent?.recentChatHistory.map((msg: Message) =>
+            msg.type === 'user'
+              ? new HumanMessage(msg.text)
+              : new AIMessage(msg.text),
+          ),
           modelName: currentAgent.openAIChatModel,
           callbacks: {
             handleLLMStart: () => {
@@ -296,10 +304,10 @@ export const useAva = (): {
             },
           });
 
-          const response = res.data.response;
+          const { response } = res.data;
           setLoading(false);
 
-          return response;
+          return { response };
         } catch (error: any) {
           setLoading(false);
           return error.message;

@@ -1,7 +1,6 @@
 import { YoutubeTranscript } from 'youtube-transcript';
 import { TokenTextSplitter } from 'langchain/text_splitter';
-import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { HumanChatMessage } from 'langchain/schema';
+import { HumanMessage } from 'langchain/schema';
 import { PromptTemplate } from 'langchain/prompts';
 import {
   StructuredOutputParser,
@@ -10,7 +9,7 @@ import {
 // import { z } from 'zod';
 import { loadSummarizationChain } from 'langchain/chains';
 import { Document } from 'langchain/document';
-import { getToken } from '../../../utils/config';
+import { handleAcaiChat } from '../models/chat';
 
 export type PartialContentResult = {
   id: number;
@@ -50,17 +49,14 @@ export const getSummaries = async ({
   const summaries: PartialContentResult[] = [];
   console.log(`Generating Partial Summaries for ${docs.length} chunks of text`);
 
-  const quickModel = new ChatOpenAI({
-    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
-    temperature: 0,
-  });
+  const { chat: quickModel } = handleAcaiChat();
   const summaryPromises = docs.map(async (doc, index) => {
     const formattedSummaryPrompt = await summaryPrompt.format({
       text: doc.pageContent,
     });
     try {
       const response = await quickModel.call([
-        new HumanChatMessage(formattedSummaryPrompt),
+        new HumanMessage(formattedSummaryPrompt),
       ]);
       const partialSummary = response.text;
       summaries.push({ id: index, partialSummary });
@@ -85,8 +81,7 @@ export const getMainSummary = async ({
   summary: string;
   openAIApiKey: string;
 }): Promise<string> => {
-  const smartModel = new ChatOpenAI({
-    openAIApiKey,
+  const { chat: smartModel } = handleAcaiChat({
     modelName: 'gpt-4',
     temperature: 0.25,
   });
