@@ -158,7 +158,10 @@ export const Ava: React.FC<AvaProps> = ({
               streamingMessage={streamingMessage}
               onSubmitHandler={async (message) => {
                 try {
-                  const { response } = await queryAva(message, systemNotes);
+                  const { response } = await queryAva({
+                    message,
+                    systemMessage: systemNotes,
+                  });
                   return response;
                 } catch (e: any) {
                   toastifyError(e.message);
