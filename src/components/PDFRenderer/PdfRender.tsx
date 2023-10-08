@@ -13,7 +13,7 @@ interface PDFRendererProps {
 const PDFRenderer: React.FC<PDFRendererProps> = ({ startingPage, fileUrl }) => {
   const [numPages, setNumPages] = useState(0);
   const [pageNumber, setPageNumber] = useState(startingPage || 1);
-  const [scale, setScale] = useState(1);
+  const [scale, setScale] = useState(1.5);
   const [isDragging, setIsDragging] = useState(false);
   const { page } = useParams<{ page: string }>();
 

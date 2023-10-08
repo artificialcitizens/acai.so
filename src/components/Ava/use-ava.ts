@@ -26,6 +26,7 @@ import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../db';
 import { AIMessage, HumanMessage } from 'langchain/schema';
+import { askAi } from '../../lib/ac-langchain/chains/ask-ai-chain';
 
 export type AvaChatResponse = {
   response: string;
@@ -53,10 +54,20 @@ if (import.meta.env.DEV) {
 }
 
 export const useAva = (): {
-  queryAva: (
-    message: string,
-    systemMessage: string,
-  ) => Promise<AvaChatResponse>;
+  queryAva: ({
+    message,
+    systemMessage,
+    override,
+    args,
+  }: {
+    message: string;
+    systemMessage: string;
+    /**
+     * Override the agent mode
+     */
+    override?: string;
+    args?: { [key: string]: string };
+  }) => Promise<AvaChatResponse>;
   streamingMessage: string;
   error: string;
   loading: boolean;
@@ -105,14 +116,21 @@ export const useAva = (): {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { editor } = useContext(EditorContext)!;
 
-  const queryAva = async (
-    message: string,
-    customPrompt: string,
-  ): Promise<AvaChatResponse> => {
+  const queryAva = async ({
+    message,
+    systemMessage: customPrompt,
+    override,
+    args,
+  }: {
+    message: string;
+    systemMessage: string;
+    override?: string;
+    args?: { [key: string]: string };
+  }): Promise<AvaChatResponse> => {
     setLoading(true);
 
     const mode = currentAgent.agentMode;
-    switch (mode) {
+    switch (override ?? mode) {
       case 'chat': {
         // if the user has a custom prompt we override the system prompt
         const sysMessage = customPrompt
@@ -132,6 +150,44 @@ export const useAva = (): {
               ? new HumanMessage(msg.text)
               : new AIMessage(msg.text),
           ),
+          modelName: currentAgent.openAIChatModel,
+          callbacks: {
+            handleLLMStart: () => {
+              setLoading(true);
+              // console.log({ llm, prompts });
+            },
+            handleLLMNewToken: (token) => {
+              setStreamingMessage((prev) => prev + token);
+              // console.log(token);
+            },
+            handleLLMEnd: () => {
+              setLoading(false);
+              setStreamingMessage('');
+              // console.log({ output });
+            },
+            handleLLMError: (err) => {
+              setError(err.message);
+              setLoading(false);
+              // console.log({ err });
+            },
+          },
+        });
+
+        // setAbortController(response.abortController);
+        return {
+          response: response.response,
+          // abortController: response.abortController,
+        };
+      }
+      case 'document': {
+        // @TODO: Add config for special rules for document agent
+        // const sysMessage = customPrompt;
+        // console.log(currentAgent?.recentChatHistory)
+        const response = await askAi({
+          documentContext: editor?.getText() || '',
+          task: args?.task || '',
+          highlighted: args?.highlighted || '',
+          messages: [],
           modelName: currentAgent.openAIChatModel,
           callbacks: {
             handleLLMStart: () => {

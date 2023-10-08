@@ -175,7 +175,10 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           },
         });
         toastifyInfo('Generating Text');
-        const { response } = await queryAva(t, '');
+        const { response } = await queryAva({
+          message: t,
+          systemMessage: '',
+        });
         const sentenceDelimiters = ['.', '?', '!'];
         const sentenceCount = sentenceDelimiters.reduce(
           (count, delimiter) => count + response.split(delimiter).length - 1,

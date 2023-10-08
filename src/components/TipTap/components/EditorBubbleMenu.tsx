@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import { BubbleMenu, BubbleMenuProps } from '@tiptap/react';
 import cx from 'classnames';
 import { FC, useState, useEffect, useRef } from 'react';
@@ -9,6 +10,7 @@ import {
   CodeIcon,
   SparklesIcon,
 } from 'lucide-react';
+import { useAva } from '../../Ava/use-ava';
 
 import { NodeSelector } from './NodeSelector';
 import { toastifyInfo } from '../../Toast';
@@ -29,21 +31,70 @@ type CursorPosition = {
 
 export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const inputWrapperRef = useRef<HTMLDivElement>(null);
+  const replaceButtonRef = useRef<HTMLButtonElement>(null);
   const [askAi, setAskAi] = useState<string>('');
   const [cursorCoords, setCursorCoords] = useState<{ x: number; y: number }>({
     x: 0,
     y: 0,
   });
   const [askAiPopover, setAskAiPopover] = useState<boolean>(false);
+  const [aiResponse, setAiResponse] = useState<string>('');
   const [selectedText, setSelectedText] = useState<string>('');
   const [cursorPosition, setCursorPosition] = useState<CursorPosition>({
     from: 0,
     to: 0,
   });
 
+  const [messages, setMessages] = useState<any[]>(
+    [],
+    // recentChatHistory?.map((history: ChatHistory) => {
+    //   return {
+    //     message: history.text,
+    //     direction: history.type === 'user' ? 'outgoing' : 'incoming',
+    //     sender: history.type === 'user' ? 'User' : 'Assistant',
+    //     position: 'single',
+    //     sentTime: history.timestamp,
+    //   };
+    // }),
+  );
+
+  const { queryAva, streamingMessage, loading } = useAva();
+
   useEffect(() => {
-    if (inputRef.current && askAiPopover) {
+    if (streamingMessage) {
+      setAiResponse(streamingMessage);
+    }
+  }, [streamingMessage]);
+  useEffect(() => {
+    // Function to handle click events
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        inputWrapperRef.current &&
+        !inputWrapperRef.current.contains(event.target as Node)
+      ) {
+        setAiResponse('');
+        setAskAiPopover(false);
+      }
+    };
+
+    // Add event listener when askAiPopover is open
+    if (askAiPopover) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    // Cleanup function to remove the event listener when the component unmounts or askAiPopover is closed
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [askAiPopover, inputRef]);
+
+  useEffect(() => {
+    if (!inputRef.current) return;
+    if (askAiPopover) {
       inputRef.current.focus();
+    } else {
+      setAskAi('');
     }
   }, [askAiPopover]);
   const items: BubbleMenuItem[] = [
@@ -123,30 +174,52 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
   return (
     <>
       <div
-        className={`fixed bg-light left-0 rounded-none w-screen md:w-[25vw] md:rounded-lg border border-solid border-light transition-opacity ${
+        ref={inputWrapperRef}
+        className={`fixed bg-light left-0 rounded-none w-screen md:w-[25vw] max-h-[50vh] md:rounded-lg border border-solid border-light transition-opacity ${
           !askAiPopover
             ? 'opacity-0 pointer-events-none'
             : 'opacity-1 pointer-events-auto'
         }`}
-        style={{ left: calculatedLeft, top: cursorCoords.y, zIndex: 10000 }}
+        style={{ left: calculatedLeft, top: cursorCoords.y + 5, zIndex: 10000 }}
       >
-        <p className="text-xs p-2 max-h-12 overflow-auto hidden md:inherit">
-          {selectedText}
+        <p className="text-xs p-2 overflow-auto">
+          {aiResponse || selectedText}
         </p>
         <form
           className="flex shadow-lg rounded-lg p-3 md:p-2 justify-items-center"
           onSubmit={(e) => {
             e.preventDefault();
-            setAskAiPopover(!askAiPopover);
-            props.editor.commands.focus();
-            props.editor.commands.insertContent(askAi);
+            const response = queryAva({
+              message: askAi,
+              systemMessage: selectedText,
+              override: 'document',
+              args: {
+                highlighted: selectedText,
+                task: askAi,
+              },
+            });
+            setAiResponse(streamingMessage);
             setAskAi('');
+            setTimeout(() => {
+              inputRef.current?.focus();
+            }, 100);
+            // setAskAiPopover(!askAiPopover);
+            // props.editor.commands.focus();
+            // props.editor.commands.insertContent(askAi);
           }}
+          // onKeyDown={(e) => {
+          //   if (e.key === 'Enter') {
+          //     // e.preventDefault();
+          //     // setAiResponse(mockResponse);
+          //     // setAskAi('');
+          //     inputRef.current?.focus();
+          //   }
+          // }}
         >
           <input
-            className={`z-50 p-2 md:p-1 bg-base border-light border border-solid w-full rounded-lg  inline-block overflow-auto focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50`}
+            className={`z-50 p-2 md:p-1 text-base md:text-xs bg-base border-light border border-solid w-full rounded-lg  inline-block overflow-auto focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50`}
             value={askAi}
-            placeholder="Ask AI"
+            placeholder={loading ? 'Loading' : 'Ask AI'}
             onChange={(e) => setAskAi(e.target.value)}
             ref={inputRef}
             onClick={(e) => {
@@ -159,6 +232,7 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
               if (e.key === 'Escape') {
                 // e.currentTarget.blur();
                 setAskAiPopover(!askAiPopover);
+                setAiResponse('');
                 props.editor.commands.focus();
               }
             }}
@@ -173,6 +247,40 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
             className="hidden md:inherit bg-dark text-acai-white font-bold max-w-min self-center ml-2 text-sm md:text-xs px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
           />
         </form>
+        {aiResponse && (
+          <span className="flex justify-end bg-light mb-2 mr-2">
+            <button
+              type="button"
+              className=" bg-dark text-acai-white font-bold max-w-min self-center ml-2 text-sm md:text-xs px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+              onClick={() => {
+                setAiResponse('');
+                setAskAi('');
+                setAskAiPopover(false);
+              }}
+              disabled={loading}
+            >
+              Discard
+            </button>
+            <button
+              className=" bg-dark text-acai-white font-bold max-w-min self-center ml-2 text-sm md:text-xs px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+              type="button"
+              ref={replaceButtonRef}
+              disabled={loading}
+              onClick={(e) => {
+                e.preventDefault();
+                setAskAiPopover(!askAiPopover);
+                props.editor.commands.focus();
+                setTimeout(() => {
+                  props.editor.commands.insertContent(aiResponse);
+                }, 100);
+                setAiResponse('');
+                setAskAi('');
+              }}
+            >
+              Replace
+            </button>
+          </span>
+        )}
       </div>
 
       <BubbleMenu
@@ -184,7 +292,7 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
           isOpen={isNodeSelectorOpen}
           setIsOpen={setIsNodeSelectorOpen}
         />
-        {/* <button
+        <button
           key={'ask-ai'}
           onClick={() => {
             // Calculate cursor position
@@ -197,7 +305,9 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
             });
 
             setAskAiPopover(true);
-            inputRef.current?.focus();
+            setTimeout(() => {
+              inputRef.current?.focus();
+            }, 100);
           }}
           className="p-2 text-acai-white hover:bg-darker active:bg-darker"
         >
@@ -207,7 +317,7 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
               'text-blue-500': true,
             })}
           />
-        </button> */}
+        </button>
 
         {items.map((item, index) => (
           <button
