@@ -108,7 +108,7 @@ export const useAva = (): {
 
   const formattedChatHistory = currentAgent?.recentChatHistory
     .map(
-      (chat: { type: 'ava' | 'user'; text: string }) =>
+      (chat: { type: 'Assistant' | 'User'; text: string }) =>
         `${chat.type}: ${chat.text}`,
     )
     .join('\n');

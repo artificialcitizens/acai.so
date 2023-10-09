@@ -74,8 +74,8 @@ const Chat: React.FC<ChatProps> = ({
     recentChatHistory?.map((history: ChatHistory) => {
       return {
         message: history.text,
-        direction: history.type === 'user' ? 'outgoing' : 'incoming',
-        sender: history.type === 'user' ? 'User' : 'Assistant',
+        direction: history.type === 'User' ? 'outgoing' : 'incoming',
+        sender: history.type === 'User' ? 'User' : 'Assistant',
         position: 'single',
         sentTime: history.timestamp,
       };
@@ -93,8 +93,8 @@ const Chat: React.FC<ChatProps> = ({
       recentChatHistory?.map((history: ChatHistory) => {
         return {
           message: history.text,
-          direction: history.type === 'user' ? 'outgoing' : 'incoming',
-          sender: history.type === 'user' ? 'User' : 'Assistant',
+          direction: history.type === 'User' ? 'outgoing' : 'incoming',
+          sender: history.type === 'User' ? 'User' : 'Assistant',
           position: 'single',
           sentTime: history.timestamp,
         };
@@ -114,14 +114,29 @@ const Chat: React.FC<ChatProps> = ({
           sentTime: Math.floor(Date.now() / 1000).toString(),
         },
       ]);
+      const chatHistory = createChatHistory(
+        workspaceId,
+        message,
+        sender as 'Assistant' | 'User',
+      );
+
+      send({
+        type: 'UPDATE_CHAT_HISTORY',
+        agent: {
+          workspaceId: workspaceId,
+          recentChatHistory: [...recentChatHistory, chatHistory],
+        },
+      });
+      return chatHistory;
     },
-    [setMessages],
+
+    [recentChatHistory, send, workspaceId],
   );
 
   const createChatHistory = (
     workspaceId: string,
     text: string,
-    type: 'user' | 'ava',
+    type: 'User' | 'Assistant',
   ): ChatHistory => {
     return {
       id: workspaceId,
@@ -160,20 +175,9 @@ const Chat: React.FC<ChatProps> = ({
 
   const handleSend = useCallback(
     async (message: string) => {
-      addMessage(message, 'User', 'outgoing');
+      const userChatHistory = addMessage(message, 'User', 'outgoing');
       setMsgInputValue('');
       inputRef.current?.focus();
-
-      const userChatHistory = createChatHistory(workspaceId, message, 'user');
-
-      send({
-        type: 'UPDATE_CHAT_HISTORY',
-        agent: {
-          workspaceId: workspaceId,
-          recentChatHistory: [...recentChatHistory, userChatHistory],
-        },
-      });
-
       try {
         const answer = await onSubmitHandler(
           message,
@@ -185,7 +189,7 @@ const Chat: React.FC<ChatProps> = ({
         const assistantChatHistory = createChatHistory(
           workspaceId,
           answer,
-          'ava',
+          'Assistant',
         );
 
         send({
