@@ -164,7 +164,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           id: workspaceId,
           text: t.trim(),
           timestamp: Math.floor(Date.now() / 1000).toString(),
-          type: 'user',
+          type: 'User',
         };
 
         send({
@@ -200,7 +200,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             id: workspaceId,
             text: res,
             timestamp: Math.floor(Date.now() / 1000).toString(),
-            type: 'ava',
+            type: 'Assistant',
           };
           send({
             type: 'UPDATE_CHAT_HISTORY',
