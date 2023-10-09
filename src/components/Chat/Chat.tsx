@@ -26,6 +26,7 @@ import remarkFootnotes from 'remark-footnotes';
 
 import { Button } from '../Button/Button';
 import { SendIcon, SpinnerIcon, StopIcon, TrashIcon } from '../Icons/Icons';
+import { MessageRole } from '../Ava/use-ava';
 
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
@@ -136,7 +137,7 @@ const Chat: React.FC<ChatProps> = ({
   const createChatHistory = (
     workspaceId: string,
     text: string,
-    type: 'user' | 'assistant',
+    type: MessageRole,
   ): ChatHistory => {
     return {
       id: workspaceId,
