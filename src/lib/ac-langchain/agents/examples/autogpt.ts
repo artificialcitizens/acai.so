@@ -23,7 +23,7 @@ const { chat } = handleAcaiChat();
 const autogpt = AutoGPT.fromLLMAndTools(chat, tools, {
   memory: vectorStore.asRetriever(),
   aiName: 'Tom',
-  aiRole: 'Assistant',
+  aiRole: 'assistant',
 });
 
 await autogpt.run(['write a weather report for SF today']);

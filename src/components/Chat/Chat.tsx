@@ -74,8 +74,8 @@ const Chat: React.FC<ChatProps> = ({
     recentChatHistory?.map((history: ChatHistory) => {
       return {
         message: history.text,
-        direction: history.type === 'User' ? 'outgoing' : 'incoming',
-        sender: history.type === 'User' ? 'User' : 'Assistant',
+        direction: history.type === 'user' ? 'outgoing' : 'incoming',
+        sender: history.type === 'user' ? 'user' : 'assistant',
         position: 'single',
         sentTime: history.timestamp,
       };
@@ -93,8 +93,8 @@ const Chat: React.FC<ChatProps> = ({
       recentChatHistory?.map((history: ChatHistory) => {
         return {
           message: history.text,
-          direction: history.type === 'User' ? 'outgoing' : 'incoming',
-          sender: history.type === 'User' ? 'User' : 'Assistant',
+          direction: history.type === 'user' ? 'outgoing' : 'incoming',
+          sender: history.type === 'user' ? 'user' : 'assistant',
           position: 'single',
           sentTime: history.timestamp,
         };
@@ -117,7 +117,7 @@ const Chat: React.FC<ChatProps> = ({
       const chatHistory = createChatHistory(
         workspaceId,
         message,
-        sender as 'Assistant' | 'User',
+        sender as 'assistant' | 'user',
       );
 
       send({
@@ -136,7 +136,7 @@ const Chat: React.FC<ChatProps> = ({
   const createChatHistory = (
     workspaceId: string,
     text: string,
-    type: 'User' | 'Assistant',
+    type: 'user' | 'assistant',
   ): ChatHistory => {
     return {
       id: workspaceId,
@@ -164,7 +164,7 @@ const Chat: React.FC<ChatProps> = ({
           {
             message: streamingMessage,
             direction: 'incoming',
-            sender: 'Assistant',
+            sender: 'assistant',
             position: 'single',
             sentTime: Math.floor(Date.now() / 1000).toString(),
           },
@@ -175,7 +175,7 @@ const Chat: React.FC<ChatProps> = ({
 
   const handleSend = useCallback(
     async (message: string) => {
-      const userChatHistory = addMessage(message, 'User', 'outgoing');
+      const userChatHistory = addMessage(message, 'user', 'outgoing');
       setMsgInputValue('');
       inputRef.current?.focus();
       try {
@@ -189,7 +189,7 @@ const Chat: React.FC<ChatProps> = ({
         const assistantChatHistory = createChatHistory(
           workspaceId,
           answer,
-          'Assistant',
+          'assistant',
         );
 
         send({
@@ -202,11 +202,11 @@ const Chat: React.FC<ChatProps> = ({
           ],
         });
 
-        addMessage(answer, 'Assistant', 'incoming');
+        addMessage(answer, 'assistant', 'incoming');
       } catch (error) {
         addMessage(
           'Sorry, there was an error processing your request. Please try again later.',
-          'Assistant',
+          'assistant',
           'incoming',
         );
       }

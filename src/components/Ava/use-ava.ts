@@ -33,7 +33,7 @@ export type AvaChatResponse = {
   // abortController: AbortController | null;
 };
 
-type MessageType = 'user' | 'ava';
+type MessageType = 'user' | 'assistant';
 
 type Message = {
   id: string;
@@ -108,7 +108,7 @@ export const useAva = (): {
 
   const formattedChatHistory = currentAgent?.recentChatHistory
     .map(
-      (chat: { type: 'Assistant' | 'User'; text: string }) =>
+      (chat: { type: 'assistant' | 'user'; text: string }) =>
         `${chat.type}: ${chat.text}`,
     )
     .join('\n');
