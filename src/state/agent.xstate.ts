@@ -5,7 +5,7 @@ export interface ChatHistory {
   id: string;
   text: string;
   timestamp: string;
-  type: 'User' | 'Assistant';
+  type: 'user' | 'assistant';
 }
 
 export type AgentMode = (typeof agentMode)[number];
