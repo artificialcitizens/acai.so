@@ -52,7 +52,7 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
     //   return {
     //     message: history.text,
     //     direction: history.type === 'user' ? 'outgoing' : 'incoming',
-    //     sender: history.type === 'user' ? 'User' : 'Assistant',
+    //     sender: history.type === 'user' ? 'user' : 'assistant',
     //     position: 'single',
     //     sentTime: history.timestamp,
     //   };

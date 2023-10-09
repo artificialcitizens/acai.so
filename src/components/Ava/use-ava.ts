@@ -33,13 +33,13 @@ export type AvaChatResponse = {
   // abortController: AbortController | null;
 };
 
-type MessageType = 'User' | 'Ava';
+export type MessageRole = 'user' | 'assistant';
 
 type Message = {
   id: string;
   text: string;
   timestamp: string;
-  type: MessageType;
+  type: MessageRole;
 };
 
 export const agentMode = [
@@ -108,7 +108,7 @@ export const useAva = (): {
 
   const formattedChatHistory = currentAgent?.recentChatHistory
     .map(
-      (chat: { type: 'Assistant' | 'User'; text: string }) =>
+      (chat: { type: MessageRole; text: string }) =>
         `${chat.type}: ${chat.text}`,
     )
     .join('\n');
@@ -146,7 +146,7 @@ export const useAva = (): {
           systemMessage: sysMessage,
           message,
           messages: currentAgent?.recentChatHistory.map((msg: Message) =>
-            msg.type === 'User'
+            msg.type === 'user'
               ? new HumanMessage(msg.text)
               : new AIMessage(msg.text),
           ),

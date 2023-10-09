@@ -1,11 +1,11 @@
 import { createMachine, assign } from 'xstate';
-import { agentMode } from '../components/Ava/use-ava';
+import { MessageRole, agentMode } from '../components/Ava/use-ava';
 
 export interface ChatHistory {
   id: string;
   text: string;
   timestamp: string;
-  type: 'User' | 'Assistant';
+  type: MessageRole;
 }
 
 export type AgentMode = (typeof agentMode)[number];
