@@ -141,7 +141,7 @@ export const useAva = (): {
               '',
               // formattedChatHistory,
             );
-        console.log(currentAgent?.recentChatHistory);
+        // console.log(currentAgent?.recentChatHistory)
         const response = await queryChat({
           systemMessage: sysMessage,
           message,
