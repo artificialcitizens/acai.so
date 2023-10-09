@@ -164,7 +164,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           id: workspaceId,
           text: t.trim(),
           timestamp: Math.floor(Date.now() / 1000).toString(),
-          type: 'User',
+          type: 'user',
         };
 
         send({
