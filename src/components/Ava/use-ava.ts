@@ -33,7 +33,7 @@ export type AvaChatResponse = {
   // abortController: AbortController | null;
 };
 
-type MessageType = 'user' | 'ava';
+type MessageType = 'User' | 'Ava';
 
 type Message = {
   id: string;
@@ -146,7 +146,7 @@ export const useAva = (): {
           systemMessage: sysMessage,
           message,
           messages: currentAgent?.recentChatHistory.map((msg: Message) =>
-            msg.type === 'user'
+            msg.type === 'User'
               ? new HumanMessage(msg.text)
               : new AIMessage(msg.text),
           ),
