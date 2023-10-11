@@ -11,7 +11,7 @@ export default {
   theme: {
     extend: {
       acai: {
-        primary: '#79586C',
+        primary: '#805B7A',
         secondary: '#758496',
         white: '#E7E9E5',
         neutral: '#84868E',
@@ -26,7 +26,7 @@ export default {
         base: '#0d0d0d',
         user: '#373737',
         acai: '#5F3C4F',
-        'acai-light': '#79586C',
+        'acai-light': '#805B7A',
         'acai-dark': '#402B35',
         'acai-darker': '#21171B',
         darker: '#090909',
