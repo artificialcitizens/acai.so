@@ -97,7 +97,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
       />
       <Sidebar
         position="right"
-        className={`rounded-lg right-0 fixed md:relative max-h-screen border-r border border-dark transition-transform`}
+        className={`right-0 fixed md:relative max-h-screen transition-transform`}
         style={{
           width: `${width}vw`,
         }}

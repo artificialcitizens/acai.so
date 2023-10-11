@@ -10,7 +10,7 @@
 .cs-expansion-panel,
 .cs-expansion-panel--open,
 .cs-expansion-panel__header {
-  @apply bg-dark text-acai-white border-dark m-0 !important;
+  @apply bg-dark text-acai-white border-dark border-l-0 border-r-0 m-0 !important;
 }
 
 .chat-panel {
@@ -18,7 +18,7 @@
 }
 
 .cs-expansion-panel__content {
-  @apply bg-dark border-lighter !important;
+  @apply bg-dark border-lighter border-0 !important;
 }
 
 .cs-search svg {
