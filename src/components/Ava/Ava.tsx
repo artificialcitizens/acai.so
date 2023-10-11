@@ -66,7 +66,7 @@ export const Ava: React.FC<AvaProps> = ({
   return (
     <SBSidebar>
       <ExpansionPanel
-        className="pt-8 md:pt-6"
+        className="pt-8 md:pt-6 border-t-0"
         title="Settings"
         onChange={toggleSettings}
         isOpened={settingsOpen}
