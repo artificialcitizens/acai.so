@@ -1,3 +1,3 @@
 export const getToken = (name: string) => {
-  returnwindow.localStorage.getItem(name);
+  return window.localStorage.getItem(name);
 };
