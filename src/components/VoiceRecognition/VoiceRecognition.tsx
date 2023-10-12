@@ -269,6 +269,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   };
 
   const onTranscriptionComplete = async (t: string) => {
+    toastifyInfo('Transcription Complete');
     const updatedUserTranscript = userTranscript
       ? userTranscript + '\n' + t
       : t;

@@ -61,14 +61,14 @@ type AgentEvent =
  * Save AgentWorkspace to local storage
  */
 const saveAgentState = (state: AgentWorkspace) => {
-  localStorage.setItem('agentState', JSON.stringify(state));
+  window.localStorage.setItem('agentState', JSON.stringify(state));
 };
 
 /**
  * Load AgentWorkspace from local storage
  */
 const loadAgentState = (): AgentWorkspace => {
-  const savedState = localStorage.getItem('agentState');
+  const savedState = window.localStorage.getItem('agentState');
   if (savedState) {
     return JSON.parse(savedState);
   } else {

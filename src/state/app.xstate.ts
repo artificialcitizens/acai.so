@@ -94,7 +94,7 @@ type Event =
  * Save state to local storage
  */
 export const saveState = (state: IContext) => {
-  localStorage.setItem('appState', JSON.stringify(state));
+  window.localStorage.setItem('appState', JSON.stringify(state));
 };
 
 /**
@@ -102,7 +102,7 @@ export const saveState = (state: IContext) => {
  */
 export const loadState = () => {
   try {
-    const serializedState = localStorage.getItem('appState');
+    const serializedState = window.localStorage.getItem('appState');
     if (serializedState === null) {
       return null;
     }

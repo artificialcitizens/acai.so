@@ -26,7 +26,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    const storedWidth = localStorage.getItem('AVA_PANEL_WIDTH');
+    const storedWidth = window.localStorage.getItem('AVA_PANEL_WIDTH');
     if (storedWidth) {
       setWidth(parseFloat(storedWidth));
     } else {
@@ -36,7 +36,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
 
   useEffect(() => {
     if (width !== null) {
-      localStorage.setItem('AVA_PANEL_WIDTH', width.toString());
+      window.localStorage.setItem('AVA_PANEL_WIDTH', width.toString());
       if (width === 0) {
         setToggled(false);
       } else {

@@ -10,14 +10,14 @@ interface IContext {
  * Save state to local storage
  */
 const saveUIState = (state: IContext) => {
-  localStorage.setItem('uiState', JSON.stringify(state));
+  window.localStorage.setItem('uiState', JSON.stringify(state));
 };
 
 /**
  * Load state from local storage
  */
 const loadUIState = (): IContext => {
-  const savedState = localStorage.getItem('uiState');
+  const savedState = window.localStorage.getItem('uiState');
   return savedState
     ? JSON.parse(savedState)
     : { thoughtsOpen: true, sideNavOpen: false, agentChatOpen: true };

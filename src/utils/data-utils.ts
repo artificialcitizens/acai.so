@@ -111,11 +111,11 @@ export const readFileAsText = (
 };
 
 export const writeToLocalStorage = (key: string, data: any): void => {
-  localStorage.setItem(key, JSON.stringify(data));
+  window.localStorage.setItem(key, JSON.stringify(data));
 };
 
 export const readFromLocalStorage = (key: string): any => {
-  const rawData = localStorage.getItem(key);
+  const rawData = window.localStorage.getItem(key);
   return rawData ? JSON.parse(rawData) : null;
 };
 
