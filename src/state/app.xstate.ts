@@ -94,6 +94,7 @@ type Event =
  * Save state to local storage
  */
 export const saveState = (state: IContext) => {
+  console.log('saving state', state);
   localStorage.setItem('appState', JSON.stringify(state));
 };
 
