@@ -61,6 +61,7 @@ type AgentEvent =
  * Save AgentWorkspace to local storage
  */
 const saveAgentState = (state: AgentWorkspace) => {
+  console.log('saving agent state');
   localStorage.setItem('agentState', JSON.stringify(state));
 };
 
