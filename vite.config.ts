@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 // eslint-disable-next-line import/named
-import { VitePWA, VitePWAOptions } from 'vite-plugin-pwa';
+// import { VitePWA, VitePWAOptions } from 'vite-plugin-pwa';
 
 const manifestForPlugin: Partial<VitePWAOptions> = {
   registerType: 'prompt',
@@ -45,7 +45,8 @@ const manifestForPlugin: Partial<VitePWAOptions> = {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), VitePWA(manifestForPlugin)],
+  plugins: [react()],
+  // plugins: [react(), VitePWA(manifestForPlugin)],
   assetsInclude: ['**/*.ico'],
   build: {
     assetsDir: 'assets',
