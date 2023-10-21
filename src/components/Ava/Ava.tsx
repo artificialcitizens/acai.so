@@ -1,22 +1,15 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import SBSidebar from '../Sidebar/SBSidebar';
 import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
-import NotificationCenter from '../../components/NotificationCenter';
 import Chat from '../../components/Chat/Chat';
-import ScratchPad from '../../components/ScratchPad/ScratchPad';
-import TokenManager from '../../components/TokenManager/token-manager';
-import { useActor, useSelector } from '@xstate/react';
+import { useSelector } from '@xstate/react';
 import { useAva } from './use-ava';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
 import VoiceRecognition from '../VoiceRecognition/VoiceRecognition';
-import ChatModelDropdown from '../ChatSettings';
-import { SocketManager } from '../SocketManager';
-import UserProfile from '../UserProfile/UserProfile';
 import { toastifyError } from '../Toast';
-import KnowledgeUpload from '../Knowledge/Knowledge';
 
 interface AvaProps {
   workspaceId: string;
@@ -29,7 +22,7 @@ export const Ava: React.FC<AvaProps> = ({
   onVoiceActivation,
   audioContext,
 }) => {
-  const { uiStateService, agentStateService }: GlobalStateContextValue =
+  const { agentStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
 
   const systemNotes =
