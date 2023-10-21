@@ -6,7 +6,6 @@ import {
 } from '../../context/GlobalStateContext';
 import { useSelector } from '@xstate/react';
 import styles from './Modal.module.css';
-import { useClickAway } from '@uidotdev/usehooks';
 
 Modal.setAppElement('#root');
 
@@ -24,11 +23,6 @@ const ACModal: React.FC = () => {
     (state) => state.context.modalContent,
   );
 
-  const ref = useClickAway(() => {
-    if (!modalOpen) return;
-    closeModal();
-  });
-
   const closeModal = () => {
     uiStateService.send({ type: 'TOGGLE_MODAL', content: '' });
   };
@@ -40,7 +34,6 @@ const ACModal: React.FC = () => {
         contentLabel="Example Modal"
         className={styles.modal}
         overlayClassName={styles.modalContent}
-        ref={ref}
       >
         <div className="flex flex-col flex-grow relative w-screen h-screen sm:h-max sm:max-w-screen-sm md:max-w-screen-sm lg:max-w-screen-md sm:rounded-xl p-8 pt-12 bg-dark">
           <button
