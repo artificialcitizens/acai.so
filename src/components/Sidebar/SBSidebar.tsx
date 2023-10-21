@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Sidebar } from '@chatscope/chat-ui-kit-react';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import './Sidebar.css';
-import { ToggleView } from '../ToggleView/ToggleView';
+import { AvaNav } from '../AvaNav/AvaNav';
 
 interface SBSidebarProps {
   children: React.ReactNode;
@@ -88,7 +88,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
           }}
         />
       )}
-      <ToggleView
+      <AvaNav
         toggled={toggled}
         handleClick={(e) => {
           e.stopPropagation();

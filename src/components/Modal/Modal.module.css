@@ -1,0 +1,8 @@
+.modal {
+  @apply fixed inset-0 flex items-center justify-center p-6 bg-darker bg-opacity-75 z-10;
+}
+
+.modalContent {
+  @apply fixed inset-0 flex items-center justify-center p-6 bg-dark md:m-10 z-20 text-acai-white;
+  @apply border-2 border-dark rounded-lg;
+}

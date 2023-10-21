@@ -4,6 +4,8 @@ interface IContext {
   thoughtsOpen: boolean;
   sideNavOpen: boolean;
   agentChatOpen: boolean;
+  modalOpen: boolean;
+  modalContent: string | React.ReactNode;
 }
 
 /**
@@ -67,6 +69,23 @@ export const uiMachine = createMachine<IContext>({
           assign({ agentChatOpen: updatedState }),
           actions.assign((ctx) => {
             saveUIState({ ...ctx, agentChatOpen: updatedState });
+            return ctx;
+          }),
+        ];
+      }),
+    },
+    TOGGLE_MODAL: {
+      actions: pure((context, event) => {
+        const updatedState = !context.modalOpen;
+        const updatedContent = event.content || context.modalContent;
+        return [
+          assign({ modalOpen: updatedState, modalContent: updatedContent }),
+          actions.assign((ctx) => {
+            saveUIState({
+              ...ctx,
+              modalOpen: updatedState,
+              modalContent: updatedContent,
+            });
             return ctx;
           }),
         ];

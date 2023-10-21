@@ -20,6 +20,7 @@ import MainView from './components/MainView/MainView';
 import useLocationManager from './hooks/use-location-manager';
 
 import { MenuButton } from './components/MenuButton/MenuButton';
+import ACModal from './components/Modal/Modal';
 
 const App = () => {
   const globalServices: GlobalStateContextValue =
@@ -99,6 +100,7 @@ const App = () => {
       >
         <EditorContext.Provider value={{ editor, setEditor }}>
           <SideNav />
+          <ACModal />
           <MenuButton
             handleClick={(e) => {
               e.stopPropagation();
