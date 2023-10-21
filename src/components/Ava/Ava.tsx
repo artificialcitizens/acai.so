@@ -38,19 +38,9 @@ export const Ava: React.FC<AvaProps> = ({
       (state) => state.context[workspaceId]?.systemNotes,
     ) || '';
   const { queryAva, streamingMessage, loading } = useAva();
-  const [uiState] = useActor(uiStateService);
-  const [settingsOpen, setSettingsOpen] = React.useState(false);
 
   const currentAgentMode =
     agentStateService.getSnapshot().context[workspaceId]?.agentMode;
-
-  const toggleAgentThoughts = () => {
-    uiStateService.send({ type: 'TOGGLE_AGENT_THOUGHTS' });
-  };
-
-  const toggleSettings = () => {
-    setSettingsOpen(!settingsOpen);
-  };
 
   const formatAgentMode = (mode: string) => {
     switch (mode) {
@@ -67,70 +57,11 @@ export const Ava: React.FC<AvaProps> = ({
     <SBSidebar>
       <ExpansionPanel
         className="pt-8 md:pt-6 border-t-0"
-        title="Settings"
-        onChange={toggleSettings}
-        isOpened={settingsOpen}
-        tabIndex={0}
-        // onKeyDown={toggleSettings}
+        title="Voice Synthesis"
       >
-        <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-1 md:pl-2 font-bold mb-3 border-b border-b-light border-b-solid">
-          User Profile
-        </h5>
-        <p className="text-xs font-medium mb-4">
-          Personalize your AVA interactions
-        </p>
-        <UserProfile />
-        <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-1 md:pl-2 font-bold mb-3 border-b border-b-light border-b-solid">
-          Access Configuration
-        </h5>
-        <TokenManager />
-      </ExpansionPanel>
-
-      <ExpansionPanel
-        title="Logs"
-        data-ava-element="TOGGLE_AGENT_THOUGHTS"
-        onChange={toggleAgentThoughts}
-        isOpened={uiState.context.thoughtsOpen}
-      >
-        <NotificationCenter
-          placeholder="A place for AI to ponder"
-          secondaryFilter="agent-thought"
-        />
-      </ExpansionPanel>
-
-      <ExpansionPanel title="Voice Synthesis">
         <VoiceRecognition
           onVoiceActivation={onVoiceActivation}
           audioContext={audioContext}
-        />
-      </ExpansionPanel>
-
-      <ExpansionPanel title="Knowledge">
-        <KnowledgeUpload workspaceId={workspaceId} />
-      </ExpansionPanel>
-
-      <ExpansionPanel title="AVA">
-        <ChatModelDropdown workspaceId={workspaceId} />
-
-        {agentStateService.getSnapshot().context[workspaceId]?.agentMode ===
-          'custom' && (
-          <>
-            <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-3 font-bold mb-3 border-b border-b-light border-b-solid">
-              Custom Agent Server
-            </h5>
-            <SocketManager />
-          </>
-        )}
-        <ScratchPad
-          placeholder="Custom Prompt"
-          content={systemNotes}
-          handleInputChange={(e) => {
-            agentStateService.send({
-              type: 'UPDATE_SYSTEM_NOTES',
-              workspaceId: workspaceId,
-              systemNotes: e.target.value,
-            });
-          }}
         />
       </ExpansionPanel>
 
