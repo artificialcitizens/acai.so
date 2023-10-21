@@ -13,7 +13,11 @@ interface IContext {
  * Save state to local storage
  */
 const saveUIState = (state: IContext) => {
-  localStorage.setItem('uiState', JSON.stringify(state));
+  const stateCopy = { ...state };
+  delete stateCopy.modalContent;
+  stateCopy.modalOpen = false;
+
+  localStorage.setItem('uiState', JSON.stringify(stateCopy));
 };
 
 /**
@@ -23,7 +27,13 @@ const loadUIState = (): IContext => {
   const savedState = localStorage.getItem('uiState');
   return savedState
     ? JSON.parse(savedState)
-    : { thoughtsOpen: true, sideNavOpen: false, agentChatOpen: true };
+    : {
+        thoughtsOpen: true,
+        sideNavOpen: false,
+        agentChatOpen: true,
+        modalOpen: false,
+        modalContent: '',
+      };
 };
 
 // Define the initial context
@@ -76,26 +86,10 @@ export const uiMachine = createMachine<IContext>({
       }),
     },
     TOGGLE_MODAL: {
-      actions: assign((context, event) => {
+      actions: assign((context) => {
         const updatedState = !context.modalOpen;
-        let updatedContent = context.modalContent;
-        if (
-          updatedState &&
-          (typeof event.content === 'string' ||
-            React.isValidElement(event.content))
-        ) {
-          updatedContent = event.content;
-        } else if (!updatedState) {
-          updatedContent = '';
-        } else {
-          updatedContent = '';
-        }
-        const saveState = {
-          ...context,
-          modalOpen: updatedState,
-          modalContent: '',
-        };
-        saveUIState(saveState);
+        const updatedContent = context.modalContent;
+
         return {
           ...context,
           modalOpen: updatedState,
