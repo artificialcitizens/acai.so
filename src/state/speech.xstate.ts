@@ -8,20 +8,20 @@ interface IContext {
 /**
  * Save state to local storage
  */
-const saveUIState = (state: IContext) => {
-  localStorage.setItem('uiState', JSON.stringify(state));
+const saveSpeechState = (state: IContext) => {
+  localStorage.setItem('speechState', JSON.stringify(state));
 };
 
 /**
  * Load state from local storage
  */
-const loadUIState = (): IContext => {
-  const savedState = localStorage.getItem('uiState');
+const loadSpeechState = (): IContext => {
+  const savedState = localStorage.getItem('speechState');
   return savedState ? JSON.parse(savedState) : { micRecording: false };
 };
 
 // Define the initial context
-const initialContext: IContext = loadUIState();
+const initialContext: IContext = loadSpeechState();
 
 const { pure } = actions;
 
@@ -48,4 +48,4 @@ export const speechMachine = createMachine<IContext>({
   },
 });
 
-loadUIState();
+loadSpeechState();
