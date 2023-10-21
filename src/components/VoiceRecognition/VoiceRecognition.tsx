@@ -304,7 +304,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     label: value.charAt(0).toUpperCase() + value.slice(1),
   }));
 
-  const options = Object.values(TTSState).map((value) => ({
+  let ttsOptions = TTSState.map((value) => ({
     value,
     label:
       value === 'webSpeech'
@@ -312,7 +312,9 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         : value.charAt(0).toUpperCase() + value.slice(1),
   }));
 
-  import.meta.env.DEV && options.unshift({ value: 'bark', label: 'Bark' });
+  if (!import.meta.env.DEV) {
+    ttsOptions = ttsOptions.filter((option) => option.value !== 'bark');
+  }
 
   const handleElevenLabsDropdownChange = (value: string) => {
     setElevenLabsVoice(value);
@@ -364,7 +366,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
       <span className="flex flex-col">
         <Dropdown
           label="TTS Engine"
-          options={options.filter((o) => o !== undefined) as any}
+          options={ttsOptions}
           value={ttsMode}
           onChange={(e) => setTtsMode(e as TTSState)}
         />
