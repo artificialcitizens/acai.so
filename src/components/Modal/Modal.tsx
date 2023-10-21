@@ -43,7 +43,7 @@ const ACModal: React.FC = () => {
         overlayClassName={styles.modalContent}
       >
         <div
-          className="relative w-screen h-screen sm:h-max sm:max-w-screen-sm md:max-w-screen-sm lg:max-w-screen-md sm:rounded-xl p-8 pt-12 bg-dark"
+          className="flex flex-col flex-grow relative w-screen h-screen sm:h-max sm:max-w-screen-sm md:max-w-screen-sm lg:max-w-screen-md sm:rounded-xl p-8 pt-12 bg-dark"
           ref={ref}
         >
           <button

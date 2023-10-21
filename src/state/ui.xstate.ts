@@ -87,10 +87,13 @@ export const uiMachine = createMachine<IContext>({
           updatedContent = event.content;
         } else if (!updatedState) {
           updatedContent = '';
+        } else {
+          updatedContent = '';
         }
         const saveState = {
           ...context,
           modalOpen: updatedState,
+          modalContent: '',
         };
         saveUIState(saveState);
         return {

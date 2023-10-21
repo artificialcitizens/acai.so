@@ -50,21 +50,24 @@ const Settings: React.FC<SettingsProps> = ({
   const toggleUserSettings = () => {
     setUserSettingsOpen(!userSettingsOpen);
   };
+  const [avaSettingsOpen, setAvaSettingsOpen] = React.useState(false);
+  const toggleAvaSettings = () => {
+    setAvaSettingsOpen(!avaSettingsOpen);
+  };
   return (
     <div
-      className="w-full h-full"
+      className="w-full h-full flex flex-col"
       style={{
         height: 'calc(100vh - 12rem)',
       }}
     >
       <Tabs
-        className="flex-grow"
+        className="flex-grow flex flex-col"
         selectedIndex={tabIndex}
         onSelect={(index) => setTabIndex(index)}
       >
         <TabList className="m-2 border-b-2 border-solid border-dark text-acai-white flex">
           <Tab>Config</Tab>
-          <Tab>AVA</Tab>
           <Tab>Knowledge</Tab>
           <Tab>Logs</Tab>
         </TabList>
@@ -85,6 +88,38 @@ const Settings: React.FC<SettingsProps> = ({
             </ExpansionPanel>
             <ExpansionPanel
               className="border-t-0"
+              title="AVA Settings"
+              onChange={toggleAvaSettings}
+              isOpened={avaSettingsOpen}
+              tabIndex={0}
+              // onKeyDown={toggleSettings}
+            >
+              {workspaceId && <ChatModelDropdown workspaceId={workspaceId} />}
+
+              {workspaceId &&
+                agentStateService.getSnapshot().context[workspaceId]
+                  ?.agentMode === 'custom' && (
+                  <>
+                    <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-3 font-bold mb-3 border-b border-b-light border-b-solid">
+                      Custom Agent Server
+                    </h5>
+                    <SocketManager />
+                  </>
+                )}
+              <ScratchPad
+                placeholder="Custom Prompt"
+                content={systemNotes}
+                handleInputChange={(e) => {
+                  agentStateService.send({
+                    type: 'UPDATE_SYSTEM_NOTES',
+                    workspaceId: workspaceId,
+                    systemNotes: e.target.value,
+                  });
+                }}
+              />
+            </ExpansionPanel>
+            <ExpansionPanel
+              className="border-t-0"
               title="Access Config"
               onChange={toggleSettings}
               isOpened={settingsOpen}
@@ -97,31 +132,7 @@ const Settings: React.FC<SettingsProps> = ({
             </ExpansionPanel>
           </span>
         </TabPanel>
-        <TabPanel>
-          {workspaceId && <ChatModelDropdown workspaceId={workspaceId} />}
 
-          {workspaceId &&
-            agentStateService.getSnapshot().context[workspaceId]?.agentMode ===
-              'custom' && (
-              <>
-                <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-3 font-bold mb-3 border-b border-b-light border-b-solid">
-                  Custom Agent Server
-                </h5>
-                <SocketManager />
-              </>
-            )}
-          <ScratchPad
-            placeholder="Custom Prompt"
-            content={systemNotes}
-            handleInputChange={(e) => {
-              agentStateService.send({
-                type: 'UPDATE_SYSTEM_NOTES',
-                workspaceId: workspaceId,
-                systemNotes: e.target.value,
-              });
-            }}
-          />
-        </TabPanel>
         <TabPanel>
           {workspaceId && <KnowledgeUpload workspaceId={workspaceId} />}
         </TabPanel>

@@ -9,3 +9,6 @@
 .react-tabs__tab-panel {
   @apply md:p-4 pt-0;
 }
+.react-tabs__tab-panel--selected {
+  @apply flex flex-grow flex-col;
+}
