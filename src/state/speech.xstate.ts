@@ -1,5 +1,4 @@
 import { createMachine, assign, actions } from 'xstate';
-import React from 'react';
 
 interface IContext {
   micRecording: boolean;
@@ -39,7 +38,6 @@ export const speechMachine = createMachine<IContext>({
         return [
           assign({ micRecording: updatedState }),
           actions.assign((ctx) => {
-            // saveUIState({ ...ctx, micRecording: updatedState });
             return ctx;
           }),
         ];
