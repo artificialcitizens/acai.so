@@ -35,7 +35,6 @@ const App = () => {
     globalServices.appStateService.getSnapshot().context.workspaces[
       workspaceId || 'docs'
     ];
-  if (!workspace || !id) navigate('/docs/documents/1-introduction');
 
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined,
@@ -51,6 +50,10 @@ const App = () => {
     filterAndCombineContent,
   } = useMemoryVectorStore('');
   const { updateLocation } = useLocationManager();
+
+  useEffect(() => {
+    if (!workspace || !id) navigate('/docs/documents/1-introduction');
+  }, [workspace, id, navigate]);
 
   useEffect(() => {
     updateLocation(routerLocation.pathname);
