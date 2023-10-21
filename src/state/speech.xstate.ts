@@ -43,6 +43,7 @@ const initialContext: IContext = loadSpeechState();
 const { pure } = actions;
 
 export const speechMachine = createMachine<IContext>({
+  predictableActionArguments: true,
   id: 'speech',
   initial: 'idle',
   context: initialContext,

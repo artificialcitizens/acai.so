@@ -1,4 +1,4 @@
-import { createMachine, assign } from 'xstate';
+import { createMachine, assign, actions } from 'xstate';
 import { timestampToHumanReadable } from '../utils/data-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { docsContent } from './fixture/docs';
@@ -39,7 +39,6 @@ interface IContext {
   currentLocation: string;
   localTime: string;
   activeWorkspaceId: string;
-  activeTabId: string;
   workspaces: WorkspaceDictionary;
 }
 
@@ -60,10 +59,6 @@ type Event =
       workspaceId: string;
     }
   | { type: 'SET_ACTIVE_WORKSPACE'; workspaceId: string }
-  | {
-      type: 'SET_ACTIVE_TAB';
-      tabId: string;
-    }
   | { type: 'TOGGLE_CONTEXT'; id: string; workspaceId: string }
   | {
       type: 'UPDATE_TAB_SYSTEM_NOTE';
@@ -79,6 +74,13 @@ export const saveState = (state: IContext) => {
   console.log('saving state', state);
   localStorage.setItem('appState', JSON.stringify(state));
 };
+
+const saveStateAction = (context: IContext) => {
+  saveState(context);
+  return context;
+};
+
+const { pure } = actions;
 
 /**
  * Load state from local storage
@@ -96,226 +98,206 @@ export const loadState = () => {
   }
 };
 
-// Create the machine
-export const appStateMachine = createMachine<IContext, Event>({
-  id: 'appState',
-  initial: 'idle',
-  context: loadState() || {
-    activeWorkspaceId: 'UUIDxyz',
-    activeTabId: 'UUIDabc',
-    currentLocation: '',
-    localTime: timestampToHumanReadable(),
-    workspaces: {
-      docs: {
-        id: 'docs',
-        name: 'acai.so',
-        createdAt: timestampToHumanReadable(),
-        lastUpdated: timestampToHumanReadable(),
-        private: true,
-        data: {
-          tiptap: {
-            tabs: [
-              {
-                id: 'introduction',
-                title: 'Introduction',
-                filetype: 'markdown',
-                content: docsContent,
-                isContext: false,
-                systemNote: '',
-                workspaceId: 'docs',
-                autoSave: false,
-                createdAt: timestampToHumanReadable(),
-                lastUpdated: timestampToHumanReadable(),
-              },
-            ],
-          },
+// Define the initial context
+const initialContext: IContext = loadState() || {
+  activeWorkspaceId: 'UUIDxyz',
+  currentLocation: '',
+  localTime: timestampToHumanReadable(),
+  workspaces: {
+    docs: {
+      id: 'docs',
+      name: 'acai.so',
+      createdAt: timestampToHumanReadable(),
+      lastUpdated: timestampToHumanReadable(),
+      private: true,
+      data: {
+        tiptap: {
+          tabs: [
+            {
+              id: 'introduction',
+              title: 'Introduction',
+              filetype: 'markdown',
+              content: docsContent,
+              isContext: false,
+              systemNote: '',
+              workspaceId: 'docs',
+              autoSave: false,
+              createdAt: timestampToHumanReadable(),
+              lastUpdated: timestampToHumanReadable(),
+            },
+          ],
         },
       },
     },
   },
+};
+// Create the machine
+export const appStateMachine = createMachine<IContext, Event>({
+  predictableActionArguments: true,
+  id: 'appState',
+  initial: 'idle',
+  context: initialContext,
   states: {
-    idle: {
-      on: {
-        UPDATE_NAME: {
-          actions: [
-            assign((context, event) => ({
-              ...context,
-              userName: event.userName,
-            })),
-            (context, event) => saveState(context),
-          ],
-        },
-        UPDATE_LOCATION: {
-          actions: [
-            assign((context, event) => ({
-              ...context,
-              currentLocation: event.currentLocation,
-            })),
-            (context, event) => saveState(context),
-          ],
-        },
-        UPDATE_TIME: {
-          actions: [
-            assign((context, event) => ({
-              ...context,
-              localTime: event.localTime,
-            })),
-            (context, event) => saveState(context),
-          ],
-        },
-        ADD_WORKSPACE: {
-          actions: [
-            assign((context, event) => {
-              const newWorkspace = event.workspace;
-              const newContext = {
-                ...context,
-                activeWorkspaceId: newWorkspace.id,
-                workspaces: {
-                  ...context.workspaces,
-                  [newWorkspace.id]: newWorkspace,
+    idle: {},
+  },
+  on: {
+    UPDATE_NAME: {
+      actions: assign((context, event) => {
+        const updatedContext = { ...context, userName: event.userName };
+        saveState(updatedContext);
+        return updatedContext;
+      }),
+    },
+    UPDATE_LOCATION: {
+      actions: assign((context, event) => {
+        const updatedContext = {
+          ...context,
+          currentLocation: event.currentLocation,
+        };
+        saveState(updatedContext);
+        return updatedContext;
+      }),
+    },
+    UPDATE_TIME: {
+      actions: assign((context, event) => {
+        const updatedContext = { ...context, localTime: event.localTime };
+        saveState(updatedContext);
+        return updatedContext;
+      }),
+    },
+    ADD_WORKSPACE: {
+      actions: assign((context, event) => {
+        const newWorkspace = event.workspace;
+        console.log('new workspace', newWorkspace);
+        const newContext = {
+          ...context,
+          activeWorkspaceId: newWorkspace.id,
+          workspaces: {
+            ...context.workspaces,
+            [newWorkspace.id]: newWorkspace,
+          },
+        };
+        console.log('new context', newContext);
+        saveState(newContext);
+        return newContext;
+      }),
+    },
+    UPDATE_WORKSPACE: {
+      actions: assign((context, event) => {
+        const updatedWorkspace = event.workspace;
+        const id = event.id;
+        const updatedWorkspaces = {
+          ...context.workspaces,
+          [id]: { ...context.workspaces[id], ...updatedWorkspace },
+        };
+        const updatedContext = { ...context, workspaces: updatedWorkspaces };
+        saveState(updatedContext);
+        return updatedContext;
+      }),
+    },
+    REPLACE_WORKSPACE: {
+      actions: assign((context, event) => {
+        const replacedWorkspace = event.workspace;
+        const id = event.id;
+        const updatedWorkspaces = {
+          ...context.workspaces,
+          [id]: replacedWorkspace,
+        };
+        const updatedContext = { ...context, workspaces: updatedWorkspaces };
+        saveState(updatedContext);
+        return updatedContext;
+      }),
+    },
+    DELETE_WORKSPACE: {
+      actions: assign((context, event) => {
+        const workspaceId = event.id;
+        if (context.workspaces[workspaceId]) {
+          const newWorkspaces = { ...context.workspaces };
+          delete newWorkspaces[workspaceId];
+          const updatedContext = { ...context, workspaces: newWorkspaces };
+          saveState(updatedContext);
+          return updatedContext;
+        }
+        return context;
+      }),
+    },
+    ADD_TAB: {
+      actions: [
+        assign((context, event) => {
+          const newTab = event.tab;
+          const workspace = context.workspaces[newTab.workspaceId];
+          if (workspace) {
+            // Create a new array with the new tab
+            workspace.data.tiptap.tabs = [
+              ...workspace.data.tiptap.tabs,
+              newTab,
+            ];
+            // Create a new workspace object with the updated tabs
+            const newWorkspace = {
+              ...workspace,
+              data: {
+                ...workspace.data,
+                tiptap: {
+                  ...workspace.data.tiptap,
+                  tabs: workspace.data.tiptap.tabs,
                 },
-              };
-              console.log(newContext);
-              return newContext;
-            }),
-            (context, event) => saveState(context),
-          ],
+              },
+            };
+            // Create a new workspaces object with the updated workspace
+            const newWorkspaces = {
+              ...context.workspaces,
+              [newTab.workspaceId]: newWorkspace,
+            };
+            return { ...context, workspaces: newWorkspaces };
+          }
+          return context;
+        }),
+        (context, event) => {
+          event.tab.autoSave && saveState(context);
         },
+      ],
+    },
+    DELETE_TAB: {
+      actions: [
+        assign((context, event) => {
+          const id = event.id;
+          Object.values(context.workspaces).forEach((workspace) => {
+            workspace.data.tiptap.tabs = workspace.data.tiptap.tabs.filter(
+              (tab) => tab.id !== id,
+            );
+          });
+          return { ...context };
+        }),
+        (context, event) => saveState(context),
+      ],
+    },
 
-        UPDATE_WORKSPACE: {
-          actions: [
-            assign((context, event) => {
-              const updatedWorkspace = event.workspace;
-              const id = event.id;
-              const updatedWorkspaces = {
-                ...context.workspaces,
-                [id]: { ...context.workspaces[id], ...updatedWorkspace },
-              };
-              return { ...context, workspaces: updatedWorkspaces };
-            }),
-            (context, event) => saveState(context),
-          ],
+    UPDATE_TAB_CONTENT: {
+      actions: [
+        assign((context, event) => {
+          const { id, content, workspaceId } = event;
+          const workspace = context.workspaces[workspaceId];
+          if (workspace) {
+            const tab = workspace.data.tiptap.tabs.find((tab) => tab.id === id);
+            if (tab) {
+              tab.content = content;
+            }
+          }
+          return { ...context };
+        }),
+        (context, event) => saveState(context),
+      ],
+    },
+    SET_ACTIVE_WORKSPACE: {
+      actions: [
+        assign({
+          activeWorkspaceId: (context, event) => event.workspaceId,
+        }),
+        (context, event) => {
+          console.log('set active workspace', context, event);
+          saveState(context);
         },
-        REPLACE_WORKSPACE: {
-          actions: [
-            assign((context, event) => {
-              const replacedWorkspace = event.workspace;
-              const id = event.id;
-              const updatedWorkspaces = {
-                ...context.workspaces,
-                [id]: replacedWorkspace, // This line completely replaces the workspace with the new one.
-              };
-              return { ...context, workspaces: updatedWorkspaces };
-            }),
-            (context, event) => saveState(context),
-          ],
-        },
-        DELETE_WORKSPACE: {
-          actions: [
-            assign((context, event) => {
-              const workspaceId = event.id;
-              if (context.workspaces[workspaceId]) {
-                // Create a new workspaces object without the deleted workspace
-                const newWorkspaces = { ...context.workspaces };
-                delete newWorkspaces[workspaceId];
-                return { ...context, workspaces: newWorkspaces };
-              }
-              return context;
-            }),
-            (context, event) => saveState(context),
-          ],
-        },
-        ADD_TAB: {
-          actions: [
-            assign((context, event) => {
-              const newTab = event.tab;
-              const workspace = context.workspaces[newTab.workspaceId];
-              if (workspace) {
-                // Create a new array with the new tab
-                workspace.data.tiptap.tabs = [
-                  ...workspace.data.tiptap.tabs,
-                  newTab,
-                ];
-                // Create a new workspace object with the updated tabs
-                const newWorkspace = {
-                  ...workspace,
-                  data: {
-                    ...workspace.data,
-                    tiptap: {
-                      ...workspace.data.tiptap,
-                      tabs: workspace.data.tiptap.tabs,
-                    },
-                  },
-                };
-                // Create a new workspaces object with the updated workspace
-                const newWorkspaces = {
-                  ...context.workspaces,
-                  [newTab.workspaceId]: newWorkspace,
-                };
-                return { ...context, workspaces: newWorkspaces };
-              }
-              return context;
-            }),
-            (context, event) => {
-              event.tab.autoSave && saveState(context);
-            },
-          ],
-        },
-        DELETE_TAB: {
-          actions: [
-            assign((context, event) => {
-              const id = event.id;
-              Object.values(context.workspaces).forEach((workspace) => {
-                workspace.data.tiptap.tabs = workspace.data.tiptap.tabs.filter(
-                  (tab) => tab.id !== id,
-                );
-              });
-              return { ...context };
-            }),
-            (context, event) => saveState(context),
-          ],
-        },
-
-        UPDATE_TAB_CONTENT: {
-          actions: [
-            assign((context, event) => {
-              const { id, content, workspaceId } = event;
-              const workspace = context.workspaces[workspaceId];
-              if (workspace) {
-                const tab = workspace.data.tiptap.tabs.find(
-                  (tab) => tab.id === id,
-                );
-                if (tab) {
-                  tab.content = content;
-                }
-              }
-              return { ...context };
-            }),
-            (context, event) => saveState(context),
-          ],
-        },
-
-        SET_ACTIVE_TAB: {
-          actions: [
-            assign({
-              activeTabId: (context, event) => event.tabId,
-            }),
-            (context, event) => saveState(context),
-          ],
-        },
-
-        SET_ACTIVE_WORKSPACE: {
-          actions: [
-            assign({
-              activeWorkspaceId: (context, event) => event.workspaceId,
-            }),
-            (context, event) => {
-              console.log('set active workspace', context, event);
-              saveState(context);
-            },
-          ],
-        },
-      },
+      ],
     },
   },
 });

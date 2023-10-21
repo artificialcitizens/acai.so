@@ -41,6 +41,7 @@ const initialContext: IContext = loadUIState();
 const { pure } = actions;
 
 export const uiMachine = createMachine<IContext>({
+  predictableActionArguments: true,
   id: 'ui',
   initial: 'idle',
   context: initialContext,

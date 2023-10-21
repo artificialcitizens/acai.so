@@ -65,13 +65,11 @@ export const SideNav: React.FC = () => {
         },
       },
     };
-    globalServices.appStateService.send({
-      type: 'ADD_WORKSPACE',
+    globalServices.appStateService.send('ADD_WORKSPACE', {
       workspace: newWorkspace,
     });
 
-    globalServices.agentStateService.send({
-      type: 'CREATE_AGENT',
+    globalServices.agentStateService.send('CREATE_AGENT', {
       workspaceId: id,
     });
     navigate(`/${id}/documents/${tabId}`);
