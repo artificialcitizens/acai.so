@@ -34,22 +34,22 @@ type WorkspaceDictionary = {
   [key: string]: Workspace;
 };
 
-interface IContext {
+export interface AppContext {
   userName: string;
   currentLocation: string;
   localTime: string;
   workspaces: WorkspaceDictionary;
 }
 
-type Event =
+export type AppEvent =
   | { type: 'UPDATE_NAME'; userName: string }
   | { type: 'UPDATE_LOCATION'; currentLocation: string }
   | { type: 'UPDATE_TIME'; localTime: string }
   | { type: 'ADD_WORKSPACE'; workspace: Workspace }
   | { type: 'UPDATE_WORKSPACE'; id: string; workspace: Partial<Workspace> }
   | { type: 'REPLACE_WORKSPACE'; id: string; workspace: Workspace }
-  | { type: 'DELETE_WORKSPACE'; id: string; workspaceId: string }
-  | { type: 'ADD_TAB'; tab: any }
+  | { type: 'DELETE_WORKSPACE'; workspaceId: string }
+  | { type: 'ADD_TAB'; tab: Tab }
   | { type: 'DELETE_TAB'; id: string; workspaceId: string }
   | {
       type: 'UPDATE_TAB_CONTENT';
@@ -68,7 +68,7 @@ type Event =
 /**
  * Save state to local storage
  */
-export const saveState = (state: IContext) => {
+export const saveState = (state: AppContext) => {
   localStorage.setItem('appState', JSON.stringify(state));
 };
 
@@ -89,7 +89,7 @@ export const loadState = () => {
 };
 
 // Define the initial context
-const initialContext: IContext = loadState() || {
+const initialContext: AppContext = loadState() || {
   currentLocation: '',
   localTime: timestampToHumanReadable(),
   workspaces: {
@@ -121,7 +121,7 @@ const initialContext: IContext = loadState() || {
   },
 };
 // Create the machine
-export const appStateMachine = createMachine<IContext, Event>({
+export const appStateMachine = createMachine<AppContext, AppEvent>({
   predictableActionArguments: true,
   id: 'appState',
   initial: 'idle',
@@ -196,7 +196,7 @@ export const appStateMachine = createMachine<IContext, Event>({
     },
     DELETE_WORKSPACE: {
       actions: assign((context, event) => {
-        const workspaceId = event.id;
+        const workspaceId = event.workspaceId;
         if (context.workspaces[workspaceId]) {
           const newWorkspaces = { ...context.workspaces };
           delete newWorkspaces[workspaceId];

@@ -36,7 +36,7 @@ export const AvaNav: React.FC<AvaSettingsProps> = ({
     });
   };
   const openModal = (content: string | React.ReactNode) =>
-    uiStateService.send({ type: 'TOGGLE_MODAL', content });
+    uiStateService.send({ type: 'TOGGLE_MODAL', modalContent: content });
 
   const openSettings = (index?: number) =>
     openModal(<Settings initialTabIndex={index || 0} />);

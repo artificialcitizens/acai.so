@@ -6,7 +6,7 @@ export type VoiceState = (typeof VoiceState)[number];
 export const TTSState = ['bark', 'elevenlabs', 'webSpeech'] as const;
 export type TTSState = (typeof TTSState)[number];
 
-interface IContext {
+export interface SpeechContext {
   micRecording: boolean;
   singleCommand: boolean;
   userTranscript: string;
@@ -14,17 +14,24 @@ interface IContext {
   ttsMode: TTSState;
 }
 
+export type SpeechEvent =
+  | { type: 'TOGGLE_MIC_RECORDING' }
+  | { type: 'TOGGLE_SINGLE_COMMAND' }
+  | { type: 'SET_USER_TRANSCRIPT'; userTranscript: string }
+  | { type: 'SET_VOICE_STATE'; voiceState: VoiceState }
+  | { type: 'SET_TTS_MODE'; ttsMode: TTSState };
+
 /**
  * Save state to local storage
  */
-const saveSpeechState = (state: IContext) => {
+const saveSpeechState = (state: SpeechContext) => {
   localStorage.setItem('speechState', JSON.stringify(state));
 };
 
 /**
  * Load state from local storage
  */
-const loadSpeechState = (): IContext => {
+const loadSpeechState = (): SpeechContext => {
   const savedState = localStorage.getItem('speechState');
   return savedState
     ? JSON.parse(savedState)
@@ -38,11 +45,11 @@ const loadSpeechState = (): IContext => {
 };
 
 // Define the initial context
-const initialContext: IContext = loadSpeechState();
+const initialContext: SpeechContext = loadSpeechState();
 
 const { pure } = actions;
 
-export const speechMachine = createMachine<IContext>({
+export const speechMachine = createMachine<SpeechContext, SpeechEvent>({
   predictableActionArguments: true,
   id: 'speech',
   initial: 'idle',

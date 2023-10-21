@@ -66,6 +66,7 @@ const App = () => {
         id: 'docs',
         content: docs,
       });
+      if (!docsWorkspace) return;
       globalServices.appStateService.send({
         type: 'REPLACE_WORKSPACE',
         id: 'docs',

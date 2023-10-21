@@ -10,7 +10,7 @@ export interface ChatHistory {
 
 export type AgentMode = (typeof agentMode)[number];
 
-export type AgentContext = {
+export type AgentWorkspace = {
   id: string;
   loading: boolean;
   agentMode: AgentMode;
@@ -31,13 +31,13 @@ export type AgentContext = {
   };
 };
 
-type AgentWorkspace = {
-  [key: string]: AgentContext;
+export type AgentContext = {
+  [key: string]: AgentWorkspace;
 };
 
-type AgentEvent =
+export type AgentEvent =
   | { type: 'LOAD'; workspaceId: string }
-  | { type: 'UPDATE'; agent: Partial<AgentContext> }
+  | { type: 'UPDATE'; agent: AgentWorkspace }
   | { type: 'TOGGLE_TOOL'; toolName: string }
   | { type: 'UPDATE_CUSTOM_PROMPT'; workspaceId: string; customPrompt: string }
   | {
@@ -60,19 +60,19 @@ type AgentEvent =
 /**
  * Save AgentWorkspace to local storage
  */
-const saveAgentState = (state: AgentWorkspace) => {
+const saveAgentState = (state: AgentContext) => {
   localStorage.setItem('agentState', JSON.stringify(state));
 };
 
 /**
  * Load AgentWorkspace from local storage
  */
-const loadAgentState = (): AgentWorkspace => {
+const loadAgentState = (): AgentContext => {
   const savedState = localStorage.getItem('agentState');
   if (savedState) {
     return JSON.parse(savedState);
   } else {
-    const initialState: AgentWorkspace = {
+    const initialState: AgentContext = {
       docs: {
         id: 'acai-docs',
         loading: false,
@@ -92,7 +92,7 @@ const loadAgentState = (): AgentWorkspace => {
   }
 };
 
-export const createAgent = (workspaceId: string): AgentContext => {
+export const createAgent = (workspaceId: string): AgentWorkspace => {
   return {
     id: workspaceId,
     loading: false,
@@ -109,10 +109,10 @@ export const createAgent = (workspaceId: string): AgentContext => {
 };
 
 // Define the initial context
-const initialAgentContext: AgentWorkspace = loadAgentState();
+const initialAgentContext: AgentContext = loadAgentState();
 
 // Define the machine
-export const agentMachine = createMachine<AgentWorkspace, AgentEvent>({
+export const agentMachine = createMachine<AgentContext, AgentEvent>({
   id: 'agent',
   initial: 'idle',
   context: initialAgentContext,

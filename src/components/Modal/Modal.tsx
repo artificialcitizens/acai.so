@@ -17,14 +17,13 @@ const ACModal: React.FC = () => {
     uiStateService,
     (state) => state.context.modalOpen,
   );
-
   const modalContent = useSelector(
     uiStateService,
     (state) => state.context.modalContent,
   );
 
   const closeModal = () => {
-    uiStateService.send({ type: 'TOGGLE_MODAL', content: '' });
+    uiStateService.send({ type: 'TOGGLE_MODAL', modalContent: '' });
   };
 
   return (

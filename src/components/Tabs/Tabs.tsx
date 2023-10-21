@@ -7,6 +7,7 @@ import './tabs.css';
 import { appStateMachine } from '../../state/app.xstate';
 import { v4 as uuidv4 } from 'uuid';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Tab as ACTab } from '../../state/app.xstate';
 
 const TabManager: React.FC = () => {
   const service = useInterpret(appStateMachine);
@@ -23,11 +24,18 @@ const TabManager: React.FC = () => {
 
   const handleCreateTab = () => {
     const title = prompt('Enter a title for the new tab');
-    const newTab = {
+    const newTab: ACTab = {
       id: uuidv4().split('-')[0],
       title: title || 'New Tab',
       content: '',
       workspaceId: activeWorkspaceId,
+      createdAt: new Date().toString(),
+      lastUpdated: new Date().toString(),
+      filetype: 'txt',
+      isContext: false,
+      systemNote: '',
+      autoSave: true,
+      canEdit: true,
     };
     service.send({ type: 'ADD_TAB', tab: newTab });
 

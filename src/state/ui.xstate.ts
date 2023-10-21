@@ -1,7 +1,7 @@
-import { createMachine, assign, actions } from 'xstate';
+import { createMachine, assign } from 'xstate';
 import React from 'react';
 
-interface IContext {
+export interface UIContext {
   thoughtsOpen: boolean;
   sideNavOpen: boolean;
   agentChatOpen: boolean;
@@ -9,20 +9,14 @@ interface IContext {
   modalContent: string | React.ReactNode;
 }
 
-/**
- * Save state to local storage
- */
-const saveUIState = (state: IContext) => {
-  const stateCopy = { ...state };
+const saveUIState = (context: UIContext) => {
+  const stateCopy = { ...context };
   stateCopy.modalContent = '';
   stateCopy.modalOpen = false;
   localStorage.setItem('uiState', JSON.stringify(stateCopy));
 };
 
-/**
- * Load state from local storage
- */
-const loadUIState = (): IContext => {
+const loadUIState = (): UIContext => {
   const savedState = localStorage.getItem('uiState');
   return savedState
     ? JSON.parse(savedState)
@@ -35,78 +29,64 @@ const loadUIState = (): IContext => {
       };
 };
 
-// Define the initial context
-const initialContext: IContext = loadUIState();
+const initialContext: UIContext = loadUIState();
 
-const { pure } = actions;
+export type AC_UIEvent =
+  | { type: 'TOGGLE_AGENT_THOUGHTS' }
+  | { type: 'TOGGLE_SIDE_NAV' }
+  | { type: 'TOGGLE_AGENT_CHAT' }
+  | {
+      type: 'TOGGLE_MODAL';
+      modalContent?: string | React.ReactNode;
+    };
 
-export const uiMachine = createMachine<IContext>({
-  predictableActionArguments: true,
-  id: 'ui',
-  initial: 'idle',
-  context: initialContext,
-  states: {
-    idle: {},
+export const uiMachine = createMachine<UIContext, AC_UIEvent>(
+  {
+    predictableActionArguments: true,
+    id: 'ui',
+    initial: 'idle',
+    context: initialContext,
+    states: {
+      idle: {},
+    },
+    on: {
+      TOGGLE_AGENT_THOUGHTS: {
+        actions: ['toggleThoughtsOpen', 'saveUIState'],
+      },
+      TOGGLE_SIDE_NAV: {
+        actions: ['toggleSideNavOpen', 'saveUIState'],
+      },
+      TOGGLE_AGENT_CHAT: {
+        actions: ['toggleAgentChatOpen', 'saveUIState'],
+      },
+      TOGGLE_MODAL: {
+        actions: ['toggleModal', 'saveUIState'],
+      },
+    },
   },
-  on: {
-    TOGGLE_AGENT_THOUGHTS: {
-      actions: pure((context) => {
-        const updatedState = !context.thoughtsOpen;
-        return [
-          assign({ thoughtsOpen: updatedState }),
-          actions.assign((ctx) => {
-            saveUIState({ ...ctx, thoughtsOpen: updatedState });
-            return ctx;
-          }),
-        ];
+  {
+    actions: {
+      toggleThoughtsOpen: assign((context) => {
+        return { ...context, thoughtsOpen: !context.thoughtsOpen };
       }),
-    },
-    TOGGLE_SIDE_NAV: {
-      actions: pure((context) => {
-        const updatedState = !context.sideNavOpen;
-        return [
-          assign({ sideNavOpen: updatedState }),
-          actions.assign((ctx) => {
-            saveUIState({ ...ctx, sideNavOpen: updatedState });
-            return ctx;
-          }),
-        ];
+      toggleSideNavOpen: assign((context) => {
+        return { ...context, sideNavOpen: !context.sideNavOpen };
       }),
-    },
-    TOGGLE_AGENT_CHAT: {
-      actions: pure((context) => {
-        const updatedState = !context.agentChatOpen;
-        return [
-          assign({ agentChatOpen: updatedState }),
-          actions.assign((ctx) => {
-            saveUIState({ ...ctx, agentChatOpen: updatedState });
-            return ctx;
-          }),
-        ];
+      toggleAgentChatOpen: assign((context) => {
+        return { ...context, agentChatOpen: !context.agentChatOpen };
       }),
-    },
-    TOGGLE_MODAL: {
-      actions: assign((context, event) => {
-        const updatedState = !context.modalOpen;
-        let updatedContent = context.modalContent;
-        if (
-          updatedState &&
-          (typeof event.content === 'string' ||
-            React.isValidElement(event.content))
-        ) {
-          updatedContent = event.content;
-        } else {
-          updatedContent = '';
+      toggleModal: assign((context, event) => {
+        if (event.type === 'TOGGLE_MODAL') {
+          const { modalContent } = event;
+          return {
+            ...context,
+            modalOpen: !context.modalOpen,
+            modalContent,
+          };
         }
-
-        return {
-          ...context,
-          modalOpen: updatedState,
-          modalContent: updatedContent,
-        };
+        return context;
       }),
+      saveUIState: (context) => saveUIState(context),
     },
   },
-});
-
-loadUIState();
+);

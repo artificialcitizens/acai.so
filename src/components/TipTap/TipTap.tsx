@@ -196,7 +196,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     if (!currentTab) return;
     if (editor && !hydrated) {
       editor.commands.setContent(currentTab.content);
-      editor.commands.setNodeSelection(0); // Add this line
+      editor.commands.setNodeSelection(0);
       setHydrated(true);
     }
   }, [currentTab, editor, hydrated]);

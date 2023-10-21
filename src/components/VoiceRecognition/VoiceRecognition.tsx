@@ -179,10 +179,8 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 
         send({
           type: 'UPDATE_CHAT_HISTORY',
-          agent: {
-            workspaceId: workspaceId,
-            recentChatHistory: [...recentChatHistory, userChatHistory],
-          },
+          workspaceId: workspaceId,
+          recentChatHistory: [...recentChatHistory, userChatHistory],
         });
         toastifyInfo('Generating Text');
         const { response } = await queryAva({
