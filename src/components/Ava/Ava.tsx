@@ -28,7 +28,7 @@ export const Ava: React.FC<AvaProps> = ({
   const systemNotes =
     useSelector(
       agentStateService,
-      (state) => state.context[workspaceId]?.systemNotes,
+      (state) => state.context[workspaceId]?.customPrompt,
     ) || '';
   const { queryAva, streamingMessage, loading } = useAva();
 
