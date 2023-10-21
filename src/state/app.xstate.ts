@@ -38,7 +38,6 @@ interface IContext {
   userName: string;
   currentLocation: string;
   localTime: string;
-  activeWorkspaceId: string;
   workspaces: WorkspaceDictionary;
 }
 
@@ -58,7 +57,6 @@ type Event =
       content: any;
       workspaceId: string;
     }
-  | { type: 'SET_ACTIVE_WORKSPACE'; workspaceId: string }
   | { type: 'TOGGLE_CONTEXT'; id: string; workspaceId: string }
   | {
       type: 'UPDATE_TAB_SYSTEM_NOTE';
@@ -73,13 +71,6 @@ type Event =
 export const saveState = (state: IContext) => {
   localStorage.setItem('appState', JSON.stringify(state));
 };
-
-const saveStateAction = (context: IContext) => {
-  saveState(context);
-  return context;
-};
-
-const { pure } = actions;
 
 /**
  * Load state from local storage
@@ -99,7 +90,6 @@ export const loadState = () => {
 
 // Define the initial context
 const initialContext: IContext = loadState() || {
-  activeWorkspaceId: 'UUIDxyz',
   currentLocation: '',
   localTime: timestampToHumanReadable(),
   workspaces: {
@@ -169,7 +159,6 @@ export const appStateMachine = createMachine<IContext, Event>({
         const newWorkspace = event.workspace;
         const newContext = {
           ...context,
-          activeWorkspaceId: newWorkspace.id,
           workspaces: {
             ...context.workspaces,
             [newWorkspace.id]: newWorkspace,
@@ -283,16 +272,6 @@ export const appStateMachine = createMachine<IContext, Event>({
           return { ...context };
         }),
         (context, event) => saveState(context),
-      ],
-    },
-    SET_ACTIVE_WORKSPACE: {
-      actions: [
-        assign({
-          activeWorkspaceId: (context, event) => event.workspaceId,
-        }),
-        (context, event) => {
-          saveState(context);
-        },
       ],
     },
   },

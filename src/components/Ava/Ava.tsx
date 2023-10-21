@@ -36,6 +36,7 @@ export const Ava: React.FC<AvaProps> = ({
     agentStateService.getSnapshot().context[workspaceId]?.agentMode;
 
   const formatAgentMode = (mode: string) => {
+    if (!mode) return '';
     switch (mode) {
       case 'ava':
         return 'Chat - AVA';
