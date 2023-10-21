@@ -125,6 +125,9 @@ dependencies:
   linkifyjs:
     specifier: ^4.1.1
     version: 4.1.1
+  lodash:
+    specifier: ^4.17.21
+    version: 4.17.21
   lodash.isequal:
     specifier: ^4.5.0
     version: 4.5.0
@@ -220,6 +223,9 @@ devDependencies:
   '@types/js-yaml':
     specifier: ^4.0.5
     version: 4.0.5
+  '@types/lodash':
+    specifier: ^4.14.200
+    version: 4.14.200
   '@types/lodash.isequal':
     specifier: ^4.5.6
     version: 4.5.6
@@ -3057,11 +3063,11 @@ packages:
   /@types/lodash.isequal@4.5.6:
     resolution: {integrity: sha512-Ww4UGSe3DmtvLLJm2F16hDwEQSv7U0Rr8SujLUA2wHI2D2dm8kPu6Et+/y303LfjTIwSBKXB/YTUcAKpem/XEg==}
     dependencies:
-      '@types/lodash': 4.14.195
+      '@types/lodash': 4.14.200
     dev: true
 
-  /@types/lodash@4.14.195:
-    resolution: {integrity: sha512-Hwx9EUgdwf2GLarOjQp5ZH8ZmblzcbTBC2wtQWNKARBSxM9ezRIAUpeDTgoQRAFB0+8CNWXVA9+MaSOzOF3nPg==}
+  /@types/lodash@4.14.200:
+    resolution: {integrity: sha512-YI/M/4HRImtNf3pJgbF+W6FrXovqj+T+/HpENLTooK9PnkacBsDpeP3IpHab40CClUfhNmdM2WTNP2sa2dni5Q==}
     dev: true
 
   /@types/long@4.0.2:

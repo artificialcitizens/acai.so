@@ -16,6 +16,7 @@ import { SocketManager } from '../SocketManager';
 import UserProfile from '../UserProfile/UserProfile';
 import KnowledgeUpload from '../Knowledge/Knowledge';
 import { useParams } from 'react-router-dom';
+import debounce from 'lodash/debounce';
 
 interface SettingsProps {
   initialTabIndex?: number;
@@ -36,14 +37,9 @@ const Settings: React.FC<SettingsProps> = ({
     id: string;
   }>();
 
-  const systemNotes =
-    (workspaceId &&
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      useSelector(
-        agentStateService,
-        (state) => state.context[workspaceId]?.systemNotes,
-      )) ||
-    '';
+  const systemNotes = useSelector(agentStateService, (state) =>
+    workspaceId ? state.context[workspaceId]?.systemNotes : '',
+  );
   const toggleSettings = () => {
     setSettingsOpen(!settingsOpen);
   };
@@ -109,13 +105,13 @@ const Settings: React.FC<SettingsProps> = ({
               <ScratchPad
                 placeholder="Custom Prompt"
                 content={systemNotes}
-                handleInputChange={(e) => {
+                handleInputChange={debounce((e) => {
                   agentStateService.send({
                     type: 'UPDATE_SYSTEM_NOTES',
                     workspaceId: workspaceId,
                     systemNotes: e.target.value,
                   });
-                }}
+                }, 300)}
               />
             </ExpansionPanel>
             <ExpansionPanel
