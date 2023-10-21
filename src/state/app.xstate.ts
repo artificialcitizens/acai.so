@@ -71,7 +71,6 @@ type Event =
  * Save state to local storage
  */
 export const saveState = (state: IContext) => {
-  console.log('saving state', state);
   localStorage.setItem('appState', JSON.stringify(state));
 };
 
@@ -168,7 +167,6 @@ export const appStateMachine = createMachine<IContext, Event>({
     ADD_WORKSPACE: {
       actions: assign((context, event) => {
         const newWorkspace = event.workspace;
-        console.log('new workspace', newWorkspace);
         const newContext = {
           ...context,
           activeWorkspaceId: newWorkspace.id,
@@ -177,7 +175,6 @@ export const appStateMachine = createMachine<IContext, Event>({
             [newWorkspace.id]: newWorkspace,
           },
         };
-        console.log('new context', newContext);
         saveState(newContext);
         return newContext;
       }),
@@ -294,7 +291,6 @@ export const appStateMachine = createMachine<IContext, Event>({
           activeWorkspaceId: (context, event) => event.workspaceId,
         }),
         (context, event) => {
-          console.log('set active workspace', context, event);
           saveState(context);
         },
       ],
