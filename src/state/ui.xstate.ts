@@ -1,4 +1,5 @@
 import { createMachine, assign, actions } from 'xstate';
+import React from 'react';
 
 interface IContext {
   thoughtsOpen: boolean;
@@ -75,20 +76,28 @@ export const uiMachine = createMachine<IContext>({
       }),
     },
     TOGGLE_MODAL: {
-      actions: pure((context, event) => {
+      actions: assign((context, event) => {
         const updatedState = !context.modalOpen;
-        const updatedContent = event.content || context.modalContent;
-        return [
-          assign({ modalOpen: updatedState, modalContent: updatedContent }),
-          actions.assign((ctx) => {
-            saveUIState({
-              ...ctx,
-              modalOpen: updatedState,
-              modalContent: updatedContent,
-            });
-            return ctx;
-          }),
-        ];
+        let updatedContent = context.modalContent;
+        if (
+          updatedState &&
+          (typeof event.content === 'string' ||
+            React.isValidElement(event.content))
+        ) {
+          updatedContent = event.content;
+        } else if (!updatedState) {
+          updatedContent = '';
+        }
+        const saveState = {
+          ...context,
+          modalOpen: updatedState,
+        };
+        saveUIState(saveState);
+        return {
+          ...context,
+          modalOpen: updatedState,
+          modalContent: updatedContent,
+        };
       }),
     },
   },
