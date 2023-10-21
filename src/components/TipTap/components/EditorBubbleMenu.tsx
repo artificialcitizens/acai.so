@@ -1,4 +1,5 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+// eslint-disable-next-line import/named
 import { BubbleMenu, BubbleMenuProps } from '@tiptap/react';
 import cx from 'classnames';
 import { FC, useState, useEffect, useRef } from 'react';
@@ -71,7 +72,7 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         inputWrapperRef.current &&
-        !inputWrapperRef.current.contains(event.target as Node)
+        !inputWrapperRef?.current?.contains(event.target as Node)
       ) {
         setAiResponse('');
         setAskAiPopover(false);
