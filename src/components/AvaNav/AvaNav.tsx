@@ -38,7 +38,8 @@ export const AvaNav: React.FC<AvaSettingsProps> = ({
   const openModal = (content: string | React.ReactNode) =>
     uiStateService.send({ type: 'TOGGLE_MODAL', content });
 
-  const openSettings = () => openModal(<Settings />);
+  const openSettings = (index?: number) =>
+    openModal(<Settings initialTabIndex={index || 0} />);
 
   return (
     <div className="z-10 absolute top-0 right-0 flex">
@@ -54,7 +55,7 @@ export const AvaNav: React.FC<AvaSettingsProps> = ({
       </button>
       <button
         className="inline-block rounded-full mr-4 my-2.5 p-1 text-xs font-medium uppercase leading-tight text-white z-index-10 "
-        onMouseDown={openSettings}
+        onMouseDown={() => openSettings(2)}
       >
         <span className="block [&>svg]:h-5 [&>svg]:w-5 md:[&>svg]:h-4 md:[&>svg]:w-4 [&>svg]:text-acai-white hover:pointer">
           <KnowledgeIcon />
@@ -62,7 +63,7 @@ export const AvaNav: React.FC<AvaSettingsProps> = ({
       </button>
       <button
         className="inline-block rounded-full mr-4 my-2.5 p-1 text-xs font-medium uppercase leading-tight text-white z-index-10 "
-        onMouseDown={openSettings}
+        onMouseDown={() => openSettings()}
       >
         <span className="block [&>svg]:h-5 [&>svg]:w-5 md:[&>svg]:h-4 md:[&>svg]:w-4 [&>svg]:text-acai-white hover:pointer">
           <SettingIcon />

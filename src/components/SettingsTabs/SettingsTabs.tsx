@@ -17,7 +17,14 @@ import UserProfile from '../UserProfile/UserProfile';
 import KnowledgeUpload from '../Knowledge/Knowledge';
 import { useParams } from 'react-router-dom';
 
-const Settings = () => {
+interface SettingsProps {
+  initialTabIndex?: number;
+}
+
+const Settings: React.FC<SettingsProps> = ({
+  initialTabIndex = 0,
+}: SettingsProps) => {
+  const [tabIndex, setTabIndex] = React.useState(initialTabIndex);
   const { agentStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
 
@@ -50,7 +57,11 @@ const Settings = () => {
         height: 'calc(100vh - 12rem)',
       }}
     >
-      <Tabs className="flex-grow">
+      <Tabs
+        className="flex-grow"
+        selectedIndex={tabIndex}
+        onSelect={(index) => setTabIndex(index)}
+      >
         <TabList className="m-2 border-b-2 border-solid border-dark text-acai-white flex">
           <Tab>Config</Tab>
           <Tab>AVA</Tab>
