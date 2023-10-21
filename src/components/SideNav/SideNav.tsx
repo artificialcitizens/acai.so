@@ -45,11 +45,6 @@ export const SideNav: React.FC = () => {
       createdAt: new Date().toString(),
       lastUpdated: new Date().toString(),
       private: false,
-      settings: {
-        webSpeechRecognition: false,
-        tts: false,
-        whisper: false,
-      },
       data: {
         tiptap: {
           tabs: [
@@ -68,19 +63,6 @@ export const SideNav: React.FC = () => {
             },
           ],
         },
-        chat: {},
-        agentLogs: {
-          thoughts: {},
-          errors: {},
-        },
-        agentTools: {
-          calculator: false,
-          weather: false,
-          googleSearch: false,
-          webBrowser: false,
-          createDocument: false,
-        },
-        notes: '',
       },
     };
     globalServices.appStateService.send({

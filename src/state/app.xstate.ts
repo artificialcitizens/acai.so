@@ -23,28 +23,10 @@ export interface Workspace {
   createdAt: string;
   lastUpdated: string;
   private: boolean;
-  settings?: {
-    webSpeechRecognition: boolean;
-    tts: boolean;
-    whisper: boolean;
-  };
   data: {
     tiptap: {
       tabs: Tab[];
     };
-    chat?: any;
-    agentLogs?: {
-      thoughts: any;
-      errors: any;
-    };
-    agentTools?: {
-      calculator: boolean;
-      weather: boolean;
-      googleSearch: boolean;
-      webBrowser: boolean;
-      createDocument: boolean;
-    };
-    notes: string;
   };
 }
 
@@ -147,19 +129,6 @@ export const appStateMachine = createMachine<IContext, Event>({
               },
             ],
           },
-          chat: {},
-          agentLogs: {
-            thoughts: {},
-            errors: {},
-          },
-          agentTools: {
-            calculator: true,
-            weather: true,
-            googleSearch: true,
-            webBrowser: true,
-            createDocument: true,
-          },
-          notes: '',
         },
       },
     },
@@ -417,7 +386,6 @@ export const createWorkspace = ({
           },
         ],
       },
-      notes: '',
     },
   };
 
