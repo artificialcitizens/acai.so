@@ -37,7 +37,7 @@ const Settings: React.FC<SettingsProps> = ({
     id: string;
   }>();
 
-  const systemNotes = useSelector(agentStateService, (state) =>
+  const customPrompt = useSelector(agentStateService, (state) =>
     workspaceId ? state.context[workspaceId]?.systemNotes : '',
   );
   const toggleSettings = () => {
@@ -52,7 +52,7 @@ const Settings: React.FC<SettingsProps> = ({
   };
   return (
     <div
-      className="w-full h-full flex flex-col"
+      className="w-full h-full flex flex-col overflow-y-auto"
       style={{
         height: 'calc(100vh - 12rem)',
       }}
@@ -104,7 +104,7 @@ const Settings: React.FC<SettingsProps> = ({
                 )}
               <ScratchPad
                 placeholder="Custom Prompt"
-                content={systemNotes}
+                content={customPrompt}
                 handleInputChange={debounce((e) => {
                   agentStateService.send({
                     type: 'UPDATE_SYSTEM_NOTES',

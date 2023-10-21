@@ -7,7 +7,7 @@ import { useBark } from '../../hooks/use-bark';
 
 import { useElevenlabs } from '../../hooks/use-elevenlabs';
 import ScratchPad from '../ScratchPad/ScratchPad';
-import { TTSState, VoiceState, useVoiceCommands } from './use-voice-command';
+import { useVoiceCommands } from './use-voice-command';
 import { useWebSpeechSynthesis } from '../../hooks/use-web-tts';
 import { getToken } from '../../utils/config';
 import { toastifyError, toastifyInfo } from '../Toast';
@@ -21,16 +21,13 @@ import { ChatHistory } from '../../state';
 import Dropdown from '../DropDown';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import { simplifyResponseChain } from '../../lib/ac-langchain/chains/simplify-response-chain';
-// import useBroadcastManager from '../../hooks/use-broadcast-manager';
+import { TTSState, VoiceState } from '../../state/speech.xstate';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
   onVoiceActivation: (bool: boolean) => void;
 }
 
-// @TODO: create xstate machine for voice recognition
-// @TODO: separate logic and refactor
-// @TODO: pass user transcript to useAva hook
 const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   onVoiceActivation,
   audioContext,
@@ -44,11 +41,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     'ELEVENLABS_VOICE',
     voices?.[0]?.value,
   );
-  const [singleCommandMode, setSingleCommandMode] = useState<boolean>(false);
-  const [synthesisMode, setSynthesisMode] = useLocalStorageKeyValue(
-    'VOICE_SYNTHESIS_MODE',
-    'webSpeech',
-  );
+
   const [manualTTS, setManualTTS] = useState<string>('');
   const [barkUrl, setBarkUrl] = useLocalStorageKeyValue(
     'BARK_URL',
@@ -71,6 +64,16 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     speechStateService,
     (state) => state.context.micRecording,
   );
+  const singleCommand = useSelector(
+    speechStateService,
+    (state) => state.context.singleCommand,
+  );
+
+  const ttsMode = useSelector(
+    speechStateService,
+    (state) => state.context.ttsMode,
+  );
+
   const [state, send] = useActor(agentStateService);
   const { workspaceId: rawWorkspaceId } = useParams<{
     workspaceId: string;
@@ -85,7 +88,9 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const gainNodeRef = React.useRef<GainNode | null>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSingleCommandMode(event.target.checked);
+    speechStateService.send('TOGGLE_SINGLE_COMMAND', {
+      singleCommand: event.target.checked,
+    });
   };
 
   const handleVoiceStateChange = (voiceState: VoiceState) => {
@@ -101,6 +106,12 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     setBarkUrl(barkUrl);
     //@TODO: update to run a test request
     toastifyInfo('Connected to Bark Server');
+  };
+
+  const setTtsMode = (mode: TTSState) => {
+    speechStateService.send('SET_TTS_MODE', {
+      ttsMode: mode,
+    });
   };
 
   const normalizedAudioElement = async (
@@ -226,24 +237,24 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     try {
       let audioData;
       toastifyInfo('Generating Audio');
-      if (synthesisMode === 'bark') {
+      if (ttsMode === 'bark') {
         audioData = await synthesizeBarkSpeech({
           inputText: response,
           voicePreset: undefined,
         });
-      } else if (synthesisMode === 'elevenlabs') {
+      } else if (ttsMode === 'elevenlabs') {
         if (!elevenlabsKey) {
           toastifyError('Missing Elevenlabs API Key');
           setTtsLoading(false);
           return;
         }
         audioData = await synthesizeElevenLabsSpeech(response, elevenLabsVoice);
-      } else if (synthesisMode === 'webSpeech') {
+      } else if (ttsMode === 'webSpeech') {
         synthesizeWebSpeech(response, () => {
           setUserTranscript('');
           setTtsLoading(false);
         });
-        if (singleCommandMode) setVoiceRecognitionState('idle');
+        if (singleCommand) setVoiceRecognitionState('idle');
         return;
       } else {
         setTtsLoading(false);
@@ -252,13 +263,13 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 
       if (audioData && audioContext && audioRef.current) {
         const audioBlob = new Blob([audioData], {
-          type: synthesisMode === 'bark' ? 'audio/wav' : 'audio/mpeg',
+          type: ttsMode === 'bark' ? 'audio/wav' : 'audio/mpeg',
         });
         const audioUrl = URL.createObjectURL(audioBlob);
         normalizedAudioElement(audioRef.current, audioBlob, audioContext);
         setAudioSrc(audioUrl);
       }
-      if (singleCommandMode) {
+      if (singleCommand) {
         setVoiceRecognitionState('idle');
       }
     } catch (error) {
@@ -288,22 +299,24 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     setManualTTS('');
   };
 
-  const options = [
-    { value: 'webSpeech', label: 'Web Speech API' },
-    { value: 'elevenlabs', label: 'Elevenlabs' },
-  ];
+  const voiceStateOptions = Object.values(VoiceState).map((value) => ({
+    value,
+    label: value.charAt(0).toUpperCase() + value.slice(1),
+  }));
+
+  const options = Object.values(TTSState).map((value) => ({
+    value,
+    label:
+      value === 'webSpeech'
+        ? 'Web Speech API'
+        : value.charAt(0).toUpperCase() + value.slice(1),
+  }));
+
   import.meta.env.DEV && options.unshift({ value: 'bark', label: 'Bark' });
 
   const handleElevenLabsDropdownChange = (value: string) => {
     setElevenLabsVoice(value);
   };
-
-  const voiceStateOptions = [
-    { value: 'idle', label: 'Idle' },
-    { value: 'ava', label: 'Ava' },
-    { value: 'notes', label: 'Notes' },
-    { value: 'voice', label: 'Voice' },
-  ];
 
   return (
     <div
@@ -343,7 +356,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
           type="checkbox"
           id="singleCommandMode"
           name="option"
-          checked={singleCommandMode}
+          checked={singleCommand}
           onChange={handleChange}
         />
       </span>
@@ -352,10 +365,10 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
         <Dropdown
           label="TTS Engine"
           options={options.filter((o) => o !== undefined) as any}
-          value={synthesisMode}
-          onChange={(e) => setSynthesisMode(e as TTSState)}
+          value={ttsMode}
+          onChange={(e) => setTtsMode(e as TTSState)}
         />
-        {synthesisMode === 'elevenlabs' && (
+        {ttsMode === 'elevenlabs' && (
           <Dropdown
             label="Voice"
             options={voices}
@@ -363,7 +376,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             onChange={handleElevenLabsDropdownChange}
           />
         )}
-        {synthesisMode === 'bark' && (
+        {ttsMode === 'bark' && (
           <form className="mb-2" onSubmit={handleBarkFormSubmit}>
             <span className="flex mb-2 items-center">
               <label
@@ -427,7 +440,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             gainNodeRef.current!.connect(audioContext.destination);
           }}
           onEnded={() => {
-            if (singleCommandMode) setVoiceRecognitionState('idle');
+            if (singleCommand) setVoiceRecognitionState('idle');
             setUserTranscript('');
             setTtsLoading(false);
             srcRef.current!.disconnect(gainNodeRef.current!);

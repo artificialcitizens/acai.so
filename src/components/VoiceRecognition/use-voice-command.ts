@@ -7,23 +7,22 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { toastifyInfo } from '../Toast';
 import { Tab } from '../../state';
-
-export type VoiceState = 'idle' | 'ava' | 'notes' | 'voice';
-export type TTSState = 'bark' | 'elevenlabs' | 'webSpeech';
+import { VoiceState, TTSState } from '../../state/speech.xstate';
+import { useSelector } from '@xstate/react';
 
 interface Command {
   commands: string[];
   action: (
-    setUserTranscript: React.Dispatch<React.SetStateAction<string>>,
-    setVoiceRecognitionState: React.Dispatch<React.SetStateAction<VoiceState>>,
-    setSynthesisMode?: React.Dispatch<React.SetStateAction<TTSState>>,
+    setUserTranscript: (transcript: string) => void,
+    setVoiceRecognitionState: (recognitionState: VoiceState) => void,
+    setSynthesisMode?: (synthesisMode: TTSState) => void,
   ) => Promise<void> | void;
   toastMessage?: string;
 }
 
 export const setStatesAndToast = (
-  setUserTranscript: React.Dispatch<React.SetStateAction<string>>,
-  setVoiceRecognitionState: React.Dispatch<React.SetStateAction<VoiceState>>,
+  setUserTranscript: (transcript: string) => void,
+  setVoiceRecognitionState: (recognitionState: VoiceState) => void,
   transcript: string,
   recognitionState: VoiceState,
 ) => {
@@ -32,12 +31,6 @@ export const setStatesAndToast = (
 };
 
 export const useVoiceCommands = () => {
-  const [userTranscript, setUserTranscript] = useState('');
-  const [voiceRecognitionState, setVoiceRecognitionState] =
-    useState<VoiceState>('idle');
-  const [synthesisMode, setSynthesisMode] = useState<TTSState>('bark');
-  const globalServices: GlobalStateContextValue =
-    useContext(GlobalStateContext);
   const navigate = useNavigate();
   const { workspaceId: rawWorkspaceId } = useParams<{
     workspaceId: string;
@@ -45,9 +38,44 @@ export const useVoiceCommands = () => {
     id: string;
   }>();
 
+  const { speechStateService, appStateService }: GlobalStateContextValue =
+    useContext(GlobalStateContext);
+
+  const voiceState = useSelector(
+    speechStateService,
+    (state) => state.context.voiceState,
+  );
+
+  const userTranscript = useSelector(
+    speechStateService,
+    (state) => state.context.userTranscript,
+  );
+
+  const ttsMode = useSelector(
+    speechStateService,
+    (state) => state.context.ttsMode,
+  );
+
   const workspaceId = rawWorkspaceId || 'docs';
-  // @TODO: Pull out experimental commands into a separate file
-  // Update the createCommand function to take an object as a parameter
+
+  const setUserTranscript = (transcript: string) => {
+    speechStateService.send('SET_USER_TRANSCRIPT', {
+      userTranscript: transcript,
+    });
+  };
+
+  const setTtsMode = (synthesisMode: TTSState) => {
+    speechStateService.send('SET_TTS_MODE', {
+      ttsMode: synthesisMode,
+    });
+  };
+
+  const setVoiceRecognitionState = (recognitionState: VoiceState) => {
+    speechStateService.send('SET_VOICE_STATE', {
+      voiceState: recognitionState,
+    });
+  };
+
   const createCommand = ({
     commands,
     recognitionState,
@@ -58,9 +86,9 @@ export const useVoiceCommands = () => {
     recognitionState: VoiceState;
     toastMessage?: string;
     action?: (
-      setUserTranscript: Dispatch<SetStateAction<string>>,
-      setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
-      setSynthesisMode?: Dispatch<SetStateAction<TTSState>>,
+      setUserTranscript: (transcript: string) => void,
+      setVoiceRecognitionState: (recognitionState: VoiceState) => void,
+      setSynthesisMode?: (synthesisMode: TTSState) => void,
     ) => Promise<void> | void;
   }): Command => ({
     commands,
@@ -78,8 +106,8 @@ export const useVoiceCommands = () => {
 
   // Handler function for 'ready' command, used when finished creating notes
   const handleReadyCommand = async (
-    setUserTranscript: Dispatch<SetStateAction<string>>,
-    setVoiceRecognitionState: Dispatch<SetStateAction<VoiceState>>,
+    setUserTranscript: (transcript: string) => void,
+    setVoiceRecognitionState: (recognitionState: VoiceState) => void,
   ) => {
     const notes = await noteChain(userTranscript);
     const newTab: Tab = {
@@ -95,7 +123,7 @@ export const useVoiceCommands = () => {
       createdAt: Date.now().toString(),
       lastUpdated: Date.now().toString(),
     };
-    globalServices.appStateService.send({ type: 'ADD_TAB', tab: newTab });
+    appStateService.send({ type: 'ADD_TAB', tab: newTab });
     setTimeout(() => {
       navigate(`/${workspaceId}/documents/${newTab.id}`);
     }, 150);
@@ -148,7 +176,7 @@ export const useVoiceCommands = () => {
         await command.action(
           setUserTranscript,
           setVoiceRecognitionState,
-          setSynthesisMode,
+          setTtsMode,
         );
       }
     }
@@ -157,10 +185,10 @@ export const useVoiceCommands = () => {
   return {
     userTranscript,
     setUserTranscript,
-    voiceRecognitionState,
+    voiceRecognitionState: voiceState,
     setVoiceRecognitionState,
-    synthesisMode,
-    setSynthesisMode,
+    ttsMode,
+    setSynthesisMode: setTtsMode,
     handleVoiceCommand,
   };
 };

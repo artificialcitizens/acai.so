@@ -1,7 +1,17 @@
 import { createMachine, assign, actions } from 'xstate';
 
+export const VoiceState = ['idle', 'ava', 'notes', 'voice'] as const;
+export type VoiceState = (typeof VoiceState)[number];
+
+export const TTSState = ['bark', 'elevenlabs', 'webSpeech'] as const;
+export type TTSState = (typeof TTSState)[number];
+
 interface IContext {
   micRecording: boolean;
+  singleCommand: boolean;
+  userTranscript: string;
+  voiceState: VoiceState;
+  ttsMode: TTSState;
 }
 
 /**
@@ -16,7 +26,15 @@ const saveSpeechState = (state: IContext) => {
  */
 const loadSpeechState = (): IContext => {
   const savedState = localStorage.getItem('speechState');
-  return savedState ? JSON.parse(savedState) : { micRecording: false };
+  return savedState
+    ? JSON.parse(savedState)
+    : {
+        micRecording: false,
+        singleCommand: false,
+        userTranscript: '',
+        voiceState: 'idle',
+        ttsMode: 'webSpeech',
+      };
 };
 
 // Define the initial context
@@ -41,6 +59,37 @@ export const speechMachine = createMachine<IContext>({
             return ctx;
           }),
         ];
+      }),
+    },
+    TOGGLE_SINGLE_COMMAND: {
+      actions: pure((context) => {
+        const updatedState = !context.singleCommand;
+        return [
+          assign({ singleCommand: updatedState }),
+          actions.assign((ctx) => {
+            ctx.micRecording = false;
+            saveSpeechState({
+              ...ctx,
+              singleCommand: updatedState,
+            });
+            return ctx;
+          }),
+        ];
+      }),
+    },
+    SET_USER_TRANSCRIPT: {
+      actions: assign((context, event) => {
+        return { ...context, userTranscript: event.userTranscript };
+      }),
+    },
+    SET_VOICE_STATE: {
+      actions: assign((context, event) => {
+        return { ...context, voiceState: event.voiceState };
+      }),
+    },
+    SET_TTS_MODE: {
+      actions: assign((context, event) => {
+        return { ...context, ttsMode: event.ttsMode };
       }),
     },
   },
