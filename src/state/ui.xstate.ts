@@ -14,9 +14,8 @@ interface IContext {
  */
 const saveUIState = (state: IContext) => {
   const stateCopy = { ...state };
-  delete stateCopy.modalContent;
+  stateCopy.modalContent = '';
   stateCopy.modalOpen = false;
-
   localStorage.setItem('uiState', JSON.stringify(stateCopy));
 };
 
@@ -86,9 +85,18 @@ export const uiMachine = createMachine<IContext>({
       }),
     },
     TOGGLE_MODAL: {
-      actions: assign((context) => {
+      actions: assign((context, event) => {
         const updatedState = !context.modalOpen;
-        const updatedContent = context.modalContent;
+        let updatedContent = context.modalContent;
+        if (
+          updatedState &&
+          (typeof event.content === 'string' ||
+            React.isValidElement(event.content))
+        ) {
+          updatedContent = event.content;
+        } else {
+          updatedContent = '';
+        }
 
         return {
           ...context,
