@@ -1,4 +1,4 @@
-import { createMachine, assign, actions } from 'xstate';
+import { createMachine, assign } from 'xstate';
 
 export const VoiceState = ['idle', 'ava', 'notes', 'voice'] as const;
 export type VoiceState = (typeof VoiceState)[number];
@@ -24,10 +24,12 @@ export type SpeechEvent =
 /**
  * Save state to local storage
  */
-const saveSpeechState = (state: SpeechContext) => {
-  localStorage.setItem('speechState', JSON.stringify(state));
+const saveSpeechState = (state: SpeechContext): Promise<void> => {
+  return new Promise((resolve) => {
+    localStorage.setItem('speechState', JSON.stringify(state));
+    resolve();
+  });
 };
-
 /**
  * Load state from local storage
  */
@@ -47,42 +49,37 @@ const loadSpeechState = (): SpeechContext => {
 // Define the initial context
 const initialContext: SpeechContext = loadSpeechState();
 
-const { pure } = actions;
-
 export const speechMachine = createMachine<SpeechContext, SpeechEvent>({
-  predictableActionArguments: true,
   id: 'speech',
   initial: 'idle',
   context: initialContext,
   states: {
     idle: {},
+    saving: {
+      invoke: {
+        id: 'saveState',
+        src: (context: SpeechContext) => saveSpeechState(context),
+        onDone: {
+          target: 'idle',
+        },
+      },
+    },
   },
   on: {
     TOGGLE_MIC_RECORDING: {
-      actions: pure((context) => {
-        const updatedState = !context.micRecording;
-        return [
-          assign({ micRecording: updatedState }),
-          actions.assign((ctx) => {
-            return ctx;
-          }),
-        ];
+      target: 'saving',
+      actions: assign((context) => {
+        return { ...context, micRecording: !context.micRecording };
       }),
     },
     TOGGLE_SINGLE_COMMAND: {
-      actions: pure((context) => {
-        const updatedState = !context.singleCommand;
-        return [
-          assign({ singleCommand: updatedState }),
-          actions.assign((ctx) => {
-            ctx.micRecording = false;
-            saveSpeechState({
-              ...ctx,
-              singleCommand: updatedState,
-            });
-            return ctx;
-          }),
-        ];
+      target: 'saving',
+      actions: assign((context) => {
+        return {
+          ...context,
+          singleCommand: !context.singleCommand,
+          micRecording: false,
+        };
       }),
     },
     SET_USER_TRANSCRIPT: {
@@ -102,5 +99,3 @@ export const speechMachine = createMachine<SpeechContext, SpeechEvent>({
     },
   },
 });
-
-loadSpeechState();
