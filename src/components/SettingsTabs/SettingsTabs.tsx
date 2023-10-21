@@ -38,7 +38,7 @@ const Settings: React.FC<SettingsProps> = ({
   }>();
 
   const customPrompt = useSelector(agentStateService, (state) =>
-    workspaceId ? state.context[workspaceId]?.systemNotes : '',
+    workspaceId ? state.context[workspaceId]?.customPrompt : '',
   );
   const toggleSettings = () => {
     setSettingsOpen(!settingsOpen);
@@ -50,6 +50,11 @@ const Settings: React.FC<SettingsProps> = ({
   const toggleAvaSettings = () => {
     setAvaSettingsOpen(!avaSettingsOpen);
   };
+  const handleCustomPromptInput = (e: { target: { value: any } }) =>
+    agentStateService.send('UPDATE_CUSTOM_PROMPT', {
+      workspaceId: workspaceId,
+      customPrompt: e.target.value,
+    });
   return (
     <div
       className="w-full h-full flex flex-col overflow-y-auto"
@@ -105,13 +110,7 @@ const Settings: React.FC<SettingsProps> = ({
               <ScratchPad
                 placeholder="Custom Prompt"
                 content={customPrompt}
-                handleInputChange={debounce((e) => {
-                  agentStateService.send({
-                    type: 'UPDATE_SYSTEM_NOTES',
-                    workspaceId: workspaceId,
-                    systemNotes: e.target.value,
-                  });
-                }, 300)}
+                handleInputChange={handleCustomPromptInput}
               />
             </ExpansionPanel>
             <ExpansionPanel

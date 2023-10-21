@@ -15,7 +15,7 @@ export type AgentContext = {
   loading: boolean;
   agentMode: AgentMode;
   workspaceId: string;
-  systemNotes: string;
+  customPrompt: string;
   recentChatHistory: ChatHistory[];
   openAIChatModel: string;
   returnRagResults: boolean;
@@ -39,7 +39,7 @@ type AgentEvent =
   | { type: 'LOAD'; workspaceId: string }
   | { type: 'UPDATE'; agent: Partial<AgentContext> }
   | { type: 'TOGGLE_TOOL'; toolName: string }
-  | { type: 'UPDATE_SYSTEM_NOTES'; workspaceId: string; systemNotes: string }
+  | { type: 'UPDATE_CUSTOM_PROMPT'; workspaceId: string; customPrompt: string }
   | {
       type: 'UPDATE_CHAT_HISTORY';
       workspaceId: string;
@@ -80,7 +80,7 @@ const loadAgentState = (): AgentWorkspace => {
         workspaceId: 'docs',
         agentMode: 'chat',
         openAIChatModel: 'gpt-4',
-        systemNotes: '',
+        customPrompt: '',
         recentChatHistory: [],
         returnRagResults: false,
         customAgentVectorSearch: false,
@@ -99,7 +99,7 @@ export const createAgent = (workspaceId: string): AgentContext => {
     loading: false,
     workspaceId: workspaceId,
     agentMode: 'chat',
-    systemNotes: '',
+    customPrompt: '',
     openAIChatModel: 'gpt-4',
     returnRagResults: false,
     customAgentVectorSearch: false,
@@ -184,14 +184,14 @@ export const agentMachine = createMachine<AgentWorkspace, AgentEvent>({
     },
   },
   on: {
-    UPDATE_SYSTEM_NOTES: {
+    UPDATE_CUSTOM_PROMPT: {
       actions: assign((context, event) => {
         if (event.workspaceId && context[event.workspaceId]) {
           const updatedContext = {
             ...context,
             [event.workspaceId]: {
               ...context[event.workspaceId],
-              systemNotes: event.systemNotes,
+              customPrompt: event.customPrompt,
             },
           };
           saveAgentState(updatedContext);
