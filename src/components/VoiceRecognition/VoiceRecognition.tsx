@@ -11,7 +11,7 @@ import { TTSState, VoiceState, useVoiceCommands } from './use-voice-command';
 import { useWebSpeechSynthesis } from '../../hooks/use-web-tts';
 import { getToken } from '../../utils/config';
 import { toastifyError, toastifyInfo } from '../Toast';
-import { useActor } from '@xstate/react';
+import { useActor, useSelector } from '@xstate/react';
 import {
   GlobalStateContextValue,
   GlobalStateContext,
@@ -50,7 +50,6 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     'webSpeech',
   );
   const [manualTTS, setManualTTS] = useState<string>('');
-  const [transcriptionOn, setTranscription] = useState<boolean>(false);
   const [barkUrl, setBarkUrl] = useLocalStorageKeyValue(
     'BARK_URL',
     import.meta.env.VITE_BARK_SERVER ||
@@ -66,8 +65,12 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     voiceRecognitionState,
     handleVoiceCommand,
   } = useVoiceCommands();
-  const { agentStateService }: GlobalStateContextValue =
+  const { agentStateService, speechStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
+  const micRecording = useSelector(
+    speechStateService,
+    (state) => state.context.micRecording,
+  );
   const [state, send] = useActor(agentStateService);
   const { workspaceId: rawWorkspaceId } = useParams<{
     workspaceId: string;
@@ -83,10 +86,6 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSingleCommandMode(event.target.checked);
-  };
-
-  const handleSpeechChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTranscription(event.target.checked);
   };
 
   const handleVoiceStateChange = (voiceState: VoiceState) => {
@@ -280,7 +279,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   useSpeechRecognition({
     onTranscriptionComplete,
     // @TODO: Fix hacky listening state
-    active: !ttsLoading && transcriptionOn ? true : false,
+    active: !ttsLoading && micRecording ? true : false,
   });
 
   const handleManualTTS = (e: React.FormEvent<HTMLFormElement>) => {
@@ -310,22 +309,6 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     <div
       className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow h-full`}
     >
-      <span className="flex mb-2 items-center">
-        <label
-          className="text-xs font-bold text-acai-white ml-2"
-          htmlFor="transcriptionOn"
-        >
-          Transcribe
-        </label>
-        <input
-          className="mx-1 mt-[0.125rem]"
-          type="checkbox"
-          id="transcriptionOn"
-          name="option"
-          checked={transcriptionOn}
-          onChange={handleSpeechChange}
-        />
-      </span>
       <p className="text-acai-white text-sm md:text-xs mb-2 ml-2">
         User Transcript
       </p>
