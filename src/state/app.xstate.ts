@@ -1,9 +1,7 @@
-import { createMachine, assign, actions } from 'xstate';
-import { timestampToHumanReadable } from '../utils/data-utils';
+import { createMachine, assign } from 'xstate';
 import { v4 as uuidv4 } from 'uuid';
-import { docsContent } from './fixture/docs';
 
-export type Tab = {
+export type ACDoc = {
   id: string;
   workspaceId: string;
   title: string;
@@ -23,11 +21,7 @@ export interface Workspace {
   createdAt: string;
   lastUpdated: string;
   private: boolean;
-  data: {
-    tiptap: {
-      tabs: Tab[];
-    };
-  };
+  docs: ACDoc[];
 }
 
 type WorkspaceDictionary = {
@@ -35,127 +29,80 @@ type WorkspaceDictionary = {
 };
 
 export interface AppContext {
-  userName: string;
-  currentLocation: string;
-  localTime: string;
   workspaces: WorkspaceDictionary;
 }
 
 export type AppEvent =
-  | { type: 'UPDATE_NAME'; userName: string }
-  | { type: 'UPDATE_LOCATION'; currentLocation: string }
-  | { type: 'UPDATE_TIME'; localTime: string }
   | { type: 'ADD_WORKSPACE'; workspace: Workspace }
   | { type: 'UPDATE_WORKSPACE'; id: string; workspace: Partial<Workspace> }
   | { type: 'REPLACE_WORKSPACE'; id: string; workspace: Workspace }
   | { type: 'DELETE_WORKSPACE'; workspaceId: string }
-  | { type: 'ADD_TAB'; tab: Tab }
+  | { type: 'ADD_TAB'; tab: ACDoc }
   | { type: 'DELETE_TAB'; id: string; workspaceId: string }
   | {
       type: 'UPDATE_TAB_CONTENT';
       id: string;
       content: any;
       workspaceId: string;
-    }
-  | { type: 'TOGGLE_CONTEXT'; id: string; workspaceId: string }
-  | {
-      type: 'UPDATE_TAB_SYSTEM_NOTE';
-      id: string;
-      systemNote: string;
-      workspaceId: string;
     };
 
-/**
- * Save state to local storage
- */
 export const saveState = (state: AppContext) => {
+  console.log('Saving state:', state);
   localStorage.setItem('appState', JSON.stringify(state));
 };
 
-/**
- * Load state from local storage
- */
 export const loadState = () => {
-  try {
-    const serializedState = localStorage.getItem('appState');
-    if (serializedState === null) {
-      return null;
-    }
-    return JSON.parse(serializedState);
-  } catch (err) {
-    console.error('Error loading state:', err);
-    return null;
-  }
+  const serializedState = localStorage.getItem('appState');
+  return JSON.parse(serializedState || '{}');
 };
 
 // Define the initial context
 const initialContext: AppContext = loadState() || {
-  currentLocation: '',
-  localTime: timestampToHumanReadable(),
-  workspaces: {
-    docs: {
-      id: 'docs',
-      name: 'acai.so',
-      createdAt: timestampToHumanReadable(),
-      lastUpdated: timestampToHumanReadable(),
-      private: true,
-      data: {
-        tiptap: {
-          tabs: [
-            {
-              id: 'introduction',
-              title: 'Introduction',
-              filetype: 'markdown',
-              content: docsContent,
-              isContext: false,
-              systemNote: '',
-              workspaceId: 'docs',
-              autoSave: false,
-              createdAt: timestampToHumanReadable(),
-              lastUpdated: timestampToHumanReadable(),
-            },
-          ],
-        },
+  id: 'docs',
+  name: 'acai.so',
+  createdAt: new Date().toString(),
+  lastUpdated: new Date().toString(),
+  private: true,
+  docs: [],
+};
+export const appStateMachine = createMachine<AppContext, AppEvent>(
+  {
+    predictableActionArguments: true,
+    id: 'appState',
+    initial: 'idle',
+    context: initialContext,
+    states: {
+      idle: {},
+    },
+    on: {
+      ADD_WORKSPACE: {
+        actions: ['addWorkspace', 'saveState'],
+      },
+      UPDATE_WORKSPACE: {
+        actions: ['updateWorkspace', 'saveState'],
+      },
+      REPLACE_WORKSPACE: {
+        actions: ['replaceWorkspace', 'saveState'],
+      },
+      DELETE_WORKSPACE: {
+        actions: ['deleteWorkspace', 'saveState'],
+      },
+      ADD_TAB: {
+        actions: ['addTab', 'saveState'],
+      },
+      DELETE_TAB: {
+        actions: ['deleteTab', 'saveState'],
+      },
+      UPDATE_TAB_CONTENT: {
+        actions: ['updateTabContent', 'saveState'],
       },
     },
   },
-};
-// Create the machine
-export const appStateMachine = createMachine<AppContext, AppEvent>({
-  predictableActionArguments: true,
-  id: 'appState',
-  initial: 'idle',
-  context: initialContext,
-  states: {
-    idle: {},
-  },
-  on: {
-    UPDATE_NAME: {
-      actions: assign((context, event) => {
-        const updatedContext = { ...context, userName: event.userName };
-        saveState(updatedContext);
-        return updatedContext;
-      }),
-    },
-    UPDATE_LOCATION: {
-      actions: assign((context, event) => {
-        const updatedContext = {
-          ...context,
-          currentLocation: event.currentLocation,
-        };
-        saveState(updatedContext);
-        return updatedContext;
-      }),
-    },
-    UPDATE_TIME: {
-      actions: assign((context, event) => {
-        const updatedContext = { ...context, localTime: event.localTime };
-        saveState(updatedContext);
-        return updatedContext;
-      }),
-    },
-    ADD_WORKSPACE: {
-      actions: assign((context, event) => {
+  {
+    actions: {
+      addWorkspace: assign((context, event) => {
+        if (event.type !== 'ADD_WORKSPACE') return context;
+        console.log('Adding workspace:', event.workspace);
         const newWorkspace = event.workspace;
         const newContext = {
           ...context,
@@ -164,126 +111,93 @@ export const appStateMachine = createMachine<AppContext, AppEvent>({
             [newWorkspace.id]: newWorkspace,
           },
         };
-        saveState(newContext);
         return newContext;
       }),
-    },
-    UPDATE_WORKSPACE: {
-      actions: assign((context, event) => {
+      updateWorkspace: assign((context, event) => {
+        if (event.type !== 'UPDATE_WORKSPACE') return context;
         const updatedWorkspace = event.workspace;
         const id = event.id;
         const updatedWorkspaces = {
           ...context.workspaces,
           [id]: { ...context.workspaces[id], ...updatedWorkspace },
         };
-        const updatedContext = { ...context, workspaces: updatedWorkspaces };
-        saveState(updatedContext);
-        return updatedContext;
+        return { ...context, workspaces: updatedWorkspaces };
       }),
-    },
-    REPLACE_WORKSPACE: {
-      actions: assign((context, event) => {
+      replaceWorkspace: assign((context, event) => {
+        if (event.type !== 'REPLACE_WORKSPACE') return context;
         const replacedWorkspace = event.workspace;
         const id = event.id;
         const updatedWorkspaces = {
           ...context.workspaces,
           [id]: replacedWorkspace,
         };
-        const updatedContext = { ...context, workspaces: updatedWorkspaces };
-        saveState(updatedContext);
-        return updatedContext;
+        return { ...context, workspaces: updatedWorkspaces };
       }),
-    },
-    DELETE_WORKSPACE: {
-      actions: assign((context, event) => {
+      deleteWorkspace: assign((context, event) => {
+        if (event.type !== 'DELETE_WORKSPACE') return context;
         const workspaceId = event.workspaceId;
         if (context.workspaces[workspaceId]) {
           const newWorkspaces = { ...context.workspaces };
           delete newWorkspaces[workspaceId];
-          const updatedContext = { ...context, workspaces: newWorkspaces };
-          saveState(updatedContext);
-          return updatedContext;
+          return { ...context, workspaces: newWorkspaces };
         }
         return context;
       }),
-    },
-    ADD_TAB: {
-      actions: [
-        assign((context, event) => {
-          const newTab = event.tab;
-          const workspace = context.workspaces[newTab.workspaceId];
-          if (workspace) {
-            // Create a new array with the new tab
-            workspace.data.tiptap.tabs = [
-              ...workspace.data.tiptap.tabs,
-              newTab,
-            ];
-            // Create a new workspace object with the updated tabs
-            const newWorkspace = {
-              ...workspace,
-              data: {
-                ...workspace.data,
-                tiptap: {
-                  ...workspace.data.tiptap,
-                  tabs: workspace.data.tiptap.tabs,
-                },
-              },
-            };
-            // Create a new workspaces object with the updated workspace
-            const newWorkspaces = {
-              ...context.workspaces,
-              [newTab.workspaceId]: newWorkspace,
-            };
-            return { ...context, workspaces: newWorkspaces };
-          }
-          return context;
-        }),
-        (context, event) => {
-          event.tab.autoSave && saveState(context);
-        },
-      ],
-    },
-    DELETE_TAB: {
-      actions: [
-        assign((context, event) => {
-          const id = event.id;
-          Object.values(context.workspaces).forEach((workspace) => {
-            workspace.data.tiptap.tabs = workspace.data.tiptap.tabs.filter(
-              (tab) => tab.id !== id,
+      addTab: assign((context, event) => {
+        if (event.type !== 'ADD_TAB') return context;
+        const newTab = event.tab;
+        const workspace = context.workspaces[newTab.workspaceId];
+        if (workspace) {
+          workspace.docs = [...workspace.docs, newTab];
+          const newWorkspace: Workspace = {
+            ...workspace,
+            docs: workspace.docs,
+          };
+          const newWorkspaces = {
+            ...context.workspaces,
+            [newTab.workspaceId]: newWorkspace,
+          };
+          return { ...context, workspaces: newWorkspaces };
+        }
+        return context;
+      }),
+      deleteTab: assign((context, event) => {
+        if (event.type !== 'DELETE_TAB') return context;
+        const id = event.id;
+        Object.values(context.workspaces).forEach((workspace) => {
+          workspace.docs = workspace.docs.filter((tab) => tab.id !== id);
+        });
+        return { ...context };
+      }),
+      updateTabContent: assign((context, event) => {
+        if (event.type !== 'UPDATE_TAB_CONTENT') return context;
+        const { id, content, workspaceId } = event;
+        const workspace = context.workspaces[workspaceId];
+        if (workspace) {
+          const tab = workspace.docs.find((tab) => tab.id === id);
+          if (tab) {
+            // Create a new tab object with updated content
+            const updatedTab = { ...tab, content: content };
+            // Replace the old tab with the updated one
+            const updatedDocs = workspace.docs.map((doc) =>
+              doc.id === id ? updatedTab : doc,
             );
-          });
-          return { ...context };
-        }),
-        (context, event) => saveState(context),
-      ],
-    },
-
-    UPDATE_TAB_CONTENT: {
-      actions: [
-        assign((context, event) => {
-          const { id, content, workspaceId } = event;
-          const workspace = context.workspaces[workspaceId];
-          if (workspace) {
-            const tab = workspace.data.tiptap.tabs.find((tab) => tab.id === id);
-            if (tab) {
-              tab.content = content;
-            }
+            // Create a new workspace object with updated docs
+            const updatedWorkspace = { ...workspace, docs: updatedDocs };
+            // Replace the old workspace with the updated one
+            const updatedWorkspaces = {
+              ...context.workspaces,
+              [workspaceId]: updatedWorkspace,
+            };
+            return { ...context, workspaces: updatedWorkspaces };
           }
-          return { ...context };
-        }),
-        (context, event) => saveState(context),
-      ],
+        }
+        return context;
+      }),
+      saveState: (context) => saveState(context),
     },
   },
-});
-
-// Load state from local storage
-const loadedState = loadState();
-
-// If there is no loaded state, save the initial state
-if (loadedState === null) {
-  saveState(appStateMachine.context);
-}
+);
 
 export const handleCreateTab = async (
   args: { title: string; content: string },
@@ -291,9 +205,9 @@ export const handleCreateTab = async (
   filetype = 'markdown',
   autoSave = true,
   canEdit = true,
-): Promise<Tab> => {
+): Promise<ACDoc> => {
   const newTab = {
-    id: uuidv4().split('-')[0],
+    id: uuidv4(),
     title: args.title,
     content: args.content,
     isContext: false,
@@ -315,35 +229,31 @@ export const createWorkspace = ({
 }: {
   workspaceName: string;
   id?: string;
-  content?: Tab[];
+  content?: ACDoc[];
 }): Workspace | undefined => {
-  const newId = id || uuidv4().split('-')[0];
-  const tabId = uuidv4().split('-')[0];
+  const newId = id || uuidv4();
+  const tabId = uuidv4();
   const newWorkspace: Workspace = {
     id: newId,
     name: workspaceName,
     createdAt: new Date().toString(),
     lastUpdated: new Date().toString(),
     private: false,
-    data: {
-      tiptap: {
-        tabs: content || [
-          {
-            id: tabId,
-            title: `Welcome to ${workspaceName}!`,
-            content: '',
-            isContext: false,
-            systemNote: '',
-            workspaceId: newId,
-            createdAt: new Date().toString(),
-            lastUpdated: new Date().toString(),
-            autoSave: true,
-            canEdit: true,
-            filetype: 'markdown',
-          },
-        ],
+    docs: content || [
+      {
+        id: tabId,
+        title: `Welcome to ${workspaceName}!`,
+        content: '',
+        isContext: false,
+        systemNote: '',
+        workspaceId: newId,
+        createdAt: new Date().toString(),
+        lastUpdated: new Date().toString(),
+        autoSave: true,
+        canEdit: true,
+        filetype: 'markdown',
       },
-    },
+    ],
   };
 
   return newWorkspace;

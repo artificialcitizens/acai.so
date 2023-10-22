@@ -8,19 +8,22 @@ import { TiptapExtensions } from './extensions';
 import { useDebouncedCallback } from 'use-debounce';
 import { EditorBubbleMenu } from './components';
 // import { toastifyDefault, toastifyError } from '../Toast';
-import { useInterpret } from '@xstate/react';
-import { Tab, appStateMachine } from '../../state';
+import { ACDoc } from '../../state';
 // import { semanticSearchQueryGeneration } from '../../utils/ac-langchain/chains/semantic-search-query-chain';
 import { autoComplete } from '../../lib/ac-langchain/chains/autocomplete-chain';
 import Bottleneck from 'bottleneck';
-import { MenuBar } from './components/MenuBar';
+// import { MenuBar } from './components/MenuBar';
 import './TipTap.css';
 // import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
 // import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { EditorContext } from '../../context/EditorContext';
 import { toastifyError } from '../Toast';
+import {
+  GlobalStateContext,
+  GlobalStateContextValue,
+} from '../../context/GlobalStateContext';
 interface EditorProps {
-  tab: Tab;
+  tab: ACDoc;
 }
 
 // Limits our stream
@@ -55,8 +58,8 @@ export const extractContentFromTipTap = (tipTapContent: any): string => {
 
 // @TODO: create left right pagination with arrow and doc title
 const Tiptap: React.FC<EditorProps> = ({ tab }) => {
-  const service = useInterpret(appStateMachine);
-
+  const { appStateService }: GlobalStateContextValue =
+    useContext(GlobalStateContext);
   const [hydrated, setHydrated] = useState(false);
   const [saveStatus, setSaveStatus] = useState('Saved');
 
@@ -65,7 +68,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   const [canEdit, setCanEdit] = useState<boolean>(tab.workspaceId !== 'docs');
   const [isLoading, setIsLoading] = useState(false);
   const [currentContext, setCurrentContext] = useState('');
-  const [currentTab, setCurrentTab] = useState<Tab>(tab);
+  const [currentTab, setCurrentTab] = useState<ACDoc>(tab);
   // const {
   //   vectorstore,
   //   addDocuments,
@@ -90,7 +93,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     setSaveStatus('Unsaved');
     const content = editor.getJSON();
     setSaveStatus('Saving...');
-    service.send({
+    appStateService.send({
       type: 'UPDATE_TAB_CONTENT',
       id: currentTab.id,
       content,
@@ -122,7 +125,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
 
   const debouncedUpdates = useDebouncedCallback(async (editor: Editor) => {
     saveContent(editor, currentTab.workspaceId);
-  }, 1000);
+  }, 500);
 
   const tokenQueue: string[] = [];
   let isProcessing = false;

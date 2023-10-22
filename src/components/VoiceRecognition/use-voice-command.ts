@@ -6,7 +6,7 @@ import {
 } from '../../context/GlobalStateContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toastifyInfo } from '../Toast';
-import { Tab } from '../../state';
+import { ACDoc } from '../../state';
 import { VoiceState, TTSState } from '../../state/speech.xstate';
 import { useSelector } from '@xstate/react';
 
@@ -110,7 +110,7 @@ export const useVoiceCommands = () => {
     setVoiceRecognitionState: (recognitionState: VoiceState) => void,
   ) => {
     const notes = await noteChain(userTranscript);
-    const newTab: Tab = {
+    const newTab: ACDoc = {
       id: Date.now().toString(),
       title: 'Notes',
       content: notes,
