@@ -68,12 +68,12 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
   }, [workspaceId]);
 
   const activeDoc = useLiveQuery(async () => {
-    if (!workspaceId) return;
+    if (!activeTabId) return;
 
-    const ws = await db.docs.where('workspaceId').equals(workspaceId).toArray();
+    const ws = await db.docs.where('id').equals(activeTabId).toArray();
 
     return ws[0];
-  }, [workspaceId]);
+  }, [activeTabId]);
 
   // const activeTab: ACDoc | null =
   //   (workspace &&

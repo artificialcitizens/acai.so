@@ -89,7 +89,6 @@ export const appDbService = {
       }
     });
 
-    console.log('Loaded state', { workspaces: workspaceDictionary });
     return { workspaces: workspaceDictionary };
   },
 };
@@ -178,6 +177,7 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
           },
         };
         appDbService.saveWorkspace(newWorkspace);
+        newWorkspace.docs.forEach((doc) => appDbService.saveDoc(doc)); // Save each document
         return newContext;
       }),
       updateWorkspace: assign((context, event) => {
@@ -189,7 +189,20 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
           [id]: { ...context.workspaces[id], ...updatedWorkspace },
         };
         appDbService.saveWorkspace(updatedWorkspaces[id]);
+        updatedWorkspaces[id].docs.forEach((doc) => appDbService.saveDoc(doc)); // Update each document
         return { ...context, workspaces: updatedWorkspaces };
+      }),
+      replaceWorkspace: assign((context, event) => {
+        if (event.type !== 'REPLACE_WORKSPACE') return context;
+        const replacedWorkspace = event.workspace;
+        const id = event.id;
+        const replacedWorkspaces = {
+          ...context.workspaces,
+          [id]: replacedWorkspace,
+        };
+        appDbService.saveWorkspace(replacedWorkspaces[id]);
+        replacedWorkspaces[id].docs.forEach((doc) => appDbService.saveDoc(doc)); // Replace each document
+        return { ...context, workspaces: replacedWorkspaces };
       }),
       deleteWorkspace: assign((context, event) => {
         if (event.type !== 'DELETE_WORKSPACE') return context;
@@ -219,6 +232,7 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
             [newTab.workspaceId]: newWorkspace,
           };
           appDbService.saveDoc(newTab);
+          appDbService.saveWorkspace(newWorkspace); // Save the updated workspace
           return { ...context, workspaces: newWorkspaces };
         }
         return context;
@@ -227,7 +241,11 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
         if (event.type !== 'DELETE_TAB') return context;
         const id = event.id;
         Object.values(context.workspaces).forEach((workspace) => {
+          const originalLength = workspace.docs.length;
           workspace.docs = workspace.docs.filter((tab) => tab.id !== id);
+          if (workspace.docs.length !== originalLength) {
+            appDbService.saveWorkspace(workspace); // Save the updated workspace
+          }
         });
         appDbService.deleteDoc(id);
         return { ...context };
@@ -246,6 +264,7 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
           if (updatedDoc) {
             appDbService.saveDoc(updatedDoc);
           }
+          appDbService.saveWorkspace(updatedWorkspace); // Save the updated workspace
           return {
             ...context,
             workspaces: {
