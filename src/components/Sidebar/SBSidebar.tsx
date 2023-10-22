@@ -54,13 +54,16 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
 
     const handleMouseMove = (moveE: MouseEvent) => {
       if (initialWidth !== null) {
+        const scalingFactor = 1.25; // Adjust this value to change the sensitivity
         const newWidth =
-          initialWidth - ((moveE.clientX - initialX) / window.innerWidth) * 100;
+          initialWidth -
+          ((moveE.clientX - initialX) / window.innerWidth) *
+            100 *
+            scalingFactor;
 
         setWidth(Math.max(Math.min(newWidth, 100), minWidth));
       }
     };
-
     const handleMouseUp = () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
