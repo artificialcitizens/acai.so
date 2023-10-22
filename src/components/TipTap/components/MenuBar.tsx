@@ -1,6 +1,6 @@
 import { Editor } from '@tiptap/react';
 import React, { useState, useEffect, useContext } from 'react';
-import { useActor, useInterpret } from '@xstate/react';
+import { useActor } from '@xstate/react';
 import { ACDoc, appStateMachine } from '../../../state';
 import {
   GlobalStateContext,
