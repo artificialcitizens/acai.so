@@ -16,8 +16,8 @@ import { Editor } from '@tiptap/react';
 import { EditorContext } from './context/EditorContext';
 import MainView from './components/MainView/MainView';
 import useLocationManager from './hooks/use-location-manager';
-// import { createDocs } from './components/TipTap/utils/docs';
-// import { createWorkspace } from './state';
+import { createDocs } from './components/TipTap/utils/docs';
+import { createWorkspace } from './state';
 
 import { MenuButton } from './components/MenuButton/MenuButton';
 import ACModal from './components/Modal/Modal';
@@ -53,6 +53,23 @@ const App = () => {
   // useEffect(() => {
   //   if (!workspace || !id) navigate('/docs/documents/1-introduction');
   // }, [workspace, id, navigate]);
+
+  useEffect(() => {
+    createDocs().then((docs) => {
+      const docsWorkspace = createWorkspace({
+        workspaceName: 'acai.so',
+        id: 'docs',
+        content: docs,
+      });
+      if (!docsWorkspace) return;
+      globalServices.appStateService.send({
+        type: 'REPLACE_WORKSPACE',
+        id: 'docs',
+        workspace: docsWorkspace,
+      });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     updateLocation(routerLocation.pathname);
