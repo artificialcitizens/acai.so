@@ -47,6 +47,7 @@ export type AppEvent =
     };
 
 export const saveState = (state: AppContext) => {
+  console.log('Saving state:', state);
   localStorage.setItem('appState', JSON.stringify(state));
 };
 
@@ -64,18 +65,44 @@ const initialContext: AppContext = loadState() || {
   private: true,
   docs: [],
 };
-// Create the machine
-export const appStateMachine = createMachine<AppContext, AppEvent>({
-  predictableActionArguments: true,
-  id: 'appState',
-  initial: 'idle',
-  context: initialContext,
-  states: {
-    idle: {},
+export const appStateMachine = createMachine<AppContext, AppEvent>(
+  {
+    predictableActionArguments: true,
+    id: 'appState',
+    initial: 'idle',
+    context: initialContext,
+    states: {
+      idle: {},
+    },
+    on: {
+      ADD_WORKSPACE: {
+        actions: ['addWorkspace', 'saveState'],
+      },
+      UPDATE_WORKSPACE: {
+        actions: ['updateWorkspace', 'saveState'],
+      },
+      REPLACE_WORKSPACE: {
+        actions: ['replaceWorkspace', 'saveState'],
+      },
+      DELETE_WORKSPACE: {
+        actions: ['deleteWorkspace', 'saveState'],
+      },
+      ADD_TAB: {
+        actions: ['addTab', 'saveState'],
+      },
+      DELETE_TAB: {
+        actions: ['deleteTab', 'saveState'],
+      },
+      UPDATE_TAB_CONTENT: {
+        actions: ['updateTabContent', 'saveState'],
+      },
+    },
   },
-  on: {
-    ADD_WORKSPACE: {
-      actions: assign((context, event) => {
+  {
+    actions: {
+      addWorkspace: assign((context, event) => {
+        if (event.type !== 'ADD_WORKSPACE') return context;
+        console.log('Adding workspace:', event.workspace);
         const newWorkspace = event.workspace;
         const newContext = {
           ...context,
@@ -84,107 +111,93 @@ export const appStateMachine = createMachine<AppContext, AppEvent>({
             [newWorkspace.id]: newWorkspace,
           },
         };
-        saveState(newContext);
         return newContext;
       }),
-    },
-    UPDATE_WORKSPACE: {
-      actions: assign((context, event) => {
+      updateWorkspace: assign((context, event) => {
+        if (event.type !== 'UPDATE_WORKSPACE') return context;
         const updatedWorkspace = event.workspace;
         const id = event.id;
         const updatedWorkspaces = {
           ...context.workspaces,
           [id]: { ...context.workspaces[id], ...updatedWorkspace },
         };
-        const updatedContext = { ...context, workspaces: updatedWorkspaces };
-        saveState(updatedContext);
-        return updatedContext;
+        return { ...context, workspaces: updatedWorkspaces };
       }),
-    },
-    REPLACE_WORKSPACE: {
-      actions: assign((context, event) => {
+      replaceWorkspace: assign((context, event) => {
+        if (event.type !== 'REPLACE_WORKSPACE') return context;
         const replacedWorkspace = event.workspace;
         const id = event.id;
         const updatedWorkspaces = {
           ...context.workspaces,
           [id]: replacedWorkspace,
         };
-        const updatedContext = { ...context, workspaces: updatedWorkspaces };
-        saveState(updatedContext);
-        return updatedContext;
+        return { ...context, workspaces: updatedWorkspaces };
       }),
-    },
-    DELETE_WORKSPACE: {
-      actions: assign((context, event) => {
+      deleteWorkspace: assign((context, event) => {
+        if (event.type !== 'DELETE_WORKSPACE') return context;
         const workspaceId = event.workspaceId;
         if (context.workspaces[workspaceId]) {
           const newWorkspaces = { ...context.workspaces };
           delete newWorkspaces[workspaceId];
-          const updatedContext = { ...context, workspaces: newWorkspaces };
-          saveState(updatedContext);
-          return updatedContext;
+          return { ...context, workspaces: newWorkspaces };
         }
         return context;
       }),
-    },
-    ADD_TAB: {
-      actions: [
-        assign((context, event) => {
-          const newTab = event.tab;
-          const workspace = context.workspaces[newTab.workspaceId];
-          if (workspace) {
-            // Create a new array with the new tab
-            workspace.docs = [...workspace.docs, newTab];
-            // Create a new workspace object with the updated tabs
-            const newWorkspace: Workspace = {
-              ...workspace,
-              docs: workspace.docs,
-            };
-            // Create a new workspaces object with the updated workspace
-            const newWorkspaces = {
+      addTab: assign((context, event) => {
+        if (event.type !== 'ADD_TAB') return context;
+        const newTab = event.tab;
+        const workspace = context.workspaces[newTab.workspaceId];
+        if (workspace) {
+          workspace.docs = [...workspace.docs, newTab];
+          const newWorkspace: Workspace = {
+            ...workspace,
+            docs: workspace.docs,
+          };
+          const newWorkspaces = {
+            ...context.workspaces,
+            [newTab.workspaceId]: newWorkspace,
+          };
+          return { ...context, workspaces: newWorkspaces };
+        }
+        return context;
+      }),
+      deleteTab: assign((context, event) => {
+        if (event.type !== 'DELETE_TAB') return context;
+        const id = event.id;
+        Object.values(context.workspaces).forEach((workspace) => {
+          workspace.docs = workspace.docs.filter((tab) => tab.id !== id);
+        });
+        return { ...context };
+      }),
+      updateTabContent: assign((context, event) => {
+        if (event.type !== 'UPDATE_TAB_CONTENT') return context;
+        const { id, content, workspaceId } = event;
+        const workspace = context.workspaces[workspaceId];
+        if (workspace) {
+          const tab = workspace.docs.find((tab) => tab.id === id);
+          if (tab) {
+            // Create a new tab object with updated content
+            const updatedTab = { ...tab, content: content };
+            // Replace the old tab with the updated one
+            const updatedDocs = workspace.docs.map((doc) =>
+              doc.id === id ? updatedTab : doc,
+            );
+            // Create a new workspace object with updated docs
+            const updatedWorkspace = { ...workspace, docs: updatedDocs };
+            // Replace the old workspace with the updated one
+            const updatedWorkspaces = {
               ...context.workspaces,
-              [newTab.workspaceId]: newWorkspace,
+              [workspaceId]: updatedWorkspace,
             };
-            return { ...context, workspaces: newWorkspaces };
+            return { ...context, workspaces: updatedWorkspaces };
           }
-          return context;
-        }),
-        (context, event) => {
-          event.tab.autoSave && saveState(context);
-        },
-      ],
-    },
-    DELETE_TAB: {
-      actions: [
-        assign((context, event) => {
-          const id = event.id;
-          Object.values(context.workspaces).forEach((workspace) => {
-            workspace.docs = workspace.docs.filter((tab) => tab.id !== id);
-          });
-          return { ...context };
-        }),
-        (context, event) => saveState(context),
-      ],
-    },
-
-    UPDATE_TAB_CONTENT: {
-      actions: [
-        assign((context, event) => {
-          const { id, content, workspaceId } = event;
-          const workspace = context.workspaces[workspaceId];
-          if (workspace) {
-            const tab = workspace.docs.find((tab) => tab.id === id);
-            if (tab) {
-              tab.content = content;
-            }
-          }
-          return { ...context };
-        }),
-        (context, event) => saveState(context),
-      ],
+        }
+        return context;
+      }),
+      saveState: (context) => saveState(context),
     },
   },
-});
+);
 
 export const handleCreateTab = async (
   args: { title: string; content: string },
