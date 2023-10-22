@@ -34,77 +34,41 @@ export interface AppContext {
   workspaces: WorkspaceDictionary;
 }
 
-let prevState: AppContext | null = null;
-
-// Create a service to manage the database operations
 export const appDbService = {
-  async saveState(state: AppContext) {
-    // Save workspaces to Dexie.js
-    for (const workspace of Object.values(state.workspaces)) {
-      try {
-        console.log('Saving or updating workspace', workspace);
-        await db.workspaces.put(workspace);
-        // add any adapters for other databases here
-      } catch (error) {
-        console.error('Error saving workspace:', error);
-      }
+  async saveWorkspace(workspace: Workspace) {
+    try {
+      console.log('Saving or updating workspace', workspace);
+      await db.workspaces.put(workspace);
+    } catch (error) {
+      console.error('Error saving workspace:', error);
     }
+  },
 
-    // Delete workspaces that no longer exist
-    if (prevState) {
-      for (const prevWorkspace of Object.values(prevState.workspaces)) {
-        if (!state.workspaces[prevWorkspace.id]) {
-          try {
-            console.log('Deleting workspace', prevWorkspace);
-            await db.workspaces.delete(prevWorkspace.id);
-          } catch (error) {
-            console.error('Error deleting workspace:', error);
-          }
-        }
-      }
+  async deleteWorkspace(workspaceId: string) {
+    try {
+      console.log('Deleting workspace', workspaceId);
+      await db.workspaces.delete(workspaceId);
+    } catch (error) {
+      console.error('Error deleting workspace:', error);
     }
+  },
 
-    // Save tabs to Dexie.js
-    for (const workspace of Object.values(state.workspaces)) {
-      for (const doc of workspace.docs) {
-        const prevWorkspace = prevState?.workspaces[workspace.id];
-        const prevDoc = prevWorkspace
-          ? prevWorkspace.docs.find((d) => d.id === doc.id)
-          : undefined;
-        if (!prevState || !isEqual(doc, prevDoc)) {
-          console.log('Saving or updating tab', doc);
-          try {
-            await db.docs.put(doc);
-            // add any adapters for other databases here
-          } catch (error) {
-            console.error('Error saving doc:', error);
-          }
-        }
-      }
+  async saveDoc(doc: ACDoc) {
+    try {
+      console.log('Saving or updating doc', doc);
+      await db.docs.put(doc);
+    } catch (error) {
+      console.error('Error saving doc:', error);
     }
+  },
 
-    // Delete docs that no longer exist
-    if (prevState) {
-      for (const prevWorkspace of Object.values(prevState.workspaces)) {
-        for (const prevDoc of prevWorkspace.docs) {
-          const currentWorkspace = state.workspaces[prevWorkspace.id];
-          if (
-            !currentWorkspace ||
-            !currentWorkspace.docs.find((d) => d.id === prevDoc.id)
-          ) {
-            try {
-              console.log('Deleting doc', prevDoc);
-              await db.docs.delete(prevDoc.id);
-            } catch (error) {
-              console.error('Error deleting doc:', error);
-            }
-          }
-        }
-      }
+  async deleteDoc(docId: string) {
+    try {
+      console.log('Deleting doc', docId);
+      await db.docs.delete(docId);
+    } catch (error) {
+      console.error('Error deleting doc:', error);
     }
-
-    // After saving the state, we set prevState to the current state
-    prevState = state;
   },
 
   async loadState(): Promise<AppContext> {
@@ -124,6 +88,8 @@ export const appDbService = {
         ];
       }
     });
+
+    console.log('Loaded state', { workspaces: workspaceDictionary });
     return { workspaces: workspaceDictionary };
   },
 };
@@ -156,11 +122,21 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
           src: () => appDbService.loadState(),
           onDone: {
             target: 'idle',
-            actions: assign((context, event) => event.data),
+            actions: assign((context, event) => {
+              console.log('Loaaaaded state', event.data);
+              return event.data;
+            }),
+          },
+          onError: {
+            target: 'error',
+            actions: (context, event) => {
+              console.error('Error loading state:', event.data);
+            },
           },
         },
       },
       idle: {},
+      error: {},
     },
     on: {
       ADD_WORKSPACE: {
@@ -201,6 +177,7 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
             [newWorkspace.id]: newWorkspace,
           },
         };
+        appDbService.saveWorkspace(newWorkspace);
         return newContext;
       }),
       updateWorkspace: assign((context, event) => {
@@ -211,27 +188,21 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
           ...context.workspaces,
           [id]: { ...context.workspaces[id], ...updatedWorkspace },
         };
-        return { ...context, workspaces: updatedWorkspaces };
-      }),
-      replaceWorkspace: assign((context, event) => {
-        if (event.type !== 'REPLACE_WORKSPACE') return context;
-        const replacedWorkspace = event.workspace;
-        const id = event.id;
-        const updatedWorkspaces = {
-          ...context.workspaces,
-          [id]: replacedWorkspace,
-        };
+        appDbService.saveWorkspace(updatedWorkspaces[id]);
         return { ...context, workspaces: updatedWorkspaces };
       }),
       deleteWorkspace: assign((context, event) => {
         if (event.type !== 'DELETE_WORKSPACE') return context;
         const workspaceId = event.workspaceId;
-        if (context.workspaces[workspaceId]) {
-          const newWorkspaces = { ...context.workspaces };
-          delete newWorkspaces[workspaceId];
-          return { ...context, workspaces: newWorkspaces };
+        const newWorkspaces = { ...context.workspaces };
+        if (newWorkspaces[workspaceId]) {
+          newWorkspaces[workspaceId].docs.forEach((doc) => {
+            appDbService.deleteDoc(doc.id);
+          });
         }
-        return context;
+        delete newWorkspaces[workspaceId];
+        appDbService.deleteWorkspace(workspaceId);
+        return { ...context, workspaces: newWorkspaces };
       }),
       addTab: assign((context, event) => {
         if (event.type !== 'ADD_TAB') return context;
@@ -247,6 +218,7 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
             ...context.workspaces,
             [newTab.workspaceId]: newWorkspace,
           };
+          appDbService.saveDoc(newTab);
           return { ...context, workspaces: newWorkspaces };
         }
         return context;
@@ -257,6 +229,7 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
         Object.values(context.workspaces).forEach((workspace) => {
           workspace.docs = workspace.docs.filter((tab) => tab.id !== id);
         });
+        appDbService.deleteDoc(id);
         return { ...context };
       }),
       updateTabContent: assign((context, event) => {
@@ -269,6 +242,10 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
               doc.id === event.id ? { ...doc, content } : doc,
             ),
           };
+          const updatedDoc = updatedWorkspace.docs.find((doc) => doc.id === id);
+          if (updatedDoc) {
+            appDbService.saveDoc(updatedDoc);
+          }
           return {
             ...context,
             workspaces: {
@@ -279,7 +256,6 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
         }
         return context;
       }),
-      saveState: (context) => appDbService.saveState(context),
     },
   },
 );
