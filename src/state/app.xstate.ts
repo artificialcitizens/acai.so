@@ -37,7 +37,6 @@ export interface AppContext {
 export const appDbService = {
   async saveWorkspace(workspace: Workspace) {
     try {
-      console.log('Saving or updating workspace', workspace);
       await db.workspaces.put(workspace);
     } catch (error) {
       console.error('Error saving workspace:', error);
@@ -46,7 +45,6 @@ export const appDbService = {
 
   async deleteWorkspace(workspaceId: string) {
     try {
-      console.log('Deleting workspace', workspaceId);
       await db.workspaces.delete(workspaceId);
     } catch (error) {
       console.error('Error deleting workspace:', error);
@@ -55,7 +53,6 @@ export const appDbService = {
 
   async saveDoc(doc: ACDoc) {
     try {
-      console.log('Saving or updating doc', doc);
       await db.docs.put(doc);
     } catch (error) {
       console.error('Error saving doc:', error);
@@ -64,7 +61,6 @@ export const appDbService = {
 
   async deleteDoc(docId: string) {
     try {
-      console.log('Deleting doc', docId);
       await db.docs.delete(docId);
     } catch (error) {
       console.error('Error deleting doc:', error);
@@ -122,7 +118,6 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
           onDone: {
             target: 'idle',
             actions: assign((context, event) => {
-              console.log('Loaaaaded state', event.data);
               return event.data;
             }),
           },
