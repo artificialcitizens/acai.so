@@ -89,11 +89,11 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     }
     globalServices.appStateService.send({
       type: 'DELETE_WORKSPACE',
-      workspaceId: workspace?.id,
+      workspaceId: workspace.id,
     });
     globalServices.agentStateService.send({
       type: 'DELETE_AGENT',
-      workspaceId: workspace?.id,
+      workspaceId: workspace.id,
     });
     setTimeout(() => {
       navigate('/');

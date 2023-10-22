@@ -11,8 +11,9 @@ import {
   SpeechEvent,
   AppContext,
   AppEvent,
+  appDbService,
 } from '../state/';
-import { ReactNode, createContext } from 'react';
+import { ReactNode, createContext, useEffect } from 'react';
 import { useInterpret } from '@xstate/react';
 import { Interpreter } from 'xstate';
 
@@ -56,6 +57,12 @@ export const GlobalStateProvider = ({ children }: { children: ReactNode }) => {
   const uiService = useInterpret(uiMachine);
   const agentService = useInterpret(agentMachine);
   const speechService = useInterpret(speechMachine);
+
+  useEffect(() => {
+    appDbService.loadState().then((loadedState) => {
+      service.send({ type: 'INITIALIZE', state: loadedState });
+    });
+  }, [service]);
 
   const value: GlobalStateContextValue = {
     appStateService: service,
