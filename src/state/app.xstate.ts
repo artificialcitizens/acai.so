@@ -1,7 +1,6 @@
 import { createMachine, assign, actions } from 'xstate';
 import { timestampToHumanReadable } from '../utils/data-utils';
 import { v4 as uuidv4 } from 'uuid';
-import { docsContent } from './fixture/docs';
 
 export type Tab = {
   id: string;
@@ -106,7 +105,7 @@ const initialContext: AppContext = loadState() || {
               id: 'introduction',
               title: 'Introduction',
               filetype: 'markdown',
-              content: docsContent,
+              content: [],
               isContext: false,
               systemNote: '',
               workspaceId: 'docs',
