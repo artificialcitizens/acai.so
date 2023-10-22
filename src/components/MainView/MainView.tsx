@@ -59,9 +59,10 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
       workspaceId || 'docs'
     ];
 
-  const activeTab: Tab =
-    workspace &&
-    workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId);
+  const activeTab: Tab | null =
+    (workspace &&
+      workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId)) ||
+    null;
 
   const handleDeleteWorkspace = () => {
     const confirmDelete = window.prompt('Type "delete" to confirm');
@@ -71,7 +72,7 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     }
     globalServices.appStateService.send({
       type: 'DELETE_WORKSPACE',
-      id: workspace?.id,
+      workspaceId: workspace?.id,
     });
     globalServices.agentStateService.send({
       type: 'DELETE_AGENT',

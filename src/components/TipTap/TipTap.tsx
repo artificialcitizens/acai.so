@@ -18,6 +18,7 @@ import './TipTap.css';
 // import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
 // import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { EditorContext } from '../../context/EditorContext';
+import { toastifyError } from '../Toast';
 interface EditorProps {
   tab: Tab;
 }
@@ -167,7 +168,8 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
             callbacks: {
               onMessageStart: () => setIsLoading(true),
               onMessageError: (error: string) => {
-                console.log(error);
+                console.error(error);
+                toastifyError(error);
                 setIsLoading(false);
               },
               onMessageStream: (token: string) => {
@@ -194,7 +196,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     if (!currentTab) return;
     if (editor && !hydrated) {
       editor.commands.setContent(currentTab.content);
-      editor.commands.setNodeSelection(0); // Add this line
+      editor.commands.setNodeSelection(0);
       setHydrated(true);
     }
   }, [currentTab, editor, hydrated]);

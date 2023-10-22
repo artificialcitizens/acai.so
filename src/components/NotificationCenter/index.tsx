@@ -38,15 +38,14 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
       );
 
   return (
-    <div className=" pt-2 border-b-2 border-solid border-lighter w-full">
-      {/* <div className="bg-base p-2 flex justify-between items-center text-white"></div> */}
+    <>
       <div
-        className="h-36 p-3 bg-base rounded overflow-y-auto w-full"
+        className="p-3 bg-base rounded-xl overflow-y-auto w-full flex-grow flex flex-col"
         ref={notificationsRef}
       >
         {(!filteredNotifications.length ||
           (unreadCount === 0 && showUnreadOnly)) && (
-          <p className="text-acai-white">{placeholder}</p>
+          <p className="text-acai-white text-sm">{placeholder}</p>
         )}
         {(showUnreadOnly
           ? filteredNotifications.filter((v) => !v.read)
@@ -67,7 +66,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
             );
           })}
       </div>
-    </div>
+    </>
   );
 };
 

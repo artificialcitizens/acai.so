@@ -256,7 +256,7 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col flex-grow">
       <SBSearch
         onSubmit={async (val: string) => {
           if (!vectorContext) return;
@@ -281,9 +281,9 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
       />
       <Dropzone onFilesDrop={handleFileDrop}>
         {!knowledgeItems?.length && (
-          <div className="w-full h-20 bg-base rounded-lg mb-2">
+          <div className="w-full h-full flex bg-base rounded-lg mb-2 md:text-sm flex-grow">
             <div
-              className={`w-full h-full flex flex-col justify-center items-center`}
+              className={`w-full h-full flex flex-col justify-center items-center flex-grow`}
             >
               <div className="text-acai-white">
                 Drop a file to{' '}

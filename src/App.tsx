@@ -20,6 +20,7 @@ import MainView from './components/MainView/MainView';
 import useLocationManager from './hooks/use-location-manager';
 
 import { MenuButton } from './components/MenuButton/MenuButton';
+import ACModal from './components/Modal/Modal';
 
 const App = () => {
   const globalServices: GlobalStateContextValue =
@@ -34,7 +35,6 @@ const App = () => {
     globalServices.appStateService.getSnapshot().context.workspaces[
       workspaceId || 'docs'
     ];
-  if (!workspace || !id) navigate('/docs/documents/1-introduction');
 
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined,
@@ -52,6 +52,10 @@ const App = () => {
   const { updateLocation } = useLocationManager();
 
   useEffect(() => {
+    if (!workspace || !id) navigate('/docs/documents/1-introduction');
+  }, [workspace, id, navigate]);
+
+  useEffect(() => {
     updateLocation(routerLocation.pathname);
   }, [routerLocation, updateLocation]);
 
@@ -62,6 +66,7 @@ const App = () => {
         id: 'docs',
         content: docs,
       });
+      if (!docsWorkspace) return;
       globalServices.appStateService.send({
         type: 'REPLACE_WORKSPACE',
         id: 'docs',
@@ -99,6 +104,7 @@ const App = () => {
       >
         <EditorContext.Provider value={{ editor, setEditor }}>
           <SideNav />
+          <ACModal />
           <MenuButton
             handleClick={(e) => {
               e.stopPropagation();

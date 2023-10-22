@@ -3,7 +3,7 @@
 /* eslint-disable react/jsx-no-comment-textnodes */
 import React, { useContext, useEffect, useRef } from 'react';
 import { Sidenav, initTE } from 'tw-elements';
-import { useActor } from '@xstate/react';
+import { useActor, useSelector } from '@xstate/react';
 import { useClickAway } from '@uidotdev/usehooks';
 import { Link, useNavigate } from 'react-router-dom';
 import { Workspace, handleCreateTab } from '../../state';
@@ -20,7 +20,10 @@ export const SideNav: React.FC = () => {
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const [state, send] = useActor(globalServices.uiStateService);
-  const navOpen = state.context.sideNavOpen;
+  const navOpen = useSelector(
+    globalServices.uiStateService,
+    (state) => state.context.sideNavOpen,
+  );
   const [docsOpen, setDocsOpen] = React.useState(true);
   const navOpenRef = useRef(navOpen);
   navOpenRef.current = navOpen;
@@ -45,11 +48,6 @@ export const SideNav: React.FC = () => {
       createdAt: new Date().toString(),
       lastUpdated: new Date().toString(),
       private: false,
-      settings: {
-        webSpeechRecognition: false,
-        tts: false,
-        whisper: false,
-      },
       data: {
         tiptap: {
           tabs: [
@@ -68,31 +66,21 @@ export const SideNav: React.FC = () => {
             },
           ],
         },
-        chat: {},
-        agentLogs: {
-          thoughts: {},
-          errors: {},
-        },
-        agentTools: {
-          calculator: false,
-          weather: false,
-          googleSearch: false,
-          webBrowser: false,
-          createDocument: false,
-        },
-        notes: '',
       },
     };
-    globalServices.appStateService.send({
-      type: 'ADD_WORKSPACE',
+    globalServices.appStateService.send('ADD_WORKSPACE', {
       workspace: newWorkspace,
     });
 
-    globalServices.agentStateService.send({
-      type: 'CREATE_AGENT',
-      workspaceId: id,
-    });
-    navigate(`/${id}/documents/${tabId}`);
+    setTimeout(() => {
+      globalServices.agentStateService.send('CREATE_AGENT', {
+        workspaceId: id,
+      });
+    }, 250);
+
+    setTimeout(() => {
+      navigate(`/${id}/documents/${tabId}`);
+    }, 1000);
   };
 
   const createTab = async (workspaceId: string) => {
@@ -108,7 +96,6 @@ export const SideNav: React.FC = () => {
     }, 250);
     globalServices.uiStateService.send({
       type: 'TOGGLE_SIDE_NAV',
-      workspaceId,
     });
   };
 
