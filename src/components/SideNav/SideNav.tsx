@@ -5,7 +5,7 @@ import React, { useContext, useEffect, useRef } from 'react';
 import { Sidenav, initTE } from 'tw-elements';
 import { useActor, useSelector } from '@xstate/react';
 import { useClickAway } from '@uidotdev/usehooks';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Workspace, handleCreateTab } from '../../state';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -14,9 +14,14 @@ import {
 } from '../../context/GlobalStateContext';
 import { ProjectLinks } from '../ProjectLinks/ProjectLinks';
 import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../../../db';
 
 export const SideNav: React.FC = () => {
   const navigate = useNavigate();
+  const { workspaceId } = useParams<{
+    workspaceId: string;
+  }>();
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const [state, send] = useActor(globalServices.uiStateService);
@@ -95,8 +100,9 @@ export const SideNav: React.FC = () => {
     });
   };
 
-  const workspaces = globalServices.appStateService.getSnapshot().context
-    .workspaces as Record<string, Workspace>;
+  const workspaces = useLiveQuery(async () => {
+    return await db.workspaces.toArray();
+  }, [workspaceId]);
 
   return (
     <nav

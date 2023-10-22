@@ -38,9 +38,7 @@ const Cursor: React.FC<CursorProps> = ({
       onReachedDestination();
     }
   };
-  console.log({
-    ...style,
-  });
+
   return (
     <div
       className="cursor"

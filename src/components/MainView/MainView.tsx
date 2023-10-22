@@ -3,8 +3,8 @@ import EditorDropzone from '../TipTap/components/EditorDropzone';
 import { ACDoc, handleCreateTab } from '../../state';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import TipTap from '../TipTap/TipTap';
-import PDFRenderer from '../PDFRenderer/PdfRender';
-import { pdfjs } from 'react-pdf';
+// import PDFRenderer from '../PDFRenderer/PdfRender';
+// import { pdfjs } from 'react-pdf';
 import { db } from '../../../db';
 
 import {
@@ -12,10 +12,10 @@ import {
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
 import { readFileAsText, slugify } from '../../utils/data-utils';
-import { getPdfText } from '../../utils/pdf-utils';
-import { VectorStoreContext } from '../../context/VectorStoreContext';
+// import { getPdfText } from '../../utils/pdf-utils';
+// import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { toastifyInfo } from '../Toast';
+// import { toastifyInfo } from '../Toast';
 import KnowledgeView from '../KnowledgeView/KnowledgeView';
 
 interface MainViewProps {
@@ -24,7 +24,7 @@ interface MainViewProps {
 
 const MainView: React.FC<MainViewProps> = ({ domain }) => {
   const navigate = useNavigate();
-  const vectorContext = useContext(VectorStoreContext);
+  // const vectorContext = useContext(VectorStoreContext);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
 
   const globalServices: GlobalStateContextValue =
@@ -54,17 +54,34 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
 
   const page = queryParams.get('page');
   const fileType = queryParams.get('fileType');
-  const workspace =
-    globalServices.appStateService.getSnapshot().context.workspaces?.[
-      workspaceId || 'docs'
-    ];
+  // const workspace =
+  //   globalServices.appStateService.getSnapshot().context.workspaces?.[
+  //     workspaceId || 'docs'
+  //   ];
 
-  const activeTab: ACDoc | null =
-    (workspace &&
-      workspace.docs?.find((tab: ACDoc) => tab.id === activeTabId)) ||
-    null;
+  const workspace = useLiveQuery(async () => {
+    if (!workspaceId) return;
+
+    const ws = await db.workspaces.where('id').equals(workspaceId).toArray();
+
+    return ws[0];
+  }, [workspaceId]);
+
+  const activeDoc = useLiveQuery(async () => {
+    if (!workspaceId) return;
+
+    const ws = await db.docs.where('workspaceId').equals(workspaceId).toArray();
+
+    return ws[0];
+  }, [workspaceId]);
+
+  // const activeTab: ACDoc | null =
+  //   (workspace &&
+  //     workspace.docs?.find((tab: ACDoc) => tab.id === activeTabId)) ||
+  //   null;
 
   const handleDeleteWorkspace = () => {
+    if (!workspace) return;
     const confirmDelete = window.prompt('Type "delete" to confirm');
     if (confirmDelete?.toLowerCase() !== 'delete') {
       alert('Deletion cancelled.');
@@ -103,8 +120,8 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
 
   const handlePdfDrop = async (file: File) => {
     if (!workspaceId) return;
-    const pageStartOffset = 0;
     const fileURL = URL.createObjectURL(file);
+    // const pageStartOffset = 0;
     // const pdfDocument = await pdfjs.getDocument(fileURL).promise;
     // const pdfData = await getPdfText(pdfDocument, slugify(file.name));
 
@@ -175,10 +192,10 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
         <EditorDropzone
           workspaceId={workspaceId}
           onPDFDrop={handlePdfDrop}
-          showHelperText={!activeTab && !fileUrl}
+          showHelperText={!activeDoc && !fileUrl}
           onFilesDrop={handleFilesDrop}
         >
-          {domain === 'documents' && activeTab && <TipTap tab={activeTab} />}
+          {domain === 'documents' && activeDoc && <TipTap tab={activeDoc} />}
           {domain === 'knowledge' && fileType && (
             <KnowledgeView
               workspaceId={workspaceId}

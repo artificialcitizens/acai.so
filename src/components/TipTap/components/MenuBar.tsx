@@ -47,7 +47,6 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
     if (!tab) return;
     setSystemNoteState(tab.systemNote);
     if (tab) {
-      console.log('Updating local state:', tab); // Add this line for debugging
       setIsContext(tab.isContext);
       setSystemNoteState(tab.systemNote);
     }
@@ -124,7 +123,6 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
 //       <div className="flex items-center justify-around left-12 bg-dark p-8">
 //         <button
 //           onClick={async () => {
-//             console.log('Sending TOGGLE_CONTEXT event'); // Add this line for debugging
 //             send({
 //               type: 'TOGGLE_CONTEXT',
 //               id: tipTapEditorId,
