@@ -9,32 +9,31 @@ import {
 } from './context/GlobalStateContext';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import ToastManager from './components/Toast';
-import { createWorkspace } from './state';
 import { VectorStoreContext } from './context/VectorStoreContext';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
 import AudioWaveform from './components/AudioWave/AudioWave';
 import { Editor } from '@tiptap/react';
 import { EditorContext } from './context/EditorContext';
-import { createDocs } from './components/TipTap/utils/docs';
 import MainView from './components/MainView/MainView';
 import useLocationManager from './hooks/use-location-manager';
+import { createDocs } from './components/TipTap/utils/docs';
 
 import { MenuButton } from './components/MenuButton/MenuButton';
 import ACModal from './components/Modal/Modal';
+import { createWorkspace } from './state';
 
 const App = () => {
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
-  const { workspaceId, domain, id } = useParams<{
+  const {
+    workspaceId,
+    domain,
+    id: docId,
+  } = useParams<{
     workspaceId: string;
     domain: 'knowledge' | 'documents' | undefined;
     id: string;
   }>();
-  const navigate = useNavigate();
-  const workspace =
-    globalServices.appStateService.getSnapshot().context?.workspaces?.[
-      workspaceId || 'docs'
-    ];
 
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined,
@@ -51,9 +50,9 @@ const App = () => {
   } = useMemoryVectorStore('');
   const { updateLocation } = useLocationManager();
 
-  useEffect(() => {
-    if (!workspace || !id) navigate('/docs/documents/1-introduction');
-  }, [workspace, id, navigate]);
+  // useEffect(() => {
+  //   if (!workspace || !id) navigate('/docs/documents/1-introduction');
+  // }, [workspace, id, navigate]);
 
   useEffect(() => {
     updateLocation(routerLocation.pathname);

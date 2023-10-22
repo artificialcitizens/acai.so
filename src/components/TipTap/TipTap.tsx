@@ -8,7 +8,7 @@ import { TiptapExtensions } from './extensions';
 import { useDebouncedCallback } from 'use-debounce';
 import { EditorBubbleMenu } from './components';
 // import { toastifyDefault, toastifyError } from '../Toast';
-import { ACDoc } from '../../state';
+import { ACDoc, Workspace } from '../../state';
 // import { semanticSearchQueryGeneration } from '../../utils/ac-langchain/chains/semantic-search-query-chain';
 import { autoComplete } from '../../lib/ac-langchain/chains/autocomplete-chain';
 import Bottleneck from 'bottleneck';
@@ -22,6 +22,8 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../../../db';
 interface EditorProps {
   tab: ACDoc;
 }
@@ -77,17 +79,21 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   // } = useContext(VectorStoreContext) as ReturnType<typeof useMemoryVectorStore>;
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { setEditor } = useContext(EditorContext)!;
+  const workspace = useLiveQuery(async () => {
+    if (!tab) return;
+    const workspaces = await db.workspaces
+      .where('id')
+      .equals(tab.workspaceId)
+      .toArray();
 
+    return workspaces[0];
+  }, [tab]);
   useEffect(() => {
     setCurrentTab(tab);
     setHydrated(false);
   }, [tab]);
 
-  const saveContent = (
-    editor: Editor,
-    workspaceId: string,
-    extraContent = '',
-  ) => {
+  const saveContent = (editor: Editor, workspace: Workspace) => {
     if (!currentTab) return;
     if (!tab.autoSave) return;
     setSaveStatus('Unsaved');
@@ -97,7 +103,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
       type: 'UPDATE_TAB_CONTENT',
       id: currentTab.id,
       content,
-      workspaceId,
+      workspace,
     });
     setTimeout(() => {
       setSaveStatus('Saved');
@@ -124,7 +130,8 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   // };
 
   const debouncedUpdates = useDebouncedCallback(async (editor: Editor) => {
-    saveContent(editor, currentTab.workspaceId);
+    if (!workspace) return;
+    saveContent(editor, workspace);
   }, 500);
 
   const tokenQueue: string[] = [];

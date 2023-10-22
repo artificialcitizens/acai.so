@@ -1,6 +1,8 @@
 import { createMachine, assign } from 'xstate';
 import { v4 as uuidv4 } from 'uuid';
-
+import { db } from '../../db';
+import { toastifyInfo } from '../components/Toast';
+import isEqual from 'lodash/isEqual';
 export type ACDoc = {
   id: string;
   workspaceId: string;
@@ -32,6 +34,65 @@ export interface AppContext {
   workspaces: WorkspaceDictionary;
 }
 
+let prevState: AppContext | null = null;
+
+export const saveState = async (state: AppContext) => {
+  console.log('Saving state...', state);
+
+  // Save workspaces to Dexie.js
+  for (const workspace of Object.values(state.workspaces)) {
+    try {
+      await db.workspaces.put(workspace);
+    } catch (error) {
+      console.error('Error saving workspace:', error);
+    }
+  }
+
+  // Save tabs to Dexie.js
+  for (const workspace of Object.values(state.workspaces)) {
+    for (const doc of workspace.docs) {
+      const prevWorkspace = prevState?.workspaces[workspace.id];
+      const prevDoc = prevWorkspace
+        ? prevWorkspace.docs.find((d) => d.id === doc.id)
+        : undefined;
+      if (!prevState || !isEqual(doc, prevDoc)) {
+        console.log('Saving or updating tab', doc);
+        try {
+          await db.docs.put(doc);
+        } catch (error) {
+          console.error('Error saving doc:', error);
+        }
+      } else {
+        console.log('Doc not saved, condition not met', doc);
+      }
+    }
+  }
+
+  // After saving the state, we set prevState to the current state
+  prevState = state;
+};
+
+const loadState = async (): Promise<AppContext> => {
+  const workspaces = await db.workspaces.toArray();
+  const docs = await db.docs.toArray();
+  const workspaceDictionary: WorkspaceDictionary = {};
+
+  workspaces.forEach((workspace) => {
+    workspaceDictionary[workspace.id] = { ...workspace, docs: [] };
+  });
+
+  docs.forEach((doc) => {
+    if (workspaceDictionary[doc.workspaceId]) {
+      workspaceDictionary[doc.workspaceId].docs = [
+        ...workspaceDictionary[doc.workspaceId].docs,
+        doc,
+      ];
+    }
+  });
+
+  return { workspaces: workspaceDictionary };
+};
+
 export type AppEvent =
   | { type: 'ADD_WORKSPACE'; workspace: Workspace }
   | { type: 'UPDATE_WORKSPACE'; id: string; workspace: Partial<Workspace> }
@@ -43,35 +104,26 @@ export type AppEvent =
       type: 'UPDATE_TAB_CONTENT';
       id: string;
       content: any;
-      workspaceId: string;
+      workspace: Workspace;
     };
 
-export const saveState = (state: AppContext) => {
-  console.log('Saving state:', state);
-  localStorage.setItem('appState', JSON.stringify(state));
-};
-
-export const loadState = () => {
-  const serializedState = localStorage.getItem('appState');
-  return JSON.parse(serializedState || '{}');
-};
-
-// Define the initial context
-const initialContext: AppContext = loadState() || {
-  id: 'docs',
-  name: 'acai.so',
-  createdAt: new Date().toString(),
-  lastUpdated: new Date().toString(),
-  private: true,
-  docs: [],
-};
 export const appStateMachine = createMachine<AppContext, AppEvent>(
   {
     predictableActionArguments: true,
     id: 'appState',
     initial: 'idle',
-    context: initialContext,
+    context: undefined,
     states: {
+      loading: {
+        invoke: {
+          id: 'loadInitialState',
+          src: () => loadState(),
+          onDone: {
+            target: 'idle',
+            actions: assign((context, event) => event.data),
+          },
+        },
+      },
       idle: {},
     },
     on: {
@@ -102,7 +154,6 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
     actions: {
       addWorkspace: assign((context, event) => {
         if (event.type !== 'ADD_WORKSPACE') return context;
-        console.log('Adding workspace:', event.workspace);
         const newWorkspace = event.workspace;
         const newContext = {
           ...context,
@@ -111,6 +162,7 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
             [newWorkspace.id]: newWorkspace,
           },
         };
+        console.log('New context:', newContext);
         return newContext;
       }),
       updateWorkspace: assign((context, event) => {
@@ -171,26 +223,23 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
       }),
       updateTabContent: assign((context, event) => {
         if (event.type !== 'UPDATE_TAB_CONTENT') return context;
-        const { id, content, workspaceId } = event;
-        const workspace = context.workspaces[workspaceId];
+        const { id, content, workspace } = event;
+        console.log({ id, content, workspace });
+        console.log({ workspace });
         if (workspace) {
-          const tab = workspace.docs.find((tab) => tab.id === id);
-          if (tab) {
-            // Create a new tab object with updated content
-            const updatedTab = { ...tab, content: content };
-            // Replace the old tab with the updated one
-            const updatedDocs = workspace.docs.map((doc) =>
-              doc.id === id ? updatedTab : doc,
-            );
-            // Create a new workspace object with updated docs
-            const updatedWorkspace = { ...workspace, docs: updatedDocs };
-            // Replace the old workspace with the updated one
-            const updatedWorkspaces = {
+          const updatedWorkspace = {
+            ...workspace,
+            docs: workspace.docs.map((doc) =>
+              doc.id === event.id ? { ...doc, content } : doc,
+            ),
+          };
+          return {
+            ...context,
+            workspaces: {
               ...context.workspaces,
-              [workspaceId]: updatedWorkspace,
-            };
-            return { ...context, workspaces: updatedWorkspaces };
-          }
+              [workspace.id]: updatedWorkspace,
+            },
+          };
         }
         return context;
       }),
