@@ -1,7 +1,7 @@
 import { Editor } from '@tiptap/react';
 import React, { useState, useEffect, useContext } from 'react';
 import { useActor, useInterpret } from '@xstate/react';
-import { DocType, appStateMachine } from '../../../state';
+import { ACDoc, appStateMachine } from '../../../state';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -43,7 +43,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
 
   useEffect(() => {
     const ws = state.context.workspaces[workspaceId];
-    const tab = ws?.docs.find((tab: DocType) => tab.id === tabId);
+    const tab = ws?.docs.find((tab: ACDoc) => tab.id === tabId);
     if (!tab) return;
     setSystemNoteState(tab.systemNote);
     if (tab) {

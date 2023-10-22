@@ -4,7 +4,7 @@ import { useInterpret } from '@xstate/react';
 import TipTap from '../TipTap/TipTap';
 import 'react-tabs/style/react-tabs.css';
 import './tabs.css';
-import { appStateMachine, DocType as ACTab } from '../../state/app.xstate';
+import { appStateMachine, ACDoc as ACTab } from '../../state/app.xstate';
 import { v4 as uuidv4 } from 'uuid';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 

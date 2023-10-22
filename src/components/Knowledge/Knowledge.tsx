@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { DocType, handleCreateTab } from '../../state';
+import { ACDoc, handleCreateTab } from '../../state';
 import { pdfjs } from 'react-pdf';
 
 import { VectorStoreContext } from '../../context/VectorStoreContext';
@@ -262,7 +262,7 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
           if (!vectorContext) return;
           const response = await vectorContext.similaritySearchWithScore(val);
           const results = vectorContext.filterAndCombineContent(response, 0.6);
-          const newTab: DocType = {
+          const newTab: ACDoc = {
             id: Date.now().toString(),
             title: val,
             content: results,

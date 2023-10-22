@@ -1,7 +1,7 @@
 import { createMachine, assign } from 'xstate';
 import { v4 as uuidv4 } from 'uuid';
 
-export type DocType = {
+export type ACDoc = {
   id: string;
   workspaceId: string;
   title: string;
@@ -21,7 +21,7 @@ export interface Workspace {
   createdAt: string;
   lastUpdated: string;
   private: boolean;
-  docs: DocType[];
+  docs: ACDoc[];
 }
 
 type WorkspaceDictionary = {
@@ -37,7 +37,7 @@ export type AppEvent =
   | { type: 'UPDATE_WORKSPACE'; id: string; workspace: Partial<Workspace> }
   | { type: 'REPLACE_WORKSPACE'; id: string; workspace: Workspace }
   | { type: 'DELETE_WORKSPACE'; workspaceId: string }
-  | { type: 'ADD_TAB'; tab: DocType }
+  | { type: 'ADD_TAB'; tab: ACDoc }
   | { type: 'DELETE_TAB'; id: string; workspaceId: string }
   | {
       type: 'UPDATE_TAB_CONTENT';
@@ -192,7 +192,7 @@ export const handleCreateTab = async (
   filetype = 'markdown',
   autoSave = true,
   canEdit = true,
-): Promise<DocType> => {
+): Promise<ACDoc> => {
   const newTab = {
     id: uuidv4(),
     title: args.title,
@@ -216,7 +216,7 @@ export const createWorkspace = ({
 }: {
   workspaceName: string;
   id?: string;
-  content?: DocType[];
+  content?: ACDoc[];
 }): Workspace | undefined => {
   const newId = id || uuidv4();
   const tabId = uuidv4();

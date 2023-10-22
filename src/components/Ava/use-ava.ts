@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 import { avaChat } from '../../lib/ac-langchain/agents/ava';
 import { toastifyAgentLog } from '../Toast';
-import { DocType, handleCreateTab } from '../../state';
+import { ACDoc, handleCreateTab } from '../../state';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -261,7 +261,7 @@ export const useAva = (): {
           },
         });
         if (agentState.context[workspaceId].returnRagResults) {
-          const newTab: DocType = {
+          const newTab: ACDoc = {
             id: Date.now().toString(),
             title: 'Retrieval Results',
             content: formattedResults,
