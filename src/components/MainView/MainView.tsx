@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import EditorDropzone from '../TipTap/components/EditorDropzone';
-import { Tab, handleCreateTab } from '../../state';
+import { DocType, handleCreateTab } from '../../state';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import TipTap from '../TipTap/TipTap';
 import PDFRenderer from '../PDFRenderer/PdfRender';
@@ -55,13 +55,13 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
   const page = queryParams.get('page');
   const fileType = queryParams.get('fileType');
   const workspace =
-    globalServices.appStateService.getSnapshot().context.workspaces[
+    globalServices.appStateService.getSnapshot().context.workspaces?.[
       workspaceId || 'docs'
     ];
 
-  const activeTab: Tab | null =
+  const activeTab: DocType | null =
     (workspace &&
-      workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId)) ||
+      workspace.docs?.find((tab: DocType) => tab.id === activeTabId)) ||
     null;
 
   const handleDeleteWorkspace = () => {
@@ -89,7 +89,7 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     const fileExtension = file.name.split('.').pop();
     if (!fileExtension) return;
     readFileAsText(file, fileExtension).then((content) => {
-      handleCreateTab({ title, content }, workspaceId).then((tab: Tab) => {
+      handleCreateTab({ title, content }, workspaceId).then((tab: DocType) => {
         globalServices.appStateService.send({
           type: 'ADD_TAB',
           tab,

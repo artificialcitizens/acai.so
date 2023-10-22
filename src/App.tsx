@@ -32,7 +32,7 @@ const App = () => {
   }>();
   const navigate = useNavigate();
   const workspace =
-    globalServices.appStateService.getSnapshot().context.workspaces[
+    globalServices.appStateService.getSnapshot().context?.workspaces?.[
       workspaceId || 'docs'
     ];
 

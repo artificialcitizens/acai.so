@@ -1,7 +1,7 @@
 import { Editor } from '@tiptap/react';
 import React, { useState, useEffect, useContext } from 'react';
 import { useActor, useInterpret } from '@xstate/react';
-import { Tab, appStateMachine } from '../../../state';
+import { DocType, appStateMachine } from '../../../state';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -43,7 +43,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
 
   useEffect(() => {
     const ws = state.context.workspaces[workspaceId];
-    const tab = ws?.data.tiptap.tabs.find((tab: Tab) => tab.id === tabId);
+    const tab = ws?.docs.find((tab: DocType) => tab.id === tabId);
     if (!tab) return;
     setSystemNoteState(tab.systemNote);
     if (tab) {
@@ -92,7 +92,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
         >
           {'>'}
         </button>
-        <button
+        {/* <button
           className={`font-bold disabled:cursor-not-allowed mt-2 ${
             isContext && 'text-acai-primary'
           }`}
@@ -108,7 +108,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
           }}
         >
           {'^'}
-        </button>
+        </button> */}
         {/* <button onClick={zoomOut}>-</button>
         <button onClick={zoomIn}>+</button> */}
       </div>

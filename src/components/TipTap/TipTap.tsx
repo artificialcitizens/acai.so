@@ -9,7 +9,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { EditorBubbleMenu } from './components';
 // import { toastifyDefault, toastifyError } from '../Toast';
 import { useInterpret } from '@xstate/react';
-import { Tab, appStateMachine } from '../../state';
+import { DocType, appStateMachine } from '../../state';
 // import { semanticSearchQueryGeneration } from '../../utils/ac-langchain/chains/semantic-search-query-chain';
 import { autoComplete } from '../../lib/ac-langchain/chains/autocomplete-chain';
 import Bottleneck from 'bottleneck';
@@ -20,7 +20,7 @@ import './TipTap.css';
 import { EditorContext } from '../../context/EditorContext';
 import { toastifyError } from '../Toast';
 interface EditorProps {
-  tab: Tab;
+  tab: DocType;
 }
 
 // Limits our stream
@@ -65,7 +65,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   const [canEdit, setCanEdit] = useState<boolean>(tab.workspaceId !== 'docs');
   const [isLoading, setIsLoading] = useState(false);
   const [currentContext, setCurrentContext] = useState('');
-  const [currentTab, setCurrentTab] = useState<Tab>(tab);
+  const [currentTab, setCurrentTab] = useState<DocType>(tab);
   // const {
   //   vectorstore,
   //   addDocuments,

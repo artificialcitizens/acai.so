@@ -1,8 +1,7 @@
-import { createMachine, assign, actions } from 'xstate';
-import { timestampToHumanReadable } from '../utils/data-utils';
+import { createMachine, assign } from 'xstate';
 import { v4 as uuidv4 } from 'uuid';
 
-export type Tab = {
+export type DocType = {
   id: string;
   workspaceId: string;
   title: string;
@@ -22,11 +21,7 @@ export interface Workspace {
   createdAt: string;
   lastUpdated: string;
   private: boolean;
-  data: {
-    tiptap: {
-      tabs: Tab[];
-    };
-  };
+  docs: DocType[];
 }
 
 type WorkspaceDictionary = {
@@ -34,90 +29,40 @@ type WorkspaceDictionary = {
 };
 
 export interface AppContext {
-  userName: string;
-  currentLocation: string;
-  localTime: string;
   workspaces: WorkspaceDictionary;
 }
 
 export type AppEvent =
-  | { type: 'UPDATE_NAME'; userName: string }
-  | { type: 'UPDATE_LOCATION'; currentLocation: string }
-  | { type: 'UPDATE_TIME'; localTime: string }
   | { type: 'ADD_WORKSPACE'; workspace: Workspace }
   | { type: 'UPDATE_WORKSPACE'; id: string; workspace: Partial<Workspace> }
   | { type: 'REPLACE_WORKSPACE'; id: string; workspace: Workspace }
   | { type: 'DELETE_WORKSPACE'; workspaceId: string }
-  | { type: 'ADD_TAB'; tab: Tab }
+  | { type: 'ADD_TAB'; tab: DocType }
   | { type: 'DELETE_TAB'; id: string; workspaceId: string }
   | {
       type: 'UPDATE_TAB_CONTENT';
       id: string;
       content: any;
       workspaceId: string;
-    }
-  | { type: 'TOGGLE_CONTEXT'; id: string; workspaceId: string }
-  | {
-      type: 'UPDATE_TAB_SYSTEM_NOTE';
-      id: string;
-      systemNote: string;
-      workspaceId: string;
     };
 
-/**
- * Save state to local storage
- */
 export const saveState = (state: AppContext) => {
   localStorage.setItem('appState', JSON.stringify(state));
 };
 
-/**
- * Load state from local storage
- */
 export const loadState = () => {
-  try {
-    const serializedState = localStorage.getItem('appState');
-    if (serializedState === null) {
-      return null;
-    }
-    return JSON.parse(serializedState);
-  } catch (err) {
-    console.error('Error loading state:', err);
-    return null;
-  }
+  const serializedState = localStorage.getItem('appState');
+  return JSON.parse(serializedState || '{}');
 };
 
 // Define the initial context
 const initialContext: AppContext = loadState() || {
-  currentLocation: '',
-  localTime: timestampToHumanReadable(),
-  workspaces: {
-    docs: {
-      id: 'docs',
-      name: 'acai.so',
-      createdAt: timestampToHumanReadable(),
-      lastUpdated: timestampToHumanReadable(),
-      private: true,
-      data: {
-        tiptap: {
-          tabs: [
-            {
-              id: 'introduction',
-              title: 'Introduction',
-              filetype: 'markdown',
-              content: [],
-              isContext: false,
-              systemNote: '',
-              workspaceId: 'docs',
-              autoSave: false,
-              createdAt: timestampToHumanReadable(),
-              lastUpdated: timestampToHumanReadable(),
-            },
-          ],
-        },
-      },
-    },
-  },
+  id: 'docs',
+  name: 'acai.so',
+  createdAt: new Date().toString(),
+  lastUpdated: new Date().toString(),
+  private: true,
+  docs: [],
 };
 // Create the machine
 export const appStateMachine = createMachine<AppContext, AppEvent>({
@@ -129,30 +74,6 @@ export const appStateMachine = createMachine<AppContext, AppEvent>({
     idle: {},
   },
   on: {
-    UPDATE_NAME: {
-      actions: assign((context, event) => {
-        const updatedContext = { ...context, userName: event.userName };
-        saveState(updatedContext);
-        return updatedContext;
-      }),
-    },
-    UPDATE_LOCATION: {
-      actions: assign((context, event) => {
-        const updatedContext = {
-          ...context,
-          currentLocation: event.currentLocation,
-        };
-        saveState(updatedContext);
-        return updatedContext;
-      }),
-    },
-    UPDATE_TIME: {
-      actions: assign((context, event) => {
-        const updatedContext = { ...context, localTime: event.localTime };
-        saveState(updatedContext);
-        return updatedContext;
-      }),
-    },
     ADD_WORKSPACE: {
       actions: assign((context, event) => {
         const newWorkspace = event.workspace;
@@ -213,20 +134,11 @@ export const appStateMachine = createMachine<AppContext, AppEvent>({
           const workspace = context.workspaces[newTab.workspaceId];
           if (workspace) {
             // Create a new array with the new tab
-            workspace.data.tiptap.tabs = [
-              ...workspace.data.tiptap.tabs,
-              newTab,
-            ];
+            workspace.docs = [...workspace.docs, newTab];
             // Create a new workspace object with the updated tabs
-            const newWorkspace = {
+            const newWorkspace: Workspace = {
               ...workspace,
-              data: {
-                ...workspace.data,
-                tiptap: {
-                  ...workspace.data.tiptap,
-                  tabs: workspace.data.tiptap.tabs,
-                },
-              },
+              docs: workspace.docs,
             };
             // Create a new workspaces object with the updated workspace
             const newWorkspaces = {
@@ -247,9 +159,7 @@ export const appStateMachine = createMachine<AppContext, AppEvent>({
         assign((context, event) => {
           const id = event.id;
           Object.values(context.workspaces).forEach((workspace) => {
-            workspace.data.tiptap.tabs = workspace.data.tiptap.tabs.filter(
-              (tab) => tab.id !== id,
-            );
+            workspace.docs = workspace.docs.filter((tab) => tab.id !== id);
           });
           return { ...context };
         }),
@@ -263,7 +173,7 @@ export const appStateMachine = createMachine<AppContext, AppEvent>({
           const { id, content, workspaceId } = event;
           const workspace = context.workspaces[workspaceId];
           if (workspace) {
-            const tab = workspace.data.tiptap.tabs.find((tab) => tab.id === id);
+            const tab = workspace.docs.find((tab) => tab.id === id);
             if (tab) {
               tab.content = content;
             }
@@ -276,23 +186,15 @@ export const appStateMachine = createMachine<AppContext, AppEvent>({
   },
 });
 
-// Load state from local storage
-const loadedState = loadState();
-
-// If there is no loaded state, save the initial state
-if (loadedState === null) {
-  saveState(appStateMachine.context);
-}
-
 export const handleCreateTab = async (
   args: { title: string; content: string },
   workspaceId: string,
   filetype = 'markdown',
   autoSave = true,
   canEdit = true,
-): Promise<Tab> => {
+): Promise<DocType> => {
   const newTab = {
-    id: uuidv4().split('-')[0],
+    id: uuidv4(),
     title: args.title,
     content: args.content,
     isContext: false,
@@ -314,35 +216,31 @@ export const createWorkspace = ({
 }: {
   workspaceName: string;
   id?: string;
-  content?: Tab[];
+  content?: DocType[];
 }): Workspace | undefined => {
-  const newId = id || uuidv4().split('-')[0];
-  const tabId = uuidv4().split('-')[0];
+  const newId = id || uuidv4();
+  const tabId = uuidv4();
   const newWorkspace: Workspace = {
     id: newId,
     name: workspaceName,
     createdAt: new Date().toString(),
     lastUpdated: new Date().toString(),
     private: false,
-    data: {
-      tiptap: {
-        tabs: content || [
-          {
-            id: tabId,
-            title: `Welcome to ${workspaceName}!`,
-            content: '',
-            isContext: false,
-            systemNote: '',
-            workspaceId: newId,
-            createdAt: new Date().toString(),
-            lastUpdated: new Date().toString(),
-            autoSave: true,
-            canEdit: true,
-            filetype: 'markdown',
-          },
-        ],
+    docs: content || [
+      {
+        id: tabId,
+        title: `Welcome to ${workspaceName}!`,
+        content: '',
+        isContext: false,
+        systemNote: '',
+        workspaceId: newId,
+        createdAt: new Date().toString(),
+        lastUpdated: new Date().toString(),
+        autoSave: true,
+        canEdit: true,
+        filetype: 'markdown',
       },
-    },
+    ],
   };
 
   return newWorkspace;

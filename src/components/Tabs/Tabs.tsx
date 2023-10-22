@@ -4,10 +4,9 @@ import { useInterpret } from '@xstate/react';
 import TipTap from '../TipTap/TipTap';
 import 'react-tabs/style/react-tabs.css';
 import './tabs.css';
-import { appStateMachine } from '../../state/app.xstate';
+import { appStateMachine, DocType as ACTab } from '../../state/app.xstate';
 import { v4 as uuidv4 } from 'uuid';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Tab as ACTab } from '../../state/app.xstate';
 
 const TabManager: React.FC = () => {
   const service = useInterpret(appStateMachine);
@@ -25,7 +24,7 @@ const TabManager: React.FC = () => {
   const handleCreateTab = () => {
     const title = prompt('Enter a title for the new tab');
     const newTab: ACTab = {
-      id: uuidv4().split('-')[0],
+      id: uuidv4(),
       title: title || 'New Tab',
       content: '',
       workspaceId: activeWorkspaceId,
@@ -45,13 +44,11 @@ const TabManager: React.FC = () => {
 
   const workspace = service.getSnapshot().context.workspaces[activeWorkspaceId];
   // Find the current active tab
-  const activeTab = workspace?.data.tiptap.tabs.find(
-    (tab) => tab.id === activeTabId,
-  );
+  const activeTab = workspace?.docs.find((tab) => tab.id === activeTabId);
 
   // Calculate the width for each tab
-  const tabWidth = workspace?.data.tiptap.tabs.length
-    ? `calc(100% / ${workspace.data.tiptap.tabs.length + 1})`
+  const tabWidth = workspace?.docs.length
+    ? `calc(100% / ${workspace.docs.length + 1})`
     : '100%';
 
   return (
@@ -59,7 +56,7 @@ const TabManager: React.FC = () => {
       <Tabs key={activeWorkspaceId} className="flex-grow">
         {/* hiding tabs for now, not happy with the layout */}
         <TabList className={'hidden m-2 border-b-2 border-solid border-dark'}>
-          {workspace.data.tiptap.tabs.map((tab, index) => (
+          {workspace.docs.map((tab, index) => (
             <Link
               key={tab.id}
               className={`cursor-pointer p-1 self-center text-acai-white truncate h-full border-2 ${
@@ -89,7 +86,7 @@ const TabManager: React.FC = () => {
             +
           </Tab>
         </TabList>
-        {workspace.data.tiptap.tabs.map((tab) => (
+        {workspace.docs.map((tab) => (
           <TabPanel key={tab.id}>
             {activeTab && <TipTap tab={activeTab} />}
           </TabPanel>

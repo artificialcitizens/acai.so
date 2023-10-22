@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Tab } from '../../../state';
+import { DocType } from '../../../state';
 
 export const fetchDocs = async (): Promise<any> => {
   const ACAI_SERVER =
@@ -17,7 +17,7 @@ export const createDocs = async () => {
   const response = await fetchDocs();
   const docs = response.docs
     .map((doc: any) => {
-      const tab: Tab = {
+      const tab: DocType = {
         id: doc.title.toLowerCase().replace(/ /g, '-'),
         title: doc.title,
         filetype: 'markdown',
@@ -32,7 +32,7 @@ export const createDocs = async () => {
       };
       return tab;
     })
-    .sort((a: Tab, b: Tab) => {
+    .sort((a: DocType, b: DocType) => {
       if (a.title < b.title) {
         return -1;
       }
