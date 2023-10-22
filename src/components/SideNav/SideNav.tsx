@@ -22,6 +22,15 @@ export const SideNav: React.FC = () => {
   const { workspaceId } = useParams<{
     workspaceId: string;
   }>();
+  const workspaces = useLiveQuery(async () => {
+    const workspacesArray = await db.workspaces.toArray();
+    return workspacesArray.sort((a, b) => {
+      if (a.id === 'docs') return -1;
+      if (b.id === 'docs') return 1;
+      return 0;
+    });
+  }, [workspaceId]);
+
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const [state, send] = useActor(globalServices.uiStateService);
@@ -99,10 +108,6 @@ export const SideNav: React.FC = () => {
       type: 'TOGGLE_SIDE_NAV',
     });
   };
-
-  const workspaces = useLiveQuery(async () => {
-    return await db.workspaces.toArray();
-  }, [workspaceId]);
 
   return (
     <nav
