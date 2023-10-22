@@ -46,7 +46,7 @@ const manifestForPlugin: Partial<VitePWAOptions> = {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), VitePWA(manifestForPlugin)],
-  assetsInclude: ['**/*.ico'],
+  assetsInclude: ['**/*.ico', '**/*.png', '**/*.svg'],
   build: {
     assetsDir: 'assets',
   },
