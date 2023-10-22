@@ -16,11 +16,11 @@ import { Editor } from '@tiptap/react';
 import { EditorContext } from './context/EditorContext';
 import MainView from './components/MainView/MainView';
 import useLocationManager from './hooks/use-location-manager';
-import { createDocs } from './components/TipTap/utils/docs';
+// import { createDocs } from './components/TipTap/utils/docs';
+// import { createWorkspace } from './state';
 
 import { MenuButton } from './components/MenuButton/MenuButton';
 import ACModal from './components/Modal/Modal';
-import { createWorkspace } from './state';
 
 const App = () => {
   const globalServices: GlobalStateContextValue =
@@ -57,23 +57,6 @@ const App = () => {
   useEffect(() => {
     updateLocation(routerLocation.pathname);
   }, [routerLocation, updateLocation]);
-
-  useEffect(() => {
-    createDocs().then((docs) => {
-      const docsWorkspace = createWorkspace({
-        workspaceName: 'acai.so',
-        id: 'docs',
-        content: docs,
-      });
-      if (!docsWorkspace) return;
-      globalServices.appStateService.send({
-        type: 'REPLACE_WORKSPACE',
-        id: 'docs',
-        workspace: docsWorkspace,
-      });
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const toggleSideNav = () => {
     globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV' });
