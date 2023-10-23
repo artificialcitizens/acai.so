@@ -17,6 +17,7 @@ import UserProfile from '../UserProfile/UserProfile';
 import KnowledgeUpload from '../Knowledge/Knowledge';
 import { useParams } from 'react-router-dom';
 import debounce from 'lodash/debounce';
+import AudioSettings from './AudioSettings';
 
 interface SettingsProps {
   initialTabIndex?: number;
@@ -70,6 +71,7 @@ const Settings: React.FC<SettingsProps> = ({
         <TabList className="m-2 border-b-2 border-solid border-dark text-acai-white flex">
           <Tab>Config</Tab>
           <Tab>Knowledge</Tab>
+          <Tab>Audio</Tab>
           <Tab>Logs</Tab>
         </TabList>
 
@@ -131,6 +133,11 @@ const Settings: React.FC<SettingsProps> = ({
         <TabPanel>
           {workspaceId && <KnowledgeUpload workspaceId={workspaceId} />}
         </TabPanel>
+
+        <TabPanel>
+          <AudioSettings />
+        </TabPanel>
+
         <TabPanel>
           <NotificationCenter
             placeholder="A place for AI to ponder"

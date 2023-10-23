@@ -8,7 +8,7 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
-import VoiceRecognition from '../VoiceRecognition/VoiceRecognition';
+import QuickSettings from '../QuickSettings/QuickSettings';
 import { toastifyError } from '../Toast';
 
 interface AvaProps {
@@ -32,8 +32,10 @@ export const Ava: React.FC<AvaProps> = ({
     ) || '';
   const { queryAva, streamingMessage, loading } = useAva();
 
-  const currentAgentMode =
-    agentStateService.getSnapshot().context[workspaceId]?.agentMode;
+  const currentAgentMode = useSelector(
+    agentStateService,
+    (state) => state.context[workspaceId]?.agentMode,
+  );
 
   const formatAgentMode = (mode: string) => {
     if (!mode) return '';
@@ -48,12 +50,13 @@ export const Ava: React.FC<AvaProps> = ({
   };
 
   return (
+    // @TODO: update to manage toggle via state
     <SBSidebar>
       <ExpansionPanel
-        className="pt-8 md:pt-6 border-t-0"
-        title="Voice Synthesis"
+        className="pt-12 md:pt-6 border-0"
+        title={formatAgentMode(currentAgentMode)}
       >
-        <VoiceRecognition
+        <QuickSettings
           onVoiceActivation={onVoiceActivation}
           audioContext={audioContext}
         />
@@ -61,19 +64,6 @@ export const Ava: React.FC<AvaProps> = ({
 
       {workspaceId && (
         <span className="flex flex-col flex-grow">
-          <p className="text-sm md:text-xs font-bold p-3">
-            {formatAgentMode(currentAgentMode)}{' '}
-            {/* @TODO: create a tag component */}
-            {/* <span
-              className="ml-2 font-semibold border-lighter border-solid border p-1 px-2 rounded-xl text-[9px]"
-              style={{
-                borderColor:
-                  currentAgentMode === 'chat' ? 'transparent' : 'currentcolor',
-              }}
-            >
-              {formatAgentMode(currentAgentMode)}
-            </span> */}
-          </p>
           <div className="flex flex-col flex-grow p-2 pt-0 mb-2 md:mb-0">
             <Chat
               name="Ava"
