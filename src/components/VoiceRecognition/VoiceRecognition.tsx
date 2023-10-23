@@ -465,7 +465,6 @@ export default VoiceRecognition;
                 <Whisper
                 onRecordingComplete={(blob) => console.log(blob)}
                 onTranscriptionComplete={async (t) => {
-                  console.log('Whisper Server Response', t);
                 }}
               />
              */
@@ -498,12 +497,10 @@ export default VoiceRecognition;
 // }, [elementPosition]);
 
 // const handleReachedDestination = () => {
-//   console.log('Cursor has reached its destination', elementName);
 //   const isUppercase = elementName === elementName.toUpperCase();
 //   if (isUppercase) {
 //     globalServices.uiStateService.send({ type: elementName, workspaceId });
 //   }
-//   console.log(isUppercase); // Outputs: true
 // };
 
 // // Get the center of the screen

@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { Editor } from '@tiptap/core';
 import { TiptapEditorProps } from './props';
@@ -8,7 +8,7 @@ import { TiptapExtensions } from './extensions';
 import { useDebouncedCallback } from 'use-debounce';
 import { EditorBubbleMenu } from './components';
 // import { toastifyDefault, toastifyError } from '../Toast';
-import { ACDoc } from '../../state';
+import { ACDoc, Workspace } from '../../state';
 // import { semanticSearchQueryGeneration } from '../../utils/ac-langchain/chains/semantic-search-query-chain';
 import { autoComplete } from '../../lib/ac-langchain/chains/autocomplete-chain';
 import Bottleneck from 'bottleneck';
@@ -22,6 +22,7 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
+import { useSelector } from '@xstate/react';
 interface EditorProps {
   tab: ACDoc;
 }
@@ -78,26 +79,25 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { setEditor } = useContext(EditorContext)!;
 
+  const workspace = useSelector(appStateService, (state) => {
+    return state.context.workspaces?.[currentTab.workspaceId || 'docs'];
+  });
+
   useEffect(() => {
     setCurrentTab(tab);
     setHydrated(false);
   }, [tab]);
 
-  const saveContent = (
-    editor: Editor,
-    workspaceId: string,
-    extraContent = '',
-  ) => {
+  const saveContent = (editor: Editor) => {
     if (!currentTab) return;
     if (!tab.autoSave) return;
     setSaveStatus('Unsaved');
     const content = editor.getJSON();
     setSaveStatus('Saving...');
     appStateService.send({
-      type: 'UPDATE_TAB_CONTENT',
+      type: 'UPDATE_DOC_CONTENT',
       id: currentTab.id,
       content,
-      workspaceId,
     });
     setTimeout(() => {
       setSaveStatus('Saved');
@@ -124,7 +124,8 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   // };
 
   const debouncedUpdates = useDebouncedCallback(async (editor: Editor) => {
-    saveContent(editor, currentTab.workspaceId);
+    if (!workspace) return;
+    saveContent(editor);
   }, 500);
 
   const tokenQueue: string[] = [];
@@ -265,7 +266,10 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     };
   }, [editor, setEditor]);
 
-  if (!currentTab) return <p>nothing to see here</p>;
+  const editorContent = useMemo(() => {
+    return <EditorContent editor={editor} />;
+  }, [editor]);
+
   return (
     <>
       <div
@@ -278,13 +282,13 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
           {currentTab.title}
         </h2>
         {editor && <EditorBubbleMenu editor={editor} />}
-        <EditorContent key={currentTab.id} editor={editor} />
+        {editorContent}
       </div>
       {/* <MenuBar
-        editor={editor}
-        tipTapEditorId={currentTab.id}
-        systemNote={currentTab.systemNote}
-      /> */}
+      editor={editor}
+      tipTapEditorId={currentTab.id}
+      systemNote={currentTab.systemNote}
+    /> */}
     </>
   );
 };

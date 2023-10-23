@@ -113,6 +113,7 @@ const initialAgentContext: AgentContext = loadAgentState();
 
 // Define the machine
 export const agentMachine = createMachine<AgentContext, AgentEvent>({
+  predictableActionArguments: true,
   id: 'agent',
   initial: 'idle',
   context: initialAgentContext,

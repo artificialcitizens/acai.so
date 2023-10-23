@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { ACDoc, handleCreateTab } from '../../state';
+import { ACDoc, handleCreateDoc } from '../../state';
 import { pdfjs } from 'react-pdf';
 
 import { VectorStoreContext } from '../../context/VectorStoreContext';
@@ -25,6 +25,8 @@ const removePageSuffix = (str: string) => {
   return str.replace(/-page-\d+$/, '');
 };
 
+// @TODO: create a knowledge state machine
+// @TODO: create a filter for knowledge items
 const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
   const { appStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
@@ -184,7 +186,7 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
         `/${workspaceId}/knowledge/${slugify(parsedId)}?fileType=pdf&page=1`,
       );
     } else {
-      const tab = await handleCreateTab(
+      const tab = await handleCreateDoc(
         { title: item.id, content: item.fullText },
         workspaceId,
         fileType,
@@ -192,8 +194,8 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
         false,
       );
       appStateService.send({
-        type: 'ADD_TAB',
-        tab,
+        type: 'ADD_DOC',
+        doc: tab,
       });
       navigate(
         `/${workspaceId}/knowledge/${slugify(parsedId)}?fileType=${
@@ -275,7 +277,7 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
             filetype: 'md',
             systemNote: '',
           };
-          appStateService.send({ type: 'ADD_TAB', tab: newTab });
+          appStateService.send({ type: 'ADD_DOC', doc: newTab });
           navigate(`/${workspaceId}/documents/${newTab.id}`);
         }}
       />

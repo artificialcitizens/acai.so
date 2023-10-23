@@ -1,6 +1,6 @@
 import { createMachine, assign } from 'xstate';
 import { v4 as uuidv4 } from 'uuid';
-
+import { db } from '../../db';
 export type ACDoc = {
   id: string;
   workspaceId: string;
@@ -21,80 +21,137 @@ export interface Workspace {
   createdAt: string;
   lastUpdated: string;
   private: boolean;
-  docs: ACDoc[];
+  docIds: string[];
 }
-
-type WorkspaceDictionary = {
-  [key: string]: Workspace;
-};
 
 export interface AppContext {
-  workspaces: WorkspaceDictionary;
+  workspaces: { [key: string]: Workspace };
+  docs: { [key: string]: ACDoc };
 }
 
+export const appDbService = {
+  async saveWorkspace(workspace: Workspace, doc?: ACDoc) {
+    try {
+      await db.workspaces.put(workspace);
+      if (doc) {
+        await db.docs.put(doc);
+      }
+    } catch (error) {
+      console.error('Error saving workspace:', error);
+    }
+  },
+
+  async deleteWorkspace(workspaceId: string) {
+    try {
+      await db.workspaces.delete(workspaceId);
+    } catch (error) {
+      console.error('Error deleting workspace:', error);
+    }
+  },
+
+  async saveDoc(doc: ACDoc) {
+    try {
+      await db.docs.put(doc);
+    } catch (error) {
+      console.error('Error saving doc:', error);
+    }
+  },
+
+  async deleteDoc(docId: string) {
+    try {
+      await db.docs.delete(docId);
+    } catch (error) {
+      console.error('Error deleting doc:', error);
+    }
+  },
+
+  async loadState(): Promise<AppContext> {
+    const workspaces = await db.workspaces.toArray();
+    const docs = await db.docs.toArray();
+    const workspaceDictionary: { [key: string]: Workspace } = {};
+    const tabDictionary: { [key: string]: ACDoc } = {}; // Add tabDictionary
+
+    workspaces.forEach((workspace) => {
+      workspaceDictionary[workspace.id] = { ...workspace, docIds: [] };
+    });
+
+    docs.forEach((doc) => {
+      if (workspaceDictionary[doc.workspaceId]) {
+        workspaceDictionary[doc.workspaceId].docIds.push(doc.id);
+        tabDictionary[doc.id] = doc; // Add doc to tabDictionary
+      }
+    });
+
+    return { workspaces: workspaceDictionary, docs: tabDictionary }; // Return tabs dictionary
+  },
+};
+
 export type AppEvent =
-  | { type: 'ADD_WORKSPACE'; workspace: Workspace }
+  | { type: 'ADD_WORKSPACE'; workspace: Workspace; doc?: ACDoc }
   | { type: 'UPDATE_WORKSPACE'; id: string; workspace: Partial<Workspace> }
   | { type: 'REPLACE_WORKSPACE'; id: string; workspace: Workspace }
   | { type: 'DELETE_WORKSPACE'; workspaceId: string }
-  | { type: 'ADD_TAB'; tab: ACDoc }
-  | { type: 'DELETE_TAB'; id: string; workspaceId: string }
+  | { type: 'ADD_DOC'; doc: ACDoc }
+  | { type: 'DELETE_DOC'; id: string; workspaceId: string }
   | {
-      type: 'UPDATE_TAB_CONTENT';
+      type: 'UPDATE_DOC_CONTENT';
       id: string;
       content: any;
-      workspaceId: string;
-    };
+    }
+  | { type: 'INITIALIZE'; state: AppContext };
 
-export const saveState = (state: AppContext) => {
-  console.log('Saving state:', state);
-  localStorage.setItem('appState', JSON.stringify(state));
-};
-
-export const loadState = () => {
-  const serializedState = localStorage.getItem('appState');
-  return JSON.parse(serializedState || '{}');
-};
-
-// Define the initial context
-const initialContext: AppContext = loadState() || {
-  id: 'docs',
-  name: 'acai.so',
-  createdAt: new Date().toString(),
-  lastUpdated: new Date().toString(),
-  private: true,
-  docs: [],
-};
 export const appStateMachine = createMachine<AppContext, AppEvent>(
   {
     predictableActionArguments: true,
     id: 'appState',
     initial: 'idle',
-    context: initialContext,
+    context: undefined,
     states: {
+      loading: {
+        invoke: {
+          id: 'loadInitialState',
+          src: () => appDbService.loadState(),
+          onDone: {
+            target: 'idle',
+            actions: assign((context, event) => {
+              return event.data;
+            }),
+          },
+          onError: {
+            target: 'error',
+            actions: (context, event) => {
+              console.error('Error loading state:', event.data);
+            },
+          },
+        },
+      },
       idle: {},
+      error: {},
     },
     on: {
       ADD_WORKSPACE: {
-        actions: ['addWorkspace', 'saveState'],
+        actions: ['addWorkspace'],
       },
       UPDATE_WORKSPACE: {
-        actions: ['updateWorkspace', 'saveState'],
+        actions: ['updateWorkspace'],
       },
       REPLACE_WORKSPACE: {
-        actions: ['replaceWorkspace', 'saveState'],
+        actions: ['replaceWorkspace'],
       },
       DELETE_WORKSPACE: {
-        actions: ['deleteWorkspace', 'saveState'],
+        actions: ['deleteWorkspace'],
       },
-      ADD_TAB: {
-        actions: ['addTab', 'saveState'],
+      ADD_DOC: {
+        actions: ['addDoc'],
       },
-      DELETE_TAB: {
-        actions: ['deleteTab', 'saveState'],
+      DELETE_DOC: {
+        actions: ['deleteDoc'],
       },
-      UPDATE_TAB_CONTENT: {
-        actions: ['updateTabContent', 'saveState'],
+      UPDATE_DOC_CONTENT: {
+        actions: ['updateDocContent'],
+      },
+      INITIALIZE: {
+        actions: assign((context, event) => event.state),
       },
     },
   },
@@ -102,15 +159,20 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
     actions: {
       addWorkspace: assign((context, event) => {
         if (event.type !== 'ADD_WORKSPACE') return context;
-        console.log('Adding workspace:', event.workspace);
         const newWorkspace = event.workspace;
+        const newDoc = event.doc;
+        const updatedDocs = newDoc
+          ? { ...context.docs, [newDoc.id]: newDoc }
+          : context.docs;
         const newContext = {
           ...context,
           workspaces: {
             ...context.workspaces,
             [newWorkspace.id]: newWorkspace,
           },
+          docs: updatedDocs,
         };
+        appDbService.saveWorkspace(newWorkspace, newDoc);
         return newContext;
       }),
       updateWorkspace: assign((context, event) => {
@@ -121,85 +183,103 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
           ...context.workspaces,
           [id]: { ...context.workspaces[id], ...updatedWorkspace },
         };
+        appDbService.saveWorkspace(updatedWorkspaces[id]);
         return { ...context, workspaces: updatedWorkspaces };
       }),
       replaceWorkspace: assign((context, event) => {
         if (event.type !== 'REPLACE_WORKSPACE') return context;
         const replacedWorkspace = event.workspace;
         const id = event.id;
-        const updatedWorkspaces = {
+        const replacedWorkspaces = {
           ...context.workspaces,
           [id]: replacedWorkspace,
         };
-        return { ...context, workspaces: updatedWorkspaces };
+        appDbService.saveWorkspace(replacedWorkspaces[id]);
+        return { ...context, workspaces: replacedWorkspaces };
       }),
       deleteWorkspace: assign((context, event) => {
         if (event.type !== 'DELETE_WORKSPACE') return context;
         const workspaceId = event.workspaceId;
-        if (context.workspaces[workspaceId]) {
-          const newWorkspaces = { ...context.workspaces };
-          delete newWorkspaces[workspaceId];
-          return { ...context, workspaces: newWorkspaces };
-        }
-        return context;
-      }),
-      addTab: assign((context, event) => {
-        if (event.type !== 'ADD_TAB') return context;
-        const newTab = event.tab;
-        const workspace = context.workspaces[newTab.workspaceId];
+        const newWorkspaces = { ...context.workspaces };
+        const newDocs = { ...context.docs };
+
+        // Get the workspace to be deleted
+        const workspace = newWorkspaces[workspaceId];
+
+        // Delete all tabs associated with the workspace
         if (workspace) {
-          workspace.docs = [...workspace.docs, newTab];
-          const newWorkspace: Workspace = {
+          workspace.docIds.forEach((docId) => {
+            delete newDocs[docId];
+            appDbService.deleteDoc(docId);
+          });
+        }
+
+        // Delete the workspace
+        delete newWorkspaces[workspaceId];
+        appDbService.deleteWorkspace(workspaceId);
+
+        return { ...context, workspaces: newWorkspaces, docs: newDocs };
+      }),
+      addDoc: assign((context, event) => {
+        if (event.type !== 'ADD_DOC') return context;
+        const newDoc = event.doc;
+        const workspace = context.workspaces[newDoc.workspaceId];
+        if (workspace) {
+          const updatedWorkspace = {
             ...workspace,
-            docs: workspace.docs,
+            docIds: [...workspace.docIds, newDoc.id],
           };
           const newWorkspaces = {
             ...context.workspaces,
-            [newTab.workspaceId]: newWorkspace,
+            [newDoc.workspaceId]: updatedWorkspace,
           };
-          return { ...context, workspaces: newWorkspaces };
+          const newDocs = {
+            ...context.docs,
+            [newDoc.id]: newDoc,
+          };
+          appDbService.saveDoc(newDoc);
+          appDbService.saveWorkspace(newWorkspaces[newDoc.workspaceId]);
+          return { ...context, workspaces: newWorkspaces, docs: newDocs };
         }
         return context;
       }),
-      deleteTab: assign((context, event) => {
-        if (event.type !== 'DELETE_TAB') return context;
+      deleteDoc: assign((context, event) => {
+        if (event.type !== 'DELETE_DOC') return context;
         const id = event.id;
-        Object.values(context.workspaces).forEach((workspace) => {
-          workspace.docs = workspace.docs.filter((tab) => tab.id !== id);
-        });
-        return { ...context };
-      }),
-      updateTabContent: assign((context, event) => {
-        if (event.type !== 'UPDATE_TAB_CONTENT') return context;
-        const { id, content, workspaceId } = event;
+        const workspaceId = event.workspaceId;
+        const newDocs = { ...context.docs };
+        delete newDocs[id];
+        appDbService.deleteDoc(id);
+
+        // Remove the doc id from the workspace's docIds array
         const workspace = context.workspaces[workspaceId];
         if (workspace) {
-          const tab = workspace.docs.find((tab) => tab.id === id);
-          if (tab) {
-            // Create a new tab object with updated content
-            const updatedTab = { ...tab, content: content };
-            // Replace the old tab with the updated one
-            const updatedDocs = workspace.docs.map((doc) =>
-              doc.id === id ? updatedTab : doc,
-            );
-            // Create a new workspace object with updated docs
-            const updatedWorkspace = { ...workspace, docs: updatedDocs };
-            // Replace the old workspace with the updated one
-            const updatedWorkspaces = {
-              ...context.workspaces,
-              [workspaceId]: updatedWorkspace,
-            };
-            return { ...context, workspaces: updatedWorkspaces };
-          }
+          const updatedWorkspace = {
+            ...workspace,
+            docIds: workspace.docIds.filter((docId) => docId !== id),
+          };
+          const newWorkspaces = {
+            ...context.workspaces,
+            [workspaceId]: updatedWorkspace,
+          };
+          appDbService.saveWorkspace(updatedWorkspace);
+          return { ...context, workspaces: newWorkspaces, docs: newDocs };
         }
-        return context;
+
+        return { ...context, docs: newDocs };
       }),
-      saveState: (context) => saveState(context),
+      updateDocContent: assign((context, event) => {
+        if (event.type !== 'UPDATE_DOC_CONTENT') return context;
+        const { id, content } = event;
+        const updatedTab = { ...context.docs[id], content };
+        appDbService.saveDoc(updatedTab);
+        return { ...context };
+      }),
     },
   },
 );
 
-export const handleCreateTab = async (
+export const handleCreateDoc = async (
   args: { title: string; content: string },
   workspaceId: string,
   filetype = 'markdown',
@@ -225,35 +305,20 @@ export const handleCreateTab = async (
 export const createWorkspace = ({
   workspaceName,
   id,
-  content,
 }: {
   workspaceName: string;
   id?: string;
   content?: ACDoc[];
 }): Workspace | undefined => {
   const newId = id || uuidv4();
-  const tabId = uuidv4();
+  const docId = uuidv4();
   const newWorkspace: Workspace = {
     id: newId,
     name: workspaceName,
     createdAt: new Date().toString(),
     lastUpdated: new Date().toString(),
     private: false,
-    docs: content || [
-      {
-        id: tabId,
-        title: `Welcome to ${workspaceName}!`,
-        content: '',
-        isContext: false,
-        systemNote: '',
-        workspaceId: newId,
-        createdAt: new Date().toString(),
-        lastUpdated: new Date().toString(),
-        autoSave: true,
-        canEdit: true,
-        filetype: 'markdown',
-      },
-    ],
+    docIds: [],
   };
 
   return newWorkspace;
