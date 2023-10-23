@@ -121,7 +121,7 @@ export const SideNav: React.FC = () => {
           >
             {workspaces &&
               Object.values(workspaces)
-                .filter((workspace) => workspace.id === 'docs')
+                .sort((workspace) => (workspace.id === 'docs' ? -1 : 1))
                 .map((workspace) => (
                   <div className="relative pb-2" key={workspace.id}>
                     <ExpansionPanel

@@ -50,6 +50,7 @@ const loadSpeechState = (): SpeechContext => {
 const initialContext: SpeechContext = loadSpeechState();
 
 export const speechMachine = createMachine<SpeechContext, SpeechEvent>({
+  predictableActionArguments: true,
   id: 'speech',
   initial: 'idle',
   context: initialContext,

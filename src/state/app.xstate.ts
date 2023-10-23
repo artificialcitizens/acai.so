@@ -131,25 +131,25 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
     },
     on: {
       ADD_WORKSPACE: {
-        actions: ['addWorkspace', 'saveState'],
+        actions: ['addWorkspace'],
       },
       UPDATE_WORKSPACE: {
-        actions: ['updateWorkspace', 'saveState'],
+        actions: ['updateWorkspace'],
       },
       REPLACE_WORKSPACE: {
-        actions: ['replaceWorkspace', 'saveState'],
+        actions: ['replaceWorkspace'],
       },
       DELETE_WORKSPACE: {
-        actions: ['deleteWorkspace', 'saveState'],
+        actions: ['deleteWorkspace'],
       },
       ADD_DOC: {
-        actions: ['addDoc', 'saveState'],
+        actions: ['addDoc'],
       },
       DELETE_DOC: {
-        actions: ['deleteDoc', 'saveState'],
+        actions: ['deleteDoc'],
       },
       UPDATE_DOC_CONTENT: {
-        actions: ['updateDocContent', 'saveState'],
+        actions: ['updateDocContent'],
       },
       INITIALIZE: {
         actions: assign((context, event) => event.state),
@@ -272,13 +272,9 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
       updateDocContent: assign((context, event) => {
         if (event.type !== 'UPDATE_DOC_CONTENT') return context;
         const { id, content } = event;
-        const updatedDoc = { ...context.docs[id], content };
-        const newDocs = {
-          ...context.docs,
-          [id]: updatedDoc,
-        };
-        appDbService.saveDoc(updatedDoc);
-        return { ...context, docs: newDocs };
+        const updatedTab = { ...context.docs[id], content };
+        appDbService.saveDoc(updatedTab);
+        return { ...context };
       }),
     },
   },
