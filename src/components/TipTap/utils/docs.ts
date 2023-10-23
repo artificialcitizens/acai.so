@@ -15,8 +15,9 @@ export const fetchDocs = async (): Promise<any> => {
 
 export const createDocs = async () => {
   const response = await fetchDocs();
+  if (!response.docs) return [];
   const docs = response.docs
-    ?.map((doc: any) => {
+    .map((doc: any) => {
       const tab: ACDoc = {
         id: doc.title.toLowerCase().replace(/ /g, '-'),
         title: doc.title,
