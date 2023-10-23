@@ -6,8 +6,7 @@ import useSpeechRecognition from '../../hooks/use-speech-recognition';
 import { useBark } from '../../hooks/use-bark';
 
 import { useElevenlabs } from '../../hooks/use-elevenlabs';
-import ScratchPad from '../ScratchPad/ScratchPad';
-import { useVoiceCommands } from './use-voice-command';
+import { useVoiceCommands } from '../../state/use-voice-command';
 import { useWebSpeechSynthesis } from '../../hooks/use-web-tts';
 import { getToken } from '../../utils/config';
 import { toastifyError, toastifyInfo } from '../Toast';
@@ -21,14 +20,16 @@ import { ChatHistory } from '../../state';
 import Dropdown from '../DropDown';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import { simplifyResponseChain } from '../../lib/ac-langchain/chains/simplify-response-chain';
-import { TTSState, VoiceState } from '../../state/speech.xstate';
+import { VoiceState } from '../../state/speech.xstate';
+import ChatModelDropdown from '../ChatSettings';
+import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
   onVoiceActivation: (bool: boolean) => void;
 }
 
-const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
+const QuickSettings: React.FC<VoiceRecognitionProps> = ({
   onVoiceActivation,
   audioContext,
 }) => {
@@ -37,18 +38,12 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const [ttsLoading, setTtsLoading] = useState<boolean>(false);
   const elevenlabsKey = getToken('ELEVENLABS_API_KEY');
   const { synthesizeElevenLabsSpeech, voices } = useElevenlabs();
-  const [elevenLabsVoice, setElevenLabsVoice] = useLocalStorageKeyValue(
+  const [elevenLabsVoice] = useLocalStorageKeyValue(
     'ELEVENLABS_VOICE',
     voices?.[0]?.value,
   );
 
   const [manualTTS, setManualTTS] = useState<string>('');
-  const [barkUrl, setBarkUrl] = useLocalStorageKeyValue(
-    'BARK_URL',
-    import.meta.env.VITE_BARK_SERVER ||
-      getToken('BARK_URL') ||
-      'http://localhost:5000',
-  );
   const synthesizeBarkSpeech = useBark();
   const synthesizeWebSpeech = useWebSpeechSynthesis();
   const {
@@ -87,31 +82,8 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   const srcRef = React.useRef<MediaElementAudioSourceNode | null>(null);
   const gainNodeRef = React.useRef<GainNode | null>(null);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    speechStateService.send('TOGGLE_SINGLE_COMMAND', {
-      singleCommand: event.target.checked,
-    });
-  };
-
   const handleVoiceStateChange = (voiceState: VoiceState) => {
     setVoiceRecognitionState(voiceState);
-  };
-
-  const handleBarkFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!barkUrl) {
-      toastifyError('Missing Bark Server URL');
-      return;
-    }
-    setBarkUrl(barkUrl);
-    //@TODO: update to run a test request
-    toastifyInfo('Connected to Bark Server');
-  };
-
-  const setTtsMode = (mode: TTSState) => {
-    speechStateService.send('SET_TTS_MODE', {
-      ttsMode: mode,
-    });
   };
 
   const normalizedAudioElement = async (
@@ -229,6 +201,7 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     }
   };
 
+  // @TODO: Configure to trigger via state
   const synthesizeAndPlay = async (response: string) => {
     if (ttsLoading) return;
     setTtsLoading(true);
@@ -302,104 +275,19 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
     label: value.charAt(0).toUpperCase() + value.slice(1),
   }));
 
-  let ttsOptions = TTSState.map((value) => ({
-    value,
-    label:
-      value === 'webSpeech'
-        ? 'Web Speech API'
-        : value.charAt(0).toUpperCase() + value.slice(1),
-  }));
-
-  if (!import.meta.env.DEV) {
-    ttsOptions = ttsOptions.filter((option) => option.value !== 'bark');
-  }
-
-  const handleElevenLabsDropdownChange = (value: string) => {
-    setElevenLabsVoice(value);
-  };
-
   return (
     <div
       className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow h-full`}
     >
-      <p className="text-acai-white text-sm md:text-xs mb-2 ml-2">
-        User Transcript
-      </p>
-      <ScratchPad
-        placeholder="User Transcript"
-        readonly
-        content={userTranscript}
-      />
-      <button
-        className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 mb-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
-        type="button"
-        onClick={() => {
-          setUserTranscript('');
-        }}
-      >
-        Clear Transcript
-      </button>
-      <hr />
+      {workspaceId && <ChatModelDropdown workspaceId={workspaceId} />}
       <Dropdown
         label="Synthesis Mode"
         options={voiceStateOptions}
         value={voiceRecognitionState}
         onChange={(e) => handleVoiceStateChange(e as VoiceState)}
       />
-
-      <span className="flex mb-2 items-start">
-        <label className="text-acai-white ml-2" htmlFor="singleCommandMode">
-          Single Command
-        </label>
-        <input
-          className="mx-1 mt-[0.25rem]"
-          type="checkbox"
-          id="singleCommandMode"
-          name="option"
-          checked={singleCommand}
-          onChange={handleChange}
-        />
-      </span>
-
-      <span className="flex flex-col">
-        <Dropdown
-          label="TTS Engine"
-          options={ttsOptions}
-          value={ttsMode}
-          onChange={(e) => setTtsMode(e as TTSState)}
-        />
-        {ttsMode === 'elevenlabs' && (
-          <Dropdown
-            label="Voice"
-            options={voices}
-            value={elevenLabsVoice || voices?.[0]?.value || ''}
-            onChange={handleElevenLabsDropdownChange}
-          />
-        )}
-        {ttsMode === 'bark' && (
-          <form className="mb-2" onSubmit={handleBarkFormSubmit}>
-            <span className="flex mb-2 items-center">
-              <label
-                htmlFor="url"
-                className="text-acai-white pr-2 w-[50%] ml-2 text-base md:text-xs"
-              >
-                Bark Server URL:
-              </label>
-              <input
-                id="url"
-                className="text-acai-white text-base md:text-sm bg-base px-[2px]"
-                type="password"
-                value={barkUrl}
-                onChange={(e) => setBarkUrl(e.target.value)}
-              />
-            </span>
-            <input
-              type="submit"
-              value="Connect"
-              className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
-            />
-          </form>
-        )}
+      {/* 
+      <ExpansionPanel className="border-t-0" title="ManualTTS">
         <form
           className="text-acai-white w-full flex flex-col flex-grow my-2"
           onSubmit={handleManualTTS}
@@ -427,11 +315,12 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
             Submit
           </button>
         </form>
-      </span>
+      </ExpansionPanel> */}
+
       {audioContext && (
         <audio
           ref={audioRef}
-          className="rounded-full p-2 w-full"
+          className="rounded-full p-2 w-full absolute hidden"
           controls
           src={audioSrc ? audioSrc : undefined}
           autoPlay
@@ -458,62 +347,4 @@ const VoiceRecognition: React.FC<VoiceRecognitionProps> = ({
   );
 };
 
-export default VoiceRecognition;
-
-{
-  /* 
-                <Whisper
-                onRecordingComplete={(blob) => console.log(blob)}
-                onTranscriptionComplete={async (t) => {
-                }}
-              />
-             */
-}
-
-// import useElementPosition from '../../hooks/use-element-position';
-// import { useHighlightedText } from '../../hooks/use-highlighted-text';
-// import CursorDebug from './components/Cursor/CursorDebug';
-// const [elementPosition, updateElementSelector, elementName] = useElementPosition("[data-ava-element='audio-wave']");
-// const [agentCursorPos, setAgentCursorPos] = useState([{ x: elementPosition.x, y: elementPosition.y }]);
-// const highlightedText = useHighlightedText();
-// case 'follow me':
-//   setUserTranscript('');
-//   // adjust to follow the cursor
-//   toastifyInfo('Following');
-//   setVoiceRecognitionState('following');
-//   break;
-
-// case 'following': {
-//   if (!updatedUserTranscript || !elevenlabsKey) return;
-//   const systemNotes =
-//     'You are responding via voice synthesis, keep the final answer short and to the point. Answer the users question about this text: ' +
-//     highlightedText;
-//   synthesizeAndPlay(fetchResponse(updatedUserTranscript, systemNotes), 'ava');
-//   break;
-// }
-// import Cursor from '../Cursor/Cursor';
-// useEffect(() => {
-//   setAgentCursorPos([elementPosition]);
-// }, [elementPosition]);
-
-// const handleReachedDestination = () => {
-//   const isUppercase = elementName === elementName.toUpperCase();
-//   if (isUppercase) {
-//     globalServices.uiStateService.send({ type: elementName, workspaceId });
-//   }
-// };
-
-// // Get the center of the screen
-// const centerX = window.innerWidth / 2;
-// const centerY = window.innerHeight / 2;
-// {
-//   /* <Cursor
-//       style={{
-//         visibility: !isOn ? 'hidden' : 'visible',
-//         display: !isOn ? 'hidden' : '',
-//       }}
-//       coordinates={agentCursorPos}
-//       onReachedDestination={handleReachedDestination}
-//       speed={1.25}
-//     /> */
-// }
+export default QuickSettings;

@@ -1,13 +1,13 @@
 import { Dispatch, SetStateAction, useContext, useState } from 'react';
-import { noteChain } from '../../lib/ac-langchain/chains/notes-chain';
+import { noteChain } from '../lib/ac-langchain/chains/notes-chain';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
-} from '../../context/GlobalStateContext';
+} from '../context/GlobalStateContext';
 import { useNavigate, useParams } from 'react-router-dom';
-import { toastifyInfo } from '../Toast';
-import { ACDoc } from '../../state';
-import { VoiceState, TTSState } from '../../state/speech.xstate';
+import { toastifyInfo } from '../components/Toast';
+import { ACDoc } from '.';
+import { VoiceState, TTSState } from './speech.xstate';
 import { useSelector } from '@xstate/react';
 
 interface Command {
