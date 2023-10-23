@@ -25,6 +25,8 @@ const removePageSuffix = (str: string) => {
   return str.replace(/-page-\d+$/, '');
 };
 
+// @TODO: create a knowledge state machine
+// @TODO: create a filter for knowledge items
 const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
   const { appStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);

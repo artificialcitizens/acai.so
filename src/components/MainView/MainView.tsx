@@ -17,6 +17,7 @@ import { readFileAsText, slugify } from '../../utils/data-utils';
 import { useLiveQuery } from 'dexie-react-hooks';
 // import { toastifyInfo } from '../Toast';
 import KnowledgeView from '../KnowledgeView/KnowledgeView';
+import { useSelector } from '@xstate/react';
 
 interface MainViewProps {
   domain: 'knowledge' | 'documents' | undefined;
@@ -54,31 +55,17 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
 
   const page = queryParams.get('page');
   const fileType = queryParams.get('fileType');
-  // const workspace =
-  //   globalServices.appStateService.getSnapshot().context.workspaces?.[
-  //     workspaceId || 'docs'
-  //   ];
 
-  const workspace = useLiveQuery(async () => {
-    if (!workspaceId) return;
+  const workspace = useSelector(globalServices.appStateService, (state) => {
+    return state.context.workspaces?.[workspaceId || 'docs'];
+  });
 
-    const ws = await db.workspaces.where('id').equals(workspaceId).toArray();
-
-    return ws[0];
-  }, [workspaceId]);
-
-  const activeDoc = useLiveQuery(async () => {
-    if (!activeTabId) return;
-
-    const ws = await db.docs.where('id').equals(activeTabId).toArray();
-
-    return ws[0];
-  }, [activeTabId]);
-
-  // const activeTab: ACDoc | null =
-  //   (workspace &&
-  //     workspace.docs?.find((tab: ACDoc) => tab.id === activeTabId)) ||
-  //   null;
+  const activeDoc = useSelector(globalServices.appStateService, (state) => {
+    if (!workspaceId || !activeTabId) return;
+    return state.context.workspaces?.[workspaceId].docs?.find((doc) => {
+      return doc.id === activeTabId;
+    });
+  });
 
   const handleDeleteWorkspace = () => {
     if (!workspace) return;

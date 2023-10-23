@@ -22,8 +22,7 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../../db';
+import { useSelector } from '@xstate/react';
 interface EditorProps {
   tab: ACDoc;
 }
@@ -79,15 +78,11 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   // } = useContext(VectorStoreContext) as ReturnType<typeof useMemoryVectorStore>;
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { setEditor } = useContext(EditorContext)!;
-  const workspace = useLiveQuery(async () => {
-    if (!tab) return;
-    const workspaces = await db.workspaces
-      .where('id')
-      .equals(tab.workspaceId)
-      .toArray();
 
-    return workspaces[0];
-  }, [tab]);
+  const workspace = useSelector(appStateService, (state) => {
+    return state.context.workspaces?.[currentTab.workspaceId || 'docs'];
+  });
+
   useEffect(() => {
     setCurrentTab(tab);
     setHydrated(false);

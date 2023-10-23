@@ -3,9 +3,9 @@
 /* eslint-disable react/jsx-no-comment-textnodes */
 import React, { useContext, useEffect, useRef } from 'react';
 import { Sidenav, initTE } from 'tw-elements';
-import { useActor, useSelector } from '@xstate/react';
+import { useSelector } from '@xstate/react';
 import { useClickAway } from '@uidotdev/usehooks';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Workspace, handleCreateTab } from '../../state';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -14,26 +14,15 @@ import {
 } from '../../context/GlobalStateContext';
 import { ProjectLinks } from '../ProjectLinks/ProjectLinks';
 import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../../db';
 
 export const SideNav: React.FC = () => {
   const navigate = useNavigate();
-  const { workspaceId } = useParams<{
-    workspaceId: string;
-  }>();
-  const workspaces = useLiveQuery(async () => {
-    const workspacesArray = await db.workspaces.toArray();
-    return workspacesArray.sort((a, b) => {
-      if (a.id === 'docs') return -1;
-      if (b.id === 'docs') return 1;
-      return 0;
-    });
-  }, [workspaceId]);
-
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
-  const [state, send] = useActor(globalServices.uiStateService);
+  const workspaces = useSelector(
+    globalServices.appStateService,
+    (state) => state.context.workspaces,
+  );
   const navOpen = useSelector(
     globalServices.uiStateService,
     (state) => state.context.sideNavOpen,
@@ -44,7 +33,7 @@ export const SideNav: React.FC = () => {
 
   const ref = useClickAway(() => {
     if (!navOpenRef.current) return;
-    send({ type: 'TOGGLE_SIDE_NAV' });
+    globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV' });
   });
 
   useEffect(() => {
