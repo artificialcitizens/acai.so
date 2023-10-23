@@ -62,7 +62,9 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
 
   const activeDoc = useSelector(globalServices.appStateService, (state) => {
     if (!workspaceId || !activeTabId) return;
-    return state.context.workspaces?.[workspaceId].docs?.find((doc) => {
+    const docs = state.context.workspaces?.[workspaceId].docs;
+    if (!docs) return;
+    return docs?.find((doc) => {
       return doc.id === activeTabId;
     });
   });
