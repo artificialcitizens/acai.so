@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import { toastifyAgentLog, toastifyError, toastifyInfo } from '../Toast';
-import { handleCreateTab } from '../../state';
+import { handleCreateDoc } from '../../state';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   GlobalStateContext,
@@ -85,10 +85,10 @@ export const SocketManager: React.FC = () => {
     const handleTab = async (data: { title: string; content: string }) => {
       if (!workspaceId) toastifyError('No workspace active');
       const { title, content } = data;
-      const tab = await handleCreateTab({ title, content }, workspaceId);
+      const tab = await handleCreateDoc({ title, content }, workspaceId);
       globalServices.appStateService.send({
-        type: 'ADD_TAB',
-        tab,
+        type: 'ADD_DOC',
+        doc: tab,
       });
       setTimeout(() => {
         navigate(`/${workspaceId}/documents/${tab.id}`);

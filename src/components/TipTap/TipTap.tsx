@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { Editor } from '@tiptap/core';
 import { TiptapEditorProps } from './props';
@@ -95,7 +95,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     const content = editor.getJSON();
     setSaveStatus('Saving...');
     appStateService.send({
-      type: 'UPDATE_TAB_CONTENT',
+      type: 'UPDATE_DOC_CONTENT',
       id: currentTab.id,
       content,
       workspace,
@@ -267,7 +267,10 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     };
   }, [editor, setEditor]);
 
-  if (!currentTab) return <p>nothing to see here</p>;
+  const editorContent = useMemo(() => {
+    return <EditorContent editor={editor} />;
+  }, [editor]);
+
   return (
     <>
       <div
@@ -280,13 +283,13 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
           {currentTab.title}
         </h2>
         {editor && <EditorBubbleMenu editor={editor} />}
-        <EditorContent key={currentTab.id} editor={editor} />
+        {editorContent}
       </div>
       {/* <MenuBar
-        editor={editor}
-        tipTapEditorId={currentTab.id}
-        systemNote={currentTab.systemNote}
-      /> */}
+      editor={editor}
+      tipTapEditorId={currentTab.id}
+      systemNote={currentTab.systemNote}
+    /> */}
     </>
   );
 };

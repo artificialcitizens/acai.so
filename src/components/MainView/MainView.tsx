@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import EditorDropzone from '../TipTap/components/EditorDropzone';
-import { ACDoc, handleCreateTab } from '../../state';
+import { ACDoc, handleCreateDoc } from '../../state';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import TipTap from '../TipTap/TipTap';
 // import PDFRenderer from '../PDFRenderer/PdfRender';
@@ -62,9 +62,9 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
 
   const activeDoc = useSelector(globalServices.appStateService, (state) => {
     if (!workspaceId || !activeTabId) return;
-    const docs = state.context.workspaces?.[workspaceId].docs;
+    const docs = state.context.docs;
     if (!docs) return;
-    return docs?.find((doc) => {
+    return Object.values(docs).find((doc) => {
       return doc.id === activeTabId;
     });
   });
@@ -95,10 +95,10 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     const fileExtension = file.name.split('.').pop();
     if (!fileExtension) return;
     readFileAsText(file, fileExtension).then((content) => {
-      handleCreateTab({ title, content }, workspaceId).then((tab: ACDoc) => {
+      handleCreateDoc({ title, content }, workspaceId).then((tab: ACDoc) => {
         globalServices.appStateService.send({
-          type: 'ADD_TAB',
-          tab,
+          type: 'ADD_DOC',
+          doc: tab,
         });
         setTimeout(() => {
           navigate(`/${workspaceId}/documents/${tab.id}`);

@@ -6,7 +6,7 @@ import { Sidenav, initTE } from 'tw-elements';
 import { useSelector } from '@xstate/react';
 import { useClickAway } from '@uidotdev/usehooks';
 import { Link, useNavigate } from 'react-router-dom';
-import { Workspace, handleCreateTab } from '../../state';
+import { ACDoc, Workspace, handleCreateDoc } from '../../state';
 import { v4 as uuidv4 } from 'uuid';
 import {
   GlobalStateContext,
@@ -22,6 +22,10 @@ export const SideNav: React.FC = () => {
   const workspaces = useSelector(
     globalServices.appStateService,
     (state) => state.context.workspaces,
+  );
+  const docs = useSelector(
+    globalServices.appStateService,
+    (state) => state.context.docs,
   );
   const navOpen = useSelector(
     globalServices.uiStateService,
@@ -51,44 +55,46 @@ export const SideNav: React.FC = () => {
       createdAt: new Date().toString(),
       lastUpdated: new Date().toString(),
       private: false,
-      docs: [
-        {
-          id: tabId,
-          title: `Welcome to ${name}!`,
-          content: '',
-          isContext: false,
-          autoSave: true,
-          systemNote: '',
-          workspaceId: id,
-          createdAt: new Date().toString(),
-          lastUpdated: new Date().toString(),
-          filetype: 'markdown',
-          canEdit: true,
-        },
-      ],
+      docIds: [tabId],
+    };
+    const doc: ACDoc = {
+      id: tabId,
+      title: `Welcome to ${name}!`,
+      content: '',
+      createdAt: new Date().toString(),
+      lastUpdated: new Date().toString(),
+      workspaceId: id,
+      filetype: 'markdown',
+      canEdit: true,
+      autoSave: true,
+      isContext: false,
+      systemNote: '',
     };
     globalServices.appStateService.send('ADD_WORKSPACE', {
       workspace: newWorkspace,
+      doc,
+    });
+
+    globalServices.agentStateService.send('CREATE_AGENT', {
+      workspaceId: id,
     });
 
     setTimeout(() => {
-      globalServices.agentStateService.send('CREATE_AGENT', {
-        workspaceId: id,
-      });
-    }, 250);
-
-    setTimeout(() => {
       navigate(`/${id}/documents/${tabId}`);
-    }, 1000);
+    }, 250);
   };
 
   const createTab = async (workspaceId: string) => {
     const title = prompt('Enter a name for your new tab');
     if (!title) return;
-    const tab = await handleCreateTab({ title, content: '' }, workspaceId);
+    const tab: ACDoc = await handleCreateDoc(
+      { title, content: '' },
+      workspaceId,
+    );
+    console.log(tab);
     globalServices.appStateService.send({
-      type: 'ADD_TAB',
-      tab,
+      type: 'ADD_DOC',
+      doc: tab,
     });
     setTimeout(() => {
       navigate(`/${workspaceId}/documents/${tab.id}`);
@@ -114,77 +120,85 @@ export const SideNav: React.FC = () => {
             data-te-sidenav-menu-ref
           >
             {workspaces &&
-              Object.values(workspaces).map((workspace) => (
-                <div className="relative pb-2" key={workspace.id}>
-                  <ExpansionPanel
-                    className="border-b border-darker border-b-solid border-l-0 border-r-0 border-t-0"
-                    title={workspace.name}
-                    onChange={() => {
-                      if (workspace.id === 'docs') setDocsOpen(!docsOpen);
-                    }}
-                    isOpened={workspace.id === 'docs' ? docsOpen : undefined}
-                  >
-                    {workspace.docs?.map((tab) => (
-                      <li
-                        className="relative text-ellipsis overflow-hidden mb-2 group transition duration-300 ease-linear "
-                        key={tab.id}
-                      >
-                        <div className="flex items-center justify-between">
-                          <Link
-                            className="w-full flex h-6 cursor-pointer items-center leading-4 text-ellipsis rounded-[5px] py-4 text-[0.78rem]  text-acai-white outline-none transition duration-300 ease-linear  hover:outline-none  hover:underline"
-                            to={`/${workspace.id}/documents/${tab.id}`}
-                            data-te-sidenav-link-ref
-                            onClick={() => {
-                              globalServices.uiStateService.send({
-                                type: 'TOGGLE_SIDE_NAV',
-                              });
-                            }}
-                          >
-                            <span>{tab.title}</span>
-                          </Link>
-                          {workspace.id !== 'docs' && (
-                            <button
-                              className="p-0 px-1 flex-grow-0 text-red-900 rounded-full  opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                              onClick={async () => {
-                                const confirmDelete = window.prompt(
-                                  'Type "delete" to confirm',
-                                );
-                                if (confirmDelete?.toLowerCase() !== 'delete') {
-                                  alert('Deletion cancelled.');
-                                  return;
-                                }
-                                globalServices.appStateService.send({
-                                  type: 'DELETE_TAB',
-                                  id: tab.id,
-                                  workspaceId: workspace.id,
-                                });
-                                setTimeout(() => {
-                                  navigate(`/${workspace.id}`);
-                                }, 250);
-                                globalServices.uiStateService.send({
-                                  type: 'TOGGLE_SIDE_NAV',
-                                });
-                              }}
+              Object.values(workspaces)
+                .filter((workspace) => workspace.id === 'docs')
+                .map((workspace) => (
+                  <div className="relative pb-2" key={workspace.id}>
+                    <ExpansionPanel
+                      className="border-b border-darker border-b-solid border-l-0 border-r-0 border-t-0"
+                      title={workspace.name}
+                      onChange={() => {
+                        if (workspace.id === 'docs') setDocsOpen(!docsOpen);
+                      }}
+                      isOpened={workspace.id === 'docs' ? docsOpen : undefined}
+                    >
+                      {docs &&
+                        Object.values(docs)
+                          .filter((tab) => tab.workspaceId === workspace.id)
+                          .map((tab) => (
+                            <li
+                              className="relative text-ellipsis overflow-hidden mb-2 group transition duration-300 ease-linear "
+                              key={tab.id}
                             >
-                              x
-                            </button>
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                    {workspace.id !== 'docs' && (
-                      <button
-                        className="rounded-none text-acai-white  text-xs w-full text-center transition duration-300 ease-linear"
-                        onClick={() => {
-                          createTab(workspace.id);
-                        }}
-                      >
-                        +
-                      </button>
-                    )}
-                  </ExpansionPanel>
-                </div>
-              ))}
+                              <div className="flex items-center justify-between">
+                                <Link
+                                  className="w-full flex h-6 cursor-pointer items-center leading-4 text-ellipsis rounded-[5px] py-4 text-[0.78rem]  text-acai-white outline-none transition duration-300 ease-linear  hover:outline-none  hover:underline"
+                                  to={`/${workspace.id}/documents/${tab.id}`}
+                                  data-te-sidenav-link-ref
+                                  onClick={() => {
+                                    globalServices.uiStateService.send({
+                                      type: 'TOGGLE_SIDE_NAV',
+                                    });
+                                  }}
+                                >
+                                  <span>{tab.title}</span>
+                                </Link>
+                                {workspace.id !== 'docs' && (
+                                  <button
+                                    className="p-0 px-1 flex-grow-0 text-red-900 rounded-full  opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                    onClick={async () => {
+                                      const confirmDelete = window.prompt(
+                                        'Type "delete" to confirm',
+                                      );
+                                      if (
+                                        confirmDelete?.toLowerCase() !==
+                                        'delete'
+                                      ) {
+                                        alert('Deletion cancelled.');
+                                        return;
+                                      }
+                                      globalServices.appStateService.send({
+                                        type: 'DELETE_DOC',
+                                        id: tab.id,
+                                        workspaceId: workspace.id,
+                                      });
+                                      setTimeout(() => {
+                                        navigate(`/${workspace.id}`);
+                                      }, 250);
+                                      globalServices.uiStateService.send({
+                                        type: 'TOGGLE_SIDE_NAV',
+                                      });
+                                    }}
+                                  >
+                                    x
+                                  </button>
+                                )}
+                              </div>
+                            </li>
+                          ))}
+                      {workspace.id !== 'docs' && (
+                        <button
+                          className="rounded-none text-acai-white  text-xs w-full text-center transition duration-300 ease-linear"
+                          onClick={() => {
+                            createTab(workspace.id);
+                          }}
+                        >
+                          +
+                        </button>
+                      )}
+                    </ExpansionPanel>
+                  </div>
+                ))}
             <button
               className="w-full rounded-none text-acai-white text-xs  hover:text-acai-white pl-2 text-left transition duration-300 ease-linear"
               onClick={createWorkspace}

@@ -123,7 +123,7 @@ export const useVoiceCommands = () => {
       createdAt: Date.now().toString(),
       lastUpdated: Date.now().toString(),
     };
-    appStateService.send({ type: 'ADD_TAB', tab: newTab });
+    appStateService.send({ type: 'ADD_DOC', doc: newTab });
     setTimeout(() => {
       navigate(`/${workspaceId}/documents/${newTab.id}`);
     }, 150);
