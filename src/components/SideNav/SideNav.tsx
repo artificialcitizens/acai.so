@@ -44,6 +44,7 @@ export const SideNav: React.FC = () => {
     initTE({ Sidenav });
   }, []);
 
+  // @TODO: use create workspace from state machine
   const createWorkspace = () => {
     const id = uuidv4();
     const tabId = uuidv4();

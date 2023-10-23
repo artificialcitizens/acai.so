@@ -16,7 +16,7 @@ import { Editor } from '@tiptap/react';
 import { EditorContext } from './context/EditorContext';
 import MainView from './components/MainView/MainView';
 import useLocationManager from './hooks/use-location-manager';
-import { createDocs } from './components/TipTap/utils/docs';
+import { createAcaiDocumentation } from './utils/docs';
 import { createWorkspace } from './state';
 
 import { MenuButton } from './components/MenuButton/MenuButton';
@@ -55,17 +55,18 @@ const App = () => {
   // }, [workspace, id, navigate]);
 
   useEffect(() => {
-    createDocs().then((docs) => {
-      const docsWorkspace = createWorkspace({
+    createAcaiDocumentation().then((d) => {
+      const { workspace, docs } = createWorkspace({
         workspaceName: 'acai.so',
         id: 'docs',
-        content: docs,
+        docs: d,
       });
-      if (!docsWorkspace) return;
+      if (!workspace) return;
       globalServices.appStateService.send({
         type: 'REPLACE_WORKSPACE',
         id: 'docs',
-        workspace: docsWorkspace,
+        workspace: workspace,
+        docs: docs,
       });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
