@@ -91,7 +91,6 @@ export const SideNav: React.FC = () => {
       { title, content: '' },
       workspaceId,
     );
-    console.log(tab);
     globalServices.appStateService.send({
       type: 'ADD_DOC',
       doc: tab,

@@ -97,7 +97,6 @@ export type AppEvent =
       type: 'UPDATE_DOC_CONTENT';
       id: string;
       content: any;
-      workspace: Workspace;
     }
   | { type: 'INITIALIZE'; state: AppContext };
 

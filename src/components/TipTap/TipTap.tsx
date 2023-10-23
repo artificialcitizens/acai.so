@@ -88,7 +88,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     setHydrated(false);
   }, [tab]);
 
-  const saveContent = (editor: Editor, workspace: Workspace) => {
+  const saveContent = (editor: Editor) => {
     if (!currentTab) return;
     if (!tab.autoSave) return;
     setSaveStatus('Unsaved');
@@ -98,7 +98,6 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
       type: 'UPDATE_DOC_CONTENT',
       id: currentTab.id,
       content,
-      workspace,
     });
     setTimeout(() => {
       setSaveStatus('Saved');
@@ -126,7 +125,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
 
   const debouncedUpdates = useDebouncedCallback(async (editor: Editor) => {
     if (!workspace) return;
-    saveContent(editor, workspace);
+    saveContent(editor);
   }, 500);
 
   const tokenQueue: string[] = [];
