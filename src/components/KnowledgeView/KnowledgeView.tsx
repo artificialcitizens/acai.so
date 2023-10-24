@@ -14,7 +14,7 @@ interface KnowledgeViewProps {
 
 const knowledgeTab = (workspaceId: string, title: string, content: string) => {
   return {
-    id: uuidv4().split('-')[0],
+    id: uuidv4(),
     workspaceId,
     title,
     filetype: 'md',
