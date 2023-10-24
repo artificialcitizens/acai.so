@@ -17,7 +17,7 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
-import { useActor, useSelector } from '@xstate/react';
+import { useActor } from '@xstate/react';
 import { ChatHistory } from '../../state';
 import { useParams } from 'react-router-dom';
 
@@ -70,10 +70,7 @@ const Chat: React.FC<ChatProps> = ({
   //   setController(abortController);
   // }, [abortController]);
 
-  const recentChatHistory = useSelector(
-    agentStateService,
-    (state) => state.context[workspaceId]?.recentChatHistory || [],
-  );
+  const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
   const [messages, setMessages] = useState<any[]>(
     recentChatHistory?.map((history: ChatHistory) => {
       return {
@@ -124,9 +121,15 @@ const Chat: React.FC<ChatProps> = ({
         sender as 'assistant' | 'user',
       );
 
+      send({
+        type: 'UPDATE_CHAT_HISTORY',
+        workspaceId: workspaceId,
+        recentChatHistory: [...recentChatHistory, chatHistory],
+      });
       return chatHistory;
     },
-    [workspaceId],
+
+    [recentChatHistory, send, workspaceId],
   );
 
   const createChatHistory = (
