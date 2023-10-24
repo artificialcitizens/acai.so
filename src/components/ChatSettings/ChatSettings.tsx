@@ -51,7 +51,7 @@ export const ChatModelDropdown: React.FC<ChatModelProps> = ({
     send({
       type: 'SET_RAG_RESULTS',
       workspaceId,
-      returnResults: event.target.checked,
+      ragResults: event.target.checked,
     });
   };
   const handleCustomKnowledgeChange = (
@@ -60,7 +60,7 @@ export const ChatModelDropdown: React.FC<ChatModelProps> = ({
     send({
       type: 'SET_CUSTOM_AGENT_VECTOR_SEARCH',
       workspaceId,
-      returnResults: event.target.checked,
+      ragResults: event.target.checked,
     });
   };
   return (
