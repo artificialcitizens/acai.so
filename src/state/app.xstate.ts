@@ -202,11 +202,19 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
           ...context.workspaces,
           [id]: replacedWorkspace,
         };
+        const replacedDocs = {
+          ...context.docs,
+          ...docs.reduce((acc, doc) => ({ ...acc, [doc.id]: doc }), {}),
+        };
         appDbService.saveWorkspace(replacedWorkspaces[id], docs);
         docs.forEach((doc) => {
           appDbService.saveDoc(doc);
         });
-        return { ...context, workspaces: replacedWorkspaces };
+        return {
+          ...context,
+          workspaces: replacedWorkspaces,
+          docs: replacedDocs,
+        };
       }),
       deleteWorkspace: assign((context, event) => {
         if (event.type !== 'DELETE_WORKSPACE') return context;
