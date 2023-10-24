@@ -50,10 +50,6 @@ const App = () => {
   } = useMemoryVectorStore('');
   const { updateLocation } = useLocationManager();
 
-  // useEffect(() => {
-  //   if (!workspace || !id) navigate('/docs/documents/1-introduction');
-  // }, [workspace, id, navigate]);
-
   useEffect(() => {
     createAcaiDocumentation().then((d) => {
       const { workspace, docs } = createWorkspace({
