@@ -1,92 +1,78 @@
-import { createMachine, assign } from 'xstate';
-import React from 'react';
+import { createMachine, assign, actions } from 'xstate';
 
-export interface UIContext {
+interface IContext {
   thoughtsOpen: boolean;
   sideNavOpen: boolean;
   agentChatOpen: boolean;
-  modalOpen: boolean;
-  modalContent: string | React.ReactNode;
 }
 
-const saveUIState = (context: UIContext) => {
-  const stateCopy = { ...context };
-  stateCopy.modalContent = '';
-  stateCopy.modalOpen = false;
-  localStorage.setItem('uiState', JSON.stringify(stateCopy));
+/**
+ * Save state to local storage
+ */
+const saveUIState = (state: IContext) => {
+  localStorage.setItem('uiState', JSON.stringify(state));
 };
 
-const loadUIState = (): UIContext => {
+/**
+ * Load state from local storage
+ */
+const loadUIState = (): IContext => {
   const savedState = localStorage.getItem('uiState');
   return savedState
     ? JSON.parse(savedState)
-    : {
-        thoughtsOpen: true,
-        sideNavOpen: false,
-        agentChatOpen: true,
-        modalOpen: false,
-        modalContent: '',
-      };
+    : { thoughtsOpen: true, sideNavOpen: false, agentChatOpen: true };
 };
 
-const initialContext: UIContext = loadUIState();
+// Define the initial context
+const initialContext: IContext = loadUIState();
 
-export type AC_UIEvent =
-  | { type: 'TOGGLE_AGENT_THOUGHTS' }
-  | { type: 'TOGGLE_SIDE_NAV' }
-  | { type: 'TOGGLE_AGENT_CHAT' }
-  | {
-      type: 'TOGGLE_MODAL';
-      modalContent?: string | React.ReactNode;
-    };
+const { pure } = actions;
 
-export const uiMachine = createMachine<UIContext, AC_UIEvent>(
-  {
-    predictableActionArguments: true,
-    id: 'ui',
-    initial: 'idle',
-    context: initialContext,
-    states: {
-      idle: {},
+export const uiMachine = createMachine<IContext>({
+  id: 'ui',
+  initial: 'idle',
+  context: initialContext,
+  states: {
+    idle: {},
+  },
+  on: {
+    TOGGLE_AGENT_THOUGHTS: {
+      actions: pure((context) => {
+        const updatedState = !context.thoughtsOpen;
+        return [
+          assign({ thoughtsOpen: updatedState }),
+          actions.assign((ctx) => {
+            saveUIState({ ...ctx, thoughtsOpen: updatedState });
+            return ctx;
+          }),
+        ];
+      }),
     },
-    on: {
-      TOGGLE_AGENT_THOUGHTS: {
-        actions: ['toggleThoughtsOpen', 'saveUIState'],
-      },
-      TOGGLE_SIDE_NAV: {
-        actions: ['toggleSideNavOpen', 'saveUIState'],
-      },
-      TOGGLE_AGENT_CHAT: {
-        actions: ['toggleAgentChatOpen', 'saveUIState'],
-      },
-      TOGGLE_MODAL: {
-        actions: ['toggleModal', 'saveUIState'],
-      },
+    TOGGLE_SIDE_NAV: {
+      actions: pure((context) => {
+        const updatedState = !context.sideNavOpen;
+        return [
+          assign({ sideNavOpen: updatedState }),
+          actions.assign((ctx) => {
+            saveUIState({ ...ctx, sideNavOpen: updatedState });
+            return ctx;
+          }),
+        ];
+      }),
+    },
+    TOGGLE_AGENT_CHAT: {
+      actions: pure((context) => {
+        const updatedState = !context.agentChatOpen;
+        return [
+          assign({ agentChatOpen: updatedState }),
+          actions.assign((ctx) => {
+            saveUIState({ ...ctx, agentChatOpen: updatedState });
+            return ctx;
+          }),
+        ];
+      }),
     },
   },
-  {
-    actions: {
-      toggleThoughtsOpen: assign((context) => {
-        return { ...context, thoughtsOpen: !context.thoughtsOpen };
-      }),
-      toggleSideNavOpen: assign((context) => {
-        return { ...context, sideNavOpen: !context.sideNavOpen };
-      }),
-      toggleAgentChatOpen: assign((context) => {
-        return { ...context, agentChatOpen: !context.agentChatOpen };
-      }),
-      toggleModal: assign((context, event) => {
-        if (event.type === 'TOGGLE_MODAL') {
-          const { modalContent } = event;
-          return {
-            ...context,
-            modalOpen: !context.modalOpen,
-            modalContent,
-          };
-        }
-        return context;
-      }),
-      saveUIState: (context) => saveUIState(context),
-    },
-  },
-);
+});
+
+loadUIState();

@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { Editor } from '@tiptap/core';
 import { TiptapEditorProps } from './props';
@@ -8,23 +8,18 @@ import { TiptapExtensions } from './extensions';
 import { useDebouncedCallback } from 'use-debounce';
 import { EditorBubbleMenu } from './components';
 // import { toastifyDefault, toastifyError } from '../Toast';
-import { ACDoc, Workspace } from '../../state';
+import { useInterpret } from '@xstate/react';
+import { Tab, appStateMachine } from '../../state';
 // import { semanticSearchQueryGeneration } from '../../utils/ac-langchain/chains/semantic-search-query-chain';
 import { autoComplete } from '../../lib/ac-langchain/chains/autocomplete-chain';
 import Bottleneck from 'bottleneck';
-// import { MenuBar } from './components/MenuBar';
+import { MenuBar } from './components/MenuBar';
 import './TipTap.css';
 // import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
 // import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { EditorContext } from '../../context/EditorContext';
-import { toastifyError } from '../Toast';
-import {
-  GlobalStateContext,
-  GlobalStateContextValue,
-} from '../../context/GlobalStateContext';
-import { useSelector } from '@xstate/react';
 interface EditorProps {
-  tab: ACDoc;
+  tab: Tab;
 }
 
 // Limits our stream
@@ -59,8 +54,8 @@ export const extractContentFromTipTap = (tipTapContent: any): string => {
 
 // @TODO: create left right pagination with arrow and doc title
 const Tiptap: React.FC<EditorProps> = ({ tab }) => {
-  const { appStateService }: GlobalStateContextValue =
-    useContext(GlobalStateContext);
+  const service = useInterpret(appStateMachine);
+
   const [hydrated, setHydrated] = useState(false);
   const [saveStatus, setSaveStatus] = useState('Saved');
 
@@ -69,7 +64,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   const [canEdit, setCanEdit] = useState<boolean>(tab.workspaceId !== 'docs');
   const [isLoading, setIsLoading] = useState(false);
   const [currentContext, setCurrentContext] = useState('');
-  const [currentTab, setCurrentTab] = useState<ACDoc>(tab);
+  const [currentTab, setCurrentTab] = useState<Tab>(tab);
   // const {
   //   vectorstore,
   //   addDocuments,
@@ -84,16 +79,21 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     setHydrated(false);
   }, [tab]);
 
-  const saveContent = (editor: Editor) => {
+  const saveContent = (
+    editor: Editor,
+    workspaceId: string,
+    extraContent = '',
+  ) => {
     if (!currentTab) return;
     if (!tab.autoSave) return;
     setSaveStatus('Unsaved');
     const content = editor.getJSON();
     setSaveStatus('Saving...');
-    appStateService.send({
-      type: 'UPDATE_DOC_CONTENT',
+    service.send({
+      type: 'UPDATE_TAB_CONTENT',
       id: currentTab.id,
       content,
+      workspaceId,
     });
     setTimeout(() => {
       setSaveStatus('Saved');
@@ -120,8 +120,8 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   // };
 
   const debouncedUpdates = useDebouncedCallback(async (editor: Editor) => {
-    saveContent(editor);
-  }, 500);
+    saveContent(editor, currentTab.workspaceId);
+  }, 1000);
 
   const tokenQueue: string[] = [];
   let isProcessing = false;
@@ -167,8 +167,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
             callbacks: {
               onMessageStart: () => setIsLoading(true),
               onMessageError: (error: string) => {
-                console.error(error);
-                toastifyError(error);
+                console.log(error);
                 setIsLoading(false);
               },
               onMessageStream: (token: string) => {
@@ -195,7 +194,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     if (!currentTab) return;
     if (editor && !hydrated) {
       editor.commands.setContent(currentTab.content);
-      editor.commands.setNodeSelection(0);
+      editor.commands.setNodeSelection(0); // Add this line
       setHydrated(true);
     }
   }, [currentTab, editor, hydrated]);
@@ -261,10 +260,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     };
   }, [editor, setEditor]);
 
-  const editorContent = useMemo(() => {
-    return <EditorContent editor={editor} />;
-  }, [editor]);
-
+  if (!currentTab) return <p>nothing to see here</p>;
   return (
     <>
       <div
@@ -277,13 +273,13 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
           {currentTab.title}
         </h2>
         {editor && <EditorBubbleMenu editor={editor} />}
-        {editorContent}
+        <EditorContent key={currentTab.id} editor={editor} />
       </div>
       {/* <MenuBar
-      editor={editor}
-      tipTapEditorId={currentTab.id}
-      systemNote={currentTab.systemNote}
-    /> */}
+        editor={editor}
+        tipTapEditorId={currentTab.id}
+        systemNote={currentTab.systemNote}
+      /> */}
     </>
   );
 };

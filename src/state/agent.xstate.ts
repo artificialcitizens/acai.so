@@ -10,12 +10,12 @@ export interface ChatHistory {
 
 export type AgentMode = (typeof agentMode)[number];
 
-export type AgentWorkspace = {
+export type AgentContext = {
   id: string;
   loading: boolean;
   agentMode: AgentMode;
   workspaceId: string;
-  customPrompt: string;
+  systemNotes: string;
   recentChatHistory: ChatHistory[];
   openAIChatModel: string;
   returnRagResults: boolean;
@@ -31,15 +31,15 @@ export type AgentWorkspace = {
   };
 };
 
-export type AgentContext = {
-  [key: string]: AgentWorkspace;
+type AgentWorkspace = {
+  [key: string]: AgentContext;
 };
 
-export type AgentEvent =
+type AgentEvent =
   | { type: 'LOAD'; workspaceId: string }
-  | { type: 'UPDATE'; agent: AgentWorkspace }
+  | { type: 'UPDATE'; agent: Partial<AgentContext> }
   | { type: 'TOGGLE_TOOL'; toolName: string }
-  | { type: 'UPDATE_CUSTOM_PROMPT'; workspaceId: string; customPrompt: string }
+  | { type: 'UPDATE_SYSTEM_NOTES'; workspaceId: string; systemNotes: string }
   | {
       type: 'UPDATE_CHAT_HISTORY';
       workspaceId: string;
@@ -60,26 +60,27 @@ export type AgentEvent =
 /**
  * Save AgentWorkspace to local storage
  */
-const saveAgentState = (state: AgentContext) => {
+const saveAgentState = (state: AgentWorkspace) => {
+  console.log('saving agent state');
   localStorage.setItem('agentState', JSON.stringify(state));
 };
 
 /**
  * Load AgentWorkspace from local storage
  */
-const loadAgentState = (): AgentContext => {
+const loadAgentState = (): AgentWorkspace => {
   const savedState = localStorage.getItem('agentState');
   if (savedState) {
     return JSON.parse(savedState);
   } else {
-    const initialState: AgentContext = {
+    const initialState: AgentWorkspace = {
       docs: {
         id: 'acai-docs',
         loading: false,
         workspaceId: 'docs',
         agentMode: 'chat',
         openAIChatModel: 'gpt-4',
-        customPrompt: '',
+        systemNotes: '',
         recentChatHistory: [],
         returnRagResults: false,
         customAgentVectorSearch: false,
@@ -92,13 +93,13 @@ const loadAgentState = (): AgentContext => {
   }
 };
 
-export const createAgent = (workspaceId: string): AgentWorkspace => {
+export const createAgent = (workspaceId: string): AgentContext => {
   return {
     id: workspaceId,
     loading: false,
     workspaceId: workspaceId,
     agentMode: 'chat',
-    customPrompt: '',
+    systemNotes: '',
     openAIChatModel: 'gpt-4',
     returnRagResults: false,
     customAgentVectorSearch: false,
@@ -109,11 +110,10 @@ export const createAgent = (workspaceId: string): AgentWorkspace => {
 };
 
 // Define the initial context
-const initialAgentContext: AgentContext = loadAgentState();
+const initialAgentContext: AgentWorkspace = loadAgentState();
 
 // Define the machine
-export const agentMachine = createMachine<AgentContext, AgentEvent>({
-  predictableActionArguments: true,
+export const agentMachine = createMachine<AgentWorkspace, AgentEvent>({
   id: 'agent',
   initial: 'idle',
   context: initialAgentContext,
@@ -184,14 +184,14 @@ export const agentMachine = createMachine<AgentContext, AgentEvent>({
     },
   },
   on: {
-    UPDATE_CUSTOM_PROMPT: {
+    UPDATE_SYSTEM_NOTES: {
       actions: assign((context, event) => {
         if (event.workspaceId && context[event.workspaceId]) {
           const updatedContext = {
             ...context,
             [event.workspaceId]: {
               ...context[event.workspaceId],
-              customPrompt: event.customPrompt,
+              systemNotes: event.systemNotes,
             },
           };
           saveAgentState(updatedContext);

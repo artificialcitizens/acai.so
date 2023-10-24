@@ -1,7 +1,7 @@
 import { Editor } from '@tiptap/react';
 import React, { useState, useEffect, useContext } from 'react';
-import { useActor, useSelector } from '@xstate/react';
-import { ACDoc, appStateMachine } from '../../../state';
+import { useActor, useInterpret } from '@xstate/react';
+import { Tab, appStateMachine } from '../../../state';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -29,32 +29,29 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
     id: string;
   }>();
 
-  const docs = useSelector(appStateService, (state) => {
-    return state.context.workspaces?.docs;
-  });
-
   const workspaceId = rawWorkspaceId || 'docs';
   const tabId = location.pathname.split('/')[2];
   const [state, send] = useActor(appStateService);
   const navigate = useNavigate();
-  // const {
-  //   vectorstore,
-  //   addDocuments,
-  //   similaritySearchWithScore,
-  //   filterAndCombineContent,
-  //   addText,
-  // } = useContext(VectorStoreContext) as ReturnType<typeof useMemoryVectorStore>;
+  const {
+    vectorstore,
+    addDocuments,
+    similaritySearchWithScore,
+    filterAndCombineContent,
+    addText,
+  } = useContext(VectorStoreContext) as ReturnType<typeof useMemoryVectorStore>;
 
   useEffect(() => {
     const ws = state.context.workspaces[workspaceId];
-    const tab = Object.values(docs).find((tab: ACDoc) => tab.id === tabId);
+    const tab = ws?.data.tiptap.tabs.find((tab: Tab) => tab.id === tabId);
     if (!tab) return;
     setSystemNoteState(tab.systemNote);
     if (tab) {
+      console.log('Updating local state:', tab); // Add this line for debugging
       setIsContext(tab.isContext);
       setSystemNoteState(tab.systemNote);
     }
-  }, [docs, state.context.workspaces, tabId, workspaceId]);
+  }, [state.context.workspaces, tabId, workspaceId]);
 
   return (
     <div className="w-full h-full relative">
@@ -66,7 +63,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
           onClick={() => {
             setLoading(true);
             send({
-              type: 'DELETE_DOC',
+              type: 'DELETE_TAB',
               id: tipTapEditorId,
               workspaceId,
             });
@@ -95,7 +92,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
         >
           {'>'}
         </button>
-        {/* <button
+        <button
           className={`font-bold disabled:cursor-not-allowed mt-2 ${
             isContext && 'text-acai-primary'
           }`}
@@ -111,7 +108,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
           }}
         >
           {'^'}
-        </button> */}
+        </button>
         {/* <button onClick={zoomOut}>-</button>
         <button onClick={zoomIn}>+</button> */}
       </div>
@@ -127,6 +124,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
 //       <div className="flex items-center justify-around left-12 bg-dark p-8">
 //         <button
 //           onClick={async () => {
+//             console.log('Sending TOGGLE_CONTEXT event'); // Add this line for debugging
 //             send({
 //               type: 'TOGGLE_CONTEXT',
 //               id: tipTapEditorId,

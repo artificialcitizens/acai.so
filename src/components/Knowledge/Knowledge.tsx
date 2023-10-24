@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { ACDoc, handleCreateDoc } from '../../state';
+import { Tab, handleCreateTab } from '../../state';
 import { pdfjs } from 'react-pdf';
 
 import { VectorStoreContext } from '../../context/VectorStoreContext';
@@ -25,8 +25,6 @@ const removePageSuffix = (str: string) => {
   return str.replace(/-page-\d+$/, '');
 };
 
-// @TODO: create a knowledge state machine
-// @TODO: create a filter for knowledge items
 const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
   const { appStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
@@ -186,7 +184,7 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
         `/${workspaceId}/knowledge/${slugify(parsedId)}?fileType=pdf&page=1`,
       );
     } else {
-      const tab = await handleCreateDoc(
+      const tab = await handleCreateTab(
         { title: item.id, content: item.fullText },
         workspaceId,
         fileType,
@@ -194,8 +192,8 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
         false,
       );
       appStateService.send({
-        type: 'ADD_DOC',
-        doc: tab,
+        type: 'ADD_TAB',
+        tab,
       });
       navigate(
         `/${workspaceId}/knowledge/${slugify(parsedId)}?fileType=${
@@ -258,13 +256,13 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
   };
 
   return (
-    <div className="flex flex-col flex-grow">
+    <div className="flex flex-col">
       <SBSearch
         onSubmit={async (val: string) => {
           if (!vectorContext) return;
           const response = await vectorContext.similaritySearchWithScore(val);
           const results = vectorContext.filterAndCombineContent(response, 0.6);
-          const newTab: ACDoc = {
+          const newTab: Tab = {
             id: Date.now().toString(),
             title: val,
             content: results,
@@ -277,15 +275,15 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
             filetype: 'md',
             systemNote: '',
           };
-          appStateService.send({ type: 'ADD_DOC', doc: newTab });
+          appStateService.send({ type: 'ADD_TAB', tab: newTab });
           navigate(`/${workspaceId}/documents/${newTab.id}`);
         }}
       />
       <Dropzone onFilesDrop={handleFileDrop}>
         {!knowledgeItems?.length && (
-          <div className="w-full h-full flex bg-base rounded-lg mb-2 md:text-sm flex-grow">
+          <div className="w-full h-20 bg-base rounded-lg mb-2">
             <div
-              className={`w-full h-full flex flex-col justify-center items-center flex-grow`}
+              className={`w-full h-full flex flex-col justify-center items-center`}
             >
               <div className="text-acai-white">
                 Drop a file to{' '}
