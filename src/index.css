@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  @apply overflow-hidden;
+}
+
 /* #root { @apply w-screen h-screen; } */
 .ProseMirror .is-editor-empty:first-child::before {
   content: attr(data-placeholder);

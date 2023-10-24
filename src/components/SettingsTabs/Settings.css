@@ -1,0 +1,14 @@
+.react-tabs__tab {
+  @apply text-acai-white truncate h-full rounded-t p-2 border-2 border-transparent md:text-sm font-semibold;
+}
+
+.react-tabs__tab--selected {
+  @apply bg-dark cursor-pointer p-2 last:first:self-center text-acai-white truncate h-full border-2 border-dark rounded-t;
+}
+
+.react-tabs__tab-panel {
+  @apply md:p-4 pt-0;
+}
+.react-tabs__tab-panel--selected {
+  @apply flex flex-grow flex-col;
+}

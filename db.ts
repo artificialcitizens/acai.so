@@ -1,5 +1,6 @@
 // db.ts
 import Dexie, { Table } from 'dexie';
+import { ACDoc, Workspace } from './src/state';
 
 export interface AcaiMemoryVector {
   content: string;
@@ -24,6 +25,8 @@ export class AcaiDexie extends Dexie {
   // 'embeddings' is added by dexie when declaring the stores()
   // We just tell the typing system this is the case
   knowledge!: Table<Knowledge>;
+  workspaces!: Table<Workspace>;
+  docs!: Table<ACDoc>;
 
   constructor() {
     super('acaiDb');
@@ -31,6 +34,14 @@ export class AcaiDexie extends Dexie {
       knowledge:
         '++id, workspaceId, file, fileType, fullText, createdAt, lastModified, memoryVectors, summary, title, tags',
     });
+    this.version(2).stores({
+      workspaces: '++id, name, createdAt, lastUpdated, private',
+      docs: '++id, workspaceId, title, filetype, content, isContext, systemNote, createdAt, lastUpdated, autoSave, canEdit',
+    });
+
+    this.knowledge = this.table('knowledge');
+    this.workspaces = this.table('workspaces');
+    this.docs = this.table('docs');
   }
 }
 

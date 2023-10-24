@@ -9,32 +9,31 @@ import {
 } from './context/GlobalStateContext';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import ToastManager from './components/Toast';
-import { createWorkspace } from './state';
 import { VectorStoreContext } from './context/VectorStoreContext';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
 import AudioWaveform from './components/AudioWave/AudioWave';
 import { Editor } from '@tiptap/react';
 import { EditorContext } from './context/EditorContext';
-import { createDocs } from './components/TipTap/utils/docs';
 import MainView from './components/MainView/MainView';
 import useLocationManager from './hooks/use-location-manager';
+import { createAcaiDocumentation } from './utils/docs';
+import { createWorkspace } from './state';
 
 import { MenuButton } from './components/MenuButton/MenuButton';
+import ACModal from './components/Modal/Modal';
 
 const App = () => {
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
-  const { workspaceId, domain, id } = useParams<{
+  const {
+    workspaceId,
+    domain,
+    id: docId,
+  } = useParams<{
     workspaceId: string;
     domain: 'knowledge' | 'documents' | undefined;
     id: string;
   }>();
-  const navigate = useNavigate();
-  const workspace =
-    globalServices.appStateService.getSnapshot().context.workspaces[
-      workspaceId || 'docs'
-    ];
-  if (!workspace || !id) navigate('/docs/documents/1-introduction');
 
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined,
@@ -51,25 +50,31 @@ const App = () => {
   } = useMemoryVectorStore('');
   const { updateLocation } = useLocationManager();
 
-  useEffect(() => {
-    updateLocation(routerLocation.pathname);
-  }, [routerLocation, updateLocation]);
+  // useEffect(() => {
+  //   if (!workspace || !id) navigate('/docs/documents/1-introduction');
+  // }, [workspace, id, navigate]);
 
   useEffect(() => {
-    createDocs().then((docs) => {
-      const docsWorkspace = createWorkspace({
+    createAcaiDocumentation().then((d) => {
+      const { workspace, docs } = createWorkspace({
         workspaceName: 'acai.so',
         id: 'docs',
-        content: docs,
+        docs: d,
       });
+      if (!workspace) return;
       globalServices.appStateService.send({
         type: 'REPLACE_WORKSPACE',
         id: 'docs',
-        workspace: docsWorkspace,
+        workspace: workspace,
+        docs: docs,
       });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    updateLocation(routerLocation.pathname);
+  }, [routerLocation, updateLocation]);
 
   const toggleSideNav = () => {
     globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV' });
@@ -99,6 +104,7 @@ const App = () => {
       >
         <EditorContext.Provider value={{ editor, setEditor }}>
           <SideNav />
+          <ACModal />
           <MenuButton
             handleClick={(e) => {
               e.stopPropagation();

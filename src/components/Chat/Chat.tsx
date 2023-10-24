@@ -123,10 +123,8 @@ const Chat: React.FC<ChatProps> = ({
 
       send({
         type: 'UPDATE_CHAT_HISTORY',
-        agent: {
-          workspaceId: workspaceId,
-          recentChatHistory: [...recentChatHistory, chatHistory],
-        },
+        workspaceId: workspaceId,
+        recentChatHistory: [...recentChatHistory, chatHistory],
       });
       return chatHistory;
     },

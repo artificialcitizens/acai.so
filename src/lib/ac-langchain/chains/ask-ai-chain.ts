@@ -1,13 +1,13 @@
 // @TODO: figure out why these imports are not working with the linter
-// eslint-disable-next-line import/named
 import {
   SystemMessage,
   HumanMessage,
-  AIMessage,
+  // eslint-disable-next-line import/named
   LLMResult,
   BaseMessage,
 } from 'langchain/schema';
 import { handleAcaiChat } from '../models/chat';
+import { toastifyError } from '../../../components/Toast';
 
 type ChatResponse = {
   response: string;
@@ -82,19 +82,20 @@ export const askAi = async ({
         {
           handleLLMStart: async (llm: any, prompts: string[]) => {
             handleLLMStart(llm, prompts);
-            console.log(JSON.stringify(llm, null, 2));
-            console.log(JSON.stringify(prompts, null, 2));
+            // console.log(JSON.stringify(llm, null, 2));
+            // console.log(JSON.stringify(prompts, null, 2));
           },
           handleLLMEnd: async (output: LLMResult) => {
             handleLLMEnd(output);
-            console.log(JSON.stringify(output, null, 2));
+            // console.log(JSON.stringify(output, null, 2));
           },
           handleLLMNewToken(token: string) {
             handleLLMNewToken(token);
-            console.log({ token });
+            // console.log({ token });
           },
           handleLLMError: async (err: Error) => {
             handleLLMError(err);
+            toastifyError(err.message);
             console.error(err);
           },
         },

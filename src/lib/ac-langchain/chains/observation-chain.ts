@@ -23,7 +23,6 @@ ${priorObservations}
     modelName: 'gpt-4',
     temperature: 0,
   });
-  console.log('context', context);
   const response = await model.call([
     new SystemMessage(prompt),
     new HumanMessage(context),
