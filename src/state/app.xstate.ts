@@ -30,11 +30,13 @@ export interface AppContext {
 }
 
 export const appDbService = {
-  async saveWorkspace(workspace: Workspace, doc?: ACDoc) {
+  async saveWorkspace(workspace: Workspace, docs?: ACDoc[]) {
     try {
       await db.workspaces.put(workspace);
-      if (doc) {
-        await db.docs.put(doc);
+      if (docs) {
+        docs.forEach((doc) => {
+          db.docs.put(doc);
+        });
       }
     } catch (error) {
       console.error('Error saving workspace:', error);
@@ -89,7 +91,12 @@ export const appDbService = {
 export type AppEvent =
   | { type: 'ADD_WORKSPACE'; workspace: Workspace; doc?: ACDoc }
   | { type: 'UPDATE_WORKSPACE'; id: string; workspace: Partial<Workspace> }
-  | { type: 'REPLACE_WORKSPACE'; id: string; workspace: Workspace }
+  | {
+      type: 'REPLACE_WORKSPACE';
+      id: string;
+      workspace: Workspace;
+      docs: ACDoc[];
+    }
   | { type: 'DELETE_WORKSPACE'; workspaceId: string }
   | { type: 'ADD_DOC'; doc: ACDoc }
   | { type: 'DELETE_DOC'; id: string; workspaceId: string }
@@ -172,7 +179,7 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
           },
           docs: updatedDocs,
         };
-        appDbService.saveWorkspace(newWorkspace, newDoc);
+        appDbService.saveWorkspace(newWorkspace, newDoc ? [newDoc] : undefined);
         return newContext;
       }),
       updateWorkspace: assign((context, event) => {
@@ -190,11 +197,15 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
         if (event.type !== 'REPLACE_WORKSPACE') return context;
         const replacedWorkspace = event.workspace;
         const id = event.id;
+        const docs = event.docs;
         const replacedWorkspaces = {
           ...context.workspaces,
           [id]: replacedWorkspace,
         };
-        appDbService.saveWorkspace(replacedWorkspaces[id]);
+        appDbService.saveWorkspace(replacedWorkspaces[id], docs);
+        docs.forEach((doc) => {
+          appDbService.saveDoc(doc);
+        });
         return { ...context, workspaces: replacedWorkspaces };
       }),
       deleteWorkspace: assign((context, event) => {
@@ -305,13 +316,16 @@ export const handleCreateDoc = async (
 export const createWorkspace = ({
   workspaceName,
   id,
+  docs,
 }: {
   workspaceName: string;
   id?: string;
-  content?: ACDoc[];
-}): Workspace | undefined => {
+  docs?: ACDoc[];
+}): {
+  workspace: Workspace;
+  docs: ACDoc[];
+} => {
   const newId = id || uuidv4();
-  const docId = uuidv4();
   const newWorkspace: Workspace = {
     id: newId,
     name: workspaceName,
@@ -321,5 +335,14 @@ export const createWorkspace = ({
     docIds: [],
   };
 
-  return newWorkspace;
+  if (docs) {
+    docs.forEach((doc) => {
+      newWorkspace.docIds.push(doc.id);
+    });
+  }
+
+  return {
+    workspace: newWorkspace,
+    docs: docs || [],
+  };
 };
