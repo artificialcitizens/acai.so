@@ -7,14 +7,14 @@ const fetchDocs = async (): Promise<
     'introduction.md',
     'knowledge.md',
     'voice-synthesis.md',
-  ]; // replace with your actual file names
+  ];
   const docs = [];
 
   for (const file of markdownFiles) {
     try {
       const response = await fetch(`/docs/${file}`);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`You really did it now! status: ${response.status}`);
       }
       const text = await response.text();
       docs.push({ filename: file, content: text });
@@ -26,11 +26,19 @@ const fetchDocs = async (): Promise<
   return docs;
 };
 
+const formatTitle = (title: string) => {
+  return title
+    .replace('.md', '')
+    .split('-')
+    .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
 export const createAcaiDocumentation = async () => {
   const response = await fetchDocs();
   const docs = response
     .map((doc: any) => {
-      const title = doc.filename.replace('.md', '');
+      const title = formatTitle(doc.filename);
       const tab: ACDoc = {
         id: title.toLowerCase().replace(/ /g, '-'),
         title: title,

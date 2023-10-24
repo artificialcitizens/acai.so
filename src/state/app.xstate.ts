@@ -326,7 +326,6 @@ export const createWorkspace = ({
   docs: ACDoc[];
 } => {
   const newId = id || uuidv4();
-  const docId = uuidv4();
   const newWorkspace: Workspace = {
     id: newId,
     name: workspaceName,
@@ -339,12 +338,6 @@ export const createWorkspace = ({
   if (docs) {
     docs.forEach((doc) => {
       newWorkspace.docIds.push(doc.id);
-      const newDoc: ACDoc = {
-        ...doc,
-        workspaceId: newId,
-        id: docId,
-      };
-      docs.push(newDoc);
     });
   }
 
