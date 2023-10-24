@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Sidebar } from '@chatscope/chat-ui-kit-react';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import './Sidebar.css';
-import { AvaNav } from '../AvaNav/AvaNav';
+import { ToggleView } from '../ToggleView/ToggleView';
 
 interface SBSidebarProps {
   children: React.ReactNode;
@@ -54,16 +54,13 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
 
     const handleMouseMove = (moveE: MouseEvent) => {
       if (initialWidth !== null) {
-        const scalingFactor = 1.25; // Adjust this value to change the sensitivity
         const newWidth =
-          initialWidth -
-          ((moveE.clientX - initialX) / window.innerWidth) *
-            100 *
-            scalingFactor;
+          initialWidth - ((moveE.clientX - initialX) / window.innerWidth) * 100;
 
         setWidth(Math.max(Math.min(newWidth, 100), minWidth));
       }
     };
+
     const handleMouseUp = () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
@@ -91,7 +88,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
           }}
         />
       )}
-      <AvaNav
+      <ToggleView
         toggled={toggled}
         handleClick={(e) => {
           e.stopPropagation();

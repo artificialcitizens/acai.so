@@ -10,6 +10,7 @@ import { handleAcaiEmbeddings } from '../models/chat';
 // }: {
 //   docs: Document[];
 // }) => {
+//   console.log('initializeMemoryVectorStore');
 //   const openAIApiKey =
 //     getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY;
 //   const vectorStore = await MemoryVectorStore.fromDocuments(

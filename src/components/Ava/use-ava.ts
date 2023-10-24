@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 import { avaChat } from '../../lib/ac-langchain/agents/ava';
 import { toastifyAgentLog } from '../Toast';
-import { ACDoc, handleCreateDoc } from '../../state';
+import { Tab, handleCreateTab } from '../../state';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -261,7 +261,7 @@ export const useAva = (): {
           },
         });
         if (agentState.context[workspaceId].returnRagResults) {
-          const newTab: ACDoc = {
+          const newTab: Tab = {
             id: Date.now().toString(),
             title: 'Retrieval Results',
             content: formattedResults,
@@ -274,7 +274,7 @@ export const useAva = (): {
             canEdit: true,
             systemNote: '',
           };
-          appStateService.send({ type: 'ADD_DOC', doc: newTab });
+          appStateService.send({ type: 'ADD_TAB', tab: newTab });
           navigate(`/${workspaceId}/documents/${newTab.id}`); // setAbortController(response.abortController);
         }
 
@@ -297,13 +297,13 @@ export const useAva = (): {
               title: string;
               content: string;
             }) => {
-              const tab = await handleCreateDoc(
+              const tab = await handleCreateTab(
                 { title, content },
                 workspaceId,
               );
               globalServices.appStateService.send({
-                type: 'ADD_DOC',
-                doc: tab,
+                type: 'ADD_TAB',
+                tab,
               });
               setTimeout(() => {
                 navigate(`/${workspaceId}/documents/${tab.id}`);

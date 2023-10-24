@@ -66,7 +66,15 @@ export const autoComplete = async ({
     new SystemMessage(systemMessage),
     new HumanMessage(context),
   ];
+  console.log(messages);
 
+  // console.log({
+  //   formattedInfo,
+  //   context,
+  //   systemMessage,
+  //   systemPrompt,
+  //   messages
+  // });
 
   const response = await model.call(messages);
   return response.content;
