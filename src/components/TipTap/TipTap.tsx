@@ -79,10 +79,6 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { setEditor } = useContext(EditorContext)!;
 
-  const workspace = useSelector(appStateService, (state) => {
-    return state.context.workspaces?.[currentTab.workspaceId || 'docs'];
-  });
-
   useEffect(() => {
     setCurrentTab(tab);
     setHydrated(false);
@@ -124,7 +120,6 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   // };
 
   const debouncedUpdates = useDebouncedCallback(async (editor: Editor) => {
-    if (!workspace) return;
     saveContent(editor);
   }, 500);
 
