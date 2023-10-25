@@ -167,7 +167,6 @@ const EditorDropzone: React.FC<DropzoneProps> = ({
 
   return (
     <div
-      className="w-full h-full flex-grow max-h-[calc(100vh-2rem)]"
       id="editor-dropzone"
       onDrop={handleDrop}
       onDragOver={handleDragOver}

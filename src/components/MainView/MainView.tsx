@@ -170,14 +170,14 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
         {workspace && <h1 className="m-2 text-lg">{workspace.name}</h1>}
         {workspaceId !== 'docs' && (
           <button
-            className="p-0 px-1  rounded-full font-medium text-red-900 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-4"
+            className="p-0 px-1 rounded-full font-medium text-red-900 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-4"
             onClick={handleDeleteWorkspace}
           >
             x
           </button>
         )}
       </div>
-      <div className="max-h-[calc(100vh-2rem)] flex flex-grow overflow-scroll">
+      <div className="">
         <EditorDropzone
           workspaceId={workspaceId}
           onPDFDrop={handlePdfDrop}

@@ -309,7 +309,7 @@ const Chat: React.FC<ChatProps> = ({
 
   return (
     <>
-      <div className="rounded-lg overflow-hidden w-full h-full">
+      <div className="rounded-lg overflow-hidden w-full h-full max-h-screen">
         <ChatContainer className="bg-dark">
           <MessageList className="bg-dark">
             {messages?.map((message) => (

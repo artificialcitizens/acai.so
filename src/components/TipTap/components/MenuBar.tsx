@@ -54,78 +54,77 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
   // }, [docs, state.context.workspaces, docId, workspaceId]);
 
   return (
-    <div className="w-full h-full relative md:absolute bottom-0">
-      <div className="flex w-full max-w-72 m-auto fixed md:absolute justify-around z-100 bg-dark md:bg-opacity-90 shadow-lg p-2 md:rounded-2xl bottom-0">
-        <button
-          //@TODO: add acai red color
-          className="font-bold hover:text-red-500 disabled:cursor-not-allowed"
-          type="button"
-          disabled={workspaceId === 'docs'}
-          onClick={() => {
-            if (!workspaceId) return;
-            const confirmDelete = window.prompt('Type "delete" to confirm');
-            if (confirmDelete?.toLowerCase() !== 'delete') {
-              toastifyInfo('Deletion cancelled.');
-              return;
-            }
+    <div className="relative bottom-0 flex w-full justify-around z-100 bg-darker md:bg-opacity-90 shadow-lg p-2 pb-4">
+      <button
+        //@TODO: add acai red color
+        className="font-bold hover:text-red-500 disabled:cursor-not-allowed"
+        type="button"
+        disabled={workspaceId === 'docs'}
+        onClick={() => {
+          if (!workspaceId) return;
+          const confirmDelete = window.prompt('Type "delete" to confirm');
+          if (confirmDelete?.toLowerCase() !== 'delete') {
+            toastifyInfo('Deletion cancelled.');
+            return;
+          }
 
-            send({
-              type: 'DELETE_DOC',
-              id: tipTapEditorId,
-              workspaceId,
-            });
-            navigate(`/${workspaceId}`);
-          }}
-        >
-          {'x'}
-        </button>
-        <button
-          className="font-bold disabled:cursor-not-allowed"
-          type="button"
-          // disabled={pageNumber <= 1}
-          // onClick={() => setPageNumber((prevPageNumber) => prevPageNumber - 1)}
-        >
-          {'<'}
-        </button>
-        {/* <p className="font-medium">
+          send({
+            type: 'DELETE_DOC',
+            id: tipTapEditorId,
+            workspaceId,
+          });
+          navigate(`/${workspaceId}`);
+        }}
+      >
+        {'x'}
+      </button>
+      <button
+        className="font-bold disabled:cursor-not-allowed"
+        type="button"
+        // disabled={pageNumber <= 1}
+        // onClick={() => setPageNumber((prevPageNumber) => prevPageNumber - 1)}
+      >
+        {'<'}
+      </button>
+      {/* <p className="font-medium">
           {pageNumber}/{numPages}
         </p> */}
-        <button
-          className="font-bold disabled:cursor-not-allowed"
-          type="button"
-          // disabled={pageNumber >= numPages}
-          // onClick={() => setPageNumber((prevPageNumber) => prevPageNumber + 1)}
-        >
-          {'>'}
-        </button>
-        <button
-          className="font-bold disabled:cursor-not-allowed"
-          type="button"
-          onClick={() => {
-            if (!editor || !doc) {
-              toastifyInfo(
-                !editor
-                  ? 'Editor is not available.'
-                  : 'Document is not available.',
-              );
-              return;
-            }
+      <button
+        className="font-bold disabled:cursor-not-allowed"
+        type="button"
+        // disabled={pageNumber >= numPages}
+        // onClick={() => setPageNumber((prevPageNumber) => prevPageNumber + 1)}
+      >
+        {'>'}
+      </button>
+      <button
+        className="font-bold disabled:cursor-not-allowed"
+        type="button"
+        onClick={() => {
+          if (!editor || !doc) {
+            toastifyInfo(
+              !editor
+                ? 'Editor is not available.'
+                : 'Document is not available.',
+            );
+            return;
+          }
 
-            const content = editor.getHTML(); // or editor.getJSON() for JSON format
-            const blob = new Blob([content], { type: 'text/html' }); // or 'application/json' for JSON format
-            const url = URL.createObjectURL(blob);
-            const { filetype, title } = doc;
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `${slugify(title)}.${filetype}`;
-            link.click();
+          const content = editor.getHTML(); // or editor.getJSON() for JSON format
+          const blob = new Blob([content], { type: 'text/html' }); // or 'application/json' for JSON format
+          const url = URL.createObjectURL(blob);
+          const { filetype, title } = doc;
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${slugify(title)}.${filetype}`;
+          link.click();
 
-            URL.revokeObjectURL(url);
-          }}
-        >
-          Download
-        </button>
-        {/* <button
+          URL.revokeObjectURL(url);
+        }}
+      >
+        Download
+      </button>
+      {/* <button
           className={`font-bold disabled:cursor-not-allowed mt-2 ${
             isContext && 'text-acai-primary'
           }`}
@@ -142,9 +141,8 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
         >
           {'^'}
         </button> */}
-        {/* <button onClick={zoomOut}>-</button>
+      {/* <button onClick={zoomOut}>-</button>
         <button onClick={zoomIn}>+</button> */}
-      </div>
     </div>
   );
 };
