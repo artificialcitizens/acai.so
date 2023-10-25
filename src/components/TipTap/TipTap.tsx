@@ -59,7 +59,7 @@ export const extractContentFromTipTap = (tipTapContent: any): string => {
 };
 
 // @TODO: create left right pagination with arrow and doc title
-const Tiptap: React.FC<EditorProps> = () => {
+const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   const { appStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const [saveStatus, setSaveStatus] = useState('Saved');
@@ -75,17 +75,6 @@ const Tiptap: React.FC<EditorProps> = () => {
   //   filterAndCombineContent,
   // } = useContext(VectorStoreContext) as ReturnType<typeof useMemoryVectorStore>;
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-
-  const { id: docId } = useParams<{
-    workspaceId: string;
-    domain: 'knowledge' | 'documents' | undefined;
-    id: string;
-  }>();
-
-  const tab = useSelector(appStateService, (state) => {
-    if (!docId) return;
-    return state.context.docs[docId];
-  });
 
   const saveContent = (editor: Editor) => {
     if (!tab) return;
