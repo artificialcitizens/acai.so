@@ -12,7 +12,7 @@ import { ACDoc } from '../../state';
 // import { semanticSearchQueryGeneration } from '../../utils/ac-langchain/chains/semantic-search-query-chain';
 import { autoComplete } from '../../lib/ac-langchain/chains/autocomplete-chain';
 import Bottleneck from 'bottleneck';
-// import { MenuBar } from './components/MenuBar';
+import { MenuBar } from './components/MenuBar';
 import './TipTap.css';
 // import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
 // import { VectorStoreContext } from '../../context/VectorStoreContext';
@@ -267,11 +267,11 @@ const Tiptap: React.FC<EditorProps> = () => {
         {editor && <EditorBubbleMenu editor={editor} />}
         <EditorContent editor={editor} />
       </div>
-      {/* <MenuBar
-      editor={editor}
-      tipTapEditorId={tab.id}
-      systemNote={tab.systemNote}
-    /> */}
+      <MenuBar
+        editor={editor}
+        tipTapEditorId={tab.id}
+        systemNote={tab.systemNote}
+      />
     </>
   );
 };

@@ -269,7 +269,7 @@ export const useAva = (): {
             isContext: false,
             createdAt: new Date().toString(),
             lastUpdated: new Date().toString(),
-            filetype: 'markdown',
+            filetype: 'md',
             autoSave: false,
             canEdit: true,
             systemNote: '',

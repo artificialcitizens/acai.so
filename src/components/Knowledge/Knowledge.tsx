@@ -32,7 +32,7 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
     useContext(GlobalStateContext);
   const vectorContext = useContext(VectorStoreContext);
   const navigate = useNavigate();
-  const { fileType } = useParams<{ fileType: string }>();
+  const { fileType } = useParams<{ fileType: any }>();
 
   const knowledgeItems = useLiveQuery(async () => {
     if (!vectorContext) return;

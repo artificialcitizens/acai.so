@@ -42,7 +42,7 @@ export const createAcaiDocumentation = async () => {
       const tab: ACDoc = {
         id: title.toLowerCase().replace(/ /g, '-'),
         title: title,
-        filetype: 'markdown',
+        filetype: 'md',
         content: doc.content,
         isContext: false,
         autoSave: false,

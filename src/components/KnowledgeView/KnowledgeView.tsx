@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import PDFRenderer from '../PDFRenderer/PdfRender';
 import Tiptap from '../TipTap/TipTap';
 import { v4 as uuidv4 } from 'uuid';
+import { ACDoc } from '../../state';
 
 interface KnowledgeViewProps {
   workspaceId: string;
@@ -48,7 +49,7 @@ const KnowledgeView: React.FC<KnowledgeViewProps> = ({
       case 'txt':
       case 'md':
         if (!content) return <div>no content</div>;
-        return <Tiptap tab={tab} />;
+        return <Tiptap tab={tab as ACDoc} />;
       default:
         return <div>Not sure how you got here...</div>;
     }
