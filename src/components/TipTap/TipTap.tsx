@@ -8,7 +8,7 @@ import { TiptapExtensions } from './extensions';
 import { useDebouncedCallback } from 'use-debounce';
 import { EditorBubbleMenu } from './components';
 // import { toastifyDefault, toastifyError } from '../Toast';
-import { ACDoc, Workspace } from '../../state';
+import { ACDoc } from '../../state';
 // import { semanticSearchQueryGeneration } from '../../utils/ac-langchain/chains/semantic-search-query-chain';
 import { autoComplete } from '../../lib/ac-langchain/chains/autocomplete-chain';
 import Bottleneck from 'bottleneck';
@@ -22,7 +22,6 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
-import { useSelector } from '@xstate/react';
 interface EditorProps {
   tab: ACDoc;
 }
@@ -245,14 +244,6 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
       window.removeEventListener('mousedown', mousedownHandler);
     };
   }, [isLoading, editor, completion]);
-
-  useEffect(() => {
-    if (!tab) return;
-    if (editor && !hydrated) {
-      editor.commands.setContent(tab.content);
-      setHydrated(true);
-    }
-  }, [editor, hydrated, tab]);
 
   useEffect(() => {
     setEditor(editor);
