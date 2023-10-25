@@ -54,8 +54,8 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
   // }, [docs, state.context.workspaces, docId, workspaceId]);
 
   return (
-    <div className="w-full h-full relative">
-      <div className="flex w-full max-w-72 m-auto fixed justify-around z-100 bg-dark md:bg-opacity-90 shadow-lg p-2 md:rounded-2xl bottom-0">
+    <div className="w-full h-full relative md:absolute bottom-0">
+      <div className="flex w-full max-w-72 m-auto fixed md:absolute justify-around z-100 bg-dark md:bg-opacity-90 shadow-lg p-2 md:rounded-2xl bottom-0">
         <button
           //@TODO: add acai red color
           className="font-bold hover:text-red-500 disabled:cursor-not-allowed"

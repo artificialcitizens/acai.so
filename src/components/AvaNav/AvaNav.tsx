@@ -7,7 +7,7 @@ import Settings from '../SettingsTabs/SettingsTabs';
 
 interface AvaSettingsProps {
   toggled: boolean;
-  handleClick: (e: any) => void;
+  handleClick: () => void;
 }
 
 import {
@@ -18,6 +18,7 @@ import {
   KnowledgeIcon,
 } from '../Icons/Icons';
 import { useSelector } from '@xstate/react';
+import AvaButton from './AvaButton';
 
 export const AvaNav: React.FC<AvaSettingsProps> = ({
   toggled,
@@ -49,40 +50,21 @@ export const AvaNav: React.FC<AvaSettingsProps> = ({
 
   return (
     <div className="z-10 absolute top-0 right-0 flex">
-      <button
-        className={`inline-block rounded-full mr-4 my-2.5 p-1 text-xs font-medium uppercase leading-tight text-white z-index-10 ${
-          micRecording ? 'bg-acai' : ''
-        }`}
-        onMouseDown={handleToggleMic}
+      <AvaButton
+        className={micRecording ? 'bg-acai' : ''}
+        onClick={handleToggleMic}
       >
-        <span className="block [&>svg]:h-5 [&>svg]:w-5 md:[&>svg]:h-4 md:[&>svg]:w-4 [&>svg]:text-acai-white hover:pointer">
-          <MicIcon />
-        </span>
-      </button>
-      <button
-        className="inline-block rounded-full mr-4 my-2.5 p-1 text-xs font-medium uppercase leading-tight text-white z-index-10 "
-        onMouseDown={() => openSettings(1)}
-      >
-        <span className="block [&>svg]:h-5 [&>svg]:w-5 md:[&>svg]:h-4 md:[&>svg]:w-4 [&>svg]:text-acai-white hover:pointer">
-          <KnowledgeIcon />
-        </span>
-      </button>
-      <button
-        className="inline-block rounded-full mr-4 my-2.5 p-1 text-xs font-medium uppercase leading-tight text-white z-index-10 "
-        onMouseDown={() => openSettings()}
-      >
-        <span className="block [&>svg]:h-5 [&>svg]:w-5 md:[&>svg]:h-4 md:[&>svg]:w-4 [&>svg]:text-acai-white hover:pointer">
-          <SettingIcon />
-        </span>
-      </button>
-      <button
-        className="inline-block rounded mr-6 py-2.5 text-xs font-medium uppercase leading-tight text-white z-index-10 "
-        onMouseDown={handleClick}
-      >
-        <span className="block [&>svg]:h-5 [&>svg]:w-5 md:[&>svg]:h-4 md:[&>svg]:w-4 [&>svg]:text-acai-white hover:pointer">
-          {toggled ? <SidebarRightIcon /> : <SidebarLeftIcon />}
-        </span>
-      </button>
+        <MicIcon />
+      </AvaButton>
+      <AvaButton onClick={() => openSettings(1)}>
+        <KnowledgeIcon />
+      </AvaButton>
+      <AvaButton onClick={() => openSettings()}>
+        <SettingIcon />
+      </AvaButton>
+      <AvaButton onClick={handleClick}>
+        {toggled ? <SidebarRightIcon /> : <SidebarLeftIcon />}
+      </AvaButton>
     </div>
   );
 };

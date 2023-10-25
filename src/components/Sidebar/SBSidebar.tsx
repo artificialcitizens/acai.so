@@ -87,14 +87,13 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
             left: 0,
             right: 0,
             cursor: 'ew-resize',
-            zIndex: 10000,
+            zIndex: 100,
           }}
         />
       )}
       <AvaNav
         toggled={toggled}
-        handleClick={(e) => {
-          e.stopPropagation();
+        handleClick={() => {
           toggleView();
         }}
       />
