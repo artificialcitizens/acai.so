@@ -34,6 +34,12 @@ export const AvaNav: React.FC<AvaSettingsProps> = ({
     speechStateService.send('TOGGLE_MIC_RECORDING', {
       micRecording: !micRecording,
     });
+
+    if (micRecording) {
+      speechStateService.send('SET_VOICE_STATE', {
+        voiceState: 'idle',
+      });
+    }
   };
   const openModal = (content: string | React.ReactNode) =>
     uiStateService.send({ type: 'TOGGLE_MODAL', modalContent: content });
