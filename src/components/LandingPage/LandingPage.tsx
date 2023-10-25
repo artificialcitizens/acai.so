@@ -73,7 +73,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ singleTagline = false }) => {
             setTagLineIndex((prevIndex) => (prevIndex + 1) % tagLines.length);
             setWordIndex(0);
             setIsTaglineComplete(false);
-          }, 5000),
+          }, 2000),
         );
       }
     }
