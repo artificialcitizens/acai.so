@@ -51,6 +51,10 @@ const App = () => {
   const { updateLocation } = useLocationManager();
 
   useEffect(() => {
+    // if (
+    //   globalServices.appStateService.getSnapshot().context.workspaces?.['docs']
+    // )
+    //   return;
     createAcaiDocumentation().then((d) => {
       const { workspace, docs } = createWorkspace({
         workspaceName: 'acai.so',
@@ -58,6 +62,7 @@ const App = () => {
         docs: d,
       });
       if (!workspace) return;
+      // @TODO: rename to load docs
       globalServices.appStateService.send({
         type: 'REPLACE_WORKSPACE',
         id: 'docs',

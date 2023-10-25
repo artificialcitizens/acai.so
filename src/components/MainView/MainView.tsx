@@ -57,7 +57,7 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
   const fileType = queryParams.get('fileType');
 
   const workspaceName = useSelector(globalServices.appStateService, (state) => {
-    return state.context.workspaces?.[workspaceId || 'docs'].name;
+    return state.context.workspaces?.[workspaceId || 'docs']?.name;
   });
 
   const activeDoc = useSelector(globalServices.appStateService, (state) => {
@@ -181,7 +181,7 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
         <EditorDropzone
           workspaceId={workspaceId}
           onPDFDrop={handlePdfDrop}
-          showHelperText={!activeDoc && !fileUrl}
+          showHelperText={false}
           onFilesDrop={handleFilesDrop}
         >
           {domain === 'documents' && activeDoc && <TipTap tab={activeDoc} />}
