@@ -22,6 +22,8 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
+import { useParams } from 'react-router-dom';
+import { useSelector } from '@xstate/react';
 interface EditorProps {
   tab: ACDoc;
 }
@@ -57,16 +59,14 @@ export const extractContentFromTipTap = (tipTapContent: any): string => {
 };
 
 // @TODO: create left right pagination with arrow and doc title
-const Tiptap: React.FC<EditorProps> = ({ tab }) => {
+const Tiptap: React.FC<EditorProps> = () => {
   const { appStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
-  const [hydrated, setHydrated] = useState(false);
   const [saveStatus, setSaveStatus] = useState('Saved');
-
   const [completion, setCompletion] = useState('');
-  // update to use the auth context
-  const [canEdit, setCanEdit] = useState<boolean>(tab.workspaceId !== 'docs');
   const [isLoading, setIsLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const { setEditor } = useContext(EditorContext)!;
   const [currentContext, setCurrentContext] = useState('');
   // const {
   //   vectorstore,
@@ -75,11 +75,17 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   //   filterAndCombineContent,
   // } = useContext(VectorStoreContext) as ReturnType<typeof useMemoryVectorStore>;
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const { setEditor } = useContext(EditorContext)!;
 
-  useEffect(() => {
-    setHydrated(false);
-  }, [tab]);
+  const { id: docId } = useParams<{
+    workspaceId: string;
+    domain: 'knowledge' | 'documents' | undefined;
+    id: string;
+  }>();
+
+  const tab = useSelector(appStateService, (state) => {
+    if (!docId) return;
+    return state.context.docs[docId];
+  });
 
   const saveContent = (editor: Editor) => {
     if (!tab) return;
@@ -94,7 +100,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     });
     setTimeout(() => {
       setSaveStatus('Saved');
-    }, 100);
+    }, 1000);
   };
 
   const currentCursorPosition = useRef(0);
@@ -140,7 +146,8 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     {
       extensions: TiptapExtensions,
       editorProps: TiptapEditorProps,
-      editable: tab.canEdit ?? true,
+      editable: tab?.canEdit ?? true,
+      content: tab?.content ?? '',
       onUpdate: async (e) => {
         setSaveStatus('Unsaved');
         currentCursorPosition.current = e.editor.state.selection.to;
@@ -190,14 +197,6 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     },
     [tab],
   );
-
-  useEffect(() => {
-    if (!tab) return;
-    if (editor) {
-      editor.commands.setContent(tab.content);
-      setHydrated(true);
-    }
-  }, [tab, editor, hydrated]);
 
   const prev = useRef('');
 
@@ -252,9 +251,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     };
   }, [editor, setEditor]);
 
-  const editorContent = useMemo(() => {
-    return <EditorContent editor={editor} />;
-  }, [editor]);
+  if (!tab) return null;
 
   return (
     <>
@@ -268,7 +265,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
           {tab.title}
         </h2>
         {editor && <EditorBubbleMenu editor={editor} />}
-        {editorContent}
+        <EditorContent editor={editor} />
       </div>
       {/* <MenuBar
       editor={editor}
