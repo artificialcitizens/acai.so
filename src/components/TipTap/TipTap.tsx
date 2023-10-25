@@ -207,7 +207,11 @@ const Tiptap: React.FC<EditorProps> = () => {
     prev.current = completion;
     editor?.commands.insertContent(diff);
   }, [isLoading, editor, completion]);
-
+  useEffect(() => {
+    if (saveStatus === 'Saved') {
+      editor?.chain().focus().run();
+    }
+  }, [saveStatus, editor]);
   useEffect(() => {
     // if user presses escape or cmd + z and it's loading,
     // stop the request, delete the completion, and insert back the "++"
