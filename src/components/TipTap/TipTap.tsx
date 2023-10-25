@@ -69,7 +69,6 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   const [canEdit, setCanEdit] = useState<boolean>(tab.workspaceId !== 'docs');
   const [isLoading, setIsLoading] = useState(false);
   const [currentContext, setCurrentContext] = useState('');
-  const [currentTab, setCurrentTab] = useState<ACDoc>(tab);
   // const {
   //   vectorstore,
   //   addDocuments,
@@ -80,25 +79,26 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   const { setEditor } = useContext(EditorContext)!;
 
   useEffect(() => {
-    setCurrentTab(tab);
     setHydrated(false);
   }, [tab]);
 
   const saveContent = (editor: Editor) => {
-    if (!currentTab) return;
+    if (!tab) return;
     if (!tab.autoSave) return;
     setSaveStatus('Unsaved');
     const content = editor.getJSON();
     setSaveStatus('Saving...');
     appStateService.send({
       type: 'UPDATE_DOC_CONTENT',
-      id: currentTab.id,
+      id: tab.id,
       content,
     });
     setTimeout(() => {
       setSaveStatus('Saved');
     }, 100);
   };
+
+  const currentCursorPosition = useRef(0);
 
   // /**
   //  * Creates context for the autocomplete vector search to inform autocomplete
@@ -144,6 +144,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
       editable: tab.canEdit ?? true,
       onUpdate: async (e) => {
         setSaveStatus('Unsaved');
+        currentCursorPosition.current = e.editor.state.selection.to;
         const selection = e.editor.state.selection;
         const lastTwo = e.editor.state.doc.textBetween(
           selection.from - 2,
@@ -186,19 +187,18 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
           debouncedUpdates(e.editor);
         }
       },
-      autofocus: 'start',
+      autofocus: currentCursorPosition?.current || 0,
     },
     [tab],
   );
 
   useEffect(() => {
-    if (!currentTab) return;
-    if (editor && !hydrated) {
-      editor.commands.setContent(currentTab.content);
-      editor.commands.setNodeSelection(0);
+    if (!tab) return;
+    if (editor) {
+      editor.commands.setContent(tab.content);
       setHydrated(true);
     }
-  }, [currentTab, editor, hydrated]);
+  }, [tab, editor, hydrated]);
 
   const prev = useRef('');
 
@@ -247,12 +247,12 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   }, [isLoading, editor, completion]);
 
   useEffect(() => {
-    if (!currentTab) return;
+    if (!tab) return;
     if (editor && !hydrated) {
-      editor.commands.setContent(currentTab.content);
+      editor.commands.setContent(tab.content);
       setHydrated(true);
     }
-  }, [editor, hydrated, currentTab]);
+  }, [editor, hydrated, tab]);
 
   useEffect(() => {
     setEditor(editor);
@@ -274,15 +274,15 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
         className="overflow-scroll w-full mb-12 p-12 px-8 border-none sm:rounded-lg sm:border sm:px-12 flex-grow"
       >
         <h2 className=" text-sm mb-4 pb-2 font-medium border-b border-solid border-dark text-acai-white">
-          {currentTab.title}
+          {tab.title}
         </h2>
         {editor && <EditorBubbleMenu editor={editor} />}
         {editorContent}
       </div>
       {/* <MenuBar
       editor={editor}
-      tipTapEditorId={currentTab.id}
-      systemNote={currentTab.systemNote}
+      tipTapEditorId={tab.id}
+      systemNote={tab.systemNote}
     /> */}
     </>
   );

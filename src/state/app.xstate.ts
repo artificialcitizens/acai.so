@@ -290,9 +290,9 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
       updateDocContent: assign((context, event) => {
         if (event.type !== 'UPDATE_DOC_CONTENT') return context;
         const { id, content } = event;
-        const updatedTab = { ...context.docs[id], content };
-        appDbService.saveDoc(updatedTab);
-        return { ...context };
+        const updatedDoc = { ...context.docs[id], content };
+        appDbService.saveDoc(updatedDoc);
+        return { ...context, docs: { ...context.docs, [id]: updatedDoc } };
       }),
     },
   },
