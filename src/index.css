@@ -172,13 +172,13 @@ ol p {
 }
 
 p {
-  @apply text-acai-white mb-2 md:mb-4;
+  @apply text-acai-white mb-2 md:mb-3;
 }
 p,
 li,
 ul,
 ol {
-  @apply text-sm sm:text-base md:text-lg;
+  @apply text-sm md:text-base;
 }
 
 pre,

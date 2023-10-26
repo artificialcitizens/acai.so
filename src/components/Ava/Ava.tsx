@@ -10,6 +10,9 @@ import {
 } from '../../context/GlobalStateContext';
 import QuickSettings from '../QuickSettings/QuickSettings';
 import { toastifyError } from '../Toast';
+import AvaButton from '../AvaNav/AvaButton';
+import { EllipsisMenuIcon } from '../Icons/Icons';
+import './Ava.css';
 
 interface AvaProps {
   workspaceId: string;
@@ -37,6 +40,8 @@ export const Ava: React.FC<AvaProps> = ({
     (state) => state.context[workspaceId]?.agentMode,
   );
 
+  const [quickSettingsOpen, setQuickSettingsOpen] = useState(false);
+
   const formatAgentMode = (mode: string) => {
     if (!mode) return '';
     switch (mode) {
@@ -52,8 +57,17 @@ export const Ava: React.FC<AvaProps> = ({
   return (
     // @TODO: update to manage toggle via state
     <SBSidebar>
+      <AvaButton
+        className="fixed right-0 top-9 md:top-7 mr-2 md:mr-4"
+        onClick={() => {
+          setQuickSettingsOpen(!quickSettingsOpen);
+        }}
+      >
+        <EllipsisMenuIcon />
+      </AvaButton>
       <ExpansionPanel
-        className="pt-12 md:pt-6 border-0"
+        className="pt-10 md:pt-6 border-0"
+        isOpened={quickSettingsOpen}
         title={formatAgentMode(currentAgentMode)}
       >
         <QuickSettings
@@ -61,7 +75,6 @@ export const Ava: React.FC<AvaProps> = ({
           audioContext={audioContext}
         />
       </ExpansionPanel>
-
       {workspaceId && (
         <span className="flex flex-col flex-grow">
           <div className="flex flex-col flex-grow p-2 pt-0 mb-2 md:mb-0">

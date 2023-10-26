@@ -45,7 +45,7 @@ const markdownComponents = {
     );
   },
   p: ({ children }: { children: ReactNode }) => (
-    <p className="mb-1 text-sm md:text-base">{children}</p>
+    <p className="mb-1 text-sm">{children}</p>
   ),
   li: ({ children }: { children: ReactNode }) => (
     <li className="text-sm sm:text-bas list-disc ml-1 mb-0 pb-0">{children}</li>
