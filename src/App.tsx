@@ -117,7 +117,7 @@ const App = () => {
           <ToastManager />
           <div onClick={handleWindowClick}>
             <main className="w-screen flex flex-grow max-h-screen overflow-hidden">
-              <span className="mt-[.75rem] text-base lg:text-lg font-semibold z-10 max-w-[25vw] truncate w-full absolute ml-16">
+              <span className="mt-[.75rem] text-base lg:text-lg font-semibold z-10 max-w-[25vw] truncate w-full fixed ml-16">
                 {workspaceName}
               </span>
               <MainView domain={domain} />

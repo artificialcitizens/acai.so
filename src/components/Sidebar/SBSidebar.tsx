@@ -121,7 +121,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
           aria-valuemax={100}
           aria-valuenow={width}
           tabIndex={0}
-          className="md:hover:bg-acai-darker"
+          className="md:hover:bg-acai-darker pointer-events-none md:pointer-events-auto"
           style={{
             width: width < 3 ? '20px' : '10px',
             cursor: 'ew-resize',

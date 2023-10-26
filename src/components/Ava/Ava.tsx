@@ -79,7 +79,7 @@ export const Ava: React.FC<AvaProps> = ({
       </ExpansionPanel>
       {workspaceId && !quickSettingsOpen && (
         <span className="flex flex-col flex-grow">
-          <div className="flex flex-col flex-grow p-2 pt-0 mb-2 md:mb-0">
+          <div className="flex flex-col flex-grow p-2 pt-0 mb-3 md:mb-0">
             <Chat
               name="Ava"
               avatar=".."
