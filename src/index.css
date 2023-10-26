@@ -178,7 +178,7 @@ p,
 li,
 ul,
 ol {
-  @apply text-sm md:text-base;
+  @apply text-base;
 }
 
 pre,
@@ -200,4 +200,8 @@ code {
 } */
 hr {
   @apply border-lighter my-2;
+}
+body {
+  /* Disables pull-to-refresh but allows touch scrolling */
+  overscroll-behavior-y: contain;
 }

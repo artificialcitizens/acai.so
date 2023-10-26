@@ -25,14 +25,9 @@ import ACModal from './components/Modal/Modal';
 const App = () => {
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
-  const {
-    workspaceId,
-    domain,
-    id: docId,
-  } = useParams<{
+  const { workspaceId, domain } = useParams<{
     workspaceId: string;
     domain: 'knowledge' | 'documents' | undefined;
-    id: string;
   }>();
 
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(

@@ -171,7 +171,9 @@ const Chat: React.FC<ChatProps> = ({
 
   useEffect(() => {
     if (inputRef.current) {
-      inputRef.current.focus();
+      if (!/Android|webOS|iPhone|iPad|/i.test(navigator.userAgent)) {
+        inputRef.current?.focus();
+      }
     }
   }, []);
 
