@@ -163,7 +163,7 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
   if (!workspaceId) return <></>;
 
   return (
-    <div className="w-full flex flex-col mt-16 md:mt-8 max-h-screen">
+    <div className="w-full flex flex-col mt-16 md:mt-8 max-h-full">
       <div className="ml-16 flex items-center group">
         {workspaceId !== 'docs' && (
           <button

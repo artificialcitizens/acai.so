@@ -115,9 +115,12 @@ const App = () => {
             <AudioWaveform audioContext={audioContext} isOn={listening} />
           )}
           <ToastManager />
-          <div onClick={handleWindowClick} className="h-full">
-            <main className="w-screen flex flex-grow max-h-full">
-              <span className="mt-[.75rem] text-base lg:text-lg font-semibold z-10 max-w-[25vw] truncate w-full fixed ml-16">
+          <main className="w-screen  max-h-full overflow-hidden">
+            <span
+              onClick={handleWindowClick}
+              className="h-full overflow-hidden flex flex-grow"
+            >
+              <span className="mt-[.75rem] text-base lg:text-lg font-semibold z-10 max-w-[25vw] truncate w-full flex-grow fixed ml-16">
                 {workspaceName}
               </span>
               <MainView domain={domain} />
@@ -126,8 +129,8 @@ const App = () => {
                 onVoiceActivation={setListening}
                 audioContext={audioContext}
               />
-            </main>
-          </div>{' '}
+            </span>{' '}
+          </main>
         </EditorContext.Provider>
       </VectorStoreContext.Provider>
     )

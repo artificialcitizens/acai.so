@@ -89,7 +89,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
 
   return (
     <>
-      {isResizing && (
+      {/* {isResizing && (
         <div
           style={{
             position: 'fixed',
@@ -101,7 +101,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
             zIndex: 100,
           }}
         />
-      )}
+      )} */}
       <AvaNav
         toggled={toggled}
         handleClick={() => {
@@ -110,7 +110,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
       />
       <Sidebar
         position="right"
-        className={`right-0 fixed md:relative max-h-full transition-transform h-screen`}
+        className={`right-0 fixed md:relative max-h-full transition-transform h-screen flex-grow`}
         style={{
           width: `${width}vw`,
         }}

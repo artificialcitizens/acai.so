@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
-  @apply overflow-hidden;
-}
-
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -26,7 +22,6 @@ html {
   max-height: 100%;
 }
 
-/* #root { @apply w-screen h-screen; } */
 .ProseMirror .is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
@@ -125,8 +120,6 @@ p > a,
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   width: 100vw;
 }
 
@@ -201,7 +194,8 @@ code {
 hr {
   @apply border-lighter my-2;
 }
+
 body {
-  /* Disables pull-to-refresh but allows touch scrolling */
-  overscroll-behavior-y: contain;
+  overscroll-behavior: none;
+  overflow: hidden;
 }
