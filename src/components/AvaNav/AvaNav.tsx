@@ -49,7 +49,7 @@ export const AvaNav: React.FC<AvaSettingsProps> = ({
     openModal(<Settings initialTabIndex={index || 0} />);
 
   return (
-    <div className="z-10 absolute top-0 right-0 flex">
+    <div className="z-10 fixed top-0 right-0 flex">
       <AvaButton
         className={micRecording ? 'bg-acai' : ''}
         onClick={handleToggleMic}
