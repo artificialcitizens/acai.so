@@ -257,7 +257,9 @@ const Chat: React.FC<ChatProps> = ({
     async (message: string) => {
       const userChatHistory = addMessage(message, 'user', 'outgoing');
       setMsgInputValue('');
-      inputRef.current?.focus();
+      if (!/Android|webOS|iPhone|iPad|/i.test(navigator.userAgent)) {
+        inputRef.current?.focus();
+      }
       try {
         const answer = await onSubmitHandler(
           message,
