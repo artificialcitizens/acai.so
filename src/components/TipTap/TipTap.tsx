@@ -272,7 +272,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
         onClick={() => {
           editor?.chain().focus().run();
         }}
-        className="overflow-y-auto flex-grow w-full mb-3 px-8 border-none sm:rounded-lg sm:border sm:px-12 h-full max-h-[calc(100vh-6rem)]"
+        className="overflow-y-auto flex-grow w-full mb-3 px-8 border-none sm:rounded-lg sm:border sm:px-12 h-full max-h-[calc(100vh-7rem)] md:max-h-[calc(100vh-5rem)]"
       >
         <EditorContent editor={editor} />
       </div>
