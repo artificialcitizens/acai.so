@@ -45,10 +45,10 @@ const markdownComponents = {
     );
   },
   p: ({ children }: { children: ReactNode }) => (
-    <p className="mb-1">{children}</p>
+    <p className="mb-1 text-sm md:text-base">{children}</p>
   ),
   li: ({ children }: { children: ReactNode }) => (
-    <li className="list-disc ml-1">{children}</li>
+    <li className="text-sm sm:text-bas list-disc ml-1 mb-0 pb-0">{children}</li>
   ),
   h1: ({ children }: { children: ReactNode }) => (
     <h1 className="text-2xl font-bold py-2">{children}</h1>
@@ -75,7 +75,7 @@ const markdownComponents = {
     <del className="line-through">{children}</del>
   ),
   ul: ({ children }: { children: ReactNode }) => (
-    <ul className="list-disc ml-6">{children}</ul>
+    <ul className="list-disc ml-6 mb-0 py-0">{children}</ul>
   ),
   ol: (props: {
     children: ReactNode;
