@@ -23,7 +23,7 @@ html {
     display: none;
   }
 
-  max-height: 100vh;
+  max-height: 100%;
 }
 
 /* #root { @apply w-screen h-screen; } */
@@ -204,9 +204,4 @@ hr {
 body {
   /* Disables pull-to-refresh but allows touch scrolling */
   overscroll-behavior-y: contain;
-}
-:root {
-  /* other styles */
-
-  max-height: 100%;
 }

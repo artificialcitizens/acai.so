@@ -106,7 +106,7 @@ export const SideNav: React.FC = () => {
 
   return (
     <nav
-      className="fixed flex flex-col left-0 top-0 z-[1035] max-h-screen w-60 -translate-x-full overflow-hidden bg-dark shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] data-[te-sidenav-hidden='false']:translate-x-0 dark:bg-dark"
+      className="fixed flex flex-col left-0 top-0 z-[1035] max-h-full w-60 -translate-x-full overflow-hidden bg-dark shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] data-[te-sidenav-hidden='false']:translate-x-0 dark:bg-dark"
       data-te-sidenav-init
       data-te-sidenav-hidden={!navOpen}
       data-te-sidenav-mode="push"
