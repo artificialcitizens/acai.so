@@ -76,6 +76,7 @@ const App = () => {
     globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV' });
   };
 
+  // @TODO: move context activation to a service
   const activateAudioContext = () => {
     const newAudioContext = new AudioContext();
     setAudioContext(newAudioContext);
@@ -111,12 +112,12 @@ const App = () => {
           {audioContext && (
             <AudioWaveform audioContext={audioContext} isOn={listening} />
           )}
+          <ToastManager />
           <div
-            className="w-screen h-screen flex flex-col sm:flex-row flex-wrap sm:flex-nowrap flex-grow p-0"
+            className="flex flex-col sm:flex-row overflow-hidden"
             onClick={handleWindowClick}
           >
-            <ToastManager />
-            <main className="w-screen flex flex-grow">
+            <main className="w-screen flex flex-grow max-h-screen overflow-hidden">
               {workspaceId && (
                 <>
                   <MainView domain={domain} />
