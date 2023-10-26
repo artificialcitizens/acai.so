@@ -55,7 +55,6 @@ export const Ava: React.FC<AvaProps> = ({
   };
 
   return (
-    // @TODO: update to manage toggle via state
     <SBSidebar>
       <AvaButton
         className="fixed right-0 top-9 md:top-7 mr-2 md:mr-4"
