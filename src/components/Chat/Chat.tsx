@@ -95,7 +95,6 @@ const markdownComponents = {
       {children}
     </a>
   ),
-  // https://flowbite.com/docs/components/tables/
   table: ({ children }: { children: ReactNode }) => (
     <table className="w-full text-sm text-center text-gray-500 dark:text-gray-400 border">
       {children}

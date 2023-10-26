@@ -191,14 +191,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
         autofocus: 'start',
       }),
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [
-        currentContext,
-        debouncedUpdates,
-        isLoading,
-        isProcessing,
-        tab?.canEdit,
-        tokenQueue,
-      ],
+      [currentContext, debouncedUpdates, isLoading, isProcessing, tokenQueue],
     ),
   );
   useEffect(() => {
@@ -272,7 +265,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
         onClick={() => {
           editor?.chain().focus().run();
         }}
-        className="overflow-y-auto flex-grow w-full mb-3 px-8 border-none sm:rounded-lg sm:border sm:px-12  max-h-[75vh] md:max-h-[calc(100vh-8rem)]"
+        className="overflow-y-auto flex-grow w-full mb-3 px-8 border-none sm:rounded-lg sm:border sm:px-12 min-h-[50vh] max-h-[75vh] md:max-h-[calc(100vh-8rem)]"
       >
         <EditorContent editor={editor} />
       </div>
