@@ -132,60 +132,74 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   };
 
   const editor = useEditor(
-    {
-      extensions: TiptapExtensions,
-      editorProps: TiptapEditorProps,
-      editable: tab?.canEdit ?? true,
-      content: tab?.content ?? '',
-      onUpdate: async (e) => {
-        setSaveStatus('Unsaved');
-        currentCursorPosition.current = e.editor.state.selection.to;
-        const selection = e.editor.state.selection;
-        const lastTwo = e.editor.state.doc.textBetween(
-          selection.from - 2,
-          selection.from,
-          '\n',
-        );
-        if (lastTwo === '++' && !isLoading) {
-          e.editor.commands.deleteRange({
-            from: selection.from - 2,
-            to: selection.from,
-          });
-          setIsLoading(true);
-          // await setAutocompleteContext(e.editor);
-          autoComplete({
-            context: e.editor.state.doc.textBetween(
-              Math.max(0, e.editor.state.selection.from - 5000),
-              e.editor.state.selection.from - 0,
-              '\n',
-            ),
-            relatedInfo: currentContext || '',
-            callbacks: {
-              onMessageStart: () => setIsLoading(true),
-              onMessageError: (error: string) => {
-                console.error(error);
-                toastifyError(error);
-                setIsLoading(false);
+    useMemo(
+      () => ({
+        extensions: TiptapExtensions,
+        editorProps: TiptapEditorProps,
+        editable: tab?.canEdit ?? true,
+        onUpdate: async (e) => {
+          setSaveStatus('Unsaved');
+          currentCursorPosition.current = e.editor.state.selection.to;
+          const selection = e.editor.state.selection;
+          const lastTwo = e.editor.state.doc.textBetween(
+            selection.from - 2,
+            selection.from,
+            '\n',
+          );
+          if (lastTwo === '++' && !isLoading) {
+            e.editor.commands.deleteRange({
+              from: selection.from - 2,
+              to: selection.from,
+            });
+            setIsLoading(true);
+            // await setAutocompleteContext(e.editor);
+            autoComplete({
+              context: e.editor.state.doc.textBetween(
+                Math.max(0, e.editor.state.selection.from - 5000),
+                e.editor.state.selection.from - 0,
+                '\n',
+              ),
+              relatedInfo: currentContext || '',
+              callbacks: {
+                onMessageStart: () => setIsLoading(true),
+                onMessageError: (error: string) => {
+                  console.error(error);
+                  toastifyError(error);
+                  setIsLoading(false);
+                },
+                onMessageStream: (token: string) => {
+                  tokenQueue.push(token);
+                  if (!isProcessing) {
+                    processTokens();
+                  }
+                },
+                onMessageComplete: (message: string) => {
+                  // setIsLoading(false);
+                },
               },
-              onMessageStream: (token: string) => {
-                tokenQueue.push(token);
-                if (!isProcessing) {
-                  processTokens();
-                }
-              },
-              onMessageComplete: (message: string) => {
-                // setIsLoading(false);
-              },
-            },
-          }).then((res) => setIsLoading(false));
-        } else {
-          debouncedUpdates(e.editor);
-        }
-      },
-      autofocus: currentCursorPosition?.current || 0,
-    },
-    [tab],
+            }).then((res) => setIsLoading(false));
+          } else {
+            debouncedUpdates(e.editor);
+          }
+        },
+        autofocus: currentCursorPosition?.current || 0,
+      }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [
+        currentContext,
+        debouncedUpdates,
+        isLoading,
+        isProcessing,
+        tab?.canEdit,
+        tokenQueue,
+      ],
+    ),
   );
+  useEffect(() => {
+    if (editor && tab) {
+      editor.commands.setContent(tab.content ?? '');
+    }
+  }, [editor, tab]);
 
   const prev = useRef('');
 
