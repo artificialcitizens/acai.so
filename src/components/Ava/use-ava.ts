@@ -142,81 +142,91 @@ export const useAva = (): {
               // formattedChatHistory,
             );
         // console.log(currentAgent?.recentChatHistory)
-        const response = await queryChat({
-          systemMessage: sysMessage,
-          message,
-          messages: currentAgent?.recentChatHistory.map((msg: Message) =>
-            msg.type === 'user'
-              ? new HumanMessage(msg.text)
-              : new AIMessage(msg.text),
-          ),
-          modelName: currentAgent.openAIChatModel,
-          callbacks: {
-            handleLLMStart: () => {
-              setLoading(true);
-              // console.log({ llm, prompts });
+        try {
+          const response = await queryChat({
+            systemMessage: sysMessage,
+            message,
+            messages: currentAgent?.recentChatHistory.map((msg: Message) =>
+              msg.type === 'user'
+                ? new HumanMessage(msg.text)
+                : new AIMessage(msg.text),
+            ),
+            modelName: currentAgent.openAIChatModel,
+            callbacks: {
+              handleLLMStart: () => {
+                setLoading(true);
+                // console.log({ llm, prompts });
+              },
+              handleLLMNewToken: (token) => {
+                setStreamingMessage((prev) => prev + token);
+                // console.log(token);
+              },
+              handleLLMEnd: () => {
+                setLoading(false);
+                setStreamingMessage('');
+                // console.log({ output });
+              },
+              handleLLMError: (err) => {
+                setError(err.message);
+                setLoading(false);
+                // console.log({ err });
+              },
             },
-            handleLLMNewToken: (token) => {
-              setStreamingMessage((prev) => prev + token);
-              // console.log(token);
-            },
-            handleLLMEnd: () => {
-              setLoading(false);
-              setStreamingMessage('');
-              // console.log({ output });
-            },
-            handleLLMError: (err) => {
-              setError(err.message);
-              setLoading(false);
-              // console.log({ err });
-            },
-          },
-        });
+          });
 
-        // setAbortController(response.abortController);
-        return {
-          response: response.response,
-          // abortController: response.abortController,
-        };
+          // setAbortController(response.abortController);
+          return {
+            response: response.response,
+            // abortController: response.abortController,
+          };
+        } catch (error: any) {
+          setLoading(false);
+          return error.message;
+        }
       }
       case 'document': {
         // @TODO: Add config for special rules for document agent
         // const sysMessage = customPrompt;
         // console.log(currentAgent?.recentChatHistory)
-        const response = await askAi({
-          documentContext: editor?.getText() || '',
-          task: args?.task || '',
-          highlighted: args?.highlighted || '',
-          messages: [],
-          modelName: currentAgent.openAIChatModel,
-          callbacks: {
-            handleLLMStart: () => {
-              setLoading(true);
-              // console.log({ llm, prompts });
+        try {
+          const response = await askAi({
+            documentContext: editor?.getText() || '',
+            task: args?.task || '',
+            highlighted: args?.highlighted || '',
+            messages: [],
+            modelName: currentAgent.openAIChatModel,
+            callbacks: {
+              handleLLMStart: () => {
+                setLoading(true);
+                // console.log({ llm, prompts });
+              },
+              handleLLMNewToken: (token) => {
+                setStreamingMessage((prev) => prev + token);
+                // console.log(token);
+              },
+              handleLLMEnd: () => {
+                setLoading(false);
+                setStreamingMessage('');
+                // console.log({ output });
+              },
+              handleLLMError: (err) => {
+                setError(err.message);
+                setLoading(false);
+                // console.log({ err });
+              },
             },
-            handleLLMNewToken: (token) => {
-              setStreamingMessage((prev) => prev + token);
-              // console.log(token);
-            },
-            handleLLMEnd: () => {
-              setLoading(false);
-              setStreamingMessage('');
-              // console.log({ output });
-            },
-            handleLLMError: (err) => {
-              setError(err.message);
-              setLoading(false);
-              // console.log({ err });
-            },
-          },
-        });
-
-        // setAbortController(response.abortController);
-        return {
-          response: response.response,
-          // abortController: response.abortController,
-        };
+          });
+          // setAbortController(response.abortController);
+          return {
+            response: response.response,
+            // abortController: response.abortController,
+          };
+        } catch (error: any) {
+          setLoading(false);
+          return error.message;
+        }
       }
+
       // maps to rag agent
       case 'knowledge': {
         if (!vectorContext) {
