@@ -7,7 +7,7 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from './context/GlobalStateContext';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import ToastManager from './components/Toast';
 import { VectorStoreContext } from './context/VectorStoreContext';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';

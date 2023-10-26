@@ -8,13 +8,24 @@ interface SBSidebarProps {
   children: React.ReactNode;
 }
 
+const isMobile = () => {
+  if (
+    !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent,
+    )
+  ) {
+    return false;
+  }
+  return true;
+};
 const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
   const calculatedWidth = window.innerWidth < 640 ? 100 : 50;
   const minWidth = 0;
   const defaultWidth = calculatedWidth;
   const [width, setWidth] = useState<number | null>(null);
   const [isResizing, setIsResizing] = useState(false);
-  const [toggled, setToggled] = useState(true);
+
+  const [toggled, setToggled] = useState(isMobile() ? false : true);
 
   const toggleView = () => {
     setToggled(!toggled);
