@@ -178,7 +178,7 @@ p,
 li,
 ul,
 ol {
-  @apply text-sm md:text-base;
+  @apply text-base;
 }
 
 pre,
