@@ -10,9 +10,9 @@ import {
 } from '../../context/GlobalStateContext';
 import QuickSettings from '../QuickSettings/QuickSettings';
 import { toastifyError } from '../Toast';
-import AvaButton from '../AvaNav/AvaButton';
-import { EllipsisMenuIcon } from '../Icons/Icons';
-import './Ava.css';
+// import AvaButton from '../AvaNav/AvaButton';
+// import { EllipsisMenuIcon } from '../Icons/Icons';
+// import './Ava.css';
 
 interface AvaProps {
   workspaceId: string;
@@ -56,16 +56,16 @@ export const Ava: React.FC<AvaProps> = ({
 
   return (
     <SBSidebar>
-      <AvaButton
+      {/* <AvaButton
         className="fixed right-0 top-9 md:top-6 mr-2 md:mr-4"
         onClick={() => {
           setQuickSettingsOpen(!quickSettingsOpen);
         }}
       >
         <EllipsisMenuIcon />
-      </AvaButton>
+      </AvaButton> */}
       <ExpansionPanel
-        className="pt-10 md:pt-6 border-0 !hover:cursor-default"
+        className="pt-10 md:pt-8 pl-1 text-sm border-0 !hover:cursor-default"
         isOpened={quickSettingsOpen}
         onChange={() => {
           setQuickSettingsOpen(!quickSettingsOpen);
@@ -77,7 +77,7 @@ export const Ava: React.FC<AvaProps> = ({
           audioContext={audioContext}
         />
       </ExpansionPanel>
-      {workspaceId && (
+      {workspaceId && !quickSettingsOpen && (
         <span className="flex flex-col flex-grow">
           <div className="flex flex-col flex-grow p-2 pt-0 mb-2 md:mb-0">
             <Chat

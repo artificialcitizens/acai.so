@@ -99,10 +99,8 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     });
     setTimeout(() => {
       setSaveStatus('Saved');
-    }, 1000);
+    }, 500);
   };
-
-  const currentCursorPosition = useRef(0);
 
   // /**
   //  * Creates context for the autocomplete vector search to inform autocomplete
@@ -148,7 +146,6 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
         editorProps: TiptapEditorProps,
         onUpdate: async (e) => {
           setSaveStatus('Unsaved');
-          currentCursorPosition.current = e.editor.state.selection.to;
           const selection = e.editor.state.selection;
           const lastTwo = e.editor.state.doc.textBetween(
             selection.from - 2,
@@ -191,7 +188,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
             debouncedUpdates(e.editor);
           }
         },
-        autofocus: currentCursorPosition?.current || 0,
+        autofocus: 'start',
       }),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [
@@ -219,11 +216,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     prev.current = completion;
     editor?.commands.insertContent(diff);
   }, [isLoading, editor, completion]);
-  useEffect(() => {
-    if (saveStatus === 'Saved') {
-      editor?.chain().focus().run();
-    }
-  }, [saveStatus, editor]);
+
   useEffect(() => {
     // if user presses escape or cmd + z and it's loading,
     // stop the request, delete the completion, and insert back the "++"
@@ -270,7 +263,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   if (!tab) return null;
 
   return (
-    <div className="h-[calc(100vh-2.75rem)] flex flex-col overflow-scroll flex-grow">
+    <div className="h-[calc(100vh-2.75rem)] flex flex-col">
       <h2 className="text-sm font-medium border-b border-solid border-dark text-acai-white mx-8 sm:mx-12 mt-6 mb-4">
         {tab.title}
       </h2>
