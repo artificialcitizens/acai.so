@@ -6,6 +6,26 @@ html {
   @apply overflow-hidden;
 }
 
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  @apply text-acai-white;
+  @apply bg-darker;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  max-height: 100vh;
+}
+
 /* #root { @apply w-screen h-screen; } */
 .ProseMirror .is-editor-empty:first-child::before {
   content: attr(data-placeholder);
@@ -94,24 +114,6 @@ ul[data-type='taskList'] li[data-checked='true'] > div > p {
   @apply text-acai-white;
   text-decoration: line-through;
   text-decoration-thickness: 2px;
-}
-
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  @apply text-acai-white;
-  @apply bg-darker;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-  ::-webkit-scrollbar {
-    display: none;
-  }
 }
 
 p > a,
