@@ -25,14 +25,9 @@ import ACModal from './components/Modal/Modal';
 const App = () => {
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
-  const {
-    workspaceId,
-    domain,
-    id: docId,
-  } = useParams<{
+  const { workspaceId, domain } = useParams<{
     workspaceId: string;
     domain: 'knowledge' | 'documents' | undefined;
-    id: string;
   }>();
 
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
@@ -49,35 +44,6 @@ const App = () => {
     filterAndCombineContent,
   } = useMemoryVectorStore('');
   const { updateLocation } = useLocationManager();
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
-
-  useEffect(() => {
-    function handleTouchStart(e: TouchEvent) {
-      setTouchStart(e.targetTouches[0].clientY);
-    }
-
-    function handleTouchMove(e: TouchEvent) {
-      setTouchEnd(e.targetTouches[0].clientY);
-    }
-
-    function handleTouchEnd() {
-      if (touchStart - touchEnd > 150) {
-        // Refresh logic here
-        window.location.reload();
-      }
-    }
-
-    window.addEventListener('touchstart', handleTouchStart);
-    window.addEventListener('touchmove', handleTouchMove);
-    window.addEventListener('touchend', handleTouchEnd);
-
-    return () => {
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [touchStart, touchEnd]);
 
   useEffect(() => {
     // if (
