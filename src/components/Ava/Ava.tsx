@@ -57,7 +57,7 @@ export const Ava: React.FC<AvaProps> = ({
   return (
     <SBSidebar>
       <AvaButton
-        className="fixed right-0 top-9 md:top-7 mr-2 md:mr-4"
+        className="fixed right-0 top-9 md:top-6 mr-2 md:mr-4"
         onClick={() => {
           setQuickSettingsOpen(!quickSettingsOpen);
         }}
@@ -65,8 +65,11 @@ export const Ava: React.FC<AvaProps> = ({
         <EllipsisMenuIcon />
       </AvaButton>
       <ExpansionPanel
-        className="pt-10 md:pt-6 border-0"
+        className="pt-10 md:pt-6 border-0 !hover:cursor-default"
         isOpened={quickSettingsOpen}
+        onChange={() => {
+          setQuickSettingsOpen(!quickSettingsOpen);
+        }}
         title={formatAgentMode(currentAgentMode)}
       >
         <QuickSettings
