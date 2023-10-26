@@ -136,7 +136,6 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
       () => ({
         extensions: TiptapExtensions,
         editorProps: TiptapEditorProps,
-        editable: tab?.canEdit ?? true,
         onUpdate: async (e) => {
           setSaveStatus('Unsaved');
           currentCursorPosition.current = e.editor.state.selection.to;
