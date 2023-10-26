@@ -116,7 +116,7 @@ export const SideNav: React.FC = () => {
       {navOpen && (
         <>
           <ul
-            className="relative m-0 list-none flex-grow max-height-[calc(100vh-4rem)] overflow-y-auto"
+            className="relative m-0 list-none flex-grow max-h-full overflow-y-auto"
             data-te-sidenav-menu-ref
           >
             {workspaces &&
