@@ -34,7 +34,7 @@ const ACModal: React.FC = () => {
         className={styles.modal}
         overlayClassName={styles.modalContent}
       >
-        <div className="flex flex-col flex-grow relative w-screen h-screen sm:h-max sm:max-w-screen-sm md:max-w-screen-sm lg:max-w-screen-md sm:rounded-xl p-8 pt-12 bg-dark">
+        <div className="flex flex-col flex-grow relative w-screen h-full sm:h-max sm:max-w-screen-sm md:max-w-screen-sm lg:max-w-screen-md sm:rounded-xl p-8 pt-12 bg-dark">
           <button
             className="absolute top-0 right-0 rounded mr-4 py-2.5 font-bold text-xl md:text-sm uppercase leading-tight text-acai-white z-50"
             onMouseDown={closeModal}

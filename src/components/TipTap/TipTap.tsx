@@ -263,16 +263,16 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   if (!tab) return null;
 
   return (
-    <div className="h-[calc(100%-2.75rem)] flex flex-col">
-      <h2 className="text-sm font-medium border-b border-solid border-dark text-acai-white mx-8 sm:mx-12 mt-8 mb-4 pb-1">
+    <div className="h-[calc(100%-2.75rem)] flex flex-col mt-8">
+      {editor && <EditorBubbleMenu editor={editor} />}
+      <h2 className="text-sm font-medium border-b border-solid border-dark text-acai-white mx-8 sm:mx-12 mb-4 pb-1">
         {tab.title}
       </h2>
-      {editor && <EditorBubbleMenu editor={editor} />}
       <div
         onClick={() => {
           editor?.chain().focus().run();
         }}
-        className="overflow-y-auto flex-grow w-full mb-3 px-8 border-none sm:rounded-lg sm:border sm:px-12 h-full min-h-[75vh] max-h-[calc(100vh-7rem)] md:max-h-[calc(100vh-5rem)]"
+        className="overflow-y-auto flex-grow w-full mb-3 px-8 border-none sm:rounded-lg sm:border sm:px-12 h-full min-h-[75vh] max-h-[75vh] md:max-h-[calc(100vh-5rem)]"
       >
         <EditorContent editor={editor} />
       </div>
