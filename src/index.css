@@ -201,3 +201,7 @@ code {
 hr {
   @apply border-lighter my-2;
 }
+body {
+  /* Disables pull-to-refresh but allows touch scrolling */
+  overscroll-behavior-y: contain;
+}
