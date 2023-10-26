@@ -56,10 +56,6 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
   const page = queryParams.get('page');
   const fileType = queryParams.get('fileType');
 
-  const workspaceName = useSelector(globalServices.appStateService, (state) => {
-    return state.context.workspaces?.[workspaceId || 'docs']?.name;
-  });
-
   const activeDoc = useSelector(globalServices.appStateService, (state) => {
     if (!workspaceId || !activeTabId) return;
     const docs = state.context.docs;
@@ -107,6 +103,8 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     });
   };
 
+  // @TODO: create a util to handle this and use to make a upload to knowledge button
+  // @TODO: update to save entire pdf with knowledge
   const handlePdfDrop = async (file: File) => {
     if (!workspaceId) return;
     const fileURL = URL.createObjectURL(file);
@@ -162,16 +160,11 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     setFileUrl(fileURL);
   };
 
-  return !workspaceId ? (
-    <p>Loading</p>
-  ) : (
-    <div className="w-full flex flex-col h-screen">
+  if (!workspaceId) return <></>;
+
+  return (
+    <div className="w-full flex flex-col mt-16 md:mt-8">
       <div className="ml-16 flex items-center group">
-        {workspaceName && (
-          <h1 className="mt-3 lg:m-2 text-base lg:text-lg z-10 max-w-[25vw] truncate">
-            {workspaceName}
-          </h1>
-        )}
         {workspaceId !== 'docs' && (
           <button
             className="p-0 px-1 rounded-full font-medium text-red-900 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-4"
@@ -181,26 +174,24 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
           </button>
         )}
       </div>
-      <div className="">
-        <EditorDropzone
-          workspaceId={workspaceId}
-          onPDFDrop={handlePdfDrop}
-          showHelperText={false}
-          onFilesDrop={handleFilesDrop}
-        >
-          {domain === 'documents' && activeDoc && <TipTap tab={activeDoc} />}
-          {domain === 'knowledge' && fileType && (
-            <KnowledgeView
-              workspaceId={workspaceId}
-              filename={activeTabId || 'knowledge'}
-              fileType={fileType as 'pdf' | 'txt' | 'md'}
-              fileUrl={fileUrl?.toString()}
-              content={knowledgeItems?.[0]?.fullText}
-              page={page || '1'}
-            />
-          )}
-        </EditorDropzone>
-      </div>
+      <EditorDropzone
+        workspaceId={workspaceId}
+        onPDFDrop={handlePdfDrop}
+        showHelperText={false}
+        onFilesDrop={handleFilesDrop}
+      >
+        {domain === 'documents' && activeDoc && <TipTap tab={activeDoc} />}
+        {domain === 'knowledge' && fileType && (
+          <KnowledgeView
+            workspaceId={workspaceId}
+            filename={activeTabId || 'knowledge'}
+            fileType={fileType as 'pdf' | 'txt' | 'md'}
+            fileUrl={fileUrl?.toString()}
+            content={knowledgeItems?.[0]?.fullText}
+            page={page || '1'}
+          />
+        )}
+      </EditorDropzone>
     </div>
   );
 };

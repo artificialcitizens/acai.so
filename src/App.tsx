@@ -21,6 +21,7 @@ import { createWorkspace } from './state';
 
 import { SideNavToggle } from './components/SideNavToggle/SideNavToggle';
 import ACModal from './components/Modal/Modal';
+import { useSelector } from '@xstate/react';
 
 const App = () => {
   const globalServices: GlobalStateContextValue =
@@ -45,11 +46,12 @@ const App = () => {
   } = useMemoryVectorStore('');
   const { updateLocation } = useLocationManager();
 
+  const workspaceName = useSelector(globalServices.appStateService, (state) => {
+    return state.context.workspaces?.[workspaceId || 'docs']?.name;
+  });
+
+  // @TODO: move directly into state machine
   useEffect(() => {
-    // if (
-    //   globalServices.appStateService.getSnapshot().context.workspaces?.['docs']
-    // )
-    //   return;
     createAcaiDocumentation().then((d) => {
       const { workspace, docs } = createWorkspace({
         workspaceName: 'acai.so',
@@ -113,21 +115,17 @@ const App = () => {
             <AudioWaveform audioContext={audioContext} isOn={listening} />
           )}
           <ToastManager />
-          <div
-            className="flex flex-col sm:flex-row overflow-hidden"
-            onClick={handleWindowClick}
-          >
+          <div onClick={handleWindowClick}>
             <main className="w-screen flex flex-grow max-h-screen overflow-hidden">
-              {workspaceId && (
-                <>
-                  <MainView domain={domain} />
-                  <Ava
-                    workspaceId={workspaceId}
-                    onVoiceActivation={setListening}
-                    audioContext={audioContext}
-                  />
-                </>
-              )}
+              <span className="mt-[.75rem] text-base lg:text-lg font-semibold z-10 max-w-[25vw] truncate w-full absolute ml-16">
+                {workspaceName}
+              </span>
+              <MainView domain={domain} />
+              <Ava
+                workspaceId={workspaceId || 'docs'}
+                onVoiceActivation={setListening}
+                audioContext={audioContext}
+              />
             </main>
           </div>{' '}
         </EditorContext.Provider>
