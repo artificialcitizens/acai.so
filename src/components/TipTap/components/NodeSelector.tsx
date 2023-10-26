@@ -30,7 +30,6 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
       icon: TextIcon,
       command: () =>
         editor.chain().focus().toggleNode('paragraph', 'paragraph').run(),
-      // I feel like there has to be a more efficient way to do this – feel free to PR if you know how!
       isActive: () =>
         editor.isActive('paragraph') &&
         !editor.isActive('bulletList') &&

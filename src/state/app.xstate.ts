@@ -5,7 +5,7 @@ export type ACDoc = {
   id: string;
   workspaceId: string;
   title: string;
-  filetype: string;
+  filetype: 'md' | 'txt' | 'pdf';
   content: any;
   isContext: boolean;
   systemNote: string;
@@ -301,7 +301,7 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
 export const handleCreateDoc = async (
   args: { title: string; content: string },
   workspaceId: string,
-  filetype = 'markdown',
+  filetype = 'md' as 'md' | 'txt' | 'pdf',
   autoSave = true,
   canEdit = true,
 ): Promise<ACDoc> => {

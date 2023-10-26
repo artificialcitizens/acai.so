@@ -115,7 +115,7 @@ export const useVoiceCommands = () => {
       title: 'Notes',
       content: notes,
       workspaceId,
-      filetype: 'markdown',
+      filetype: 'md',
       autoSave: true,
       canEdit: true,
       systemNote: '',

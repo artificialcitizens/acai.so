@@ -45,10 +45,10 @@ const markdownComponents = {
     );
   },
   p: ({ children }: { children: ReactNode }) => (
-    <p className="mb-1">{children}</p>
+    <p className="mb-1 text-sm">{children}</p>
   ),
   li: ({ children }: { children: ReactNode }) => (
-    <li className="list-disc ml-1">{children}</li>
+    <li className="text-sm sm:text-bas list-disc ml-1 mb-0 pb-0">{children}</li>
   ),
   h1: ({ children }: { children: ReactNode }) => (
     <h1 className="text-2xl font-bold py-2">{children}</h1>
@@ -75,7 +75,7 @@ const markdownComponents = {
     <del className="line-through">{children}</del>
   ),
   ul: ({ children }: { children: ReactNode }) => (
-    <ul className="list-disc ml-6">{children}</ul>
+    <ul className="list-disc ml-6 mb-0 py-0">{children}</ul>
   ),
   ol: (props: {
     children: ReactNode;
@@ -309,7 +309,7 @@ const Chat: React.FC<ChatProps> = ({
 
   return (
     <>
-      <div className="rounded-lg overflow-hidden w-full h-full">
+      <div className="rounded-lg overflow-hidden w-full h-full max-h-screen">
         <ChatContainer className="bg-dark">
           <MessageList className="bg-dark">
             {messages?.map((message) => (

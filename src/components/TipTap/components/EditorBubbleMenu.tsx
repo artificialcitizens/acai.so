@@ -187,7 +187,7 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
           {aiResponse || selectedText}
         </p>
         <form
-          className="flex shadow-lg rounded-lg p-3 md:p-2 justify-items-center"
+          className="flex shadow-lg rounded-lg p-3 md:p-2 mb-0 pb-0 justify-items-center"
           onSubmit={(e) => {
             e.preventDefault();
             const response = queryAva({

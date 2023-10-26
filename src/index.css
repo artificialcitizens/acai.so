@@ -6,6 +6,26 @@ html {
   @apply overflow-hidden;
 }
 
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  @apply text-acai-white;
+  @apply bg-darker;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  max-height: 100vh;
+}
+
 /* #root { @apply w-screen h-screen; } */
 .ProseMirror .is-editor-empty:first-child::before {
   content: attr(data-placeholder);
@@ -96,24 +116,6 @@ ul[data-type='taskList'] li[data-checked='true'] > div > p {
   text-decoration-thickness: 2px;
 }
 
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  @apply text-acai-white;
-  @apply bg-darker;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-  ::-webkit-scrollbar {
-    display: none;
-  }
-}
-
 p > a,
 .link {
   @apply text-blue-300 hover:text-blue-400 !important;
@@ -140,31 +142,27 @@ h6 {
 }
 
 h1 {
-  font-size: 2.5em;
+  @apply text-2xl sm:text-3xl md:text-4xl;
 }
 
 h2 {
-  font-size: 2em;
+  @apply text-xl sm:text-2xl md:text-3xl;
 }
 
 h3 {
-  font-size: 1.75em;
+  @apply text-lg sm:text-xl md:text-2xl;
 }
 
 h4 {
-  font-size: 1.5em;
+  @apply text-base sm:text-lg md:text-xl;
 }
 
 h5 {
-  font-size: 1.25em;
+  @apply text-sm sm:text-base md:text-lg;
 }
 
 h6 {
-  font-size: 1em;
-}
-
-p {
-  @apply mb-4;
+  @apply text-xs sm:text-sm md:text-base;
 }
 
 li p,
@@ -174,7 +172,13 @@ ol p {
 }
 
 p {
-  @apply text-acai-white;
+  @apply text-acai-white mb-2 md:mb-3;
+}
+p,
+li,
+ul,
+ol {
+  @apply text-sm md:text-base;
 }
 
 pre,

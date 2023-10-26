@@ -19,7 +19,7 @@ import useLocationManager from './hooks/use-location-manager';
 import { createAcaiDocumentation } from './utils/docs';
 import { createWorkspace } from './state';
 
-import { MenuButton } from './components/MenuButton/MenuButton';
+import { SideNavToggle } from './components/SideNavToggle/SideNavToggle';
 import ACModal from './components/Modal/Modal';
 
 const App = () => {
@@ -51,6 +51,10 @@ const App = () => {
   const { updateLocation } = useLocationManager();
 
   useEffect(() => {
+    // if (
+    //   globalServices.appStateService.getSnapshot().context.workspaces?.['docs']
+    // )
+    //   return;
     createAcaiDocumentation().then((d) => {
       const { workspace, docs } = createWorkspace({
         workspaceName: 'acai.so',
@@ -58,6 +62,7 @@ const App = () => {
         docs: d,
       });
       if (!workspace) return;
+      // @TODO: rename to load docs
       globalServices.appStateService.send({
         type: 'REPLACE_WORKSPACE',
         id: 'docs',
@@ -101,7 +106,8 @@ const App = () => {
         <EditorContext.Provider value={{ editor, setEditor }}>
           <SideNav />
           <ACModal />
-          <MenuButton
+          <SideNavToggle
+            className="fixed top-0 left-0 z-20"
             handleClick={(e) => {
               e.stopPropagation();
               toggleSideNav();

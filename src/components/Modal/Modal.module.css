@@ -1,5 +1,5 @@
 .modal {
-  @apply fixed inset-0 flex items-center justify-center bg-darker bg-opacity-75 z-10;
+  @apply fixed inset-0 flex items-center justify-center bg-darker bg-opacity-75 z-20;
 }
 
 .modalContent {

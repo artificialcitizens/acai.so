@@ -56,8 +56,8 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
   const page = queryParams.get('page');
   const fileType = queryParams.get('fileType');
 
-  const workspace = useSelector(globalServices.appStateService, (state) => {
-    return state.context.workspaces?.[workspaceId || 'docs'];
+  const workspaceName = useSelector(globalServices.appStateService, (state) => {
+    return state.context.workspaces?.[workspaceId || 'docs']?.name;
   });
 
   const activeDoc = useSelector(globalServices.appStateService, (state) => {
@@ -70,7 +70,7 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
   });
 
   const handleDeleteWorkspace = () => {
-    if (!workspace) return;
+    if (!workspaceId) return;
     const confirmDelete = window.prompt('Type "delete" to confirm');
     if (confirmDelete?.toLowerCase() !== 'delete') {
       alert('Deletion cancelled.');
@@ -78,11 +78,11 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     }
     globalServices.appStateService.send({
       type: 'DELETE_WORKSPACE',
-      workspaceId: workspace.id,
+      workspaceId,
     });
     globalServices.agentStateService.send({
       type: 'DELETE_AGENT',
-      workspaceId: workspace.id,
+      workspaceId,
     });
     setTimeout(() => {
       navigate('/');
@@ -167,21 +167,21 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
   ) : (
     <div className="w-full flex flex-col h-screen">
       <div className="ml-16 flex items-center group">
-        {workspace && <h1 className="m-2 text-lg">{workspace.name}</h1>}
+        {workspaceName && <h1 className="m-2 text-lg z-50">{workspaceName}</h1>}
         {workspaceId !== 'docs' && (
           <button
-            className="p-0 px-1  rounded-full font-medium text-red-900 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-4"
+            className="p-0 px-1 rounded-full font-medium text-red-900 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-4"
             onClick={handleDeleteWorkspace}
           >
             x
           </button>
         )}
       </div>
-      <div className="max-h-[calc(100vh-2rem)] flex flex-grow overflow-scroll">
+      <div className="">
         <EditorDropzone
           workspaceId={workspaceId}
           onPDFDrop={handlePdfDrop}
-          showHelperText={!activeDoc && !fileUrl}
+          showHelperText={false}
           onFilesDrop={handleFilesDrop}
         >
           {domain === 'documents' && activeDoc && <TipTap tab={activeDoc} />}

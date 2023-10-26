@@ -54,7 +54,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
 
     const handleMouseMove = (moveE: MouseEvent) => {
       if (initialWidth !== null) {
-        const scalingFactor = 1.25; // Adjust this value to change the sensitivity
+        const scalingFactor = 1.65; // Adjust this value to change the sensitivity
         const newWidth =
           initialWidth -
           ((moveE.clientX - initialX) / window.innerWidth) *
@@ -87,14 +87,13 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
             left: 0,
             right: 0,
             cursor: 'ew-resize',
-            zIndex: 10000,
+            zIndex: 100,
           }}
         />
       )}
       <AvaNav
         toggled={toggled}
-        handleClick={(e) => {
-          e.stopPropagation();
+        handleClick={() => {
           toggleView();
         }}
       />
