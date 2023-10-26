@@ -167,7 +167,7 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
   ) : (
     <div className="w-full flex flex-col h-screen">
       <div className="ml-16 flex items-center group">
-        {workspaceName && <h1 className="m-2 text-lg">{workspaceName}</h1>}
+        {workspaceName && <h1 className="m-2 text-lg z-50">{workspaceName}</h1>}
         {workspaceId !== 'docs' && (
           <button
             className="p-0 px-1 rounded-full font-medium text-red-900 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-4"

@@ -2,13 +2,14 @@ import { MenuIcon } from 'lucide-react';
 import React from 'react';
 
 interface FloatingButtonProps {
+  className?: string;
   variant?: 'primary' | 'secondary';
   size?: 'small' | 'medium' | 'large';
   label?: string;
   handleClick: (e: any) => void;
 }
 
-export const MenuButton: React.FC<FloatingButtonProps> = ({
+export const SideNavToggle: React.FC<FloatingButtonProps> = ({
   variant,
   size,
   label,
@@ -16,19 +17,18 @@ export const MenuButton: React.FC<FloatingButtonProps> = ({
 }) => {
   return (
     <button
-      className="z-10 absolute top-0 left-0 inline-block rounded px-6 py-2.5 text-xs font-medium uppercase leading-tight text-white z-index-10"
+      className="fixed z-20 rounded-full ml-4 my-2.5 p-1 text-xs font-medium uppercase leading-tight text-acai-white"
       data-te-sidenav-toggle-ref
       data-te-target="#sidenav-1"
       aria-controls="#sidenav-1"
       aria-haspopup="true"
       onMouseDown={handleClick}
     >
-      <span className="block [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-white">
+      <span className="block [&>svg]:h-5 [&>svg]:w-5 md:[&>svg]:h-4 md:[&>svg]:w-4 [&>svg]:text-acai-white hover:pointer">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="currentColor"
-          className="h-5 w-5"
         >
           <path
             fillRule="evenodd"

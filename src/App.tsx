@@ -19,7 +19,7 @@ import useLocationManager from './hooks/use-location-manager';
 import { createAcaiDocumentation } from './utils/docs';
 import { createWorkspace } from './state';
 
-import { MenuButton } from './components/MenuButton/MenuButton';
+import { SideNavToggle } from './components/SideNavToggle/SideNavToggle';
 import ACModal from './components/Modal/Modal';
 
 const App = () => {
@@ -106,7 +106,8 @@ const App = () => {
         <EditorContext.Provider value={{ editor, setEditor }}>
           <SideNav />
           <ACModal />
-          <MenuButton
+          <SideNavToggle
+            className="fixed top-0 left-0 z-20"
             handleClick={(e) => {
               e.stopPropagation();
               toggleSideNav();

@@ -12,7 +12,7 @@ const AvaButton: React.FC<AvaButtonProps> = ({
   onClick,
 }) => {
   const combinedClass =
-    'inline-block rounded-full mr-4 my-2.5 p-1 text-xs font-medium uppercase leading-tight text-white z-index-10 ' +
+    'inline-block rounded-full mr-4 my-2.5 p-1 text-xs font-medium uppercase leading-tight text-acai-white z-index-10 ' +
     className;
 
   return (

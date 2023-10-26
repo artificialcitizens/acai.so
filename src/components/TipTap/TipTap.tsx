@@ -261,7 +261,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
 
   return (
     <div className="h-[calc(100vh-2.75rem)] flex flex-col overflow-scroll flex-grow">
-      <h2 className="text-sm font-medium border-b border-solid border-dark text-acai-white mx-12 mt-12 pb-1">
+      <h2 className="text-sm font-medium border-b border-solid border-dark text-acai-white mx-8 mt-6 mb-4">
         {tab.title}
       </h2>
       {editor && <EditorBubbleMenu editor={editor} />}
@@ -269,7 +269,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
         onClick={() => {
           editor?.chain().focus().run();
         }}
-        className="overflow-scroll flex-grow w-full mb-3 mt-4 px-8 border-none sm:rounded-lg sm:border sm:px-12 max-h-full"
+        className="overflow-scroll flex-grow w-full mb-3 px-8 border-none sm:rounded-lg sm:border sm:px-12 max-h-full"
       >
         <EditorContent editor={editor} />
       </div>
