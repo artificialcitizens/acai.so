@@ -15,6 +15,7 @@ export type AgentWorkspace = {
   id: string;
   loading: boolean;
   agentMode: AgentMode;
+  agentName?: string;
   workspaceId: string;
   customPrompt: string;
   recentChatHistory: ChatHistory[];

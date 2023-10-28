@@ -107,11 +107,13 @@ export const useAva = (): {
   //   useState<AbortController | null>(null);
 
   const formattedChatHistory = currentAgent?.recentChatHistory
-    .map(
-      (chat: { type: MessageRole; text: string }) =>
-        `${chat.type}: ${chat.text}`,
-    )
-    .join('\n');
+    ? currentAgent.recentChatHistory
+        .map(
+          (chat: { type: MessageRole; text: string }) =>
+            `${chat.type}: ${chat.text}`,
+        )
+        .join('\n')
+    : '';
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { editor } = useContext(EditorContext)!;

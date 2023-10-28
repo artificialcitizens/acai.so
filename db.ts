@@ -41,7 +41,7 @@ export class AcaiDexie extends Dexie {
     });
     this.version(3).stores({
       agents:
-        '++id, loading, agentMode, workspaceId, customPrompt, recentChatHistory, openAIChatModel, returnRagResults, customAgentVectorSearch, agentLogs, memory, agentTools',
+        '++id, loading, agentMode, agentName, workspaceId, customPrompt, recentChatHistory, openAIChatModel, returnRagResults, customAgentVectorSearch, agentLogs, memory, agentTools',
     });
 
     this.knowledge = this.table('knowledge');
