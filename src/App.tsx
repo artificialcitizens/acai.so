@@ -51,6 +51,10 @@ const App = () => {
     return state.context.workspaces?.[workspaceId || 'docs']?.name;
   });
 
+  const docsAgent = useSelector(globalServices.agentStateService, (state) => {
+    return globalServices.agentStateService.getSnapshot().context['docs'];
+  });
+
   // @TODO: move directly into state machine
   useEffect(() => {
     setLoading(true);
@@ -68,7 +72,8 @@ const App = () => {
         workspace: workspace,
         docs: docs,
       });
-      if (!globalServices.agentStateService.getSnapshot().context['docs']) {
+
+      if (!docsAgent) {
         globalServices.agentStateService.send({
           type: 'CREATE_AGENT',
           workspaceId: 'docs',

@@ -17,14 +17,10 @@ export const useSaveWorkspace = () => {
 
     const zip = new JSZip();
     const filesFolder = zip.folder('files');
-
     if (filesFolder) {
       await Promise.all(
         files.map(async (f) => {
-          const file = new File([f.file], 'filename');
-          const url = URL.createObjectURL(file);
-          filesFolder.file(f.fileName, url);
-          URL.revokeObjectURL(url);
+          filesFolder.file(f.fileName, f.file);
         }),
       );
     }

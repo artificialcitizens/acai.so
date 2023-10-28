@@ -16,9 +16,9 @@ import { SocketManager } from '../SocketManager';
 import UserProfile from '../UserProfile/UserProfile';
 import KnowledgeUpload from '../Knowledge/Knowledge';
 import { useParams } from 'react-router-dom';
-import debounce from 'lodash/debounce';
 import AudioSettings from './AudioSettings';
 import { useSaveWorkspace } from '../../hooks/use-save-workspace';
+import { useLoadWorkspace } from '../../hooks/use-load-workspace';
 
 interface SettingsProps {
   initialTabIndex?: number;
@@ -43,6 +43,9 @@ const Settings: React.FC<SettingsProps> = ({
   const customPrompt = useSelector(agentStateService, (state) =>
     workspaceId ? state.context[workspaceId]?.customPrompt : '',
   );
+
+  const { loadWorkspace } = useLoadWorkspace();
+
   const toggleSettings = () => {
     setSettingsOpen(!settingsOpen);
   };
@@ -58,6 +61,29 @@ const Settings: React.FC<SettingsProps> = ({
       workspaceId: workspaceId,
       customPrompt: e.target.value,
     });
+
+  // @TODO: move when we move import/export to its own component
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleImportClick = () => {
+    if (!workspaceId) return;
+    // Trigger click on file input
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    // Process the selected file
+    try {
+      await loadWorkspace(file);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div
       className="w-full h-full flex flex-col overflow-y-auto"
@@ -135,7 +161,21 @@ const Settings: React.FC<SettingsProps> = ({
 
         <TabPanel>
           <h2>Import/Export</h2>
-          <button className="btn btn-primary">Import</button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              if (!workspaceId) return;
+              handleImportClick();
+            }}
+          >
+            Import Workspace
+          </button>
           <button
             className="btn btn-primary"
             onClick={() => {

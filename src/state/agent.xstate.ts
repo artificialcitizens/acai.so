@@ -64,6 +64,7 @@ export type AgentEvent =
 
 export const agentDbService = {
   async saveAgent(agent: AgentWorkspace) {
+    if (!agent.workspaceId) return;
     try {
       await db.agents.put(agent);
     } catch (error) {
