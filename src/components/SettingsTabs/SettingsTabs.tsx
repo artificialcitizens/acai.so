@@ -98,7 +98,6 @@ const Settings: React.FC<SettingsProps> = ({
       >
         <TabList className="m-2 border-b-2 border-solid border-dark text-acai-white flex">
           <Tab>Config</Tab>
-          <Tab>Import/Export</Tab>
           <Tab>Knowledge</Tab>
           <Tab>Audio</Tab>
           <Tab>Logs</Tab>
@@ -157,34 +156,32 @@ const Settings: React.FC<SettingsProps> = ({
               </span>
             </ExpansionPanel>
           </span>
-        </TabPanel>
-
-        <TabPanel>
-          <h2>Import/Export</h2>
-          <input
-            type="file"
-            ref={fileInputRef}
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
-          />
-          <button
-            className="btn btn-primary"
-            onClick={() => {
-              if (!workspaceId) return;
-              handleImportClick();
-            }}
-          >
-            Import Workspace
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={() => {
-              if (!workspaceId) return;
-              saveWorkspace(workspaceId);
-            }}
-          >
-            Export
-          </button>
+          <span className="flex w-full justify-center my-2">
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+            <button
+              className="text-xs mr-2"
+              onClick={() => {
+                if (!workspaceId) return;
+                handleImportClick();
+              }}
+            >
+              Import Workspace
+            </button>
+            <button
+              className="text-xs"
+              onClick={() => {
+                if (!workspaceId) return;
+                saveWorkspace(workspaceId);
+              }}
+            >
+              Export Workspace
+            </button>
+          </span>
         </TabPanel>
 
         <TabPanel>
