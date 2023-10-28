@@ -1,6 +1,6 @@
 // db.ts
 import Dexie, { Table } from 'dexie';
-import { ACDoc, Workspace } from './src/state';
+import { ACDoc, Workspace, AgentWorkspace } from './src/state';
 
 export interface AcaiMemoryVector {
   content: string;
@@ -27,6 +27,7 @@ export class AcaiDexie extends Dexie {
   knowledge!: Table<Knowledge>;
   workspaces!: Table<Workspace>;
   docs!: Table<ACDoc>;
+  agents!: Table<AgentWorkspace>;
 
   constructor() {
     super('acaiDb');
@@ -38,9 +39,14 @@ export class AcaiDexie extends Dexie {
       workspaces: '++id, name, createdAt, lastUpdated, private',
       docs: '++id, workspaceId, title, filetype, content, isContext, systemNote, createdAt, lastUpdated, autoSave, canEdit',
     });
+    this.version(3).stores({
+      agents:
+        '++id, loading, agentMode, workspaceId, customPrompt, recentChatHistory, openAIChatModel, returnRagResults, customAgentVectorSearch, agentLogs, memory, agentTools',
+    });
 
     this.knowledge = this.table('knowledge');
     this.workspaces = this.table('workspaces');
+    this.agents = this.table('agents');
     this.docs = this.table('docs');
   }
 }
