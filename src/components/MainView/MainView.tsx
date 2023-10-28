@@ -43,12 +43,17 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
       .toArray();
   }, [activeTabId]);
 
-  useEffect(() => {
-    if (!knowledgeItems || !knowledgeItems[0]?.file) return;
-    // create a file url from knowledgeITem.file
-    const fileUrl = URL.createObjectURL(knowledgeItems[0].file);
-    setFileUrl(fileUrl);
+  const file = useLiveQuery(async () => {
+    if (!knowledgeItems || !knowledgeItems[0]?.fileId) return;
+    return await db.files.get(knowledgeItems?.[0]?.fileId);
   }, [knowledgeItems]);
+
+  useEffect(() => {
+    if (!knowledgeItems || !file) return;
+    // create a file url from knowledgeITem.file
+    const fileUrl = URL.createObjectURL(file.file);
+    setFileUrl(fileUrl);
+  }, [file, knowledgeItems]);
 
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);

@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { ACDoc, handleCreateDoc } from '../../state';
 import { pdfjs } from 'react-pdf';
+import { v4 as uuidv4 } from 'uuid';
 
 import { VectorStoreContext } from '../../context/VectorStoreContext';
 import {
@@ -46,7 +47,19 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
     for (const file of files) {
       if (!file) return;
 
-      const fileExtension = file.name.split('.').pop();
+      const fileExtension = file.name.split('.').pop() as 'pdf' | 'txt' | 'md';
+      const generatedFileId = uuidv4();
+      // Add the file to the files table in the database
+      const fileId = await db.files.add({
+        id: generatedFileId,
+        workspaceId,
+        file,
+        fileType: fileExtension || 'html',
+        fileName: file.name,
+        createdAt: new Date().toISOString(),
+        lastModified: new Date().toISOString(),
+      });
+
       switch (fileExtension) {
         case 'txt':
         case 'md':
@@ -80,7 +93,8 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   id: slugifiedFilename,
                   workspaceId,
                   memoryVectors: filteredMemoryVectors || [],
-                  file,
+                  fileId: generatedFileId,
+                  fileName: file.name,
                   fileType: fileExtension,
                   fullText: fileContent,
                   createdAt: new Date().toISOString(),
@@ -144,7 +158,8 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   id: metadata.id,
                   workspaceId,
                   memoryVectors: filteredMemoryVectors || [],
-                  file,
+                  fileId: generatedFileId,
+                  fileName: file.name,
                   fullText: page.content,
                   fileType: 'pdf',
                   createdAt: new Date().toISOString(),

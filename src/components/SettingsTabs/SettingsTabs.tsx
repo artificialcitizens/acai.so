@@ -18,6 +18,7 @@ import KnowledgeUpload from '../Knowledge/Knowledge';
 import { useParams } from 'react-router-dom';
 import debounce from 'lodash/debounce';
 import AudioSettings from './AudioSettings';
+import { useSaveWorkspace } from '../../hooks/use-save-workspace';
 
 interface SettingsProps {
   initialTabIndex?: number;
@@ -29,6 +30,7 @@ const Settings: React.FC<SettingsProps> = ({
   const [tabIndex, setTabIndex] = React.useState(initialTabIndex);
   const { agentStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
+  const { saveWorkspace } = useSaveWorkspace();
 
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [userSettingsOpen, setUserSettingsOpen] = React.useState(false);
@@ -70,6 +72,7 @@ const Settings: React.FC<SettingsProps> = ({
       >
         <TabList className="m-2 border-b-2 border-solid border-dark text-acai-white flex">
           <Tab>Config</Tab>
+          <Tab>Import/Export</Tab>
           <Tab>Knowledge</Tab>
           <Tab>Audio</Tab>
           <Tab>Logs</Tab>
@@ -128,6 +131,20 @@ const Settings: React.FC<SettingsProps> = ({
               </span>
             </ExpansionPanel>
           </span>
+        </TabPanel>
+
+        <TabPanel>
+          <h2>Import/Export</h2>
+          <button className="btn btn-primary">Import</button>
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              if (!workspaceId) return;
+              saveWorkspace(workspaceId);
+            }}
+          >
+            Export
+          </button>
         </TabPanel>
 
         <TabPanel>
