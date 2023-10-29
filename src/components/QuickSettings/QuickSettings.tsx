@@ -17,13 +17,13 @@ import {
 } from '../../context/GlobalStateContext';
 import { useParams } from 'react-router-dom';
 import { ChatHistory } from '../../state';
-import Dropdown from '../DropDown';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import { simplifyResponseChain } from '../../lib/ac-langchain/chains/simplify-response-chain';
-import { VoiceState } from '../../state/speech.xstate';
 import ChatModelDropdown from '../ChatSettings';
-import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
-import { useSaveWorkspace } from '../../hooks/use-save-workspace';
+import AudioSettings from '../SettingsTabs/AudioSettings';
+import { SocketManager } from '../SocketManager';
+import ScratchPad from '../ScratchPad/ScratchPad';
+import KnowledgeUpload from '../Knowledge/Knowledge';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
@@ -83,11 +83,14 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
   const srcRef = React.useRef<MediaElementAudioSourceNode | null>(null);
   const gainNodeRef = React.useRef<GainNode | null>(null);
 
-  const { saveWorkspace } = useSaveWorkspace();
-
-  const handleVoiceStateChange = (voiceState: VoiceState) => {
-    setVoiceRecognitionState(voiceState);
-  };
+  const customPrompt = useSelector(agentStateService, (state) =>
+    workspaceId ? state.context[workspaceId]?.customPrompt : '',
+  );
+  const handleCustomPromptInput = (e: { target: { value: any } }) =>
+    agentStateService.send('UPDATE_CUSTOM_PROMPT', {
+      workspaceId: workspaceId,
+      customPrompt: e.target.value,
+    });
 
   const normalizedAudioElement = async (
     audioElem: HTMLAudioElement,
@@ -273,62 +276,55 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
     setManualTTS('');
   };
 
-  const voiceStateOptions = Object.values(VoiceState).map((value) => ({
-    value,
-    label: value.charAt(0).toUpperCase() + value.slice(1),
-  }));
-
   return (
     <div
       className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow h-full`}
     >
       {workspaceId && <ChatModelDropdown workspaceId={workspaceId} />}
-      <Dropdown
-        label="Synthesis Mode"
-        options={voiceStateOptions}
-        value={voiceRecognitionState}
-        onChange={(e) => handleVoiceStateChange(e as VoiceState)}
+      {workspaceId &&
+        agentStateService.getSnapshot().context[workspaceId]?.agentMode ===
+          'custom' && (
+          <>
+            <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-3 font-bold mb-3 border-b border-b-light border-b-solid">
+              Custom Agent Server
+            </h5>
+            <SocketManager />
+          </>
+        )}
+      <ScratchPad
+        placeholder="Custom Prompt"
+        content={customPrompt}
+        handleInputChange={handleCustomPromptInput}
       />
-      <button
-        className="text-center w-full rounded-none text-acai-white text-xs  hover:text-acai-light pl-2 transition duration-150 ease-linear"
-        onClick={() => {
-          if (!workspaceId) return;
-          saveWorkspace(workspaceId);
-        }}
+      <AudioSettings />
+      <form
+        className="text-acai-white w-full flex flex-col flex-grow mb-4"
+        onSubmit={handleManualTTS}
       >
-        Export Workspace
-      </button>
-      {/* 
-      <ExpansionPanel className="border-t-0" title="ManualTTS">
-        <form
-          className="text-acai-white w-full flex flex-col flex-grow my-2"
-          onSubmit={handleManualTTS}
+        <label className="mb-2 ml-2 text-sm md:text-xs" htmlFor="manualTTS">
+          Manual TTS
+        </label>
+        <textarea
+          placeholder="Enter text to synthesize, press submit or enter to play"
+          id="manualTTS"
+          className="rounded bg-base text-acai-white text-base md:text-xs p-4 mb-2"
+          value={manualTTS}
+          onChange={(e) => setManualTTS(e.target.value)}
+          onKeyDown={(e: any) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleManualTTS(e);
+            }
+          }}
+        />
+        <button
+          className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+          type="submit"
         >
-          <label className="mb-2 ml-2 text-sm md:text-xs" htmlFor="manualTTS">
-            Manual TTS
-          </label>
-          <textarea
-            placeholder="Enter text to synthesize, press submit or enter to play"
-            id="manualTTS"
-            className="rounded bg-base text-acai-white text-base md:text-xs p-4 mb-2"
-            value={manualTTS}
-            onChange={(e) => setManualTTS(e.target.value)}
-            onKeyDown={(e: any) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                handleManualTTS(e);
-              }
-            }}
-          />
-          <button
-            className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
-            type="submit"
-          >
-            Submit
-          </button>
-        </form>
-      </ExpansionPanel> */}
-
+          Submit
+        </button>
+      </form>
+      <hr />
       {audioContext && (
         <audio
           ref={audioRef}
@@ -355,6 +351,8 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
           }}
         />
       )}
+      <p className="mb-2 ml-2 text-sm md:text-xs font-semibold">Knowledge</p>
+      {workspaceId && <KnowledgeUpload workspaceId={workspaceId} />}
     </div>
   );
 };
