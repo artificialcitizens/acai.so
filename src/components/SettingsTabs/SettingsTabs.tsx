@@ -15,10 +15,8 @@ import ChatModelDropdown from '../ChatSettings';
 import { SocketManager } from '../SocketManager';
 import UserProfile from '../UserProfile/UserProfile';
 import KnowledgeUpload from '../Knowledge/Knowledge';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import AudioSettings from './AudioSettings';
-import { useSaveWorkspace } from '../../hooks/use-save-workspace';
-import { useLoadWorkspace } from '../../hooks/use-load-workspace';
 
 interface SettingsProps {
   initialTabIndex?: number;
@@ -30,7 +28,6 @@ const Settings: React.FC<SettingsProps> = ({
   const [tabIndex, setTabIndex] = React.useState(initialTabIndex);
   const { agentStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
-  const { saveWorkspace } = useSaveWorkspace();
 
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [userSettingsOpen, setUserSettingsOpen] = React.useState(false);
@@ -131,17 +128,6 @@ const Settings: React.FC<SettingsProps> = ({
                 <TokenManager />
               </span>
             </ExpansionPanel>
-          </span>
-          <span className="flex w-full justify-center my-2">
-            <button
-              className="text-xs"
-              onClick={() => {
-                if (!workspaceId) return;
-                saveWorkspace(workspaceId);
-              }}
-            >
-              Export Workspace
-            </button>
           </span>
         </TabPanel>
 

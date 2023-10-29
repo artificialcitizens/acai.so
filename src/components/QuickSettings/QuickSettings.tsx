@@ -23,6 +23,7 @@ import { simplifyResponseChain } from '../../lib/ac-langchain/chains/simplify-re
 import { VoiceState } from '../../state/speech.xstate';
 import ChatModelDropdown from '../ChatSettings';
 import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
+import { useSaveWorkspace } from '../../hooks/use-save-workspace';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
@@ -81,6 +82,8 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
   const audioRef = React.useRef<HTMLAudioElement>(null);
   const srcRef = React.useRef<MediaElementAudioSourceNode | null>(null);
   const gainNodeRef = React.useRef<GainNode | null>(null);
+
+  const { saveWorkspace } = useSaveWorkspace();
 
   const handleVoiceStateChange = (voiceState: VoiceState) => {
     setVoiceRecognitionState(voiceState);
@@ -286,6 +289,15 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
         value={voiceRecognitionState}
         onChange={(e) => handleVoiceStateChange(e as VoiceState)}
       />
+      <button
+        className="text-center w-full rounded-none text-acai-white text-xs  hover:text-acai-light pl-2 transition duration-150 ease-linear"
+        onClick={() => {
+          if (!workspaceId) return;
+          saveWorkspace(workspaceId);
+        }}
+      >
+        Export Workspace
+      </button>
       {/* 
       <ExpansionPanel className="border-t-0" title="ManualTTS">
         <form
