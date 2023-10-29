@@ -108,81 +108,52 @@ export type AppEvent =
   | { type: 'INITIALIZE'; state: AppContext }
   | { type: 'RESYNC_DB' };
 
-export const appStateMachine = createMachine<AppContext, AppEvent>(
-  {
-    predictableActionArguments: true,
-    id: 'appState',
-    initial: 'idle',
-    context: undefined,
-    states: {
-      loading: {
-        invoke: {
-          id: 'loadInitialState',
-          src: () => appDbService.loadState(),
-          onDone: {
-            target: 'idle',
-            actions: assign((context, event) => {
-              return event.data;
-            }),
-          },
-          onError: {
-            target: 'error',
-            actions: (context, event) => {
-              console.error('Error loading state:', event.data);
-            },
+export const appStateMachine = createMachine<AppContext, AppEvent>({
+  predictableActionArguments: true,
+  id: 'appState',
+  initial: 'idle',
+  context: undefined,
+  states: {
+    loading: {
+      invoke: {
+        id: 'loadInitialState',
+        src: () => appDbService.loadState(),
+        onDone: {
+          target: 'idle',
+          actions: assign((context, event) => {
+            return event.data;
+          }),
+        },
+        onError: {
+          target: 'error',
+          actions: (context, event) => {
+            console.error('Error loading state:', event.data);
           },
         },
       },
-      resyncing: {
-        invoke: {
-          id: 'resyncDb',
-          src: appDbService.loadState,
-          onDone: {
-            target: 'idle',
-            actions: assign((context, event) => event.data),
-          },
-          onError: {
-            target: 'error',
-            actions: (context, event) => {
-              console.error('Error resyncing DB:', event.data);
-            },
+    },
+    resyncing: {
+      invoke: {
+        id: 'resyncDb',
+        src: appDbService.loadState,
+        onDone: {
+          target: 'idle',
+          actions: assign((context, event) => event.data),
+        },
+        onError: {
+          target: 'error',
+          actions: (context, event) => {
+            console.error('Error resyncing DB:', event.data);
           },
         },
       },
-      idle: {},
-      error: {},
     },
-    on: {
-      ADD_WORKSPACE: {
-        actions: ['addWorkspace'],
-      },
-      UPDATE_WORKSPACE: {
-        actions: ['updateWorkspace'],
-      },
-      REPLACE_WORKSPACE: {
-        actions: ['replaceWorkspace'],
-      },
-      DELETE_WORKSPACE: {
-        actions: ['deleteWorkspace'],
-      },
-      ADD_DOC: {
-        actions: ['addDoc'],
-      },
-      DELETE_DOC: {
-        actions: ['deleteDoc'],
-      },
-      UPDATE_DOC_CONTENT: {
-        actions: ['updateDocContent'],
-      },
-      INITIALIZE: {
-        actions: assign((context, event) => event.state),
-      },
-      RESYNC_DB: 'resyncing',
-    },
+    idle: {},
+    error: {},
   },
-  {
-    actions: {
-      addWorkspace: assign((context, event) => {
+  on: {
+    ADD_WORKSPACE: {
+      actions: assign((context, event) => {
         if (event.type !== 'ADD_WORKSPACE') return context;
         const newWorkspace = event.workspace;
         const newDoc = event.doc;
@@ -200,7 +171,9 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
         appDbService.saveWorkspace(newWorkspace, newDoc ? [newDoc] : undefined);
         return newContext;
       }),
-      updateWorkspace: assign((context, event) => {
+    },
+    UPDATE_WORKSPACE: {
+      actions: assign((context, event) => {
         if (event.type !== 'UPDATE_WORKSPACE') return context;
         const updatedWorkspace = event.workspace;
         const id = event.id;
@@ -211,7 +184,9 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
         appDbService.saveWorkspace(updatedWorkspaces[id]);
         return { ...context, workspaces: updatedWorkspaces };
       }),
-      replaceWorkspace: assign((context, event) => {
+    },
+    REPLACE_WORKSPACE: {
+      actions: assign((context, event) => {
         if (event.type !== 'REPLACE_WORKSPACE') return context;
         const replacedWorkspace = event.workspace;
         const id = event.id;
@@ -234,7 +209,9 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
           docs: replacedDocs,
         };
       }),
-      deleteWorkspace: assign((context, event) => {
+    },
+    DELETE_WORKSPACE: {
+      actions: assign((context, event) => {
         if (event.type !== 'DELETE_WORKSPACE') return context;
         const workspaceId = event.workspaceId;
         const newWorkspaces = { ...context.workspaces };
@@ -257,7 +234,9 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
 
         return { ...context, workspaces: newWorkspaces, docs: newDocs };
       }),
-      addDoc: assign((context, event) => {
+    },
+    ADD_DOC: {
+      actions: assign((context, event) => {
         if (event.type !== 'ADD_DOC') return context;
         const newDoc = event.doc;
         const workspace = context.workspaces[newDoc.workspaceId];
@@ -280,7 +259,9 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
         }
         return context;
       }),
-      deleteDoc: assign((context, event) => {
+    },
+    DELETE_DOC: {
+      actions: assign((context, event) => {
         if (event.type !== 'DELETE_DOC') return context;
         const id = event.id;
         const workspaceId = event.workspaceId;
@@ -305,7 +286,9 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
 
         return { ...context, docs: newDocs };
       }),
-      updateDocContent: assign((context, event) => {
+    },
+    UPDATE_DOC_CONTENT: {
+      actions: assign((context, event) => {
         if (event.type !== 'UPDATE_DOC_CONTENT') return context;
         const { id, content } = event;
         const updatedDoc = { ...context.docs[id], content };
@@ -313,8 +296,12 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
         return { ...context, docs: { ...context.docs, [id]: updatedDoc } };
       }),
     },
+    INITIALIZE: {
+      actions: assign((context, event) => event.state),
+    },
+    RESYNC_DB: 'resyncing',
   },
-);
+});
 
 export const handleCreateDoc = async (
   args: { title: string; content: string },
