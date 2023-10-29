@@ -297,7 +297,7 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
         handleInputChange={handleCustomPromptInput}
       />
       <AudioSettings />
-      <form
+      {/* <form
         className="text-acai-white w-full flex flex-col flex-grow mb-4"
         onSubmit={handleManualTTS}
       >
@@ -323,7 +323,7 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
         >
           Submit
         </button>
-      </form>
+      </form> */}
       {audioContext && (
         <audio
           ref={audioRef}
