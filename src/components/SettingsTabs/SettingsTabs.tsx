@@ -26,20 +26,14 @@ const Settings: React.FC<SettingsProps> = ({
   initialTabIndex = 0,
 }: SettingsProps) => {
   const [tabIndex, setTabIndex] = React.useState(initialTabIndex);
-  const { agentStateService }: GlobalStateContextValue =
-    useContext(GlobalStateContext);
 
-  const [settingsOpen, setSettingsOpen] = React.useState(false);
-  const [userSettingsOpen, setUserSettingsOpen] = React.useState(false);
+  const [settingsOpen, setSettingsOpen] = React.useState(true);
+  const [userSettingsOpen, setUserSettingsOpen] = React.useState(true);
   const { workspaceId } = useParams<{
     workspaceId: string;
     domain: 'knowledge' | 'documents' | undefined;
     id: string;
   }>();
-
-  const customPrompt = useSelector(agentStateService, (state) =>
-    workspaceId ? state.context[workspaceId]?.customPrompt : '',
-  );
 
   const toggleSettings = () => {
     setSettingsOpen(!settingsOpen);
@@ -47,15 +41,6 @@ const Settings: React.FC<SettingsProps> = ({
   const toggleUserSettings = () => {
     setUserSettingsOpen(!userSettingsOpen);
   };
-  const [avaSettingsOpen, setAvaSettingsOpen] = React.useState(false);
-  const toggleAvaSettings = () => {
-    setAvaSettingsOpen(!avaSettingsOpen);
-  };
-  const handleCustomPromptInput = (e: { target: { value: any } }) =>
-    agentStateService.send('UPDATE_CUSTOM_PROMPT', {
-      workspaceId: workspaceId,
-      customPrompt: e.target.value,
-    });
 
   return (
     <div
@@ -72,7 +57,6 @@ const Settings: React.FC<SettingsProps> = ({
         <TabList className="m-2 border-b-2 border-solid border-dark text-acai-white flex">
           <Tab>Config</Tab>
           <Tab>Knowledge</Tab>
-          <Tab>Audio</Tab>
           <Tab>Logs</Tab>
         </TabList>
 
@@ -92,32 +76,6 @@ const Settings: React.FC<SettingsProps> = ({
             </ExpansionPanel>
             <ExpansionPanel
               className="border-t-0"
-              title="AVA Settings"
-              onChange={toggleAvaSettings}
-              isOpened={avaSettingsOpen}
-              tabIndex={0}
-              // onKeyDown={toggleSettings}
-            >
-              {workspaceId && <ChatModelDropdown workspaceId={workspaceId} />}
-
-              {workspaceId &&
-                agentStateService.getSnapshot().context[workspaceId]
-                  ?.agentMode === 'custom' && (
-                  <>
-                    <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-3 font-bold mb-3 border-b border-b-light border-b-solid">
-                      Custom Agent Server
-                    </h5>
-                    <SocketManager />
-                  </>
-                )}
-              <ScratchPad
-                placeholder="Custom Prompt"
-                content={customPrompt}
-                handleInputChange={handleCustomPromptInput}
-              />
-            </ExpansionPanel>
-            <ExpansionPanel
-              className="border-t-0"
               title="Access Config"
               onChange={toggleSettings}
               isOpened={settingsOpen}
@@ -133,10 +91,6 @@ const Settings: React.FC<SettingsProps> = ({
 
         <TabPanel>
           {workspaceId && <KnowledgeUpload workspaceId={workspaceId} />}
-        </TabPanel>
-
-        <TabPanel>
-          <AudioSettings />
         </TabPanel>
 
         <TabPanel>

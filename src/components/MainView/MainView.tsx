@@ -70,26 +70,6 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     });
   });
 
-  const handleDeleteWorkspace = () => {
-    if (!workspaceId) return;
-    const confirmDelete = window.prompt('Type "delete" to confirm');
-    if (confirmDelete?.toLowerCase() !== 'delete') {
-      alert('Deletion cancelled.');
-      return;
-    }
-    globalServices.appStateService.send({
-      type: 'DELETE_WORKSPACE',
-      workspaceId,
-    });
-    globalServices.agentStateService.send({
-      type: 'DELETE_AGENT',
-      workspaceId,
-    });
-    setTimeout(() => {
-      navigate('/');
-    }, 250);
-  };
-
   const handleFilesDrop = async (file: File) => {
     if (!workspaceId) return;
     const title = file.name.split('.')[0];
@@ -169,34 +149,27 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
 
   return (
     <div className="w-full flex flex-col mt-16 md:mt-8 max-h-full">
-      <div className="ml-16 flex items-center group">
-        {workspaceId !== 'docs' && (
-          <button
-            className="p-0 px-1 rounded-full font-medium text-red-900 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-4"
-            onClick={handleDeleteWorkspace}
-          >
-            x
-          </button>
-        )}
-      </div>
-      <EditorDropzone
+      {/* editor dropzone was overriding the tiptap editor drop callbacks.
+      we want to be able to drop images into the editor (we may just need to handle if the file hovering over the editor is an image and then ignore the drop if it is)
+      */}
+      {/* <EditorDropzone
         workspaceId={workspaceId}
         onPDFDrop={handlePdfDrop}
         showHelperText={false}
         onFilesDrop={handleFilesDrop}
-      >
-        {domain === 'documents' && activeDoc && <TipTap tab={activeDoc} />}
-        {domain === 'knowledge' && fileType && (
-          <KnowledgeView
-            workspaceId={workspaceId}
-            filename={activeTabId || 'knowledge'}
-            fileType={fileType as 'pdf' | 'txt' | 'md'}
-            fileUrl={fileUrl?.toString()}
-            content={knowledgeItems?.[0]?.fullText}
-            page={page || '1'}
-          />
-        )}
-      </EditorDropzone>
+      > */}
+      {domain === 'documents' && activeDoc && <TipTap tab={activeDoc} />}
+      {domain === 'knowledge' && fileType && (
+        <KnowledgeView
+          workspaceId={workspaceId}
+          filename={activeTabId || 'knowledge'}
+          fileType={fileType as 'pdf' | 'txt' | 'md'}
+          fileUrl={fileUrl?.toString()}
+          content={knowledgeItems?.[0]?.fullText}
+          page={page || '1'}
+        />
+      )}
+      {/* </EditorDropzone> */}
     </div>
   );
 };

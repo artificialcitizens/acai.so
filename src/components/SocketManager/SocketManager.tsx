@@ -130,7 +130,7 @@ export const SocketManager: React.FC = () => {
 
   return (
     <SocketContext.Provider value={socket}>
-      <form onSubmit={handleFormSubmit}>
+      <form className="mb-4" onSubmit={handleFormSubmit}>
         <span className="flex mb-2 items-center">
           <label htmlFor="url" className="text-acai-white pr-2 w-[50%]">
             URL:

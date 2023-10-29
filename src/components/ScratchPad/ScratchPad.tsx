@@ -16,7 +16,7 @@ const MarkdownInput: React.FC<MarkdownInputProps> = ({
   height = '24px',
 }) => {
   return (
-    <div className="pt-2 mb-2 max-h-[25vh] text-base md:text-sm overflow-scroll border-b-transparent bg-base text-acai-white shadow-none w-full rounded-lg">
+    <div className="pt-2 mb-2 max-h-[25vh] text-sm overflow-scroll border-b-transparent bg-base text-acai-white shadow-none w-full rounded-lg">
       {!readonly ? (
         <textarea
           // set pre-wrap to preserve line breaks
