@@ -16,10 +16,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <GlobalStateProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
           <Route path="/:workspaceId/:domain/:id" element={<App />} />
           {/* update with proper 404 with links to docs */}
-          <Route path="*" element={<App />} />
+          <Route path="*" element={<LandingPage />} />
         </Routes>
       </Router>
     </GlobalStateProvider>

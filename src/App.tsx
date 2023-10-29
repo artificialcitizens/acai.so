@@ -55,32 +55,40 @@ const App = () => {
     return globalServices.agentStateService.getSnapshot().context['docs'];
   });
 
-  // @TODO: move directly into state machine
   useEffect(() => {
-    setLoading(true);
-    createAcaiDocumentation().then((d) => {
-      const { workspace, docs } = createWorkspace({
-        workspaceName: 'acai.so',
-        id: 'docs',
-        docs: d,
-      });
-      if (!workspace) return;
-      // @TODO: rename to load docs
-      globalServices.appStateService.send({
-        type: 'REPLACE_WORKSPACE',
-        id: 'docs',
-        workspace: workspace,
-        docs: docs,
-      });
+    const currentTime = new Date().getTime();
+    const lastUpdated = Number(localStorage.getItem('lastUpdated')) || 0;
+    const twentyFourHours = 24 * 60 * 60 * 1000;
 
-      if (!docsAgent) {
-        globalServices.agentStateService.send({
-          type: 'CREATE_AGENT',
-          workspaceId: 'docs',
+    if (!docsAgent || currentTime - lastUpdated > twentyFourHours) {
+      setLoading(true);
+      createAcaiDocumentation().then((d) => {
+        const { workspace, docs } = createWorkspace({
+          workspaceName: 'acai.so',
+          id: 'docs',
+          docs: d,
         });
-      }
-    });
-    setLoading(false);
+        if (!workspace) return;
+        // @TODO: rename to load docs
+        globalServices.appStateService.send({
+          type: 'REPLACE_WORKSPACE',
+          id: 'docs',
+          workspace: workspace,
+          docs: docs,
+        });
+
+        if (!docsAgent) {
+          globalServices.agentStateService.send({
+            type: 'CREATE_AGENT',
+            workspaceId: 'docs',
+          });
+        }
+
+        // Update the last updated time in localStorage
+        localStorage.setItem('lastUpdated', String(currentTime));
+      });
+      setLoading(false);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
