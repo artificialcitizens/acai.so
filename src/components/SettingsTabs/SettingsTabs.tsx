@@ -15,7 +15,7 @@ import ChatModelDropdown from '../ChatSettings';
 import { SocketManager } from '../SocketManager';
 import UserProfile from '../UserProfile/UserProfile';
 import KnowledgeUpload from '../Knowledge/Knowledge';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import AudioSettings from './AudioSettings';
 import { useSaveWorkspace } from '../../hooks/use-save-workspace';
 import { useLoadWorkspace } from '../../hooks/use-load-workspace';
@@ -43,6 +43,8 @@ const Settings: React.FC<SettingsProps> = ({
   const customPrompt = useSelector(agentStateService, (state) =>
     workspaceId ? state.context[workspaceId]?.customPrompt : '',
   );
+
+  const navigate = useNavigate();
 
   const { loadWorkspace } = useLoadWorkspace();
 
@@ -78,7 +80,8 @@ const Settings: React.FC<SettingsProps> = ({
     if (!file) return;
     // Process the selected file
     try {
-      await loadWorkspace(file);
+      const { workspaceId, docId } = await loadWorkspace(file);
+      navigate(`/${workspaceId}/documents/${docId}`);
     } catch (error) {
       console.error(error);
     }

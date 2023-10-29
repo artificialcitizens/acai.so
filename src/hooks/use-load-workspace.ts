@@ -57,6 +57,10 @@ export const useLoadWorkspace = () => {
         });
       }),
     );
+    return {
+      workspaceId: workspaceData.workspace.id,
+      docId: workspaceData.docs[0]?.id,
+    };
   }, []);
 
   return { loadWorkspace };
