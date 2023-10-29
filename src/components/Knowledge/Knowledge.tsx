@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { ACDoc, handleCreateDoc } from '../../state';
 import { pdfjs } from 'react-pdf';
+import { v4 as uuidv4 } from 'uuid';
 
 import { VectorStoreContext } from '../../context/VectorStoreContext';
 import {
@@ -46,7 +47,9 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
     for (const file of files) {
       if (!file) return;
 
-      const fileExtension = file.name.split('.').pop();
+      const fileExtension = file.name.split('.').pop() as 'pdf' | 'txt' | 'md';
+      const generatedFileId = uuidv4();
+
       switch (fileExtension) {
         case 'txt':
         case 'md':
@@ -75,12 +78,14 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                 const filteredMemoryVectors = memoryVectors?.filter(
                   (item) => item.metadata.id === slugifiedFilename,
                 );
+
                 // @TODO: Add options for generating summary on upload
-                const id = db.knowledge.add({
+                const id = await db.knowledge.add({
                   id: slugifiedFilename,
                   workspaceId,
                   memoryVectors: filteredMemoryVectors || [],
-                  file,
+                  fileId: generatedFileId,
+                  fileName: file.name,
                   fileType: fileExtension,
                   fullText: fileContent,
                   createdAt: new Date().toISOString(),
@@ -89,8 +94,19 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
               } else {
                 throw new Error('Context is null');
               }
+              await db.files.add({
+                id: generatedFileId,
+                workspaceId,
+                file,
+                fileType: fileExtension,
+                fileName: file.name,
+                createdAt: new Date().toISOString(),
+                lastModified: new Date().toISOString(),
+              });
               toastifyInfo(`File uploaded successfully: ${file.name}`);
             } catch (error) {
+              console.error(error);
+
               toastifyError(`Error processing file: ${file.name}`);
             }
           }
@@ -120,7 +136,6 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   workspaceId,
                   pageNumber: page.page,
                   offset: pageStartOffset,
-                  file,
                   src: srcFormat(p),
                   totalPages: pdfData[slugifiedFilename].length,
                   originalFilename: file.name,
@@ -144,7 +159,8 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                   id: metadata.id,
                   workspaceId,
                   memoryVectors: filteredMemoryVectors || [],
-                  file,
+                  fileId: generatedFileId,
+                  fileName: file.name,
                   fullText: page.content,
                   fileType: 'pdf',
                   createdAt: new Date().toISOString(),
@@ -154,10 +170,20 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
             } else {
               throw new Error('Context is null');
             }
+
             toastifyInfo(`File uploaded successfully: ${file.name}`);
           } catch (error) {
             toastifyError(`Error processing file: ${file.name}`);
           }
+          await db.files.add({
+            id: generatedFileId,
+            workspaceId,
+            file,
+            fileType: fileExtension,
+            fileName: file.name,
+            createdAt: new Date().toISOString(),
+            lastModified: new Date().toISOString(),
+          });
           break;
         }
         default:

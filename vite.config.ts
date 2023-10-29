@@ -470,10 +470,14 @@ const manifestForPlugin: Partial<VitePWAOptions> = {
 };
 
 // https://vitejs.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), VitePWA(manifestForPlugin)],
   assetsInclude: ['**/*.ico', '**/*.png', '**/*.svg', '**/*.md'],
   build: {
     assetsDir: 'assets',
+  },
+  optimizeDeps: {
+    exclude: ['vite-plugin-pwa'],
   },
 });

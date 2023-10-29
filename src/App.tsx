@@ -35,6 +35,7 @@ const App = () => {
     undefined,
   );
   const [listening, setListening] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const routerLocation = useLocation();
   const [editor, setEditor] = useState<Editor | null>(null);
   const {
@@ -50,8 +51,13 @@ const App = () => {
     return state.context.workspaces?.[workspaceId || 'docs']?.name;
   });
 
+  const docsAgent = useSelector(globalServices.agentStateService, (state) => {
+    return globalServices.agentStateService.getSnapshot().context['docs'];
+  });
+
   // @TODO: move directly into state machine
   useEffect(() => {
+    setLoading(true);
     createAcaiDocumentation().then((d) => {
       const { workspace, docs } = createWorkspace({
         workspaceName: 'acai.so',
@@ -66,7 +72,15 @@ const App = () => {
         workspace: workspace,
         docs: docs,
       });
+
+      if (!docsAgent) {
+        globalServices.agentStateService.send({
+          type: 'CREATE_AGENT',
+          workspaceId: 'docs',
+        });
+      }
     });
+    setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

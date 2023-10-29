@@ -55,6 +55,7 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "js-yaml": "^4.1.0",
+    "jszip": "^3.10.1",
     "langchain": "^0.0.150",
     "linkify-react": "^4.1.1",
     "linkifyjs": "^4.1.1",

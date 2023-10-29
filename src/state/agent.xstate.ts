@@ -1,5 +1,6 @@
 import { createMachine, assign } from 'xstate';
 import { MessageRole, agentMode } from '../components/Ava/use-ava';
+import { db } from '../../db';
 
 export interface ChatHistory {
   id: string;
@@ -14,6 +15,7 @@ export type AgentWorkspace = {
   id: string;
   loading: boolean;
   agentMode: AgentMode;
+  agentName?: string;
   workspaceId: string;
   customPrompt: string;
   recentChatHistory: ChatHistory[];
@@ -21,6 +23,9 @@ export type AgentWorkspace = {
   returnRagResults: boolean;
   customAgentVectorSearch: boolean;
   agentLogs: {
+    [key: string]: any;
+  };
+  memory: {
     [key: string]: any;
   };
   agentTools: {
@@ -38,7 +43,7 @@ export type AgentContext = {
 export type AgentEvent =
   | { type: 'LOAD'; workspaceId: string }
   | { type: 'UPDATE'; agent: AgentWorkspace }
-  | { type: 'TOGGLE_TOOL'; toolName: string }
+  | { type: 'TOGGLE_TOOL'; toolName: string; workspaceId: string }
   | { type: 'UPDATE_CUSTOM_PROMPT'; workspaceId: string; customPrompt: string }
   | {
       type: 'UPDATE_CHAT_HISTORY';
@@ -57,39 +62,34 @@ export type AgentEvent =
     }
   | { type: 'DELETE_AGENT'; workspaceId: string };
 
-/**
- * Save AgentWorkspace to local storage
- */
-const saveAgentState = (state: AgentContext) => {
-  localStorage.setItem('agentState', JSON.stringify(state));
-};
+export const agentDbService = {
+  async saveAgent(agent: AgentWorkspace) {
+    if (!agent.workspaceId) return;
+    try {
+      await db.agents.put(agent);
+    } catch (error) {
+      console.error('Error saving agent:', error);
+    }
+  },
 
-/**
- * Load AgentWorkspace from local storage
- */
-const loadAgentState = (): AgentContext => {
-  const savedState = localStorage.getItem('agentState');
-  if (savedState) {
-    return JSON.parse(savedState);
-  } else {
-    const initialState: AgentContext = {
-      docs: {
-        id: 'acai-docs',
-        loading: false,
-        workspaceId: 'docs',
-        agentMode: 'chat',
-        openAIChatModel: 'gpt-4',
-        customPrompt: '',
-        recentChatHistory: [],
-        returnRagResults: false,
-        customAgentVectorSearch: false,
-        agentLogs: {},
-        agentTools: {},
-      },
-    }; // Define your initial state here
-    saveAgentState(initialState);
-    return initialState;
-  }
+  async deleteAgent(agentId: string) {
+    try {
+      await db.agents.delete(agentId);
+    } catch (error) {
+      console.error('Error deleting agent:', error);
+    }
+  },
+
+  async loadAgents(): Promise<{ [key: string]: AgentWorkspace }> {
+    const agents = await db.agents.toArray();
+    const agentDictionary: { [key: string]: AgentWorkspace } = {};
+
+    agents.forEach((agent) => {
+      agentDictionary[agent.id] = agent;
+    });
+
+    return agentDictionary;
+  },
 };
 
 export const createAgent = (workspaceId: string): AgentWorkspace => {
@@ -102,21 +102,19 @@ export const createAgent = (workspaceId: string): AgentWorkspace => {
     openAIChatModel: 'gpt-4',
     returnRagResults: false,
     customAgentVectorSearch: false,
+    memory: {},
     recentChatHistory: [],
     agentLogs: {},
     agentTools: {},
   };
 };
 
-// Define the initial context
-const initialAgentContext: AgentContext = loadAgentState();
-
 // Define the machine
 export const agentMachine = createMachine<AgentContext, AgentEvent>({
   predictableActionArguments: true,
   id: 'agent',
   initial: 'idle',
-  context: initialAgentContext,
+  context: undefined,
   states: {
     idle: {
       on: {
@@ -131,7 +129,7 @@ export const agentMachine = createMachine<AgentContext, AgentEvent>({
                   loading: true,
                 },
               };
-              saveAgentState(updatedContext);
+              agentDbService.saveAgent(updatedContext[event.workspaceId]);
               return updatedContext;
             }
             return context;
@@ -140,24 +138,20 @@ export const agentMachine = createMachine<AgentContext, AgentEvent>({
       },
     },
     loading: {
-      on: {
-        UPDATE: {
+      invoke: {
+        id: 'loadAgents',
+        src: () => agentDbService.loadAgents(),
+        onDone: {
           target: 'idle',
           actions: assign((context, event) => {
-            if (event.agent.workspaceId) {
-              const updatedContext = {
-                ...context,
-                [event.agent.workspaceId]: {
-                  ...context[event.agent.workspaceId],
-                  ...event.agent,
-                  loading: false,
-                },
-              };
-              saveAgentState(updatedContext);
-              return updatedContext;
-            }
-            return context;
+            return event.data;
           }),
+        },
+        onError: {
+          target: 'error',
+          actions: (context, event) => {
+            console.error('Error loading agents:', event.data);
+          },
         },
       },
     },
@@ -174,7 +168,7 @@ export const agentMachine = createMachine<AgentContext, AgentEvent>({
                   loading: true,
                 },
               };
-              saveAgentState(updatedContext);
+              agentDbService.saveAgent(updatedContext[event.workspaceId]);
               return updatedContext;
             }
             return context;
@@ -194,7 +188,7 @@ export const agentMachine = createMachine<AgentContext, AgentEvent>({
               customPrompt: event.customPrompt,
             },
           };
-          saveAgentState(updatedContext);
+          agentDbService.saveAgent(updatedContext[event.workspaceId]);
           return updatedContext;
         }
         return context;
@@ -210,7 +204,7 @@ export const agentMachine = createMachine<AgentContext, AgentEvent>({
               recentChatHistory: event.recentChatHistory,
             },
           };
-          saveAgentState(updatedContext);
+          agentDbService.saveAgent(updatedContext[event.workspaceId]);
           return updatedContext;
         }
         return context;
@@ -219,14 +213,29 @@ export const agentMachine = createMachine<AgentContext, AgentEvent>({
     TOGGLE_TOOL: {
       actions: assign((context, event) => {
         const workspaceIds = Object.keys(context);
+        const updatedContext = { ...context };
+
         for (const workspaceId of workspaceIds) {
-          const tool = context[workspaceId].agentTools[event.toolName];
+          const agentWorkspace = updatedContext[workspaceId];
+          const tool = agentWorkspace.agentTools[event.toolName];
           if (tool) {
-            tool.enabled = !tool.enabled;
+            // Create a new tool object with the updated enabled property
+            const updatedTool = { ...tool, enabled: !tool.enabled };
+            // Create a new agentTools object with the updated tool
+            const updatedAgentTools = {
+              ...agentWorkspace.agentTools,
+              [event.toolName]: updatedTool,
+            };
+            // Create a new agentWorkspace object with the updated agentTools
+            updatedContext[workspaceId] = {
+              ...agentWorkspace,
+              agentTools: updatedAgentTools,
+            };
+            agentDbService.saveAgent(updatedContext[workspaceId]);
           }
         }
-        saveAgentState(context);
-        return context;
+
+        return updatedContext;
       }),
     },
     CREATE_AGENT: {
@@ -236,7 +245,7 @@ export const agentMachine = createMachine<AgentContext, AgentEvent>({
           ...context,
           [event.workspaceId]: newAgent,
         };
-        saveAgentState(updatedContext);
+        agentDbService.saveAgent(newAgent);
         return updatedContext;
       }),
     },
@@ -246,7 +255,7 @@ export const agentMachine = createMachine<AgentContext, AgentEvent>({
         if (context[workspaceId]) {
           const updatedContext = { ...context };
           delete updatedContext[workspaceId];
-          saveAgentState(updatedContext);
+          agentDbService.deleteAgent(workspaceId);
           return updatedContext;
         }
         return context;
@@ -262,7 +271,7 @@ export const agentMachine = createMachine<AgentContext, AgentEvent>({
               recentChatHistory: [], // Clear the chat history
             },
           };
-          saveAgentState(updatedContext);
+          agentDbService.saveAgent(updatedContext[event.workspaceId]);
           return updatedContext;
         }
         return context;
@@ -278,7 +287,7 @@ export const agentMachine = createMachine<AgentContext, AgentEvent>({
               openAIChatModel: event.modelName,
             },
           };
-          saveAgentState(updatedContext);
+          agentDbService.saveAgent(updatedContext[event.workspaceId]);
           return updatedContext;
         }
         return context;
@@ -294,7 +303,7 @@ export const agentMachine = createMachine<AgentContext, AgentEvent>({
               agentMode: event.mode,
             },
           };
-          saveAgentState(updatedContext);
+          agentDbService.saveAgent(updatedContext[event.workspaceId]);
           return updatedContext;
         }
         return context;
@@ -310,7 +319,7 @@ export const agentMachine = createMachine<AgentContext, AgentEvent>({
               returnRagResults: !context[event.workspaceId].returnRagResults,
             },
           };
-          saveAgentState(updatedContext);
+          agentDbService.saveAgent(updatedContext[event.workspaceId]);
           return updatedContext;
         }
         return context;
@@ -327,7 +336,7 @@ export const agentMachine = createMachine<AgentContext, AgentEvent>({
                 !context[event.workspaceId].customAgentVectorSearch,
             },
           };
-          saveAgentState(updatedContext);
+          agentDbService.saveAgent(updatedContext[event.workspaceId]);
           return updatedContext;
         }
         return context;

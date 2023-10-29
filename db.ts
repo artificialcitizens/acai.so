@@ -1,6 +1,6 @@
 // db.ts
 import Dexie, { Table } from 'dexie';
-import { ACDoc, Workspace } from './src/state';
+import { ACDoc, Workspace, AgentWorkspace } from './src/state';
 
 export interface AcaiMemoryVector {
   content: string;
@@ -10,7 +10,8 @@ export interface AcaiMemoryVector {
 export interface Knowledge {
   id: string;
   workspaceId: string;
-  file: File;
+  fileId: string;
+  fileName: string;
   fileType: 'pdf' | 'md' | 'txt';
   fullText: string;
   createdAt: string;
@@ -21,12 +22,24 @@ export interface Knowledge {
   tags?: string[];
 }
 
+export interface ACFile {
+  id: string;
+  workspaceId: string;
+  file: File;
+  fileType: 'pdf' | 'md' | 'txt' | 'html';
+  fileName: string;
+  createdAt: string;
+  lastModified: string;
+}
+
 export class AcaiDexie extends Dexie {
   // 'embeddings' is added by dexie when declaring the stores()
   // We just tell the typing system this is the case
   knowledge!: Table<Knowledge>;
   workspaces!: Table<Workspace>;
   docs!: Table<ACDoc>;
+  agents!: Table<AgentWorkspace>;
+  files!: Table<ACFile>;
 
   constructor() {
     super('acaiDb');
@@ -38,10 +51,17 @@ export class AcaiDexie extends Dexie {
       workspaces: '++id, name, createdAt, lastUpdated, private',
       docs: '++id, workspaceId, title, filetype, content, isContext, systemNote, createdAt, lastUpdated, autoSave, canEdit',
     });
+    this.version(3).stores({
+      agents:
+        '++id, loading, agentMode, agentName, workspaceId, customPrompt, recentChatHistory, openAIChatModel, returnRagResults, customAgentVectorSearch, agentLogs, memory, agentTools',
+      files: '++id, workspaceId, file, createdAt, lastModified',
+    });
 
     this.knowledge = this.table('knowledge');
     this.workspaces = this.table('workspaces');
+    this.agents = this.table('agents');
     this.docs = this.table('docs');
+    this.files = this.table('files');
   }
 }
 

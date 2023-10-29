@@ -155,7 +155,12 @@ const Chat: React.FC<ChatProps> = ({
   //   setController(abortController);
   // }, [abortController]);
 
+  useEffect(() => {
+    send({ type: 'LOAD', workspaceId });
+  }, [send, workspaceId]);
+
   const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
+
   const [messages, setMessages] = useState<any[]>(
     recentChatHistory?.map((history: ChatHistory) => {
       return {
