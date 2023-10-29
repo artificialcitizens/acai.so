@@ -9,6 +9,7 @@ export interface UIContext {
   modalContent: string | React.ReactNode;
 }
 
+// @TODO: update to use db service paradigm
 const saveUIState = (context: UIContext) => {
   const stateCopy = { ...context };
   stateCopy.modalContent = '';
