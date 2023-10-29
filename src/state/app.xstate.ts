@@ -105,7 +105,8 @@ export type AppEvent =
       id: string;
       content: any;
     }
-  | { type: 'INITIALIZE'; state: AppContext };
+  | { type: 'INITIALIZE'; state: AppContext }
+  | { type: 'RESYNC_DB' };
 
 export const appStateMachine = createMachine<AppContext, AppEvent>(
   {
@@ -128,6 +129,22 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
             target: 'error',
             actions: (context, event) => {
               console.error('Error loading state:', event.data);
+            },
+          },
+        },
+      },
+      resyncing: {
+        invoke: {
+          id: 'resyncDb',
+          src: appDbService.loadState,
+          onDone: {
+            target: 'idle',
+            actions: assign((context, event) => event.data),
+          },
+          onError: {
+            target: 'error',
+            actions: (context, event) => {
+              console.error('Error resyncing DB:', event.data);
             },
           },
         },
@@ -160,6 +177,7 @@ export const appStateMachine = createMachine<AppContext, AppEvent>(
       INITIALIZE: {
         actions: assign((context, event) => event.state),
       },
+      RESYNC_DB: 'resyncing',
     },
   },
   {
