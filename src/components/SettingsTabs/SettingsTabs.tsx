@@ -44,10 +44,6 @@ const Settings: React.FC<SettingsProps> = ({
     workspaceId ? state.context[workspaceId]?.customPrompt : '',
   );
 
-  const navigate = useNavigate();
-
-  const { loadWorkspace } = useLoadWorkspace();
-
   const toggleSettings = () => {
     setSettingsOpen(!settingsOpen);
   };
@@ -63,29 +59,6 @@ const Settings: React.FC<SettingsProps> = ({
       workspaceId: workspaceId,
       customPrompt: e.target.value,
     });
-
-  // @TODO: move when we move import/export to its own component
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  const handleImportClick = () => {
-    if (!workspaceId) return;
-    // Trigger click on file input
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    // Process the selected file
-    try {
-      const { workspaceId, docId } = await loadWorkspace(file);
-      navigate(`/${workspaceId}/documents/${docId}`);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   return (
     <div
@@ -160,21 +133,6 @@ const Settings: React.FC<SettingsProps> = ({
             </ExpansionPanel>
           </span>
           <span className="flex w-full justify-center my-2">
-            <input
-              type="file"
-              ref={fileInputRef}
-              style={{ display: 'none' }}
-              onChange={handleFileChange}
-            />
-            <button
-              className="text-xs mr-2"
-              onClick={() => {
-                if (!workspaceId) return;
-                handleImportClick();
-              }}
-            >
-              Import Workspace
-            </button>
             <button
               className="text-xs"
               onClick={() => {

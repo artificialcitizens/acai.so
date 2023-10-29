@@ -5,7 +5,7 @@ import React, { useContext, useEffect, useRef } from 'react';
 import { Sidenav, initTE } from 'tw-elements';
 import { useSelector } from '@xstate/react';
 import { useClickAway } from '@uidotdev/usehooks';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ACDoc, Workspace, handleCreateDoc } from '../../state';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -14,9 +14,16 @@ import {
 } from '../../context/GlobalStateContext';
 import { ProjectLinks } from '../ProjectLinks/ProjectLinks';
 import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
+import { useLoadWorkspace } from '../../hooks/use-load-workspace';
 
 export const SideNav: React.FC = () => {
   const navigate = useNavigate();
+  const { workspaceId } = useParams<{
+    workspaceId: string;
+    domain: 'knowledge' | 'documents' | undefined;
+    id: string;
+  }>();
+
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const workspaces = useSelector(
@@ -31,14 +38,29 @@ export const SideNav: React.FC = () => {
     globalServices.uiStateService,
     (state) => state.context.sideNavOpen,
   );
-  const [docsOpen, setDocsOpen] = React.useState(true);
   const navOpenRef = useRef(navOpen);
   navOpenRef.current = navOpen;
-
+  const [openedPanelGroup, setOpenedPanelGroup] = React.useState<string | null>(
+    null,
+  );
   const ref = useClickAway(() => {
     if (!navOpenRef.current) return;
     globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV' });
   });
+
+  const { loadWorkspace } = useLoadWorkspace();
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleImportClick = () => {
+    // Trigger click on file input
+    fileInputRef.current?.click();
+  };
+
+  useEffect(() => {
+    if (!workspaceId) return;
+    setOpenedPanelGroup(workspaceId);
+  }, [workspaceId]);
 
   useEffect(() => {
     initTE({ Sidenav });
@@ -104,6 +126,20 @@ export const SideNav: React.FC = () => {
     });
   };
 
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    // Process the selected file
+    try {
+      const { workspaceId, docId } = await loadWorkspace(file);
+      navigate(`/${workspaceId}/documents/${docId}`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <nav
       className="fixed flex flex-col left-0 top-0 z-[1035] max-h-full w-60 -translate-x-full overflow-hidden bg-dark shadow-[0_4px_12px_0_rgba(0,0,0,0.07),_0_2px_4px_rgba(0,0,0,0.05)] data-[te-sidenav-hidden='false']:translate-x-0 dark:bg-dark"
@@ -127,10 +163,9 @@ export const SideNav: React.FC = () => {
                     <ExpansionPanel
                       className="border-b border-darker border-b-solid border-l-0 border-r-0 border-t-0"
                       title={workspace.name}
-                      onChange={() => {
-                        if (workspace.id === 'docs') setDocsOpen(!docsOpen);
-                      }}
-                      isOpened={workspace.id === 'docs' ? docsOpen : undefined}
+                      {...(workspace.id === openedPanelGroup
+                        ? { isOpened: true }
+                        : {})}
                     >
                       {docs &&
                         Object.values(docs)
@@ -200,10 +235,22 @@ export const SideNav: React.FC = () => {
                   </div>
                 ))}
             <button
-              className="w-full rounded-none text-acai-white text-xs  hover:text-acai-white pl-2 text-left transition duration-300 ease-linear"
+              className="font-light text-center w-full rounded-none text-acai-white text-xs  hover:text-acai-light pl-2 transition duration-150 ease-linear"
               onClick={createWorkspace}
             >
-              New Workspace +
+              New Workspace
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+            <button
+              className="font-light text-center w-full rounded-none text-acai-white text-xs  hover:text-acai-light pl-2 transition duration-150 ease-linear"
+              onClick={handleImportClick}
+            >
+              Import Workspace
             </button>
           </ul>
           <ProjectLinks />
