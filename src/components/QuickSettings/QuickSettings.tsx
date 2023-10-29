@@ -324,7 +324,6 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
           Submit
         </button>
       </form>
-      <hr />
       {audioContext && (
         <audio
           ref={audioRef}
@@ -351,8 +350,10 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
           }}
         />
       )}
+      {/* 
+      <hr />
       <p className="mb-2 ml-2 text-sm md:text-xs font-semibold">Knowledge</p>
-      {workspaceId && <KnowledgeUpload workspaceId={workspaceId} />}
+      {workspaceId && <KnowledgeUpload workspaceId={workspaceId} />} */}
     </div>
   );
 };
