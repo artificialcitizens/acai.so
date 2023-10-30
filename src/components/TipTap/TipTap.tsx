@@ -194,9 +194,22 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
       [currentContext, debouncedUpdates, isLoading, isProcessing, tokenQueue],
     ),
   );
+
   useEffect(() => {
     if (editor && tab) {
-      editor.commands.setContent(tab.content ?? '');
+      const currentContent = editor.getHTML();
+      const newContent = tab.content ?? '';
+
+      if (currentContent !== newContent) {
+        // Store the current cursor position
+        const { from, to } = editor.state.selection;
+
+        // Set the content
+        editor.commands.setContent(newContent);
+
+        // Restore the cursor position
+        editor.commands.setTextSelection({ from, to });
+      }
     }
   }, [editor, tab]);
 
