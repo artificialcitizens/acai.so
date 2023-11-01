@@ -104,9 +104,9 @@ export const SocketManager: React.FC = () => {
     socket.on('agent-log', (data: string) => {
       toastifyAgentLog(data);
     });
-    socket.on('info-toast', (err: any) => {
-      console.error(err);
-      toastifyInfo(err.message);
+    socket.on('info-toast', (data: { info: string }) => {
+      console.log(data.info);
+      toastifyInfo(data.info);
     });
 
     return () => {

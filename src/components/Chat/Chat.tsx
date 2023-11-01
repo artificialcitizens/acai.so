@@ -28,6 +28,7 @@ import remarkFootnotes from 'remark-footnotes';
 import { Button } from '../Button/Button';
 import { SendIcon, SpinnerIcon, StopIcon, TrashIcon } from '../Icons/Icons';
 import { MessageRole } from '../Ava/use-ava';
+import { v4 as uuidv4 } from 'uuid';
 
 const markdownComponents = {
   code: ({ node, inline, className, children, ...props }: any) => {
@@ -235,7 +236,7 @@ const Chat: React.FC<ChatProps> = ({
     type: MessageRole,
   ): ChatHistory => {
     return {
-      id: workspaceId,
+      id: uuidv4(),
       text: text,
       timestamp: Math.floor(Date.now() / 1000).toString(),
       type: type,
