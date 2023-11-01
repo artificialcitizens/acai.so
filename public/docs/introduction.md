@@ -37,7 +37,7 @@ AVA operates in different modes to assist the user in different tasks. These can
 The current available modes are:
 
 - `chat` - This is a standard chat interface and allows the user to talk to AVA without any agent tools slowing down the interaction. Set a custom prompt and the chat model in the **AVA** panel
-- `knowledge` - Chat with your uploaded knowledge, see [acai - knowledge](http://acai.so/docs/documents/2---knowledge)
+- `knowledge` - Chat with your uploaded knowledge, see [acai - knowledge](/docs/documents/knowledge)
 - `custom` - This mode allows for a custom server to connect to the [acai.so](http://acai.so) interface, giving developers a platform to develop their own intelligent digital workers.
 
 #### **Custom Agent**

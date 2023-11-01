@@ -48,7 +48,6 @@ const KnowledgeView: React.FC<KnowledgeViewProps> = ({
         return <PDFRenderer startingPage={Number(page)} fileUrl={fileUrl} />;
       case 'txt':
       case 'md':
-        if (!content) return <div>no content</div>;
         return <Tiptap tab={tab as ACDoc} />;
       default:
         return <div>Not sure how you got here...</div>;

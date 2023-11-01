@@ -90,11 +90,21 @@ const markdownComponents = {
   blockquote: ({ children }: { children: ReactNode }) => (
     <blockquote className="border-l-4 pl-4">{children}</blockquote>
   ),
-  a: ({ children, href }: { children: ReactNode; href?: string }) => (
-    <a href={href} className="text-blue-500 hover:underline">
-      {children}
-    </a>
-  ),
+  a: ({ children, href }: { children: ReactNode; href?: string }) => {
+    const isLocalLink =
+      href && (href.startsWith(window.location.origin) || href.startsWith('/'));
+    return (
+      <a
+        href={href}
+        className="text-blue-500 hover:underline"
+        {...(isLocalLink
+          ? {}
+          : { target: '_blank', rel: 'noopener noreferrer' })}
+      >
+        {children}
+      </a>
+    );
+  },
   table: ({ children }: { children: ReactNode }) => (
     <table className="w-full text-sm text-center text-gray-500 dark:text-gray-400 border">
       {children}

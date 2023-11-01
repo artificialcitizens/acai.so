@@ -24,17 +24,17 @@ export const TiptapEditorProps: EditorProps = {
   //   }
   //   return false;
   // },
-  handleDrop: (view, event, _slice, moved) => {
-    if (
-      !moved &&
-      event.dataTransfer &&
-      event.dataTransfer.files &&
-      event.dataTransfer.files[0]
-    ) {
-      event.preventDefault();
-      const file = event.dataTransfer.files[0];
-      // return handleImageUpload(file, view, event);
-    }
-    return false;
-  },
+  // handleDrop: (view, event, _slice, moved) => {
+  //   if (
+  //     !moved &&
+  //     event.dataTransfer &&
+  //     event.dataTransfer.files &&
+  //     event.dataTransfer.files[0]
+  //   ) {
+  //     event.preventDefault();
+  //     const file = event.dataTransfer.files[0];
+  //     // return handleImageUpload(file, view, event);
+  //   }
+  //   return false;
+  // },
 };
