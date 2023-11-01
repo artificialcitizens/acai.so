@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 .env
 OAI_CONFIG_LIST.json
+cache.db
