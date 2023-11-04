@@ -5,6 +5,9 @@ import { VitePWA, VitePWAOptions } from 'vite-plugin-pwa';
 
 const manifestForPlugin: Partial<VitePWAOptions> = {
   registerType: 'autoUpdate',
+  workbox: {
+    cleanupOutdatedCaches: true,
+  },
   devOptions: {
     enabled: true,
   },
