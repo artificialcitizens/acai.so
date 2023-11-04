@@ -27,7 +27,7 @@ import './TipTap.css';
 // import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
 // import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { EditorContext } from '../../context/EditorContext';
-import { toastifyError } from '../Toast';
+import { toastifyError, toastifyInfo } from '../Toast';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -89,6 +89,10 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 
   const saveContent = (editor: Editor) => {
+    if (tab.id === 'home' || workspaceId === 'docs') {
+      toastifyInfo('Changes to homepage or docs workspace are not saved.');
+      return;
+    }
     if (!tab) return;
     if (!tab.autoSave) return;
     setSaveStatus('Unsaved');

@@ -7,6 +7,7 @@ const manifestForPlugin: Partial<VitePWAOptions> = {
   registerType: 'autoUpdate',
   workbox: {
     cleanupOutdatedCaches: true,
+    skipWaiting: true,
   },
   devOptions: {
     enabled: true,
