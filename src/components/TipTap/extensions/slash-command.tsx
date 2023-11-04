@@ -194,26 +194,27 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       command: ({ editor, range }: CommandProps) =>
         editor.chain().focus().deleteRange(range).toggleCodeBlock().run(),
     },
-    // {
-    //   title: 'Image',
-    //   description: 'Upload an image from your computer.',
-    //   searchTerms: ['photo', 'picture', 'media'],
-    //   icon: <ImageIcon size={18} />,
-    //   command: ({ editor, range }: CommandProps) => {
-    //     editor.chain().focus().deleteRange(range).run();
-    //     // upload image
-    //     const input = document.createElement('input');
-    //     input.type = 'file';
-    //     input.accept = 'image/*';
-    //     input.onchange = async (event) => {
-    //       if (input.files?.length) {
-    //         const file = input.files[0];
-    //         return handleImageUpload(file, editor.view, event);
-    //       }
-    //     };
-    //     input.click();
-    //   },
-    // },
+    {
+      title: 'Image',
+      description: 'Upload an image from your computer.',
+      searchTerms: ['photo', 'picture', 'media'],
+      icon: <ImageIcon size={18} />,
+      command: ({ editor, range }: CommandProps) => {
+        editor.chain().focus().deleteRange(range).run();
+        // upload image
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async (event) => {
+          if (input.files?.length) {
+            const file = input.files[0];
+            // @TODO: create image table and use the base64 string to save/display the image
+            // return handleImageUpload(file, editor.view, event);
+          }
+        };
+        input.click();
+      },
+    },
   ].filter((item) => {
     if (typeof query === 'string' && query.length > 0) {
       const search = query.toLowerCase();
