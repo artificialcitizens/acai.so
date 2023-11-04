@@ -4,7 +4,10 @@ import react from '@vitejs/plugin-react';
 import { VitePWA, VitePWAOptions } from 'vite-plugin-pwa';
 
 const manifestForPlugin: Partial<VitePWAOptions> = {
-  registerType: 'prompt',
+  registerType: 'autoUpdate',
+  devOptions: {
+    enabled: true,
+  },
   includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
   manifest: {
     name: 'acai',
