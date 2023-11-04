@@ -30,6 +30,7 @@ import {
 import LoadingCircle from '../loading-circle';
 import Magic from '../magic';
 import { toastifyError } from '../../Toast';
+import { startImageUpload } from '../plugins/upload-images';
 
 interface CommandItemProps {
   title: string;
@@ -208,8 +209,8 @@ const getSuggestionItems = ({ query }: { query: string }) => {
         input.onchange = async (event) => {
           if (input.files?.length) {
             const file = input.files[0];
-            // @TODO: create image table and use the base64 string to save/display the image
-            // return handleImageUpload(file, editor.view, event);
+            const pos = editor.view.state.selection.from;
+            return startImageUpload(file, editor.view, pos, 'docs');
           }
         };
         input.click();
