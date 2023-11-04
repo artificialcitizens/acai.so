@@ -68,7 +68,6 @@ export function startImageUpload(
   pos: number,
   workspaceId: string,
 ) {
-  toastifyInfo('Uploading image...');
   // check if the file is an image
   if (!file.type.includes('image/')) {
     toastifyError('File type not supported.');
@@ -128,7 +127,6 @@ export const handleImageUpload = (file: File, workspaceId: string) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
-      toastifyInfo('Uploading image...');
       // can create a db entry here
       // imageService.send({
       //   type: 'CREATE_IMAGE',
