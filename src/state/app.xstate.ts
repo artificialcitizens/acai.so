@@ -71,7 +71,7 @@ export const appDbService = {
     const workspaces = await db.workspaces.toArray();
     const docs = await db.docs.toArray();
     const workspaceDictionary: { [key: string]: Workspace } = {};
-    const tabDictionary: { [key: string]: ACDoc } = {}; // Add tabDictionary
+    const tabDictionary: { [key: string]: ACDoc } = {};
 
     workspaces.forEach((workspace) => {
       workspaceDictionary[workspace.id] = { ...workspace, docIds: [] };
@@ -84,7 +84,10 @@ export const appDbService = {
       }
     });
 
-    return { workspaces: workspaceDictionary, docs: tabDictionary }; // Return tabs dictionary
+    return {
+      workspaces: workspaceDictionary,
+      docs: tabDictionary,
+    };
   },
 };
 

@@ -13,7 +13,7 @@ import {
 } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { Editor } from '@tiptap/core';
-import { TiptapEditorProps } from './props';
+import { defaultEditorProps } from './props';
 import { TiptapExtensions } from './extensions';
 import { useDebouncedCallback } from 'use-debounce';
 import { EditorBubbleMenu } from './components';
@@ -34,6 +34,7 @@ import {
 } from '../../context/GlobalStateContext';
 import { useParams } from 'react-router-dom';
 import { useSelector } from '@xstate/react';
+import { ImageResizer } from './extensions/image-resizer';
 interface EditorProps {
   tab: ACDoc;
 }
@@ -72,6 +73,7 @@ export const extractContentFromTipTap = (tipTapContent: any): string => {
 const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   const { appStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
+  const { workspaceId } = useParams();
   const [saveStatus, setSaveStatus] = useState('Saved');
   const [completion, setCompletion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -143,7 +145,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     useMemo(
       () => ({
         extensions: TiptapExtensions,
-        editorProps: TiptapEditorProps,
+        editorProps: defaultEditorProps(workspaceId || 'docs'),
         onUpdate: async (e) => {
           setSaveStatus('Unsaved');
           const selection = e.editor.state.selection;
@@ -281,6 +283,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
         className="overflow-y-auto flex-grow w-full mb-3 px-8 border-none sm:rounded-lg sm:border sm:px-12 min-h-[50vh] max-h-[75vh] md:max-h-[calc(100vh-8rem)]"
       >
         <EditorContent editor={editor} />
+        {editor?.isActive('image') && <ImageResizer editor={editor} />}
       </div>
       {/* <MenuBar
         editor={editor}

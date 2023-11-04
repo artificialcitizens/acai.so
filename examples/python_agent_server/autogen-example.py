@@ -23,6 +23,9 @@ socketio = SocketIO(
 )
 
 
+import json
+
+
 def print_messages(recipient, messages, sender, config):
     if "callback" in config and config["callback"] is not None:
         callback = config["callback"]
@@ -34,6 +37,19 @@ def print_messages(recipient, messages, sender, config):
 
     if "TERMINATE" in content:
         socketio.emit("info-toast", {"info": f"{content} | {role} | {sender.name}"})
+
+        # Format messages to match OpenAI chat endpoint
+        formatted_messages = [
+            {
+                "role": msg.get("role", "No role"),
+                "content": msg.get("content", "No content"),
+            }
+            for msg in messages
+        ]
+        messages_json_str = json.dumps(formatted_messages)
+        socketio.emit(
+            "create-tab", {"title": "Autogen Logs", "content": messages_json_str}
+        )
 
     print(
         f"Messages sent to: {recipient.name} | num messages: {len(messages)} | {content} | {role} | {sender.name}"
