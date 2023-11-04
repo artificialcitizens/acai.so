@@ -86,17 +86,12 @@ export const TiptapExtensions = [
       class: 'mt-4 mb-6 border-t border-light',
     },
   }),
-  TiptapImage.extend({
+  UpdatedImage.extend({
     addProseMirrorPlugins() {
       return [UploadImagesPlugin()];
     },
   }).configure({
     allowBase64: true,
-    HTMLAttributes: {
-      class: 'novel-rounded-lg novel-border novel-border-stone-200',
-    },
-  }),
-  UpdatedImage.configure({
     HTMLAttributes: {
       class: 'novel-rounded-lg novel-border novel-border-stone-200',
     },
