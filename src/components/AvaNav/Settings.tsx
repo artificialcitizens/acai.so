@@ -9,6 +9,7 @@ import {
 import { ACDoc, Workspace, handleCreateDoc } from '../../state';
 import { useLoadWorkspace } from '../../hooks/use-load-workspace';
 import { useSaveWorkspace } from '../../hooks/use-save-workspace';
+import { toastifyInfo } from '../Toast';
 // import { EditorContext } from '../../context/EditorContext';
 // import { toastifyInfo } from '../Toast';
 // import { useSelector } from '@xstate/react';
@@ -55,9 +56,10 @@ const DropdownSettings: React.FC<DropdownSettingsProps> = ({ onClose }) => {
       docIds: [tabId],
     };
     const doc: ACDoc = {
-      id: tabId,
-      title: `Welcome to ${name}!`,
-      content: '',
+      id: `home`,
+      title: `Home`,
+      content:
+        'This is the homepage, this will be the future index page for your workspace.',
       createdAt: new Date().toString(),
       lastUpdated: new Date().toString(),
       workspaceId: id,
@@ -198,6 +200,10 @@ const DropdownSettings: React.FC<DropdownSettingsProps> = ({ onClose }) => {
           className="px-4 py-2 block w-full rounded-none text-acai-white text-sm hover:text-acai-light disabled:text-gray-400 disabled:hover:text-gray-400 pl-2 transition duration-150 ease-linear text-left"
           onClick={async () => {
             if (!workspaceId || !activeTabId) return;
+            if (activeTabId === 'home') {
+              toastifyInfo('Cannot delete home document.');
+              return;
+            }
             onClose();
             const confirmDelete = window.prompt('Type "delete" to confirm');
             if (confirmDelete?.toLowerCase() !== 'delete') {
@@ -209,7 +215,7 @@ const DropdownSettings: React.FC<DropdownSettingsProps> = ({ onClose }) => {
               workspaceId,
             });
             setTimeout(() => {
-              navigate(`/${workspaceId}`);
+              navigate(`/${workspaceId}/documents/home`);
             }, 250);
           }}
         >
