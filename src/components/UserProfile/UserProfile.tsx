@@ -18,13 +18,13 @@ const UserProfile: React.FC = () => {
       <div className="flex mb-2 items-center">
         <label
           htmlFor="userName"
-          className="text-acai-white text-sm md:text-xs pr-2 w-[50%]"
+          className="text-acai-white text-base md:text-sm pr-2 w-[50%]"
         >
           Name:
         </label>
         <input
           id="userName"
-          className="text-acai-white text-base md:text-xs bg-base px-[2px]"
+          className="text-acai-white text-base md:text-sm bg-base px-[2px]"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -33,20 +33,20 @@ const UserProfile: React.FC = () => {
       <div className="flex mb-2 items-center">
         <label
           htmlFor="userLocation"
-          className="text-acai-white pr-2 w-[50%] text-sm md:text-xs"
+          className="text-acai-white pr-2 w-[50%] text-base md:text-sm"
         >
           Location:
         </label>
         <input
           id="userLocation"
-          className="text-acai-white bg-base px-[2px] text-base md:text-xs"
+          className="text-acai-white bg-base px-[2px] text-base md:text-sm"
           type="text"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
         />
       </div>
       <button
-        className="bg-light text-acai-white text-sm md:text-xs px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        className="bg-light text-acai-white text-base md:text-sm px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
         type="submit"
       >
         Save
