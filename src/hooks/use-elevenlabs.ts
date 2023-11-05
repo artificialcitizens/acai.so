@@ -3,30 +3,15 @@ import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { getToken } from '../utils/config';
 import { Option } from '../components/DropDown/';
+import { useLocalStorageKeyValue } from './use-local-storage';
 
 export const useElevenlabs = () => {
   const [voices, setVoices] = useState<Option[]>([]);
-  const [apiKey, setApiKey] = useState(
-    getToken('ELEVENLABS_API_KEY') || import.meta.env.VITE_ELEVENLABS_API_KEY,
-  );
+  const [apiKey] = useLocalStorageKeyValue('ELEVENLABS_API_KEY', '');
 
-  useEffect(() => {
-    const handleStorageChange = () => {
-      setApiKey(
-        getToken('ELEVENLABS_API_KEY') ||
-          import.meta.env.VITE_ELEVENLABS_API_KEY,
-      );
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
   const synthesizeElevenLabsSpeech = useCallback(
     async (inputText: string, voice: any) => {
+      if (!apiKey) return;
       const options = {
         method: 'POST',
         url: `https://api.elevenlabs.io/v1/text-to-speech/${voice}/stream`,
@@ -52,6 +37,7 @@ export const useElevenlabs = () => {
   const getVoices = useCallback(async () => {
     const apiKey =
       getToken('ELEVENLABS_API_KEY') || import.meta.env.VITE_ELEVENLABS_API_KEY;
+    if (!apiKey) return;
     const options = {
       method: 'GET',
       url: 'https://api.elevenlabs.io/v1/voices',
@@ -76,7 +62,7 @@ export const useElevenlabs = () => {
       // reverse so custom voices appear at top of list
       setVoices(voiceMap.reverse());
     });
-  }, [getVoices]);
+  }, [getVoices, apiKey]);
 
   return { synthesizeElevenLabsSpeech, voices };
 };
