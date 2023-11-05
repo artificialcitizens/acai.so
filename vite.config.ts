@@ -8,6 +8,7 @@ const manifestForPlugin: Partial<VitePWAOptions> = {
   workbox: {
     cleanupOutdatedCaches: true,
     skipWaiting: true,
+    maximumFileSizeToCacheInBytes: 3500000,
   },
   devOptions: {
     enabled: true,
