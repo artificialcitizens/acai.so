@@ -1,6 +1,5 @@
 import StarterKit from '@tiptap/starter-kit';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
-import TiptapLink from '@tiptap/extension-link';
 import TiptapImage from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
 import TiptapUnderline from '@tiptap/extension-underline';
@@ -13,6 +12,11 @@ import Highlight from '@tiptap/extension-highlight';
 import { ColorHighlighter } from './color-highlighter';
 import SlashCommand from './slash-command';
 import { InputRule } from '@tiptap/core';
+import CustomLink from './custom-link';
+import UploadImagesPlugin from '../plugins/upload-images';
+import UpdatedImage from './updated-image';
+import CustomKeymap from './custom-keymap';
+import DragAndDrop from './drag-and-drop';
 
 export const TiptapExtensions = [
   StarterKit.configure({
@@ -67,7 +71,7 @@ export const TiptapExtensions = [
 
             const { tr } = state;
             const start = range.from;
-            let end = range.to;
+            const end = range.to;
 
             tr.insert(start - 1, this.type.create(attributes)).delete(
               tr.mapping.map(start),
@@ -82,16 +86,14 @@ export const TiptapExtensions = [
       class: 'mt-4 mb-6 border-t border-light',
     },
   }),
-  TiptapLink.configure({
-    HTMLAttributes: {
-      class:
-        'text-acai-white underline underline-offset-[3px] hover:text-stone-600 transition-colors cursor-pointer',
+  UpdatedImage.extend({
+    addProseMirrorPlugins() {
+      return [UploadImagesPlugin()];
     },
-  }),
-  TiptapImage.configure({
+  }).configure({
     allowBase64: true,
     HTMLAttributes: {
-      class: 'rounded-lg border border-light',
+      class: 'novel-rounded-lg novel-border novel-border-stone-200',
     },
   }),
   Placeholder.configure({
@@ -125,5 +127,8 @@ export const TiptapExtensions = [
     linkify: true,
     transformCopiedText: true,
   }),
+  CustomKeymap,
   ColorHighlighter,
+  CustomLink,
+  DragAndDrop,
 ];

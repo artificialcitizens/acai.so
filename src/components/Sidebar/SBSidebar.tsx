@@ -2,19 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { Sidebar } from '@chatscope/chat-ui-kit-react';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import './Sidebar.css';
-import { ToggleView } from '../ToggleView/ToggleView';
+import { AvaNav } from '../AvaNav/AvaNav';
 
 interface SBSidebarProps {
   children: React.ReactNode;
 }
 
+const isMobile = () => {
+  if (
+    !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent,
+    )
+  ) {
+    return false;
+  }
+  return true;
+};
 const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
   const calculatedWidth = window.innerWidth < 640 ? 100 : 50;
   const minWidth = 0;
   const defaultWidth = calculatedWidth;
   const [width, setWidth] = useState<number | null>(null);
   const [isResizing, setIsResizing] = useState(false);
-  const [toggled, setToggled] = useState(true);
+
+  const [toggled, setToggled] = useState(isMobile() ? false : true);
 
   const toggleView = () => {
     setToggled(!toggled);
@@ -54,13 +65,16 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
 
     const handleMouseMove = (moveE: MouseEvent) => {
       if (initialWidth !== null) {
+        const scalingFactor = 1.65; // Adjust this value to change the sensitivity
         const newWidth =
-          initialWidth - ((moveE.clientX - initialX) / window.innerWidth) * 100;
+          initialWidth -
+          ((moveE.clientX - initialX) / window.innerWidth) *
+            100 *
+            scalingFactor;
 
         setWidth(Math.max(Math.min(newWidth, 100), minWidth));
       }
     };
-
     const handleMouseUp = () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
@@ -75,7 +89,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
 
   return (
     <>
-      {isResizing && (
+      {/* {isResizing && (
         <div
           style={{
             position: 'fixed',
@@ -84,20 +98,19 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
             left: 0,
             right: 0,
             cursor: 'ew-resize',
-            zIndex: 10000,
+            zIndex: 100,
           }}
         />
-      )}
-      <ToggleView
+      )} */}
+      <AvaNav
         toggled={toggled}
-        handleClick={(e) => {
-          e.stopPropagation();
+        handleClick={() => {
           toggleView();
         }}
       />
       <Sidebar
         position="right"
-        className={`right-0 fixed md:relative max-h-screen transition-transform`}
+        className={`right-0 fixed md:relative max-h-full transition-transform h-screen flex-grow`}
         style={{
           width: `${width}vw`,
         }}
@@ -108,7 +121,7 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
           aria-valuemax={100}
           aria-valuenow={width}
           tabIndex={0}
-          className="md:hover:bg-acai-darker"
+          className="md:hover:bg-acai-darker pointer-events-none md:pointer-events-auto"
           style={{
             width: width < 3 ? '20px' : '10px',
             cursor: 'ew-resize',

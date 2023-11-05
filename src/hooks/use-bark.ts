@@ -1,9 +1,24 @@
 // hooks/useBark.ts
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { getToken } from '../utils/config';
 
 export const useBark = () => {
+  const [token, setToken] = useState(getToken('BARK_URL'));
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setToken(getToken('BARK_URL'));
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
   const synthesizeBarkSpeech = useCallback(
     async ({
       inputText,

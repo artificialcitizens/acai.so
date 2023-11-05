@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 import { avaChat } from '../../lib/ac-langchain/agents/ava';
 import { toastifyAgentLog } from '../Toast';
-import { Tab, handleCreateTab } from '../../state';
+import { ACDoc, handleCreateDoc } from '../../state';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -107,11 +107,13 @@ export const useAva = (): {
   //   useState<AbortController | null>(null);
 
   const formattedChatHistory = currentAgent?.recentChatHistory
-    .map(
-      (chat: { type: MessageRole; text: string }) =>
-        `${chat.type}: ${chat.text}`,
-    )
-    .join('\n');
+    ? currentAgent.recentChatHistory
+        .map(
+          (chat: { type: MessageRole; text: string }) =>
+            `${chat.type}: ${chat.text}`,
+        )
+        .join('\n')
+    : '';
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { editor } = useContext(EditorContext)!;
@@ -142,81 +144,91 @@ export const useAva = (): {
               // formattedChatHistory,
             );
         // console.log(currentAgent?.recentChatHistory)
-        const response = await queryChat({
-          systemMessage: sysMessage,
-          message,
-          messages: currentAgent?.recentChatHistory.map((msg: Message) =>
-            msg.type === 'user'
-              ? new HumanMessage(msg.text)
-              : new AIMessage(msg.text),
-          ),
-          modelName: currentAgent.openAIChatModel,
-          callbacks: {
-            handleLLMStart: () => {
-              setLoading(true);
-              // console.log({ llm, prompts });
+        try {
+          const response = await queryChat({
+            systemMessage: sysMessage,
+            message,
+            messages: currentAgent?.recentChatHistory.map((msg: Message) =>
+              msg.type === 'user'
+                ? new HumanMessage(msg.text)
+                : new AIMessage(msg.text),
+            ),
+            modelName: currentAgent.openAIChatModel,
+            callbacks: {
+              handleLLMStart: () => {
+                setLoading(true);
+                // console.log({ llm, prompts });
+              },
+              handleLLMNewToken: (token) => {
+                setStreamingMessage((prev) => prev + token);
+                // console.log(token);
+              },
+              handleLLMEnd: () => {
+                setLoading(false);
+                setStreamingMessage('');
+                // console.log({ output });
+              },
+              handleLLMError: (err) => {
+                setError(err.message);
+                setLoading(false);
+                // console.log({ err });
+              },
             },
-            handleLLMNewToken: (token) => {
-              setStreamingMessage((prev) => prev + token);
-              // console.log(token);
-            },
-            handleLLMEnd: () => {
-              setLoading(false);
-              setStreamingMessage('');
-              // console.log({ output });
-            },
-            handleLLMError: (err) => {
-              setError(err.message);
-              setLoading(false);
-              // console.log({ err });
-            },
-          },
-        });
+          });
 
-        // setAbortController(response.abortController);
-        return {
-          response: response.response,
-          // abortController: response.abortController,
-        };
+          // setAbortController(response.abortController);
+          return {
+            response: response.response,
+            // abortController: response.abortController,
+          };
+        } catch (error: any) {
+          setLoading(false);
+          return error.message;
+        }
       }
       case 'document': {
         // @TODO: Add config for special rules for document agent
         // const sysMessage = customPrompt;
         // console.log(currentAgent?.recentChatHistory)
-        const response = await askAi({
-          documentContext: editor?.getText() || '',
-          task: args?.task || '',
-          highlighted: args?.highlighted || '',
-          messages: [],
-          modelName: currentAgent.openAIChatModel,
-          callbacks: {
-            handleLLMStart: () => {
-              setLoading(true);
-              // console.log({ llm, prompts });
+        try {
+          const response = await askAi({
+            documentContext: editor?.getText() || '',
+            task: args?.task || '',
+            highlighted: args?.highlighted || '',
+            messages: [],
+            modelName: currentAgent.openAIChatModel,
+            callbacks: {
+              handleLLMStart: () => {
+                setLoading(true);
+                // console.log({ llm, prompts });
+              },
+              handleLLMNewToken: (token) => {
+                setStreamingMessage((prev) => prev + token);
+                // console.log(token);
+              },
+              handleLLMEnd: () => {
+                setLoading(false);
+                setStreamingMessage('');
+                // console.log({ output });
+              },
+              handleLLMError: (err) => {
+                setError(err.message);
+                setLoading(false);
+                // console.log({ err });
+              },
             },
-            handleLLMNewToken: (token) => {
-              setStreamingMessage((prev) => prev + token);
-              // console.log(token);
-            },
-            handleLLMEnd: () => {
-              setLoading(false);
-              setStreamingMessage('');
-              // console.log({ output });
-            },
-            handleLLMError: (err) => {
-              setError(err.message);
-              setLoading(false);
-              // console.log({ err });
-            },
-          },
-        });
-
-        // setAbortController(response.abortController);
-        return {
-          response: response.response,
-          // abortController: response.abortController,
-        };
+          });
+          // setAbortController(response.abortController);
+          return {
+            response: response.response,
+            // abortController: response.abortController,
+          };
+        } catch (error: any) {
+          setLoading(false);
+          return error.message;
+        }
       }
+
       // maps to rag agent
       case 'knowledge': {
         if (!vectorContext) {
@@ -261,7 +273,7 @@ export const useAva = (): {
           },
         });
         if (agentState.context[workspaceId].returnRagResults) {
-          const newTab: Tab = {
+          const newTab: ACDoc = {
             id: Date.now().toString(),
             title: 'Retrieval Results',
             content: formattedResults,
@@ -269,12 +281,12 @@ export const useAva = (): {
             isContext: false,
             createdAt: new Date().toString(),
             lastUpdated: new Date().toString(),
-            filetype: 'markdown',
+            filetype: 'md',
             autoSave: false,
             canEdit: true,
             systemNote: '',
           };
-          appStateService.send({ type: 'ADD_TAB', tab: newTab });
+          appStateService.send({ type: 'ADD_DOC', doc: newTab });
           navigate(`/${workspaceId}/documents/${newTab.id}`); // setAbortController(response.abortController);
         }
 
@@ -297,13 +309,13 @@ export const useAva = (): {
               title: string;
               content: string;
             }) => {
-              const tab = await handleCreateTab(
+              const tab = await handleCreateDoc(
                 { title, content },
                 workspaceId,
               );
               globalServices.appStateService.send({
-                type: 'ADD_TAB',
-                tab,
+                type: 'ADD_DOC',
+                doc: tab,
               });
               setTimeout(() => {
                 navigate(`/${workspaceId}/documents/${tab.id}`);

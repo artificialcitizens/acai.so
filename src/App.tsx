@@ -7,39 +7,35 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from './context/GlobalStateContext';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import ToastManager from './components/Toast';
-import { createWorkspace } from './state';
 import { VectorStoreContext } from './context/VectorStoreContext';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
 import AudioWaveform from './components/AudioWave/AudioWave';
 import { Editor } from '@tiptap/react';
 import { EditorContext } from './context/EditorContext';
-import { createDocs } from './components/TipTap/utils/docs';
 import MainView from './components/MainView/MainView';
 import useLocationManager from './hooks/use-location-manager';
-
-import { MenuButton } from './components/MenuButton/MenuButton';
+import { createAcaiDocumentation } from './utils/docs';
+import { createWorkspace } from './state';
+import PullToRefresh from 'react-simple-pull-to-refresh';
+import { SideNavToggle } from './components/SideNavToggle/SideNavToggle';
+import ACModal from './components/Modal/Modal';
+import { useSelector } from '@xstate/react';
 
 const App = () => {
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
-  const { workspaceId, domain, id } = useParams<{
+  const { workspaceId, domain } = useParams<{
     workspaceId: string;
     domain: 'knowledge' | 'documents' | undefined;
-    id: string;
   }>();
-  const navigate = useNavigate();
-  const workspace =
-    globalServices.appStateService.getSnapshot().context.workspaces[
-      workspaceId || 'docs'
-    ];
-  if (!workspace || !id) navigate('/docs/documents/1-introduction');
 
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined,
   );
   const [listening, setListening] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const routerLocation = useLocation();
   const [editor, setEditor] = useState<Editor | null>(null);
   const {
@@ -51,30 +47,60 @@ const App = () => {
   } = useMemoryVectorStore('');
   const { updateLocation } = useLocationManager();
 
+  const workspaceName = useSelector(globalServices.appStateService, (state) => {
+    return state.context.workspaces?.[workspaceId || 'docs']?.name;
+  });
+
+  const docsAgent = useSelector(globalServices.agentStateService, (state) => {
+    return globalServices.agentStateService.getSnapshot().context['docs'];
+  });
+
+  useEffect(() => {
+    const currentTime = new Date().getTime();
+    const lastUpdated = Number(localStorage.getItem('lastUpdated')) || 0;
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+
+    if (!docsAgent || currentTime - lastUpdated > twentyFourHours) {
+      setLoading(true);
+      createAcaiDocumentation().then((d) => {
+        const { workspace, docs } = createWorkspace({
+          workspaceName: 'acai.so',
+          id: 'docs',
+          docs: d,
+        });
+        if (!workspace) return;
+        // @TODO: rename to load docs
+        globalServices.appStateService.send({
+          type: 'REPLACE_WORKSPACE',
+          id: 'docs',
+          workspace: workspace,
+          docs: docs,
+        });
+
+        if (!docsAgent) {
+          globalServices.agentStateService.send({
+            type: 'CREATE_AGENT',
+            workspaceId: 'docs',
+          });
+        }
+
+        // Update the last updated time in localStorage
+        localStorage.setItem('lastUpdated', String(currentTime));
+      });
+      setLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     updateLocation(routerLocation.pathname);
   }, [routerLocation, updateLocation]);
-
-  useEffect(() => {
-    createDocs().then((docs) => {
-      const docsWorkspace = createWorkspace({
-        workspaceName: 'acai.so',
-        id: 'docs',
-        content: docs,
-      });
-      globalServices.appStateService.send({
-        type: 'REPLACE_WORKSPACE',
-        id: 'docs',
-        workspace: docsWorkspace,
-      });
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const toggleSideNav = () => {
     globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV' });
   };
 
+  // @TODO: move context activation to a service
   const activateAudioContext = () => {
     const newAudioContext = new AudioContext();
     setAudioContext(newAudioContext);
@@ -99,7 +125,9 @@ const App = () => {
       >
         <EditorContext.Provider value={{ editor, setEditor }}>
           <SideNav />
-          <MenuButton
+          <ACModal />
+          <SideNavToggle
+            className="fixed top-0 left-0 z-20"
             handleClick={(e) => {
               e.stopPropagation();
               toggleSideNav();
@@ -108,24 +136,30 @@ const App = () => {
           {audioContext && (
             <AudioWaveform audioContext={audioContext} isOn={listening} />
           )}
-          <div
-            className="w-screen h-screen flex flex-col sm:flex-row flex-wrap sm:flex-nowrap flex-grow p-0"
-            onClick={handleWindowClick}
+          <ToastManager />
+          <PullToRefresh
+            onRefresh={async () => window.location.reload()}
+            pullDownThreshold={125}
+            maxPullDownDistance={150}
+            pullingContent={''}
           >
-            <ToastManager />
-            <main className="w-screen flex flex-grow">
-              {workspaceId && (
-                <>
-                  <MainView domain={domain} />
-                  <Ava
-                    workspaceId={workspaceId}
-                    onVoiceActivation={setListening}
-                    audioContext={audioContext}
-                  />
-                </>
-              )}
+            <main className="w-screen  max-h-full overflow-hidden">
+              <span
+                onClick={handleWindowClick}
+                className="h-full overflow-hidden flex flex-grow"
+              >
+                <span className="mt-[.75rem] text-base lg:text-lg font-semibold z-10 max-w-[25vw] truncate w-full flex-grow fixed ml-16">
+                  {workspaceName}
+                </span>
+                <MainView domain={domain} />
+                <Ava
+                  workspaceId={workspaceId || 'docs'}
+                  onVoiceActivation={setListening}
+                  audioContext={audioContext}
+                />
+              </span>{' '}
             </main>
-          </div>{' '}
+          </PullToRefresh>
         </EditorContext.Provider>
       </VectorStoreContext.Provider>
     )

@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 .env
+OAI_CONFIG_LIST.json
+cache.db
+dev-dist

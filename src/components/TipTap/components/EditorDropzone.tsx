@@ -1,7 +1,7 @@
 import React, { useState, useCallback, ReactNode, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toastifyError } from '../../Toast';
-import { Tab, handleCreateTab } from '../../../state';
+import { ACDoc, handleCreateDoc } from '../../../state';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -154,10 +154,10 @@ const EditorDropzone: React.FC<DropzoneProps> = ({
       toastifyError('Must enter a title');
       return;
     }
-    handleCreateTab({ title, content: '' }, workspaceId).then((tab: Tab) => {
+    handleCreateDoc({ title, content: '' }, workspaceId).then((tab: ACDoc) => {
       globalServices.appStateService.send({
-        type: 'ADD_TAB',
-        tab,
+        type: 'ADD_DOC',
+        doc: tab,
       });
       setTimeout(() => {
         navigate(`/${workspaceId}/documents/${tab.id}`);
@@ -167,7 +167,6 @@ const EditorDropzone: React.FC<DropzoneProps> = ({
 
   return (
     <div
-      className="w-full h-full flex-grow max-h-[calc(100vh-2rem)]"
       id="editor-dropzone"
       onDrop={handleDrop}
       onDragOver={handleDragOver}

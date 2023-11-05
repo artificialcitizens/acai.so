@@ -62,6 +62,9 @@ def agent():
         socketio.emit(
             "create-tab", {"title": "Hello Tab!", "content": formatted_payload}
         )
+        socketio.emit(
+            "info-toast", {"info": "We are sending a toast from the server side!"}
+        )
 
         return jsonify({"response": "Hello from the server side..."}), 200
 

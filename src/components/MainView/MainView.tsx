@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import EditorDropzone from '../TipTap/components/EditorDropzone';
-import { Tab, handleCreateTab } from '../../state';
+import { ACDoc, handleCreateDoc } from '../../state';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import TipTap from '../TipTap/TipTap';
-import PDFRenderer from '../PDFRenderer/PdfRender';
-import { pdfjs } from 'react-pdf';
+// import PDFRenderer from '../PDFRenderer/PdfRender';
+// import { pdfjs } from 'react-pdf';
 import { db } from '../../../db';
 
 import {
@@ -12,11 +12,12 @@ import {
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
 import { readFileAsText, slugify } from '../../utils/data-utils';
-import { getPdfText } from '../../utils/pdf-utils';
-import { VectorStoreContext } from '../../context/VectorStoreContext';
+// import { getPdfText } from '../../utils/pdf-utils';
+// import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { toastifyInfo } from '../Toast';
+// import { toastifyInfo } from '../Toast';
 import KnowledgeView from '../KnowledgeView/KnowledgeView';
+import { useSelector } from '@xstate/react';
 
 interface MainViewProps {
   domain: 'knowledge' | 'documents' | undefined;
@@ -24,7 +25,7 @@ interface MainViewProps {
 
 const MainView: React.FC<MainViewProps> = ({ domain }) => {
   const navigate = useNavigate();
-  const vectorContext = useContext(VectorStoreContext);
+  // const vectorContext = useContext(VectorStoreContext);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
 
   const globalServices: GlobalStateContextValue =
@@ -42,45 +43,32 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
       .toArray();
   }, [activeTabId]);
 
-  useEffect(() => {
-    if (!knowledgeItems || !knowledgeItems[0]?.file) return;
-    // create a file url from knowledgeITem.file
-    const fileUrl = URL.createObjectURL(knowledgeItems[0].file);
-    setFileUrl(fileUrl);
+  const file = useLiveQuery(async () => {
+    if (!knowledgeItems || !knowledgeItems[0]?.fileId) return;
+    return await db.files.get(knowledgeItems?.[0]?.fileId);
   }, [knowledgeItems]);
+
+  useEffect(() => {
+    if (!knowledgeItems || !file) return;
+    // create a file url from knowledgeITem.file
+    const fileUrl = URL.createObjectURL(file.file);
+    setFileUrl(fileUrl);
+  }, [file, knowledgeItems]);
 
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
 
   const page = queryParams.get('page');
   const fileType = queryParams.get('fileType');
-  const workspace =
-    globalServices.appStateService.getSnapshot().context.workspaces[
-      workspaceId || 'docs'
-    ];
 
-  const activeTab: Tab =
-    workspace &&
-    workspace.data.tiptap.tabs.find((tab: Tab) => tab.id === activeTabId);
-
-  const handleDeleteWorkspace = () => {
-    const confirmDelete = window.prompt('Type "delete" to confirm');
-    if (confirmDelete?.toLowerCase() !== 'delete') {
-      alert('Deletion cancelled.');
-      return;
-    }
-    globalServices.appStateService.send({
-      type: 'DELETE_WORKSPACE',
-      id: workspace?.id,
+  const activeDoc = useSelector(globalServices.appStateService, (state) => {
+    if (!workspaceId || !activeTabId) return;
+    const docs = state.context.docs;
+    if (!docs) return;
+    return Object.values(docs).find((doc) => {
+      return doc.id === activeTabId;
     });
-    globalServices.agentStateService.send({
-      type: 'DELETE_AGENT',
-      workspaceId: workspace?.id,
-    });
-    setTimeout(() => {
-      navigate('/');
-    }, 250);
-  };
+  });
 
   const handleFilesDrop = async (file: File) => {
     if (!workspaceId) return;
@@ -88,10 +76,10 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     const fileExtension = file.name.split('.').pop();
     if (!fileExtension) return;
     readFileAsText(file, fileExtension).then((content) => {
-      handleCreateTab({ title, content }, workspaceId).then((tab: Tab) => {
+      handleCreateDoc({ title, content }, workspaceId).then((tab: ACDoc) => {
         globalServices.appStateService.send({
-          type: 'ADD_TAB',
-          tab,
+          type: 'ADD_DOC',
+          doc: tab,
         });
         setTimeout(() => {
           navigate(`/${workspaceId}/documents/${tab.id}`);
@@ -100,10 +88,12 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     });
   };
 
+  // @TODO: create a util to handle this and use to make a upload to knowledge button
+  // @TODO: update to save entire pdf with knowledge
   const handlePdfDrop = async (file: File) => {
     if (!workspaceId) return;
-    const pageStartOffset = 0;
     const fileURL = URL.createObjectURL(file);
+    // const pageStartOffset = 0;
     // const pdfDocument = await pdfjs.getDocument(fileURL).promise;
     // const pdfData = await getPdfText(pdfDocument, slugify(file.name));
 
@@ -155,41 +145,31 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     setFileUrl(fileURL);
   };
 
-  return !workspaceId ? (
-    <p>Loading</p>
-  ) : (
-    <div className="w-full flex flex-col h-screen">
-      <div className="ml-16 flex items-center group">
-        {workspace && <h1 className="m-2 text-lg">{workspace.name}</h1>}
-        {workspaceId !== 'docs' && (
-          <button
-            className="p-0 px-1  rounded-full font-medium text-red-900 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-4"
-            onClick={handleDeleteWorkspace}
-          >
-            x
-          </button>
-        )}
-      </div>
-      <div className="max-h-[calc(100vh-2rem)] flex flex-grow overflow-scroll">
-        <EditorDropzone
+  if (!workspaceId) return <></>;
+
+  return (
+    <div className="w-full flex flex-col mt-16 md:mt-8 max-h-full">
+      {/* editor dropzone was overriding the tiptap editor drop callbacks.
+      we want to be able to drop images into the editor (we may just need to handle if the file hovering over the editor is an image and then ignore the drop if it is)
+      */}
+      {/* <EditorDropzone
+        workspaceId={workspaceId}
+        onPDFDrop={handlePdfDrop}
+        showHelperText={false}
+        onFilesDrop={handleFilesDrop}
+      > */}
+      {domain === 'documents' && activeDoc && <TipTap tab={activeDoc} />}
+      {domain === 'knowledge' && fileType && (
+        <KnowledgeView
           workspaceId={workspaceId}
-          onPDFDrop={handlePdfDrop}
-          showHelperText={!activeTab && !fileUrl}
-          onFilesDrop={handleFilesDrop}
-        >
-          {domain === 'documents' && activeTab && <TipTap tab={activeTab} />}
-          {domain === 'knowledge' && fileType && (
-            <KnowledgeView
-              workspaceId={workspaceId}
-              filename={activeTabId || 'knowledge'}
-              fileType={fileType as 'pdf' | 'txt' | 'md'}
-              fileUrl={fileUrl?.toString()}
-              content={knowledgeItems?.[0]?.fullText}
-              page={page || '1'}
-            />
-          )}
-        </EditorDropzone>
-      </div>
+          filename={activeTabId || 'knowledge'}
+          fileType={fileType as 'pdf' | 'txt' | 'md'}
+          fileUrl={fileUrl?.toString()}
+          content={knowledgeItems?.[0]?.fullText}
+          page={page || '1'}
+        />
+      )}
+      {/* </EditorDropzone> */}
     </div>
   );
 };

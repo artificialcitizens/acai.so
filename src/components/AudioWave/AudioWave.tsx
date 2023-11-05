@@ -3,7 +3,6 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useRef, useEffect } from 'react';
 // eslint-disable-next-line import/namespace
-import * as d3 from 'd3';
 
 interface AudioWaveformProps {
   isOn: boolean;

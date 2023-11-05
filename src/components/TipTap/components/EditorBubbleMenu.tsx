@@ -1,4 +1,5 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+// eslint-disable-next-line import/named
 import { BubbleMenu, BubbleMenuProps } from '@tiptap/react';
 import cx from 'classnames';
 import { FC, useState, useEffect, useRef } from 'react';
@@ -13,7 +14,6 @@ import {
 import { useAva } from '../../Ava/use-ava';
 
 import { NodeSelector } from './NodeSelector';
-import { toastifyInfo } from '../../Toast';
 
 export interface BubbleMenuItem {
   name: string;
@@ -71,7 +71,7 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         inputWrapperRef.current &&
-        !inputWrapperRef.current.contains(event.target as Node)
+        !inputWrapperRef?.current?.contains(event.target as Node)
       ) {
         setAiResponse('');
         setAskAiPopover(false);
@@ -186,7 +186,7 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
           {aiResponse || selectedText}
         </p>
         <form
-          className="flex shadow-lg rounded-lg p-3 md:p-2 justify-items-center"
+          className="flex shadow-lg rounded-lg p-3 md:p-2 mb-0 pb-0 justify-items-center"
           onSubmit={(e) => {
             e.preventDefault();
             const response = queryAva({

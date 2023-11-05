@@ -1,15 +1,24 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { useContext, useEffect, useRef, useState } from 'react';
+import {
+  JSXElementConstructor,
+  ReactElement,
+  ReactFragment,
+  ReactPortal,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { Editor } from '@tiptap/core';
-import { TiptapEditorProps } from './props';
+import { defaultEditorProps } from './props';
 import { TiptapExtensions } from './extensions';
 import { useDebouncedCallback } from 'use-debounce';
 import { EditorBubbleMenu } from './components';
 // import { toastifyDefault, toastifyError } from '../Toast';
-import { useInterpret } from '@xstate/react';
-import { Tab, appStateMachine } from '../../state';
+import { ACDoc } from '../../state';
 // import { semanticSearchQueryGeneration } from '../../utils/ac-langchain/chains/semantic-search-query-chain';
 import { autoComplete } from '../../lib/ac-langchain/chains/autocomplete-chain';
 import Bottleneck from 'bottleneck';
@@ -18,8 +27,16 @@ import './TipTap.css';
 // import { useMemoryVectorStore } from '../../hooks/use-memory-vectorstore';
 // import { VectorStoreContext } from '../../context/VectorStoreContext';
 import { EditorContext } from '../../context/EditorContext';
+import { toastifyError, toastifyInfo } from '../Toast';
+import {
+  GlobalStateContext,
+  GlobalStateContextValue,
+} from '../../context/GlobalStateContext';
+import { useParams } from 'react-router-dom';
+import { useSelector } from '@xstate/react';
+import { ImageResizer } from './extensions/image-resizer';
 interface EditorProps {
-  tab: Tab;
+  tab: ACDoc;
 }
 
 // Limits our stream
@@ -54,17 +71,15 @@ export const extractContentFromTipTap = (tipTapContent: any): string => {
 
 // @TODO: create left right pagination with arrow and doc title
 const Tiptap: React.FC<EditorProps> = ({ tab }) => {
-  const service = useInterpret(appStateMachine);
-
-  const [hydrated, setHydrated] = useState(false);
+  const { appStateService }: GlobalStateContextValue =
+    useContext(GlobalStateContext);
+  const { workspaceId } = useParams();
   const [saveStatus, setSaveStatus] = useState('Saved');
-
   const [completion, setCompletion] = useState('');
-  // update to use the auth context
-  const [canEdit, setCanEdit] = useState<boolean>(tab.workspaceId !== 'docs');
   const [isLoading, setIsLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const { setEditor } = useContext(EditorContext)!;
   const [currentContext, setCurrentContext] = useState('');
-  const [currentTab, setCurrentTab] = useState<Tab>(tab);
   // const {
   //   vectorstore,
   //   addDocuments,
@@ -72,32 +87,25 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   //   filterAndCombineContent,
   // } = useContext(VectorStoreContext) as ReturnType<typeof useMemoryVectorStore>;
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const { setEditor } = useContext(EditorContext)!;
 
-  useEffect(() => {
-    setCurrentTab(tab);
-    setHydrated(false);
-  }, [tab]);
-
-  const saveContent = (
-    editor: Editor,
-    workspaceId: string,
-    extraContent = '',
-  ) => {
-    if (!currentTab) return;
+  const saveContent = (editor: Editor) => {
+    if (tab.id === 'home' || workspaceId === 'docs') {
+      toastifyInfo('Changes to homepage or docs workspace are not saved.');
+      return;
+    }
+    if (!tab) return;
     if (!tab.autoSave) return;
     setSaveStatus('Unsaved');
     const content = editor.getJSON();
     setSaveStatus('Saving...');
-    service.send({
-      type: 'UPDATE_TAB_CONTENT',
-      id: currentTab.id,
+    appStateService.send({
+      type: 'UPDATE_DOC_CONTENT',
+      id: tab.id,
       content,
-      workspaceId,
     });
     setTimeout(() => {
       setSaveStatus('Saved');
-    }, 100);
+    }, 500);
   };
 
   // /**
@@ -120,8 +128,8 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   // };
 
   const debouncedUpdates = useDebouncedCallback(async (editor: Editor) => {
-    saveContent(editor, currentTab.workspaceId);
-  }, 1000);
+    saveContent(editor);
+  }, 500);
 
   const tokenQueue: string[] = [];
   let isProcessing = false;
@@ -138,66 +146,78 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   };
 
   const editor = useEditor(
-    {
-      extensions: TiptapExtensions,
-      editorProps: TiptapEditorProps,
-      editable: tab.canEdit ?? true,
-      onUpdate: async (e) => {
-        setSaveStatus('Unsaved');
-        const selection = e.editor.state.selection;
-        const lastTwo = e.editor.state.doc.textBetween(
-          selection.from - 2,
-          selection.from,
-          '\n',
-        );
-        if (lastTwo === '++' && !isLoading) {
-          e.editor.commands.deleteRange({
-            from: selection.from - 2,
-            to: selection.from,
-          });
-          setIsLoading(true);
-          // await setAutocompleteContext(e.editor);
-          autoComplete({
-            context: e.editor.state.doc.textBetween(
-              Math.max(0, e.editor.state.selection.from - 5000),
-              e.editor.state.selection.from - 0,
-              '\n',
-            ),
-            relatedInfo: currentContext || '',
-            callbacks: {
-              onMessageStart: () => setIsLoading(true),
-              onMessageError: (error: string) => {
-                console.log(error);
-                setIsLoading(false);
+    useMemo(
+      () => ({
+        extensions: TiptapExtensions,
+        editorProps: defaultEditorProps(workspaceId || 'docs'),
+        onUpdate: async (e) => {
+          setSaveStatus('Unsaved');
+          const selection = e.editor.state.selection;
+          const lastTwo = e.editor.state.doc.textBetween(
+            selection.from - 2,
+            selection.from,
+            '\n',
+          );
+          if (lastTwo === '++' && !isLoading) {
+            e.editor.commands.deleteRange({
+              from: selection.from - 2,
+              to: selection.from,
+            });
+            setIsLoading(true);
+            // await setAutocompleteContext(e.editor);
+            autoComplete({
+              context: e.editor.state.doc.textBetween(
+                Math.max(0, e.editor.state.selection.from - 5000),
+                e.editor.state.selection.from - 0,
+                '\n',
+              ),
+              relatedInfo: currentContext || '',
+              callbacks: {
+                onMessageStart: () => setIsLoading(true),
+                onMessageError: (error: string) => {
+                  console.error(error);
+                  toastifyError(error);
+                  setIsLoading(false);
+                },
+                onMessageStream: (token: string) => {
+                  tokenQueue.push(token);
+                  if (!isProcessing) {
+                    processTokens();
+                  }
+                },
+                onMessageComplete: (message: string) => {
+                  // setIsLoading(false);
+                },
               },
-              onMessageStream: (token: string) => {
-                tokenQueue.push(token);
-                if (!isProcessing) {
-                  processTokens();
-                }
-              },
-              onMessageComplete: (message: string) => {
-                // setIsLoading(false);
-              },
-            },
-          }).then((res) => setIsLoading(false));
-        } else {
-          debouncedUpdates(e.editor);
-        }
-      },
-      autofocus: 'start',
-    },
-    [tab],
+            }).then((res) => setIsLoading(false));
+          } else {
+            debouncedUpdates(e.editor);
+          }
+        },
+        autofocus: 'start',
+      }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [currentContext, debouncedUpdates, isLoading, isProcessing, tokenQueue],
+    ),
   );
 
   useEffect(() => {
-    if (!currentTab) return;
-    if (editor && !hydrated) {
-      editor.commands.setContent(currentTab.content);
-      editor.commands.setNodeSelection(0); // Add this line
-      setHydrated(true);
+    if (editor && tab) {
+      const currentContent = editor.getHTML();
+      const newContent = tab.content ?? '';
+
+      if (currentContent !== newContent) {
+        // Store the current cursor position
+        const { from, to } = editor.state.selection;
+
+        // Set the content
+        editor.commands.setContent(newContent);
+
+        // Restore the cursor position
+        editor.commands.setTextSelection({ from, to });
+      }
     }
-  }, [currentTab, editor, hydrated]);
+  }, [editor, tab]);
 
   const prev = useRef('');
 
@@ -246,41 +266,35 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   }, [isLoading, editor, completion]);
 
   useEffect(() => {
-    if (!currentTab) return;
-    if (editor && !hydrated) {
-      editor.commands.setContent(currentTab.content);
-      setHydrated(true);
-    }
-  }, [editor, hydrated, currentTab]);
-
-  useEffect(() => {
     setEditor(editor);
     return () => {
       setEditor(null);
     };
   }, [editor, setEditor]);
 
-  if (!currentTab) return <p>nothing to see here</p>;
+  if (!tab) return null;
+
   return (
-    <>
+    <div className="flex flex-col">
+      {editor && <EditorBubbleMenu editor={editor} />}
+      <h2 className="text-sm font-medium border-b border-solid border-dark text-acai-white mx-8 mt-6 sm:mx-12 mb-4 pb-1">
+        {tab.title}
+      </h2>
       <div
         onClick={() => {
           editor?.chain().focus().run();
         }}
-        className="overflow-scroll w-full mb-12 p-12 px-8 border-none sm:rounded-lg sm:border sm:px-12 flex-grow"
+        className="overflow-y-auto flex-grow w-full mb-3 px-8 border-none sm:rounded-lg sm:border sm:px-12 min-h-[50vh] max-h-[75vh] md:max-h-[calc(100vh-8rem)]"
       >
-        <h2 className=" text-sm mb-4 pb-2 font-medium border-b border-solid border-dark text-acai-white">
-          {currentTab.title}
-        </h2>
-        {editor && <EditorBubbleMenu editor={editor} />}
-        <EditorContent key={currentTab.id} editor={editor} />
+        <EditorContent editor={editor} />
+        {editor?.isActive('image') && <ImageResizer editor={editor} />}
       </div>
       {/* <MenuBar
         editor={editor}
-        tipTapEditorId={currentTab.id}
-        systemNote={currentTab.systemNote}
+        tipTapEditorId={tab.id}
+        systemNote={tab.systemNote}
       /> */}
-    </>
+    </div>
   );
 };
 

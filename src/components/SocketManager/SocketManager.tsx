@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import { toastifyAgentLog, toastifyError, toastifyInfo } from '../Toast';
-import { handleCreateTab } from '../../state';
+import { handleCreateDoc } from '../../state';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   GlobalStateContext,
@@ -85,10 +85,10 @@ export const SocketManager: React.FC = () => {
     const handleTab = async (data: { title: string; content: string }) => {
       if (!workspaceId) toastifyError('No workspace active');
       const { title, content } = data;
-      const tab = await handleCreateTab({ title, content }, workspaceId);
+      const tab = await handleCreateDoc({ title, content }, workspaceId);
       globalServices.appStateService.send({
-        type: 'ADD_TAB',
-        tab,
+        type: 'ADD_DOC',
+        doc: tab,
       });
       setTimeout(() => {
         navigate(`/${workspaceId}/documents/${tab.id}`);
@@ -104,9 +104,9 @@ export const SocketManager: React.FC = () => {
     socket.on('agent-log', (data: string) => {
       toastifyAgentLog(data);
     });
-    socket.on('info-toast', (err: any) => {
-      console.error(err);
-      toastifyInfo(err.message);
+    socket.on('info-toast', (data: { info: string }) => {
+      console.log(data.info);
+      toastifyInfo(data.info);
     });
 
     return () => {
@@ -130,7 +130,7 @@ export const SocketManager: React.FC = () => {
 
   return (
     <SocketContext.Provider value={socket}>
-      <form onSubmit={handleFormSubmit}>
+      <form className="mb-4" onSubmit={handleFormSubmit}>
         <span className="flex mb-2 items-center">
           <label htmlFor="url" className="text-acai-white pr-2 w-[50%]">
             URL:

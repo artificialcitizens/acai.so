@@ -1,7 +1,7 @@
 import { Editor } from '@tiptap/react';
 import React, { useState, useEffect, useContext } from 'react';
-import { useActor, useInterpret } from '@xstate/react';
-import { Tab, appStateMachine } from '../../../state';
+import { useActor, useSelector } from '@xstate/react';
+import { ACDoc, appStateMachine } from '../../../state';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
@@ -9,6 +9,8 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { VectorStoreContext } from '../../../context/VectorStoreContext';
 import { useMemoryVectorStore } from '../../../hooks/use-memory-vectorstore';
+import { toastifyInfo } from '../../Toast';
+import { slugify } from '../../../utils/data-utils';
 
 interface MenuBarProps {
   editor: Editor | null;
@@ -19,80 +21,110 @@ interface MenuBarProps {
 export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
   const { appStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
-  const [isContext, setIsContext] = useState(false);
-  const [systemNoteState, setSystemNoteState] = useState('');
-  const [loading, setLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const { workspaceId: rawWorkspaceId } = useParams<{
+  const { workspaceId, id: docId } = useParams<{
     workspaceId: string;
     domain: string;
     id: string;
   }>();
 
-  const workspaceId = rawWorkspaceId || 'docs';
-  const tabId = location.pathname.split('/')[2];
+  const doc = useSelector(appStateService, (state) => {
+    if (!docId) return;
+    return state.context?.docs[docId];
+  });
+
   const [state, send] = useActor(appStateService);
   const navigate = useNavigate();
-  const {
-    vectorstore,
-    addDocuments,
-    similaritySearchWithScore,
-    filterAndCombineContent,
-    addText,
-  } = useContext(VectorStoreContext) as ReturnType<typeof useMemoryVectorStore>;
+  // const {
+  //   vectorstore,
+  //   addDocuments,
+  //   similaritySearchWithScore,
+  //   filterAndCombineContent,
+  //   addText,
+  // } = useContext(VectorStoreContext) as ReturnType<typeof useMemoryVectorStore>;
 
-  useEffect(() => {
-    const ws = state.context.workspaces[workspaceId];
-    const tab = ws?.data.tiptap.tabs.find((tab: Tab) => tab.id === tabId);
-    if (!tab) return;
-    setSystemNoteState(tab.systemNote);
-    if (tab) {
-      console.log('Updating local state:', tab); // Add this line for debugging
-      setIsContext(tab.isContext);
-      setSystemNoteState(tab.systemNote);
-    }
-  }, [state.context.workspaces, tabId, workspaceId]);
+  // useEffect(() => {
+  //   const doc = Object.values(docs).find((doc: ACDoc) => doc.id === docId);
+  //   if (!doc) return;
+  //   setSystemNoteState(doc.systemNote);
+  //   if (doc) {
+  //     setIsContext(doc.isContext);
+  //     setSystemNoteState(doc.systemNote);
+  //   }
+  // }, [docs, state.context.workspaces, docId, workspaceId]);
 
   return (
-    <div className="w-full h-full relative">
-      <div className="flex w-1/2 md:w-1/3 max-w-72 m-auto fixed justify-around z-100 bg-dark bg-opacity-90 shadow-lg p-2 rounded-2xl bottom-4 right-1/2">
-        <button
-          className="font-bold hover:text-red-800 disabled:cursor-not-allowed"
-          type="button"
-          // disabled={pageNumber <= 1}
-          onClick={() => {
-            setLoading(true);
-            send({
-              type: 'DELETE_TAB',
-              id: tipTapEditorId,
-              workspaceId,
-            });
-            setLoading(false);
-            navigate(`/${workspaceId}`);
-          }}
-        >
-          {'x'}
-        </button>
-        <button
-          className="font-bold disabled:cursor-not-allowed"
-          type="button"
-          // disabled={pageNumber <= 1}
-          // onClick={() => setPageNumber((prevPageNumber) => prevPageNumber - 1)}
-        >
-          {'<'}
-        </button>
-        {/* <p className="font-medium">
+    <div className="relative bottom-0 flex w-full justify-around z-100 bg-darker md:bg-opacity-90 shadow-lg p-2 pb-4">
+      <button
+        //@TODO: add acai red color
+        className="font-bold hover:text-red-500 disabled:cursor-not-allowed"
+        type="button"
+        disabled={workspaceId === 'docs'}
+        onClick={() => {
+          if (!workspaceId) return;
+          const confirmDelete = window.prompt('Type "delete" to confirm');
+          if (confirmDelete?.toLowerCase() !== 'delete') {
+            toastifyInfo('Deletion cancelled.');
+            return;
+          }
+
+          send({
+            type: 'DELETE_DOC',
+            id: tipTapEditorId,
+            workspaceId,
+          });
+          navigate(`/${workspaceId}/documents/home`);
+        }}
+      >
+        {'x'}
+      </button>
+      <button
+        className="font-bold disabled:cursor-not-allowed"
+        type="button"
+        // disabled={pageNumber <= 1}
+        // onClick={() => setPageNumber((prevPageNumber) => prevPageNumber - 1)}
+      >
+        {'<'}
+      </button>
+      {/* <p className="font-medium">
           {pageNumber}/{numPages}
         </p> */}
-        <button
-          className="font-bold disabled:cursor-not-allowed"
-          type="button"
-          // disabled={pageNumber >= numPages}
-          // onClick={() => setPageNumber((prevPageNumber) => prevPageNumber + 1)}
-        >
-          {'>'}
-        </button>
-        <button
+      <button
+        className="font-bold disabled:cursor-not-allowed"
+        type="button"
+        // disabled={pageNumber >= numPages}
+        // onClick={() => setPageNumber((prevPageNumber) => prevPageNumber + 1)}
+      >
+        {'>'}
+      </button>
+      <button
+        className="font-bold disabled:cursor-not-allowed"
+        type="button"
+        onClick={() => {
+          if (!editor || !doc) {
+            toastifyInfo(
+              !editor
+                ? 'Editor is not available.'
+                : 'Document is not available.',
+            );
+            return;
+          }
+
+          const content = editor.getHTML(); // or editor.getJSON() for JSON format
+          const blob = new Blob([content], { type: 'text/html' }); // or 'application/json' for JSON format
+          const url = URL.createObjectURL(blob);
+          const { filetype, title } = doc;
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${slugify(title)}.${filetype}`;
+          link.click();
+
+          URL.revokeObjectURL(url);
+        }}
+      >
+        Download
+      </button>
+      {/* <button
           className={`font-bold disabled:cursor-not-allowed mt-2 ${
             isContext && 'text-acai-primary'
           }`}
@@ -108,10 +140,9 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
           }}
         >
           {'^'}
-        </button>
-        {/* <button onClick={zoomOut}>-</button>
+        </button> */}
+      {/* <button onClick={zoomOut}>-</button>
         <button onClick={zoomIn}>+</button> */}
-      </div>
     </div>
   );
 };
@@ -124,7 +155,6 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
 //       <div className="flex items-center justify-around left-12 bg-dark p-8">
 //         <button
 //           onClick={async () => {
-//             console.log('Sending TOGGLE_CONTEXT event'); // Add this line for debugging
 //             send({
 //               type: 'TOGGLE_CONTEXT',
 //               id: tipTapEditorId,

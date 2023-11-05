@@ -30,6 +30,7 @@ import {
 import LoadingCircle from '../loading-circle';
 import Magic from '../magic';
 import { toastifyError } from '../../Toast';
+import { startImageUpload } from '../plugins/upload-images';
 
 interface CommandItemProps {
   title: string;
@@ -194,26 +195,27 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       command: ({ editor, range }: CommandProps) =>
         editor.chain().focus().deleteRange(range).toggleCodeBlock().run(),
     },
-    // {
-    //   title: 'Image',
-    //   description: 'Upload an image from your computer.',
-    //   searchTerms: ['photo', 'picture', 'media'],
-    //   icon: <ImageIcon size={18} />,
-    //   command: ({ editor, range }: CommandProps) => {
-    //     editor.chain().focus().deleteRange(range).run();
-    //     // upload image
-    //     const input = document.createElement('input');
-    //     input.type = 'file';
-    //     input.accept = 'image/*';
-    //     input.onchange = async (event) => {
-    //       if (input.files?.length) {
-    //         const file = input.files[0];
-    //         return handleImageUpload(file, editor.view, event);
-    //       }
-    //     };
-    //     input.click();
-    //   },
-    // },
+    {
+      title: 'Image',
+      description: 'Upload an image from your computer.',
+      searchTerms: ['photo', 'picture', 'media'],
+      icon: <ImageIcon size={18} />,
+      command: ({ editor, range }: CommandProps) => {
+        editor.chain().focus().deleteRange(range).run();
+        // upload image
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async (event) => {
+          if (input.files?.length) {
+            const file = input.files[0];
+            const pos = editor.view.state.selection.from;
+            return startImageUpload(file, editor.view, pos, 'docs');
+          }
+        };
+        input.click();
+      },
+    },
   ].filter((item) => {
     if (typeof query === 'string' && query.length > 0) {
       const search = query.toLowerCase();

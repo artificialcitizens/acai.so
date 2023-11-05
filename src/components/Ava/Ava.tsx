@@ -1,22 +1,18 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import SBSidebar from '../Sidebar/SBSidebar';
 import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
-import NotificationCenter from '../../components/NotificationCenter';
 import Chat from '../../components/Chat/Chat';
-import ScratchPad from '../../components/ScratchPad/ScratchPad';
-import TokenManager from '../../components/TokenManager/token-manager';
-import { useActor, useSelector } from '@xstate/react';
+import { useSelector } from '@xstate/react';
 import { useAva } from './use-ava';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
-import VoiceRecognition from '../VoiceRecognition/VoiceRecognition';
-import ChatModelDropdown from '../ChatSettings';
-import { SocketManager } from '../SocketManager';
-import UserProfile from '../UserProfile/UserProfile';
+import QuickSettings from '../QuickSettings/QuickSettings';
 import { toastifyError } from '../Toast';
-import KnowledgeUpload from '../Knowledge/Knowledge';
+// import AvaButton from '../AvaNav/AvaButton';
+// import { EllipsisMenuIcon } from '../Icons/Icons';
+// import './Ava.css';
 
 interface AvaProps {
   workspaceId: string;
@@ -29,30 +25,25 @@ export const Ava: React.FC<AvaProps> = ({
   onVoiceActivation,
   audioContext,
 }) => {
-  const { uiStateService, agentStateService }: GlobalStateContextValue =
+  const { agentStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
 
   const systemNotes =
     useSelector(
       agentStateService,
-      (state) => state.context[workspaceId]?.systemNotes,
+      (state) => state.context[workspaceId]?.customPrompt,
     ) || '';
   const { queryAva, streamingMessage, loading } = useAva();
-  const [uiState] = useActor(uiStateService);
-  const [settingsOpen, setSettingsOpen] = React.useState(false);
 
-  const currentAgentMode =
-    agentStateService.getSnapshot().context[workspaceId]?.agentMode;
+  const currentAgentMode = useSelector(
+    agentStateService,
+    (state) => state.context[workspaceId]?.agentMode,
+  );
 
-  const toggleAgentThoughts = () => {
-    uiStateService.send({ type: 'TOGGLE_AGENT_THOUGHTS' });
-  };
-
-  const toggleSettings = () => {
-    setSettingsOpen(!settingsOpen);
-  };
+  const [quickSettingsOpen, setQuickSettingsOpen] = useState(false);
 
   const formatAgentMode = (mode: string) => {
+    if (!mode) return '';
     switch (mode) {
       case 'ava':
         return 'Chat - AVA';
@@ -65,91 +56,30 @@ export const Ava: React.FC<AvaProps> = ({
 
   return (
     <SBSidebar>
-      <ExpansionPanel
-        className="pt-8 md:pt-6 border-t-0"
-        title="Settings"
-        onChange={toggleSettings}
-        isOpened={settingsOpen}
-        tabIndex={0}
-        // onKeyDown={toggleSettings}
+      {/* <AvaButton
+        className="fixed right-0 top-9 md:top-6 mr-2 md:mr-4"
+        onClick={() => {
+          setQuickSettingsOpen(!quickSettingsOpen);
+        }}
       >
-        <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-1 md:pl-2 font-bold mb-3 border-b border-b-light border-b-solid">
-          User Profile
-        </h5>
-        <p className="text-xs font-medium mb-4">
-          Personalize your AVA interactions
-        </p>
-        <UserProfile />
-        <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-1 md:pl-2 font-bold mb-3 border-b border-b-light border-b-solid">
-          Access Configuration
-        </h5>
-        <TokenManager />
-      </ExpansionPanel>
-
+        <EllipsisMenuIcon />
+      </AvaButton> */}
       <ExpansionPanel
-        title="Logs"
-        data-ava-element="TOGGLE_AGENT_THOUGHTS"
-        onChange={toggleAgentThoughts}
-        isOpened={uiState.context.thoughtsOpen}
+        className="pt-10 md:pt-8 pl-1 text-sm border-0 !hover:cursor-default"
+        isOpened={quickSettingsOpen}
+        onChange={() => {
+          setQuickSettingsOpen(!quickSettingsOpen);
+        }}
+        title={formatAgentMode(currentAgentMode)}
       >
-        <NotificationCenter
-          placeholder="A place for AI to ponder"
-          secondaryFilter="agent-thought"
-        />
-      </ExpansionPanel>
-
-      <ExpansionPanel title="Voice Synthesis">
-        <VoiceRecognition
+        <QuickSettings
           onVoiceActivation={onVoiceActivation}
           audioContext={audioContext}
         />
       </ExpansionPanel>
-
-      <ExpansionPanel title="Knowledge">
-        <KnowledgeUpload workspaceId={workspaceId} />
-      </ExpansionPanel>
-
-      <ExpansionPanel title="AVA">
-        <ChatModelDropdown workspaceId={workspaceId} />
-
-        {agentStateService.getSnapshot().context[workspaceId]?.agentMode ===
-          'custom' && (
-          <>
-            <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-3 font-bold mb-3 border-b border-b-light border-b-solid">
-              Custom Agent Server
-            </h5>
-            <SocketManager />
-          </>
-        )}
-        <ScratchPad
-          placeholder="Custom Prompt"
-          content={systemNotes}
-          handleInputChange={(e) => {
-            agentStateService.send({
-              type: 'UPDATE_SYSTEM_NOTES',
-              workspaceId: workspaceId,
-              systemNotes: e.target.value,
-            });
-          }}
-        />
-      </ExpansionPanel>
-
-      {workspaceId && (
+      {workspaceId && !quickSettingsOpen && (
         <span className="flex flex-col flex-grow">
-          <p className="text-sm md:text-xs font-bold p-3">
-            {formatAgentMode(currentAgentMode)}{' '}
-            {/* @TODO: create a tag component */}
-            {/* <span
-              className="ml-2 font-semibold border-lighter border-solid border p-1 px-2 rounded-xl text-[9px]"
-              style={{
-                borderColor:
-                  currentAgentMode === 'chat' ? 'transparent' : 'currentcolor',
-              }}
-            >
-              {formatAgentMode(currentAgentMode)}
-            </span> */}
-          </p>
-          <div className="flex flex-col flex-grow p-2 pt-0 mb-2 md:mb-0">
+          <div className="flex flex-col flex-grow p-2 pt-0 mb-3 md:mb-0">
             <Chat
               name="Ava"
               avatar=".."

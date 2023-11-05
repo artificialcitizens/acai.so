@@ -1,7 +1,8 @@
 // eslint-disable-next-line import/named
 import { EditorProps } from '@tiptap/pm/view';
+import { startImageUpload } from './plugins/upload-images';
 
-export const TiptapEditorProps: EditorProps = {
+export const defaultEditorProps = (workspaceId: string): EditorProps => ({
   attributes: {
     class: 'prose-lg prose-headings:font-display focus:outline-none max-w-full',
   },
@@ -16,14 +17,21 @@ export const TiptapEditorProps: EditorProps = {
       }
     },
   },
-  // handlePaste: (view, event) => {
-  //   if (event.clipboardData && event.clipboardData.files && event.clipboardData.files[0]) {
-  //     event.preventDefault();
-  //     const file = event.clipboardData.files[0];
-  //     return handleImageUpload(file, view, event);
-  //   }
-  //   return false;
-  // },
+  handlePaste: (view, event) => {
+    if (
+      event.clipboardData &&
+      event.clipboardData.files &&
+      event.clipboardData.files[0]
+    ) {
+      event.preventDefault();
+      const file = event.clipboardData.files[0];
+      const pos = view.state.selection.from;
+
+      startImageUpload(file, view, pos, workspaceId);
+      return true;
+    }
+    return false;
+  },
   handleDrop: (view, event, _slice, moved) => {
     if (
       !moved &&
@@ -33,8 +41,14 @@ export const TiptapEditorProps: EditorProps = {
     ) {
       event.preventDefault();
       const file = event.dataTransfer.files[0];
-      // return handleImageUpload(file, view, event);
+      const coordinates = view.posAtCoords({
+        left: event.clientX,
+        top: event.clientY,
+      });
+      // here we deduct 1 from the pos or else the image will create an extra node
+      startImageUpload(file, view, coordinates?.pos || 0 - 1, workspaceId);
+      return true;
     }
     return false;
   },
-};
+});

@@ -4,6 +4,7 @@ import React, {
   useRef,
   useCallback,
   useContext,
+  ReactNode,
 } from 'react';
 import {
   ChatContainer,
@@ -27,6 +28,101 @@ import remarkFootnotes from 'remark-footnotes';
 import { Button } from '../Button/Button';
 import { SendIcon, SpinnerIcon, StopIcon, TrashIcon } from '../Icons/Icons';
 import { MessageRole } from '../Ava/use-ava';
+import { v4 as uuidv4 } from 'uuid';
+
+const markdownComponents = {
+  code: ({ node, inline, className, children, ...props }: any) => {
+    const match = /language-(\w+)/.exec(className || '');
+    return !inline && match ? (
+      <pre className="p-2">
+        <code className="text-sm" {...props}>
+          {String(children).replace(/\n$/, '')}
+        </code>
+      </pre>
+    ) : (
+      <code className="text-sm" {...props}>
+        {children}
+      </code>
+    );
+  },
+  p: ({ children }: { children: ReactNode }) => (
+    <p className="mb-1 text-sm">{children}</p>
+  ),
+  li: ({ children }: { children: ReactNode }) => (
+    <li className="text-sm sm:text-bas list-disc ml-1 mb-0 pb-0">{children}</li>
+  ),
+  h1: ({ children }: { children: ReactNode }) => (
+    <h1 className="text-2xl font-bold py-2">{children}</h1>
+  ),
+  h2: ({ children }: { children: ReactNode }) => (
+    <h2 className="text-xl font-bold py-2">{children}</h2>
+  ),
+  h3: ({ children }: { children: ReactNode }) => (
+    <h3 className="text-lg font-bold py-2">{children}</h3>
+  ),
+  h4: ({ children }: { children: ReactNode }) => (
+    <h4 className="text-base font-bold py-2">{children}</h4>
+  ),
+  h5: ({ children }: { children: ReactNode }) => (
+    <h5 className="text-sm font-bold py-2">{children}</h5>
+  ),
+  em: ({ children }: { children: ReactNode }) => (
+    <em className="italic">{children}</em>
+  ),
+  strong: ({ children }: { children: ReactNode }) => (
+    <strong className="font-bold">{children}</strong>
+  ),
+  del: ({ children }: { children: ReactNode }) => (
+    <del className="line-through">{children}</del>
+  ),
+  ul: ({ children }: { children: ReactNode }) => (
+    <ul className="list-disc ml-6 mb-0 py-0">{children}</ul>
+  ),
+  ol: (props: {
+    children: ReactNode;
+    start?: number;
+    ordered?: boolean;
+    depth: number;
+  }) => (
+    <ol className="list-decimal ml-6" start={props.start}>
+      {props.children}
+    </ol>
+  ),
+  blockquote: ({ children }: { children: ReactNode }) => (
+    <blockquote className="border-l-4 pl-4">{children}</blockquote>
+  ),
+  a: ({ children, href }: { children: ReactNode; href?: string }) => {
+    const isLocalLink =
+      href && (href.startsWith(window.location.origin) || href.startsWith('/'));
+    return (
+      <a
+        href={href}
+        className="text-blue-500 hover:underline"
+        {...(isLocalLink
+          ? {}
+          : { target: '_blank', rel: 'noopener noreferrer' })}
+      >
+        {children}
+      </a>
+    );
+  },
+  table: ({ children }: { children: ReactNode }) => (
+    <table className="w-full text-sm text-center text-gray-500 dark:text-gray-400 border">
+      {children}
+    </table>
+  ),
+  thead: ({ children }: { children: ReactNode }) => (
+    <thead className="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+      {children}
+    </thead>
+  ),
+  th: ({ children }: { children: ReactNode }) => (
+    <th className="p-2 text-gray-300 ">{children}</th>
+  ),
+  td: ({ children }: { children: ReactNode }) => (
+    <td className="p-2 border bg-gray-100 text-gray-900">{children}</td>
+  ),
+};
 
 // https://chatscope.io/storybook/react/?path=/story/documentation-introduction--page
 interface ChatProps {
@@ -70,7 +166,12 @@ const Chat: React.FC<ChatProps> = ({
   //   setController(abortController);
   // }, [abortController]);
 
+  useEffect(() => {
+    send({ type: 'LOAD', workspaceId });
+  }, [send, workspaceId]);
+
   const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
+
   const [messages, setMessages] = useState<any[]>(
     recentChatHistory?.map((history: ChatHistory) => {
       return {
@@ -85,7 +186,9 @@ const Chat: React.FC<ChatProps> = ({
 
   useEffect(() => {
     if (inputRef.current) {
-      inputRef.current.focus();
+      if (!/Android|webOS|iPhone|iPad|/i.test(navigator.userAgent)) {
+        inputRef.current?.focus();
+      }
     }
   }, []);
 
@@ -121,17 +224,10 @@ const Chat: React.FC<ChatProps> = ({
         sender as 'assistant' | 'user',
       );
 
-      send({
-        type: 'UPDATE_CHAT_HISTORY',
-        agent: {
-          workspaceId: workspaceId,
-          recentChatHistory: [...recentChatHistory, chatHistory],
-        },
-      });
       return chatHistory;
     },
 
-    [recentChatHistory, send, workspaceId],
+    [workspaceId],
   );
 
   const createChatHistory = (
@@ -140,7 +236,7 @@ const Chat: React.FC<ChatProps> = ({
     type: MessageRole,
   ): ChatHistory => {
     return {
-      id: workspaceId,
+      id: uuidv4(),
       text: text,
       timestamp: Math.floor(Date.now() / 1000).toString(),
       type: type,
@@ -178,7 +274,9 @@ const Chat: React.FC<ChatProps> = ({
     async (message: string) => {
       const userChatHistory = addMessage(message, 'user', 'outgoing');
       setMsgInputValue('');
-      inputRef.current?.focus();
+      if (!/Android|webOS|iPhone|iPad|/i.test(navigator.userAgent)) {
+        inputRef.current?.focus();
+      }
       try {
         const answer = await onSubmitHandler(
           message,
@@ -242,7 +340,10 @@ const Chat: React.FC<ChatProps> = ({
                 }}
               >
                 <Message.CustomContent>
-                  <ReactMarkdown remarkPlugins={[remarkFootnotes]}>
+                  <ReactMarkdown
+                    components={markdownComponents}
+                    remarkPlugins={[remarkFootnotes]}
+                  >
                     {message.message}
                   </ReactMarkdown>
                 </Message.CustomContent>
