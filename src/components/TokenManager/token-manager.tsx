@@ -131,6 +131,8 @@ const TokenManager: React.FC = () => {
         }
       });
       toastifyInfo('Tokens imported and saved');
+      // @TODO: remove this hack
+      window.location.reload();
     };
     reader.readAsText(file);
   };
@@ -145,6 +147,8 @@ const TokenManager: React.FC = () => {
       setValue(values[id]);
     });
     toastifyInfo('Keys saved');
+    // @TODO: remove this hack
+    window.location.reload();
   };
 
   return (
