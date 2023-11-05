@@ -101,10 +101,10 @@ const TokenManager: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'acai-env';
+    link.download = 'acai.env';
     link.click();
     URL.revokeObjectURL(url);
-    toastifySuccess('Tokens exported');
+    toastifyInfo('Tokens exported');
   };
 
   const handleImport = (event: ChangeEvent<HTMLInputElement>) => {
@@ -130,7 +130,7 @@ const TokenManager: React.FC = () => {
           setValue(newValues[id]);
         }
       });
-      toastifySuccess('Tokens imported and saved');
+      toastifyInfo('Tokens imported and saved');
     };
     reader.readAsText(file);
   };
