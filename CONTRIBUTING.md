@@ -24,7 +24,7 @@ We welcome your contributions. To make the process as seamless as possible, we a
 
 - When you’re ready to create a pull request, be sure to:
 
-  - Have test cases for the new code. If you have questions about how to do it, please ask in your pull request.
+  - Have test cases for new code. If you have questions about how to do it, please ask in your pull request.
 
   - Run all the tests to ensure nothing else was accidentally broken.
 
