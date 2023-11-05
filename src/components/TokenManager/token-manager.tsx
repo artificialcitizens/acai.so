@@ -125,7 +125,12 @@ const TokenManager: React.FC = () => {
       }, {} as { [key: string]: string });
 
       setValues(newValues);
-      toastifySuccess('Tokens imported');
+      keys.forEach(({ id, setValue }) => {
+        if (newValues[id]) {
+          setValue(newValues[id]);
+        }
+      });
+      toastifySuccess('Tokens imported and saved');
     };
     reader.readAsText(file);
   };
@@ -181,7 +186,7 @@ const TokenManager: React.FC = () => {
       ))}
       <input
         type="submit"
-        value="Submit"
+        value="Save"
         className="bg-light text-acai-white text-base md:text-sm px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
       />
     </form>
