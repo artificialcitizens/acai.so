@@ -139,6 +139,8 @@ const App = () => {
           <ToastManager />
           <PullToRefresh
             onRefresh={async () => window.location.reload()}
+            pullDownThreshold={125}
+            maxPullDownDistance={150}
             pullingContent={''}
           >
             <main className="w-screen  max-h-full overflow-hidden">
