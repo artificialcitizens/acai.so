@@ -31,21 +31,21 @@ const TokenManager: React.FC = () => {
         name: 'OpenAI API Base URL',
         value: openAIBase,
         setValue: setOpenAIBase,
-        type: "text",
+        type: 'text',
       },
       {
         id: 'OPENAI_KEY',
         name: 'OpenAI API Key',
         value: openAIKey,
         setValue: setOpenAIKey,
-        type: "password",
+        type: 'password',
       },
       {
         id: 'ELEVENLABS_API_KEY',
         name: 'Eleven Labs API Key',
         value: elevenlabsApiKey,
         setValue: setElevenlabsApiKey,
-        type: "password",
+        type: 'password',
       },
       // {
       //   id: 'GOOGLE_API_KEY',
@@ -61,14 +61,12 @@ const TokenManager: React.FC = () => {
       // },
     ],
     [
+      openAIBase,
+      setOpenAIBase,
       openAIKey,
       setOpenAIKey,
       elevenlabsApiKey,
       setElevenlabsApiKey,
-      // googleApiKey,
-      // setGoogleApiKey,
-      // googleCSEId,
-      // setGoogleCSEId,
     ],
   );
 

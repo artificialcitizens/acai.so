@@ -11,19 +11,18 @@ const { chat: model } = handleAcaiChat({
   verbose: false,
 });
 
-const tools = [
-  new Calculator(),
-  new GoogleCustomSearch({
-    googleCSEId: getToken('GOOGLE_CSE_ID') || import.meta.env.GOOGLE_CSE_ID,
-    apiKey: getToken('GOOGLE_API_KEY') || import.meta.env.GOOGLE_API_KEY,
-  }),
-];
-const executor = PlanAndExecuteAgentExecutor.fromLLMAndTools({
-  llm: model,
-  tools,
-});
-
 export const queryPlanAgent = async (input: string) => {
+  const tools = [
+    new Calculator(),
+    new GoogleCustomSearch({
+      googleCSEId: getToken('GOOGLE_CSE_ID') || import.meta.env.GOOGLE_CSE_ID,
+      apiKey: getToken('GOOGLE_API_KEY') || import.meta.env.GOOGLE_API_KEY,
+    }),
+  ];
+  const executor = PlanAndExecuteAgentExecutor.fromLLMAndTools({
+    llm: model,
+    tools,
+  });
   const res = await executor.call({ input });
   return res;
 };

@@ -6,8 +6,25 @@ import { Option } from '../components/DropDown/';
 
 export const useElevenlabs = () => {
   const [voices, setVoices] = useState<Option[]>([]);
-  const apiKey =
-    getToken('ELEVENLABS_API_KEY') || import.meta.env.VITE_ELEVENLABS_API_KEY;
+  const [apiKey, setApiKey] = useState(
+    getToken('ELEVENLABS_API_KEY') || import.meta.env.VITE_ELEVENLABS_API_KEY,
+  );
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setApiKey(
+        getToken('ELEVENLABS_API_KEY') ||
+          import.meta.env.VITE_ELEVENLABS_API_KEY,
+      );
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
   const synthesizeElevenLabsSpeech = useCallback(
     async (inputText: string, voice: any) => {
       const options = {

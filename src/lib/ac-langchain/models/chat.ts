@@ -3,19 +3,24 @@ import { getToken } from '../../../utils/config';
 import { OpenAI } from 'langchain/llms/openai';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 
-const auth = {
-  openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
-  configuration: {
-    baseURL:
-      getToken('OPENAI_API_BASE') ?? import.meta.env.VITE_OPENAI_API_BASE,
-  },
-};
+const setDefaults = () => {
+  const auth = {
+    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
+    configuration: {
+      baseURL:
+        getToken('OPENAI_API_BASE') ?? import.meta.env.VITE_OPENAI_API_BASE,
+    },
+  };
 
-const acaiDefaults = {
-  ...auth,
-  streaming: true,
-  temperature: 0,
-  maxTokens: 1024,
+  const acaiDefaults = {
+    ...auth,
+    streaming: true,
+    temperature: 0,
+    maxTokens: 1024,
+  };
+  return {
+    ...acaiDefaults,
+  };
 };
 
 // Need a central way to assign acai-managed config
@@ -24,7 +29,7 @@ export function handleAcaiChat(fields: any = {}) {
   return {
     chat: new ChatOpenAI({
       modelName: 'gpt-3.5-turbo',
-      ...acaiDefaults,
+      ...setDefaults(),
       ...fields,
     }),
   };
@@ -34,13 +39,20 @@ export function handleAcaiChat(fields: any = {}) {
 export function handleAcaiLLM(fields: any = {}) {
   return {
     llm: new OpenAI({
-      ...acaiDefaults,
+      ...setDefaults(),
       ...fields,
     }),
   };
 }
 
 export function handleAcaiEmbeddings(fields: any = {}) {
+  const auth = {
+    openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
+    configuration: {
+      baseURL:
+        getToken('OPENAI_API_BASE') ?? import.meta.env.VITE_OPENAI_API_BASE,
+    },
+  };
   return {
     embeddings: new OpenAIEmbeddings(
       {

@@ -84,16 +84,19 @@ export const speechMachine = createMachine<SpeechContext, SpeechEvent>({
       }),
     },
     SET_USER_TRANSCRIPT: {
+      target: 'saving',
       actions: assign((context, event) => {
         return { ...context, userTranscript: event.userTranscript };
       }),
     },
     SET_VOICE_STATE: {
+      target: 'saving',
       actions: assign((context, event) => {
         return { ...context, voiceState: event.voiceState };
       }),
     },
     SET_TTS_MODE: {
+      target: 'saving',
       actions: assign((context, event) => {
         return { ...context, ttsMode: event.ttsMode };
       }),

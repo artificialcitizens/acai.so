@@ -37,7 +37,12 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const { queryAva, loading } = useAva();
   const [ttsLoading, setTtsLoading] = useState<boolean>(false);
-  const elevenlabsKey = getToken('ELEVENLABS_API_KEY');
+  const elevenlabsKey = useLocalStorageKeyValue(
+    'ELEVENLABS_API_KEY',
+    getToken('ELEVENLABS_API_KEY') ||
+      import.meta.env.VITE_ELEVENLABS_API_KEY ||
+      '',
+  );
   const { synthesizeElevenLabsSpeech, voices } = useElevenlabs();
   const [elevenLabsVoice] = useLocalStorageKeyValue(
     'ELEVENLABS_VOICE',
