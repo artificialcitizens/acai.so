@@ -67,18 +67,29 @@ export const useLocalStorageKeyValue = (
   key: string,
   initialValue: string,
 ): [string, (value: string) => void] => {
-  const [storedValue, setStoredValue] = useState(initialValue);
+  const [storedValue, setStoredValue] = useState(() => {
+    const item = window.localStorage.getItem(key);
+    return item ? item : initialValue;
+  });
 
   useEffect(() => {
-    const item = window.localStorage.getItem(key);
-    if (item) {
-      setStoredValue(item);
-    }
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === key) {
+        setStoredValue(e.newValue || '');
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [key]);
 
   const setValue = (value: string) => {
-    setStoredValue(value);
     window.localStorage.setItem(key, value);
+    setStoredValue(value);
   };
 
   return [storedValue, setValue];
