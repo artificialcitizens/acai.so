@@ -14,7 +14,6 @@ import {
 import { useAva } from '../../Ava/use-ava';
 
 import { NodeSelector } from './NodeSelector';
-import { toastifyInfo } from '../../Toast';
 
 export interface BubbleMenuItem {
   name: string;
