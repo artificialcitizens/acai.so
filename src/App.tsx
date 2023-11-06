@@ -22,6 +22,7 @@ import PullToRefresh from 'react-simple-pull-to-refresh';
 import { SideNavToggle } from './components/SideNavToggle/SideNavToggle';
 import ACModal from './components/Modal/Modal';
 import { useSelector } from '@xstate/react';
+import { isMobile } from './utils/browser-support';
 
 const App = () => {
   const globalServices: GlobalStateContextValue =
@@ -142,6 +143,7 @@ const App = () => {
             pullDownThreshold={125}
             maxPullDownDistance={150}
             pullingContent={''}
+            isPullable={isMobile()}
           >
             <main className="w-screen  max-h-full overflow-hidden">
               <span
