@@ -8,7 +8,7 @@
   font-weight: 400;
 
   @apply text-acai-white;
-  @apply bg-darker;
+  @apply bg-base;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -176,7 +176,7 @@ ol {
 
 pre,
 code {
-  @apply bg-darker text-acai-white !important;
+  @apply bg-darker rounded-lg text-acai-white !important;
 }
 
 /* @media (prefers-color-scheme: light) {
