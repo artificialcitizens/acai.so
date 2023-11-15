@@ -49,9 +49,7 @@ const markdownComponents = {
     <p className="mb-1 text-sm">{children}</p>
   ),
   li: ({ children }: { children: ReactNode }) => (
-    <li className="text-sm sm:text-base list-disc ml-1 mb-0 pb-0">
-      {children}
-    </li>
+    <li className="text-sm list-disc ml-1 mb-0 pb-0">{children}</li>
   ),
   h1: ({ children }: { children: ReactNode }) => (
     <h1 className="text-2xl font-bold py-2">{children}</h1>
