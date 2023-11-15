@@ -81,10 +81,9 @@ export const SideNav: React.FC = () => {
       docIds: [tabId],
     };
     const doc: ACDoc = {
-      id: 'home',
+      id: tabId,
       title: `Home`,
-      content:
-        'This is the homepage, this will be the future index page for your workspace.',
+      content: `Welcome to ${name}`,
       createdAt: new Date().toString(),
       lastUpdated: new Date().toString(),
       workspaceId: id,
@@ -209,9 +208,7 @@ export const SideNav: React.FC = () => {
                                         workspaceId: workspace.id,
                                       });
                                       setTimeout(() => {
-                                        navigate(
-                                          `/${workspace.id}/documents/home`,
-                                        );
+                                        navigate(`/${workspace.id}`);
                                       }, 250);
                                       globalServices.uiStateService.send({
                                         type: 'TOGGLE_SIDE_NAV',
