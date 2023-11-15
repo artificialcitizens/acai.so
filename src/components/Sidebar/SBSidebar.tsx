@@ -19,12 +19,13 @@ const isMobile = () => {
   return true;
 };
 const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
-  const calculatedWidth = window.innerWidth < 640 ? 100 : 50;
+  const calculatedWidth = window.innerWidth < 786 ? 100 : 50;
   const minWidth = 0;
   const defaultWidth = calculatedWidth;
   const [width, setWidth] = useState<number | null>(null);
   const [isResizing, setIsResizing] = useState(false);
 
+  // @TODO: Manage toggle state via state machine
   const [toggled, setToggled] = useState(isMobile() ? false : true);
 
   const toggleView = () => {
