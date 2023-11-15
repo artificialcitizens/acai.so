@@ -89,10 +89,6 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 
   const saveContent = (editor: Editor) => {
-    if (tab.id === 'home' || workspaceId === 'docs') {
-      toastifyInfo('Changes to homepage or docs workspace are not saved.');
-      return;
-    }
     if (!tab) return;
     if (!tab.autoSave) return;
     setSaveStatus('Unsaved');

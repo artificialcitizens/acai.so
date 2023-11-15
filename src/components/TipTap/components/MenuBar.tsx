@@ -73,7 +73,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
             id: tipTapEditorId,
             workspaceId,
           });
-          navigate(`/${workspaceId}/documents/home`);
+          navigate(`/${workspaceId}`);
         }}
       >
         {'x'}
