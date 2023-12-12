@@ -21,6 +21,7 @@ import { createWorkspace } from './state';
 import { SideNavToggle } from './components/SideNavToggle/SideNavToggle';
 import ACModal from './components/Modal/Modal';
 import { useSelector } from '@xstate/react';
+import AudioWaveform from './components/AudioWaveform/AudioWaveform';
 // import { isMobile } from './utils/browser-support';
 
 const App = () => {
@@ -147,6 +148,9 @@ const App = () => {
               toggleSideNav();
             }}
           />
+          {audioContext && (
+            <AudioWaveform audioContext={audioContext} isOn={listening} />
+          )}
           <ToastManager />
           {/* <PullToRefresh
             onRefresh={async () => window.location.reload()}
