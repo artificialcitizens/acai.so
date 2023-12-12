@@ -176,25 +176,25 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
           recentChatHistory: [...recentChatHistory, userChatHistory],
         });
         const { response } = await queryAva({
-          message: t,
+          message: `!!!You are using a voice synthesis pipeline, keep your response brief and natural sounding as if you were speaking!!!\n\n\n\n${t.trim()}`,
           systemMessage: '',
         });
-        const sentenceDelimiters = ['.', '?', '!'];
-        const sentenceCount = sentenceDelimiters.reduce(
-          (count, delimiter) => count + response.split(delimiter).length - 1,
-          0,
-        );
+        // const sentenceDelimiters = ['.', '?', '!'];
+        // const sentenceCount = sentenceDelimiters.reduce(
+        //   (count, delimiter) => count + response.split(delimiter).length - 1,
+        //   0,
+        // );
 
-        let voiceResponse;
-        // if response is longer than 3 sentences implify it
-        if (sentenceCount > 3) {
-          voiceResponse = await simplifyResponseChain(
-            `User:${t}\n\nAssistant:${response}\n\nSingle Sentence Response:`,
-          );
-        } else {
-          voiceResponse = response;
-        }
-        synthesizeAndPlay(voiceResponse).then(async () => {
+        // let voiceResponse;
+        // // if response is longer than 3 sentences implify it
+        // if (sentenceCount > 3) {
+        //   voiceResponse = await simplifyResponseChain(
+        //     `User:${t}\n\nAssistant:${response}\n\nSingle Sentence Response:`,
+        //   );
+        // } else {
+        //   voiceResponse = response;
+        // }
+        synthesizeAndPlay(response).then(async () => {
           const res = await Promise.resolve(response);
           const assistantChatHistory: ChatHistory = {
             id: workspaceId,
