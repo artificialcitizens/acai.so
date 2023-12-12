@@ -127,6 +127,7 @@ export const useXtts = () => {
         scriptNode.onaudioprocess = (audioProcessingEvent) => {
           const outputBuffer =
             audioProcessingEvent.outputBuffer.getChannelData(0);
+          const fadeOutLength = Math.min(4000, outputBuffer.length); // adjust as needed
           for (let i = 0; i < outputBuffer.length; i++) {
             if (nextSample < audioQueue.length) {
               const sampleIndex = Math.floor(nextSample);
@@ -140,8 +141,19 @@ export const useXtts = () => {
               outputBuffer[i] = interpolatedSample / 32768;
               nextSample += playbackSpeed;
             } else {
-              outputBuffer[i] = 0; // Fill with silence if no data available
-              if (isStreamingFinished) {
+              if (
+                isStreamingFinished &&
+                i >= outputBuffer.length - fadeOutLength
+              ) {
+                // Apply fade-out effect
+                const fadeOutFactor =
+                  1 -
+                  (i - (outputBuffer.length - fadeOutLength)) / fadeOutLength;
+                outputBuffer[i] *= fadeOutFactor;
+              } else {
+                outputBuffer[i] = 0; // Fill with silence if no data available
+              }
+              if (isStreamingFinished && i === outputBuffer.length - 1) {
                 scriptNode.disconnect();
                 audioContext.close();
                 setLoading(false);
