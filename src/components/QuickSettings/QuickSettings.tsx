@@ -24,18 +24,28 @@ import AudioSettings from '../SettingsTabs/AudioSettings';
 import { SocketManager } from '../SocketManager';
 import ScratchPad from '../ScratchPad/ScratchPad';
 import KnowledgeUpload from '../Knowledge/Knowledge';
+import { useXtts } from '../../hooks/tts-hooks/use-xtts';
 
 interface VoiceRecognitionProps {
   audioContext?: AudioContext;
   onVoiceActivation: (bool: boolean) => void;
 }
 
+// @TODO: Rename this to the voice recognition components and remove non-voice related components
 const QuickSettings: React.FC<VoiceRecognitionProps> = ({
   onVoiceActivation,
   audioContext,
 }) => {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
-  const { queryAva, loading } = useAva();
+  const { queryAva, loading: avaLoading } = useAva();
+  const {
+    file,
+    setFile,
+    loading: xttsLoading,
+    handleFileChange,
+    handleUpload,
+    handleTTS,
+  } = useXtts();
   const [ttsLoading, setTtsLoading] = useState<boolean>(false);
   const elevenlabsKey = useLocalStorageKeyValue(
     'ELEVENLABS_API_KEY',
@@ -145,7 +155,7 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
 
   const handleVoiceRecognition = async (t: string) => {
     if (!t || t.split(' ').length < 2) return;
-    if (ttsLoading) return;
+    if (ttsLoading || xttsLoading || avaLoading) return;
 
     switch (voiceRecognitionState) {
       case 'voice': {
@@ -165,7 +175,6 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
           workspaceId: workspaceId,
           recentChatHistory: [...recentChatHistory, userChatHistory],
         });
-        toastifyInfo('Generating Text');
         const { response } = await queryAva({
           message: t,
           systemMessage: '',
@@ -218,7 +227,6 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
     setTtsLoading(true);
     try {
       let audioData;
-      toastifyInfo('Generating Audio');
       if (ttsMode === 'bark') {
         audioData = await synthesizeBarkSpeech({
           inputText: response,
@@ -233,6 +241,13 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
         audioData = await synthesizeElevenLabsSpeech(response, elevenLabsVoice);
       } else if (ttsMode === 'webSpeech') {
         synthesizeWebSpeech(response, () => {
+          setUserTranscript('');
+          setTtsLoading(false);
+        });
+        if (singleCommand) setVoiceRecognitionState('idle');
+        return;
+      } else if (ttsMode === 'xtts') {
+        handleTTS(response, 'en').then(() => {
           setUserTranscript('');
           setTtsLoading(false);
         });
@@ -272,7 +287,8 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
   useSpeechRecognition({
     onTranscriptionComplete,
     // @TODO: Fix hacky listening state
-    active: !ttsLoading && micRecording ? true : false,
+    active:
+      !ttsLoading && !avaLoading && !xttsLoading && micRecording ? true : false,
   });
 
   const handleManualTTS = (e: React.FormEvent<HTMLFormElement>) => {
