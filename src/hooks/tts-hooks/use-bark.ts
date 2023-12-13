@@ -1,7 +1,7 @@
 // hooks/useBark.ts
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
-import { getToken } from '../utils/config';
+import { getToken } from '../../utils/config';
 
 export const useBark = () => {
   const [token, setToken] = useState(getToken('BARK_URL'));

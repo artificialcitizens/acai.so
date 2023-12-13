@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React, { useContext } from 'react';
 
-import { useElevenlabs } from '../../hooks/use-elevenlabs';
+import { useElevenlabs } from '../../hooks/tts-hooks/use-elevenlabs';
 import ScratchPad from '../ScratchPad/ScratchPad';
 import { useVoiceCommands } from '../../state/use-voice-command';
 import { getToken } from '../../utils/config';

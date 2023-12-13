@@ -3,11 +3,11 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useAva } from '../Ava/use-ava';
 
 import useSpeechRecognition from '../../hooks/use-speech-recognition';
-import { useBark } from '../../hooks/use-bark';
+import { useBark } from '../../hooks/tts-hooks/use-bark';
 
-import { useElevenlabs } from '../../hooks/use-elevenlabs';
+import { useElevenlabs } from '../../hooks/tts-hooks/use-elevenlabs';
 import { useVoiceCommands } from '../../state/use-voice-command';
-import { useWebSpeechSynthesis } from '../../hooks/use-web-tts';
+import { useWebSpeechSynthesis } from '../../hooks/tts-hooks/use-web-tts';
 import { getToken } from '../../utils/config';
 import { toastifyError, toastifyInfo } from '../Toast';
 import { useActor, useSelector } from '@xstate/react';
@@ -18,7 +18,7 @@ import {
 import { useParams } from 'react-router-dom';
 import { ChatHistory } from '../../state';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
-import { simplifyResponseChain } from '../../lib/ac-langchain/chains/simplify-response-chain';
+// import { simplifyResponseChain } from '../../lib/ac-langchain/chains/simplify-response-chain';
 import ChatModelDropdown from '../ChatSettings';
 import AudioSettings from '../SettingsTabs/AudioSettings';
 import { SocketManager } from '../SocketManager';
