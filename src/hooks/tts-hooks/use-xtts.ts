@@ -151,7 +151,17 @@ export const useXtts = () => {
               audioQueue[nextIndex],
               sampleFraction,
             );
-            outputBuffer[i] = interpolatedSample / 32768;
+            // Apply fade-out effect if we are in the last 4096 samples
+            const fadeOutSamples = 4096; // Adjust this value as needed
+            const fadeOutStartIndex = Math.max(
+              audioQueue.length - fadeOutSamples,
+              0,
+            );
+            const volume =
+              sampleIndex >= fadeOutStartIndex
+                ? 1 - (sampleIndex - fadeOutStartIndex) / fadeOutSamples
+                : 1;
+            outputBuffer[i] = (interpolatedSample / 32768) * volume;
             nextSample += playbackSpeed;
           } else {
             outputBuffer[i] = 0; // Fill with silence if no data available
@@ -159,7 +169,6 @@ export const useXtts = () => {
         }
 
         if (isStreamingFinished && nextSample >= audioQueue.length) {
-          // Apply fade-out effect here if needed
           scriptNode.disconnect();
           audioContext.close();
           setLoading(false);
