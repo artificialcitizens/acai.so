@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { toastifyInfo } from '../../components/Toast';
+import { useLocalStorageKeyValue } from '../use-local-storage';
+import { getToken } from '../../utils/config';
 
 type SpeakerRefType = {
   gpt_cond_latent: any;
@@ -10,7 +12,12 @@ export const useXtts = () => {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const speakerRef = useRef<SpeakerRefType | null>(null);
-
+  const [XTTS_URL] = useLocalStorageKeyValue(
+    'XTTS_URL',
+    import.meta.env.VITE_XTTS_URL ||
+      getToken('XTTS_URL') ||
+      'http://localhost:8080',
+  );
   useEffect(() => {
     const fetchDefaultSpeakerEmbedding = async () => {
       // if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -40,13 +47,10 @@ export const useXtts = () => {
         const formData = new FormData();
         formData.append('wav_file', blob, 'ref.wav');
 
-        const speakerResponse = await fetch(
-          'http://192.168.4.186:8000/clone_speaker',
-          {
-            method: 'POST',
-            body: formData,
-          },
-        );
+        const speakerResponse = await fetch(`${XTTS_URL}/clone_speaker`, {
+          method: 'POST',
+          body: formData,
+        });
         toastifyInfo('Default speaker embedding loaded');
         const speakerData = await speakerResponse.json();
         speakerRef.current = speakerData;
@@ -60,7 +64,7 @@ export const useXtts = () => {
     };
 
     fetchDefaultSpeakerEmbedding();
-  }, []);
+  }, [XTTS_URL]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -73,13 +77,10 @@ export const useXtts = () => {
       const formData = new FormData();
       formData.append('wav_file', file);
 
-      const speakerResponse = await fetch(
-        'http://192.168.4.186:8000/clone_speaker',
-        {
-          method: 'POST',
-          body: formData,
-        },
-      );
+      const speakerResponse = await fetch(`${XTTS_URL}/clone_speaker`, {
+        method: 'POST',
+        body: formData,
+      });
       toastifyInfo('Default speaker embedding loaded');
       const speakerData = await speakerResponse.json();
       speakerRef.current = speakerData;
@@ -105,7 +106,7 @@ export const useXtts = () => {
     }
 
     try {
-      const response = await fetch('http://192.168.4.186:8000/tts_stream', {
+      const response = await fetch(`${XTTS_URL}/tts_stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

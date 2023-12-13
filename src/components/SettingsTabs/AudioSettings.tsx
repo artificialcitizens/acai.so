@@ -35,7 +35,7 @@ const AudioSettings: React.FC<AudioSettingsProps> = ({ handleUpload }) => {
 
   const [xttsUrl, setXttsUrl] = useLocalStorageKeyValue(
     'XTTS_URL',
-    import.meta.env.VITE_XTTS_SERVER ||
+    import.meta.env.VITE_XTTS_URL ||
       getToken('XTTS_URL') ||
       'http://localhost:8080',
   );
