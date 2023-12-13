@@ -317,7 +317,7 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
         content={customPrompt}
         handleInputChange={handleCustomPromptInput}
       />
-      <AudioSettings />
+      <AudioSettings handleUpload={handleUpload} />
       {/* <form
         className="text-acai-white w-full flex flex-col flex-grow mb-4"
         onSubmit={handleManualTTS}

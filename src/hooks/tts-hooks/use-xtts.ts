@@ -68,7 +68,7 @@ export const useXtts = () => {
     }
   };
 
-  const handleUpload = async () => {
+  const handleUpload = async (file: string | Blob) => {
     if (file) {
       const formData = new FormData();
       formData.append('wav_file', file);

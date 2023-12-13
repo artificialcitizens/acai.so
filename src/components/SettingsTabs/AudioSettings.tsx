@@ -15,7 +15,11 @@ import Dropdown from '../DropDown';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import { TTSState, VoiceState } from '../../state/speech.xstate';
 
-const AudioSettings: React.FC = () => {
+export interface AudioSettingsProps {
+  handleUpload: (file: string | Blob) => void;
+}
+
+const AudioSettings: React.FC<AudioSettingsProps> = ({ handleUpload }) => {
   const { voices } = useElevenlabs();
   const [elevenLabsVoice, setElevenLabsVoice] = useLocalStorageKeyValue(
     'ELEVENLABS_VOICE',
@@ -28,6 +32,14 @@ const AudioSettings: React.FC = () => {
       getToken('BARK_URL') ||
       'http://localhost:5000',
   );
+
+  const [xttsUrl, setXttsUrl] = useLocalStorageKeyValue(
+    'XTTS_URL',
+    import.meta.env.VITE_XTTS_SERVER ||
+      getToken('XTTS_URL') ||
+      'http://localhost:8080',
+  );
+
   const {
     setUserTranscript,
     setVoiceRecognitionState,
@@ -46,6 +58,12 @@ const AudioSettings: React.FC = () => {
     speechStateService,
     (state) => state.context.ttsMode,
   );
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileButtonClick = () => {
+    fileInputRef.current?.click();
+  };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     speechStateService.send('TOGGLE_SINGLE_COMMAND', {
@@ -66,6 +84,16 @@ const AudioSettings: React.FC = () => {
     setBarkUrl(barkUrl);
     //@TODO: update to run a test request
     toastifyInfo('Connected to Bark Server');
+  };
+  const handleXttsFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!xttsUrl) {
+      toastifyError('Missing Xtts Server URL');
+      return;
+    }
+    setXttsUrl(xttsUrl);
+    //@TODO: update to run a test request
+    toastifyInfo('Connected to XTTS Server');
   };
 
   const setTtsMode = (mode: TTSState) => {
@@ -165,7 +193,6 @@ const AudioSettings: React.FC = () => {
               <input
                 id="url"
                 className="text-acai-white text-base md:text-sm bg-base px-[2px]"
-                type="password"
                 value={barkUrl}
                 onChange={(e) => setBarkUrl(e.target.value)}
               />
@@ -176,6 +203,54 @@ const AudioSettings: React.FC = () => {
               className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
             />
           </form>
+        )}
+        {ttsMode === 'xtts' && (
+          <>
+            <form className="mb-2" onSubmit={handleXttsFormSubmit}>
+              <span className="flex mb-2 items-center">
+                <label
+                  htmlFor="url"
+                  className="text-acai-white pr-2 w-[50%] ml-2 text-base md:text-xs"
+                >
+                  XTTS Server URL:
+                </label>
+                <input
+                  id="url"
+                  className="text-acai-white text-base md:text-sm bg-base px-[2px]"
+                  value={xttsUrl}
+                  onChange={(e) => setXttsUrl(e.target.value)}
+                />
+              </span>
+              <input
+                type="submit"
+                value="Connect"
+                className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+              />
+            </form>
+
+            <form className="mb-2" onSubmit={(e) => e.preventDefault()}>
+              <input
+                ref={fileInputRef}
+                className="hidden"
+                type="file"
+                id="file"
+                accept=".wav"
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  const file = event.target.files?.[0];
+                  if (file) {
+                    handleUpload(file);
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+                onClick={handleFileButtonClick}
+              >
+                Clone Voice
+              </button>
+            </form>
+          </>
         )}
       </span>
     </div>
