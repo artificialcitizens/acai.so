@@ -18,7 +18,7 @@ import {
 import { useParams } from 'react-router-dom';
 import { ChatHistory } from '../../state';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
-// import { simplifyResponseChain } from '../../lib/ac-langchain/chains/simplify-response-chain';
+import { simplifyResponseChain } from '../../lib/ac-langchain/chains/simplify-response-chain';
 import ChatModelDropdown from '../ChatSettings';
 import AudioSettings from '../SettingsTabs/AudioSettings';
 import { SocketManager } from '../SocketManager';
@@ -179,22 +179,22 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
           message: `${t.trim()}`,
           systemMessage: '',
         });
-        // const sentenceDelimiters = ['.', '?', '!'];
-        // const sentenceCount = sentenceDelimiters.reduce(
-        //   (count, delimiter) => count + response.split(delimiter).length - 1,
-        //   0,
-        // );
+        const sentenceDelimiters = ['.', '?', '!'];
+        const sentenceCount = sentenceDelimiters.reduce(
+          (count, delimiter) => count + response.split(delimiter).length - 1,
+          0,
+        );
 
-        // let voiceResponse;
-        // // if response is longer than 3 sentences implify it
-        // if (sentenceCount > 3) {
-        //   voiceResponse = await simplifyResponseChain(
-        //     `User:${t}\n\nAssistant:${response}\n\nSingle Sentence Response:`,
-        //   );
-        // } else {
-        //   voiceResponse = response;
-        // }
-        synthesizeAndPlay(response).then(async () => {
+        let voiceResponse;
+        // if response is longer than 3 sentences implify it
+        if (sentenceCount > 3) {
+          voiceResponse = await simplifyResponseChain(
+            `User:${t}\n\nAssistant:${response}\n\nSingle Sentence Response:`,
+          );
+        } else {
+          voiceResponse = response;
+        }
+        synthesizeAndPlay(voiceResponse).then(async () => {
           const res = await Promise.resolve(response);
           const assistantChatHistory: ChatHistory = {
             id: workspaceId,
