@@ -3,7 +3,7 @@ import { createMachine, assign } from 'xstate';
 export const VoiceState = ['idle', 'ava', 'notes', 'voice'] as const;
 export type VoiceState = (typeof VoiceState)[number];
 
-export const TTSState = ['bark', 'elevenlabs', 'webSpeech'] as const;
+export const TTSState = ['bark', 'xtts', 'elevenlabs', 'webSpeech'] as const;
 export type TTSState = (typeof TTSState)[number];
 
 export interface SpeechContext {

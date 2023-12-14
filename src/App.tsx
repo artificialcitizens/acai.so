@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import { Ava } from './components/Ava/Ava';
 import { SideNav } from './components/SideNav/SideNav';
 import {
@@ -11,18 +11,18 @@ import { useLocation, useParams } from 'react-router-dom';
 import ToastManager from './components/Toast';
 import { VectorStoreContext } from './context/VectorStoreContext';
 import { useMemoryVectorStore } from './hooks/use-memory-vectorstore';
-import AudioWaveform from './components/AudioWave/AudioWave';
 import { Editor } from '@tiptap/react';
 import { EditorContext } from './context/EditorContext';
 import MainView from './components/MainView/MainView';
 import useLocationManager from './hooks/use-location-manager';
 import { createAcaiDocumentation } from './utils/docs';
 import { createWorkspace } from './state';
-import PullToRefresh from 'react-simple-pull-to-refresh';
+// import PullToRefresh from 'react-simple-pull-to-refresh';
 import { SideNavToggle } from './components/SideNavToggle/SideNavToggle';
 import ACModal from './components/Modal/Modal';
 import { useSelector } from '@xstate/react';
-import { isMobile } from './utils/browser-support';
+import AudioWaveform from './components/AudioWaveform/AudioWaveform';
+// import { isMobile } from './utils/browser-support';
 
 const App = () => {
   const globalServices: GlobalStateContextValue =
@@ -55,6 +55,19 @@ const App = () => {
   const docsAgent = useSelector(globalServices.agentStateService, (state) => {
     return globalServices.agentStateService.getSnapshot().context['docs'];
   });
+
+  const audioContextRef = useRef<AudioContext | undefined>(undefined);
+
+  useEffect(() => {
+    if (audioContext) return;
+    audioContextRef.current = audioContext;
+
+    return () => {
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+    };
+  }, [audioContext]);
 
   useEffect(() => {
     const currentTime = new Date().getTime();
@@ -125,6 +138,7 @@ const App = () => {
         }}
       >
         <EditorContext.Provider value={{ editor, setEditor }}>
+          {/* {audioContext && <TTS audioContext={audioContext} />} */}
           <SideNav />
           <ACModal />
           <SideNavToggle
