@@ -116,7 +116,9 @@ const AudioSettings: React.FC<AudioSettingsProps> = ({ handleUpload }) => {
   }));
 
   if (!import.meta.env.DEV) {
-    ttsOptions = ttsOptions.filter((option) => option.value !== 'bark');
+    ttsOptions = ttsOptions.filter(
+      (option) => option.value !== 'bark' && option.value !== 'xtts',
+    );
   }
 
   const handleElevenLabsDropdownChange = (value: string) => {

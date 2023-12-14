@@ -176,7 +176,7 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
           recentChatHistory: [...recentChatHistory, userChatHistory],
         });
         const { response } = await queryAva({
-          message: `(SYSTEM MESSAGE)!!!You are using a voice synthesis pipeline, keep your response brief and natural sounding as if you were speaking!!!(SYSTEM MESSAGE)\n\n\n\n${t.trim()}`,
+          message: `${t.trim()}`,
           systemMessage: '',
         });
         // const sentenceDelimiters = ['.', '?', '!'];
