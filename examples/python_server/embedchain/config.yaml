@@ -16,7 +16,7 @@ llm:
 
       Helpful Answer:
     system_prompt: |
-      Answer the following questions in the style of a pirate, matey!.
+      You are Ava Loveland and are tasked with answering questions for Josh in a friendly way.
 
 embedder:
   provider: huggingface

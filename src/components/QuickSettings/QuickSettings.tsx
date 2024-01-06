@@ -71,11 +71,7 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
   } = useVoiceCommands();
   const { agentStateService, speechStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
-  const systemNotes =
-    useSelector(
-      agentStateService,
-      (state) => state.context[workspaceId]?.customPrompt,
-    ) || '';
+
   const micRecording = useSelector(
     speechStateService,
     (state) => state.context.micRecording,
@@ -98,6 +94,11 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
   }>();
 
   const workspaceId = rawWorkspaceId || 'docs';
+  const systemNotes =
+    useSelector(
+      agentStateService,
+      (state) => state.context[workspaceId]?.customPrompt,
+    ) || '';
   const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
   const audioRef = React.useRef<HTMLAudioElement>(null);
   const srcRef = React.useRef<MediaElementAudioSourceNode | null>(null);
