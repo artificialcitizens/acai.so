@@ -59,16 +59,7 @@ export const getLocalLLMs = async () => {
   const response = await openai.listModels();
   const models = response.data;
   // filter to only models containing gpt models
-  const filteredModels = models.data.filter(
-    (model) =>
-      model.id.includes('') &&
-      !model.id.includes('instruct') &&
-      !model.id.includes('davinci') &&
-      !model.id.includes('ada') &&
-      !model.id.includes('babbage') &&
-      !model.id.includes('curie') &&
-      !model.id.includes('cushman'),
-  );
+  const filteredModels = models.data.filter((model) => model.id.includes(''));
   // order by descending id
   filteredModels.sort((a, b) => {
     if (a.id < b.id) {
