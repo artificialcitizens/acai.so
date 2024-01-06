@@ -4,6 +4,10 @@ from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 from router.routes import get_route
 
+# config
+agent_server = "http://127.0.0.1:7589",
+
+
 # existing code...
 app = Flask(__name__)
 CORS(app)
@@ -34,7 +38,7 @@ def proxy():
 
 @app.route("/test", methods=["GET"])
 def test():
-    return "Hello world"
+    return jsonify({"response": "Hello World!"}), 200
 
 @app.route("/test-route", methods=["POST"])
 def test_route():
@@ -99,6 +103,10 @@ def agent():
         print(e)
         return jsonify({"error": "An error occurred while processing the payload"}), 500
 
+
+@socketio.on('message')
+def handle_message(data):
+    print('received message: ' + data)
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5050)

@@ -14,7 +14,7 @@ If you haven't installed Anaconda or Miniconda yet, you can download it from the
 ## Step 2: Create a new Conda environment
 
 Open your terminal and create a new Conda environment using the following command:
-`conda create --name acai python=3.9`
+`conda create --name acai python=3.10`
 
 ## Step 3: Activate the Conda environment
 
