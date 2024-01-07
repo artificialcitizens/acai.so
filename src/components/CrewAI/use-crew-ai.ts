@@ -23,12 +23,7 @@ export interface Task {
 }
 
 export interface Crew {
-  agents: Agent[];
-  tasks: Task[];
-  process: string;
-}
-
-export interface Config {
+  id: string;
   agents: Agent[];
   tasks: Task[];
   process: string;
