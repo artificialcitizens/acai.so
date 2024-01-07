@@ -14,7 +14,7 @@ const CrewAIContainer = () => {
     // updateTask,
     // config,
     crews,
-    updateConfig,
+    saveCrew,
     test,
     output,
   } = useCrewAi();
@@ -26,7 +26,7 @@ const CrewAIContainer = () => {
           <CrewCard
             output={output}
             crew={crew}
-            onSave={updateConfig}
+            onSave={saveCrew}
             key={crew.id}
             test={test}
           />

@@ -78,7 +78,7 @@ export const useCrewAi = () => {
   const crews = useLiveQuery(() => db.crews.toArray());
   const [output, setOutput] = useState<string>('');
 
-  const updateConfig = async (crew: Crew) => {
+  const saveCrew = async (crew: Crew) => {
     await db.crews.add(crew);
     try {
       const id = await db.crews.add(crew);
@@ -164,7 +164,7 @@ export const useCrewAi = () => {
 
   return {
     crews,
-    updateConfig,
+    saveCrew,
     // addAgent,
     // addTask,
     // deleteAgent,
