@@ -3,10 +3,10 @@ import { Agent } from '../use-crew-ai'; // Assuming you have a types file
 
 interface AgentCardProps {
   agent: Agent;
-  deleteAgent: (agentId: string) => void;
+  // deleteAgent: (agentId: string) => void;
 }
 
-export const AgentCard: React.FC<AgentCardProps> = ({ agent, deleteAgent }) => {
+export const AgentCard: React.FC<AgentCardProps> = ({ agent }) => {
   const [showDetails, setShowDetails] = useState(false);
 
   return (

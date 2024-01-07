@@ -1,6 +1,7 @@
 // db.ts
 import Dexie, { Table } from 'dexie';
 import { ACDoc, Workspace, AgentWorkspace } from './src/state';
+import { Crew } from './src/components/CrewAI/use-crew-ai';
 
 export interface AcaiMemoryVector {
   content: string;
@@ -40,6 +41,7 @@ export class AcaiDexie extends Dexie {
   docs!: Table<ACDoc>;
   agents!: Table<AgentWorkspace>;
   files!: Table<ACFile>;
+  crews!: Table<Crew>;
 
   constructor() {
     super('acaiDb');
@@ -56,12 +58,17 @@ export class AcaiDexie extends Dexie {
         '++id, loading, agentMode, agentName, workspaceId, customPrompt, recentChatHistory, openAIChatModel, returnRagResults, customAgentVectorSearch, agentLogs, memory, agentTools',
       files: '++id, workspaceId, file, createdAt, lastModified',
     });
+    this.version(4).stores({
+      crews:
+        '++id, createdAt, lastUpdated, name, agents, tasks, files, metadata, process',
+    });
 
     this.knowledge = this.table('knowledge');
     this.workspaces = this.table('workspaces');
     this.agents = this.table('agents');
     this.docs = this.table('docs');
     this.files = this.table('files');
+    this.crews = this.table('crews');
   }
 }
 

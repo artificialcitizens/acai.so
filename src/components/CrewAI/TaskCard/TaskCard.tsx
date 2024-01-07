@@ -3,10 +3,10 @@ import { Task } from '../use-crew-ai'; // Assuming you have a types file
 
 interface TaskCardProps {
   task: Task;
-  deleteTask: (taskId: string) => void;
+  // deleteTask: (taskId: string) => void;
 }
 
-export const TaskCard: React.FC<TaskCardProps> = ({ task, deleteTask }) => {
+export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
   const [showDetails, setShowDetails] = useState(false);
 
   return (

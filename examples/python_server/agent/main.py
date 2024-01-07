@@ -38,7 +38,7 @@ from flask import request
 import json
 from langchain.tools import DuckDuckGoSearchRun
 
-@app.route("/create-crew", methods=["POST"])
+@app.route("/run-crew", methods=["POST"])
 def create_crew():
     try:
         # Get the JSON payload from the request body
@@ -52,7 +52,6 @@ def create_crew():
         # Call the function with the JSON string and the tool_mapping
         # Replace `tool_mapping` with the actual tool mapping you have
         crew = create_crew_from_config(config_string, tool_mapping)
-        # @TODO: Update to save crew and move run to a separate endpoint
         response = crew.kickoff()
         print(response)
         # If everything goes well, return a success response

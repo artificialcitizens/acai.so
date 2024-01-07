@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { exampleData } from './example-data';
 import axios from 'axios';
-import { toastifyInfo } from '../Toast';
+import { toastifyError, toastifyInfo } from '../Toast';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../../../db';
 export interface File {
   id: string;
   name: string;
@@ -66,80 +68,91 @@ export interface Crew {
 }
 
 const runCrewAi = async (crew: Crew) => {
-  const response = await axios.post('http://localhost:5050/create-crew', crew);
+  const response = await axios.post('http://localhost:5050/run-crew', crew);
   const data = await response.data;
   return data;
 };
 
 // manages the crew and the tasks
 export const useCrewAi = () => {
+  const crews = useLiveQuery(() => db.crews.toArray());
   const [output, setOutput] = useState<string>('');
-  const [crew, setCrew] = useState<Crew>(exampleData);
 
-  const updateConfig = (config: Crew) => {
-    setCrew(config);
+  const updateConfig = async (crew: Crew) => {
+    await db.crews.add(crew);
+    try {
+      const id = await db.crews.add(crew);
+      toastifyInfo(`Crew ${crew.name} saved with id ${id}`);
+    } catch (error: any) {
+      toastifyError(`Crew ${crew.name} failed to save: ${error.message}`);
+    }
   };
-  const addAgent = (agent: Agent) => {
-    setCrew((prevConfig) => ({
-      ...prevConfig,
-      agents: [...prevConfig.agents, agent],
-    }));
-  };
+  // const addAgent = (agent: Agent) => {
+  //   setCrew((prevConfig) => ({
+  //     ...prevConfig,
+  //     agents: [...prevConfig.agents, agent],
+  //   }));
+  // };
 
-  const addTask = (task: Task) => {
-    setCrew((prevConfig) => ({
-      ...prevConfig,
-      tasks: [...prevConfig.tasks, task],
-    }));
-  };
+  // const addTask = (task: Task) => {
+  //   setCrew((prevConfig) => ({
+  //     ...prevConfig,
+  //     tasks: [...prevConfig.tasks, task],
+  //   }));
+  // };
 
-  const deleteAgent = (agentId: string) => {
-    setCrew((prevConfig) => ({
-      ...prevConfig,
-      agents: prevConfig.agents.filter((agent) => agent.id !== agentId),
-    }));
-  };
+  // const deleteAgent = (agentId: string) => {
+  //   setCrew((prevConfig) => ({
+  //     ...prevConfig,
+  //     agents: prevConfig.agents.filter((agent) => agent.id !== agentId),
+  //   }));
+  // };
 
-  const deleteTask = (taskId: string) => {
-    setCrew((prevConfig) => ({
-      ...prevConfig,
-      tasks: prevConfig.tasks.filter((task) => task.id !== taskId),
-    }));
-  };
+  // const deleteTask = (taskId: string) => {
+  //   setCrew((prevConfig) => ({
+  //     ...prevConfig,
+  //     tasks: prevConfig.tasks.filter((task) => task.id !== taskId),
+  //   }));
+  // };
 
-  const updateAgent = (updatedAgent: Agent) => {
-    setCrew((prevConfig) => ({
-      ...prevConfig,
-      agents: prevConfig.agents.map((agent) =>
-        agent.id === updatedAgent.id ? updatedAgent : agent,
-      ),
-    }));
-  };
+  // const updateAgent = (updatedAgent: Agent) => {
+  //   setCrew((prevConfig) => ({
+  //     ...prevConfig,
+  //     agents: prevConfig.agents.map((agent) =>
+  //       agent.id === updatedAgent.id ? updatedAgent : agent,
+  //     ),
+  //   }));
+  // };
 
-  const updateTask = (updatedTask: Task) => {
-    setCrew((prevConfig) => ({
-      ...prevConfig,
-      tasks: prevConfig.tasks.map((task) =>
-        task.id === updatedTask.id ? updatedTask : task,
-      ),
-    }));
-  };
+  // const updateTask = (updatedTask: Task) => {
+  //   setCrew((prevConfig) => ({
+  //     ...prevConfig,
+  //     tasks: prevConfig.tasks.map((task) =>
+  //       task.id === updatedTask.id ? updatedTask : task,
+  //     ),
+  //   }));
+  // };
 
-  const addFile = (file: File) => {
-    setCrew((prevConfig) => ({
-      ...prevConfig,
-      files: [...(prevConfig.files || []), file], // Add the new file to the existing files
-    }));
-  };
+  // const addFile = (file: File) => {
+  //   setCrew((prevConfig) => ({
+  //     ...prevConfig,
+  //     files: [...(prevConfig.files || []), file], // Add the new file to the existing files
+  //   }));
+  // };
 
-  const deleteFile = (fileId: string) => {
-    setCrew((prevConfig) => ({
-      ...prevConfig,
-      files: prevConfig.files?.filter((file) => file.id !== fileId), // Remove the file with the given id
-    }));
-  };
+  // const deleteFile = (fileId: string) => {
+  //   setCrew((prevConfig) => ({
+  //     ...prevConfig,
+  //     files: prevConfig.files?.filter((file) => file.id !== fileId), // Remove the file with the given id
+  //   }));
+  // };
 
-  const test = async () => {
+  const test = async (crewId: string) => {
+    const crew = crews?.filter((crew) => crew.id === crewId)[0];
+    if (!crew) {
+      toastifyError(`Crew ${crewId} not found`);
+      return;
+    }
     toastifyInfo(`Running Crew ${crew.name}...}`);
     try {
       const result = await runCrewAi(crew);
@@ -150,16 +163,16 @@ export const useCrewAi = () => {
   };
 
   return {
-    config: crew,
+    crews,
     updateConfig,
-    addAgent,
-    addTask,
-    deleteAgent,
-    deleteTask,
-    updateAgent,
-    updateTask,
-    addFile,
-    deleteFile,
+    // addAgent,
+    // addTask,
+    // deleteAgent,
+    // deleteTask,
+    // updateAgent,
+    // updateTask,
+    // addFile,
+    // deleteFile,
     test,
     output,
   };

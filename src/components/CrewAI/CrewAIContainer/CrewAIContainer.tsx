@@ -2,65 +2,37 @@ import CrewAICard from '../CrewAIList/CrewAIList';
 import CrewAIForm from '../CrewAIForm/CrewAIForm';
 import { useCrewAi } from '../use-crew-ai';
 import { useState } from 'react';
+import CrewCard from '../CrewCard/CrewCard';
 
 const CrewAIContainer = () => {
   const {
-    addAgent,
-    addTask,
-    deleteAgent,
-    deleteTask,
-    updateAgent,
-    updateTask,
-    config,
+    // addAgent,
+    // addTask,
+    // deleteAgent,
+    // deleteTask,
+    // updateAgent,
+    // updateTask,
+    // config,
+    crews,
     updateConfig,
     test,
     output,
   } = useCrewAi();
 
-  const [isFormVisible, setIsFormVisible] = useState(false);
   return (
-    <div>
-      <button
-        className="float-right"
-        onClick={() => setIsFormVisible(!isFormVisible)}
-      >
-        {isFormVisible ? 'View' : 'Edit'}
-      </button>
-      <button
-        className="float-right mr-2"
-        onClick={() => {
-          test();
-        }}
-      >
-        Test
-      </button>
+    crews && (
       <div>
-        {output && (
-          <pre>
-            <p></p>
-          </pre>
-        )}
+        {crews.map((crew) => (
+          <CrewCard
+            output={output}
+            crew={crew}
+            onSave={updateConfig}
+            key={crew.id}
+            test={test}
+          />
+        ))}
       </div>
-      <div>{output && <p>Output:{output}</p>}</div>
-      <h2>{config.name} Crew</h2>
-      {isFormVisible ? (
-        <>
-          <h3 className="text-xl font-bold">JSON Config</h3>
-          <CrewAIForm config={config} updateConfig={updateConfig} />
-        </>
-      ) : (
-        <CrewAICard
-          addAgent={addAgent}
-          addTask={addTask}
-          deleteAgent={deleteAgent}
-          deleteTask={deleteTask}
-          updateAgent={updateAgent}
-          updateTask={updateTask}
-          config={config}
-        />
-      )}
-      <br />
-    </div>
+    )
   );
 };
 

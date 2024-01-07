@@ -7,20 +7,20 @@ import AgentForm from '../AgentCard/AgentForm';
 
 const CrewAIList = ({
   config,
-  addAgent,
-  addTask,
-  deleteAgent,
-  deleteTask,
-  updateAgent,
-  updateTask,
-}: {
+}: // addAgent,
+// addTask,
+// deleteAgent,
+// deleteTask,
+// updateAgent,
+// updateTask,
+{
   config: Crew;
-  addAgent: (agent: Agent) => void;
-  addTask: (task: Task) => void;
-  deleteAgent: (agentId: string) => void;
-  deleteTask: (taskId: string) => void;
-  updateAgent: (agent: Agent) => void;
-  updateTask: (task: Task) => void;
+  // addAgent: (agent: Agent) => void;
+  // addTask: (task: Task) => void;
+  // deleteAgent: (agentId: string) => void;
+  // deleteTask: (taskId: string) => void;
+  // updateAgent: (agent: Agent) => void;
+  // updateTask: (task: Task) => void;
 }) => {
   const [isFormVisible, setIsFormVisible] = useState(false);
   return (
@@ -29,7 +29,8 @@ const CrewAIList = ({
         <h3 className="text-2x font-bold">Agents</h3>
         {/* <button onClick={() => setIsFormVisible(true)}>+</button> */}
         {config.agents.map((agent, index) => (
-          <AgentCard agent={agent} deleteAgent={deleteAgent} key={agent.id} />
+          // <AgentCard agent={agent} deleteAgent={deleteAgent} key={agent.id} />
+          <AgentCard agent={agent} key={agent.id} />
         ))}
         {/* {isFormVisible && (
           <AgentForm
@@ -69,7 +70,8 @@ const CrewAIList = ({
       <h2 className="text-2xl font-bold m-2">Tasks</h2>
       <ul className="m-2 border-b-2 border-solid border-dark text-acai-white flex flex-col">
         {config.tasks.map((task, index) => (
-          <TaskCard task={task} deleteTask={deleteTask} key={task.id} />
+          // <TaskCard task={task} deleteTask={deleteTask} key={task.id} />
+          <TaskCard task={task} key={task.id} />
         ))}
       </ul>
       {/* <form
