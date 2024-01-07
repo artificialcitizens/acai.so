@@ -21,9 +21,10 @@ def query_bot(query):
 
 def wipe_resources():
     rag_bot.reset()
-
+rag_bot.add("./dnd-5e-srd/markdown", data_type="directory")
+response = rag_bot.query("list all files in the directory")
+print(response)
 # # Embed online resources
-add_resources(["/home/josh/dev/acai.so/examples/python_server/embedchain/dnd-5e-srd/markdown/02 classes.md"])
 
 # # Query the bot
 

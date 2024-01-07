@@ -2,3 +2,4 @@ python-dotenv
 crewai
 flask
 socketio
+duckduckgo-search
