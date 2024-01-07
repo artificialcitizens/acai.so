@@ -1,6 +1,6 @@
-import { Agent, Llm, Task } from '../use-crew-ai';
+import { Agent, Task } from '../use-crew-ai';
 
-const CrewAICard = ({
+const CrewAIList = ({
   getAgents,
   getTasks,
 }: {
@@ -28,16 +28,8 @@ const CrewAICard = ({
           </li>
         ))}
       </ul>
-      {/* <ul>
-        {llmInfo.map((llm, index) => (
-          <li key={index}>
-            Base URL: {llm.base_url}, Model Name: {llm.model_name}, OpenAI API
-            Key: {llm.openai_api_key}
-          </li>
-        ))}
-      </ul> */}
     </div>
   );
 };
 
-export default CrewAICard;
+export default CrewAIList;

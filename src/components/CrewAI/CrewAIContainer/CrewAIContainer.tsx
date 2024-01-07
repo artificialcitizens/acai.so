@@ -1,4 +1,4 @@
-import CrewAICard from '../CrewAICard/CrewAICard';
+import CrewAICard from '../CrewAIList/CrewAIList';
 import CrewAIForm from '../CrewAIForm/CrewAIForm';
 import { useCrewAi } from '../use-crew-ai';
 
