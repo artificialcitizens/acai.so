@@ -14,6 +14,9 @@ def create_crew_from_config(config_string, tool_mapping):
             llms[llm_key] = ChatOpenAI(**llm_config)
         agent_config["llm"] = llms[llm_key]
 
+        # Remove id from agent_config
+        agent_config.pop("id", None)
+
         # Create the tools
         if "tools" in agent_config:
             agent_config["tools"] = [tool_mapping[tool_name] for tool_name in agent_config["tools"]]
@@ -28,6 +31,10 @@ def create_crew_from_config(config_string, tool_mapping):
         agent_role = task_config.pop("agent")
         if agent_role not in agents:
             raise Exception(f"No agent found with role '{agent_role}'")
+        
+        # Remove id from task_config
+        task_config.pop("id", None)
+
         if "tools" in task_config:
             task_config["tools"] = [tool_mapping[tool_name] for tool_name in task_config["tools"]]
         tasks.append(Task(agent=agents[agent_role], **task_config))
@@ -40,20 +47,3 @@ def create_crew_from_config(config_string, tool_mapping):
     )
 
     return crew
-
-# Example usage
-if __name__ == "__main__":
-
-    import json
-    
-    # open example.json
-    with open("/home/josh/dev/acai.so/examples/python_server/agent/generator/example.json") as f:
-        config_string = f.read()
-    
-    tool_mapping = {
-    "DuckDuckGoSearch": DuckDuckGoSearchRun()
-    }
-     # Add your tools here
-    crew = create_crew_from_config(config_string, tool_mapping)
-    result = crew.kickoff()
-    print(result)
