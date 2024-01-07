@@ -11,7 +11,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, deleteAgent }) => {
 
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
-      <ul className="bg-base rounded-md p-4 mb-2" key={agent.role}>
+      <ul className="bg-darker rounded-md p-4 mb-2" key={agent.role}>
         <li className="p-2">Name: {agent.role}</li>
         {showDetails && (
           <>

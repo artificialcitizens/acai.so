@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { exampleData } from './example-data';
 import axios from 'axios';
+import { toastifyInfo } from '../Toast';
 export interface File {
   id: string;
   name: string;
@@ -54,6 +55,9 @@ export interface Task {
 
 export interface Crew {
   id: string;
+  createdAt: string;
+  lastUpdated: string;
+  name: string;
   agents: Agent[];
   tasks: Task[];
   files: File[];
@@ -70,7 +74,7 @@ const runCrewAi = async (crew: Crew) => {
 // manages the crew and the tasks
 export const useCrewAi = () => {
   const [output, setOutput] = useState<string>('');
-  const [crew, setCrew] = useState<Crew>(exampleData as Crew);
+  const [crew, setCrew] = useState<Crew>(exampleData);
 
   const updateConfig = (config: Crew) => {
     setCrew(config);
@@ -135,9 +139,14 @@ export const useCrewAi = () => {
     }));
   };
 
-  const run = async () => {
-    const result = await runCrewAi(crew);
-    setOutput(result.response);
+  const test = async () => {
+    toastifyInfo(`Running Crew ${crew.name}...}`);
+    try {
+      const result = await runCrewAi(crew);
+      setOutput(result.response);
+    } catch (e: any) {
+      setOutput(e.message);
+    }
   };
 
   return {
@@ -151,7 +160,7 @@ export const useCrewAi = () => {
     updateTask,
     addFile,
     deleteFile,
-    run,
+    test,
     output,
   };
 };

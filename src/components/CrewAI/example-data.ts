@@ -36,20 +36,14 @@ export const exampleTools: Tool[] = [
 /// create type from example tools array
 export type ExampleTools = (typeof exampleTools)[number];
 
-type AgentWithoutId = Omit<Agent, 'id'>;
-type TaskWithoutId = Omit<Task, 'id'>;
-type ExampleCrew = {
-  id: string;
-  agents: AgentWithoutId[];
-  tasks: TaskWithoutId[];
-  files: File[];
-  metadata: Record<string, string | number | JSON>;
-  process: string;
-};
-export const exampleData: ExampleCrew = {
+export const exampleData: Crew = {
   id: '1',
+  createdAt: '2021-01-01',
+  lastUpdated: '2021-01-01',
+  name: 'Knapsack',
   agents: [
     {
+      id: '1',
       name: 'Grant',
       role: 'Product Manager',
       goal: 'Orchestrate the team to create the design system, based on the clients needs. You will be provided the goal for the sprint and you will need to create a task list for the team and assign the tasks to the team members.',
@@ -67,6 +61,7 @@ export const exampleData: ExampleCrew = {
       allow_delegation: true,
     },
     {
+      id: '2',
       role: 'Senior Research',
       name: 'Jim',
       goal: 'Research the best way to create a design system for Knapsack.cloud. The design system will be called Toby. Toby is a bear avatar an represents Tobias who came up with the Knapsack problem. Lets start by creating a set of design tokens',
@@ -84,6 +79,7 @@ export const exampleData: ExampleCrew = {
       allow_delegation: false,
     },
     {
+      id: '3',
       name: 'Matt',
       role: 'Designer',
       goal: 'Create a design system for Knapsack.cloud. The design system will be called Toby. Toby is a bear avatar an represents Tobias who came up with the Knapsack problem. Lets start by creating a set of design tokens',
@@ -103,6 +99,7 @@ export const exampleData: ExampleCrew = {
   ],
   tasks: [
     {
+      id: '1',
       name: 'AI Integration',
       description:
         'We need to create a integrate AI into our design system for Knapsack.cloud. The design system will be called Toby. Toby is a bear avatar an represents Tobias who came up with the Knapsack problem. Lets start by creating a set of design tokens. You can use your team to help you.',
@@ -114,6 +111,7 @@ export const exampleData: ExampleCrew = {
       },
     },
     {
+      id: '2',
       name: 'AI Research',
       description:
         'Conduct a comprehensive analysis of the latest advancements in AI in 2024. Identify key trends, breakthrough technologies, and potential industry impacts. Compile your findings in a detailed report. Your final answer MUST be a full analysis report',
@@ -125,6 +123,7 @@ export const exampleData: ExampleCrew = {
       },
     },
     {
+      id: '3',
       name: 'Color Tokens',
       description:
         'Lookup colors for knapsack.cloud. Toby is a bear avatar an represents Tobias who came up with the Knapsack problem.',
@@ -136,6 +135,7 @@ export const exampleData: ExampleCrew = {
       },
     },
     {
+      id: '4',
       name: 'Create Color Tokens',
       description:
         'Create a list of color tokens to represent our design system Toby. Toby is a bear avatar an represents Tobias who came up with the Knapsack problem.',

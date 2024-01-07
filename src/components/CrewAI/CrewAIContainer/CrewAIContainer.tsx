@@ -13,7 +13,7 @@ const CrewAIContainer = () => {
     updateTask,
     config,
     updateConfig,
-    run,
+    test,
     output,
   } = useCrewAi();
 
@@ -29,15 +29,23 @@ const CrewAIContainer = () => {
       <button
         className="float-right mr-2"
         onClick={() => {
-          run();
+          test();
         }}
       >
         Test
       </button>
-      {output && <p>{output}</p>}
+      <div>
+        {output && (
+          <pre>
+            <p></p>
+          </pre>
+        )}
+      </div>
+      <div>{output && <p>Output:{output}</p>}</div>
+      <h2>{config.name} Crew</h2>
       {isFormVisible ? (
         <>
-          <h2 className="text-2xl font-bold">JSON Config</h2>
+          <h3 className="text-xl font-bold">JSON Config</h3>
           <CrewAIForm config={config} updateConfig={updateConfig} />
         </>
       ) : (

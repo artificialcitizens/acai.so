@@ -11,11 +11,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, deleteTask }) => {
 
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
-      <ul className="bg-base rounded-md p-4 mb-2" key={task.id}>
+      <ul className="bg-darker rounded-md p-4 mb-2" key={task.id}>
         <li className="p-2">Name: {task.name}</li>
         {showDetails && (
           <>
-            <li className="p-2">ID: {task.id}</li>
             <li className="p-2">Description: {task.description}</li>
             <li className="p-2">Agent: {task.agent}</li>
             <li className="p-2">Tools: {task.tools?.join('|')}</li>

@@ -26,7 +26,7 @@ const CrewAIList = ({
   return (
     <div className="w-full h-full flex flex-col overflow-y-auto">
       <div className="m-2 border-b-2 border-solid border-dark text-acai-white flex flex-col">
-        <h2 className="text-2xl font-bold">Agents</h2>
+        <h3 className="text-2x font-bold">Agents</h3>
         {/* <button onClick={() => setIsFormVisible(true)}>+</button> */}
         {config.agents.map((agent, index) => (
           <AgentCard agent={agent} deleteAgent={deleteAgent} key={agent.id} />
