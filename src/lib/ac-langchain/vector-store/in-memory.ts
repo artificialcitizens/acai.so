@@ -3,31 +3,28 @@ import { AcaiMemoryVector } from '../../../../db';
 import { Document } from 'langchain/document';
 import { Embeddings } from 'langchain/embeddings/base';
 import { handleAcaiEmbeddings } from '../models/chat';
-// import { HuggingFaceTransformersEmbeddings } from 'langchain/embeddings/hf_transformers';
+import { HuggingFaceTransformersEmbeddings } from 'langchain/embeddings/hf_transformers';
 
-// export const initializeMemoryVectorStore = async ({
-//   docs,
-// }: {
-//   docs: Document[];
-// }) => {
-//   const openAIApiKey =
-//     getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY;
-//   const vectorStore = await MemoryVectorStore.fromDocuments(
-//     docs,
-//     new HuggingFaceTransformersEmbeddings({
-//       modelName: 'Xenova/bge-base-en',
-//     }),
-//   );
-//   return vectorStore;
-// };
+const huggingFaceEmbeddings = false;
+
 export const initializeMemoryVectorStore = async ({
   docs,
 }: {
   docs: Document[];
 }) => {
-  const { embeddings } = handleAcaiEmbeddings();
-  const vectorStore = await MemoryVectorStore.fromDocuments(docs, embeddings);
-  return vectorStore;
+  if (huggingFaceEmbeddings) {
+    const vectorStore = await MemoryVectorStore.fromDocuments(
+      docs,
+      new HuggingFaceTransformersEmbeddings({
+        modelName: 'Xenova/bge-base-en',
+      }),
+    );
+    return vectorStore;
+  } else {
+    const { embeddings } = handleAcaiEmbeddings();
+    const vectorStore = await MemoryVectorStore.fromDocuments(docs, embeddings);
+    return vectorStore;
+  }
 };
 
 /**
