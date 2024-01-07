@@ -1,3 +1,4 @@
+from generator.create_crew import create_crew_from_config
 from flask import Flask, jsonify
 from teams.test import test
 import requests
@@ -15,7 +16,12 @@ app.config["SECRET_KEY"] = "your_secret_key"
 
 CORS(
     app,
-    origins=["http://192.168.4.74:5173", "http://localhost:5173", "http://www.acai.so"],
+    origins=[
+        "http://192.168.4.74:5173", 
+        "http://localhost:5173", 
+        "http://www.acai.so",
+        "http://192.168.4.192:5173"  # Add this line
+    ],
 )
 
 socketio = SocketIO(
@@ -24,8 +30,37 @@ socketio = SocketIO(
         "http://192.168.4.74:5173",
         "http://localhost:5173",
         "http://www.acai.so",
+        "http://192.168.4.192:5173"  # And this line
     ],
 )
+
+from flask import request
+import json
+from langchain.tools import DuckDuckGoSearchRun
+
+@app.route("/create-crew", methods=["POST"])
+def create_crew():
+    try:
+        # Get the JSON payload from the request body
+        payload = request.get_json()
+
+        # Convert the payload to a JSON string
+        config_string = json.dumps(payload)
+        tool_mapping = {
+        "DuckDuckGoSearch": DuckDuckGoSearchRun()
+        }
+        # Call the function with the JSON string and the tool_mapping
+        # Replace `tool_mapping` with the actual tool mapping you have
+        crew = create_crew_from_config(config_string, tool_mapping)
+        # @TODO: Update to save crew and move run to a separate endpoint
+        response = crew.kickoff()
+        print(response)
+        # If everything goes well, return a success response
+        return jsonify({"response": response, "status": "success"}), 200
+    except Exception as e:
+        print(e)
+        # If something goes wrong, return an error response
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route("/proxy", methods=["GET"])
 def proxy():

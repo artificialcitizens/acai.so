@@ -1,7 +1,8 @@
 import React, { FormEvent, useState } from 'react';
+import { Crew } from '../use-crew-ai';
 
 type CrewAIFormProps = {
-  config: any;
+  config: Crew;
   updateConfig: any;
 };
 
@@ -20,16 +21,14 @@ const CrewAIForm: React.FC<CrewAIFormProps> = ({ config, updateConfig }) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="flex w-full h-full flex-grow">
-        <pre className="w-full h-full">
-          <textarea
-            id="config"
-            value={input} // Change this line
-            onChange={(e) => setInput(e.target.value)}
-            className="text-acai-white text-base md:text-sm bg-base px-[2px] w-full h-full rounded-md"
-          />
-        </pre>
-      </div>
+      <pre className="flex w-full h-screen">
+        <textarea
+          id="config"
+          value={input} // Change this line
+          onChange={(e) => setInput(e.target.value)}
+          className="flex-grow text-acai-white text-base md:text-sm bg-base px-[2px] w-full h-full rounded-md"
+        />
+      </pre>
       <button
         type="submit"
         className="bg-light text-acai-white text-base md:text-sm px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
