@@ -5,14 +5,14 @@ import { Embeddings } from 'langchain/embeddings/base';
 import { handleAcaiEmbeddings } from '../models/chat';
 import { HuggingFaceTransformersEmbeddings } from 'langchain/embeddings/hf_transformers';
 
-const huggingFaceEmbeddings = false;
+const huggingFaceEmbeddings = import.meta.env.VITE_HUGGING_FACE_EMBEDDINGS;
 
 export const initializeMemoryVectorStore = async ({
   docs,
 }: {
   docs: Document[];
 }) => {
-  if (huggingFaceEmbeddings) {
+  if (huggingFaceEmbeddings === 'true') {
     const vectorStore = await MemoryVectorStore.fromDocuments(
       docs,
       new HuggingFaceTransformersEmbeddings({
