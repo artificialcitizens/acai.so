@@ -1,21 +1,24 @@
 import React, { FormEvent, useState } from 'react';
 import { Crew } from '../use-crew-ai';
+import { toastifyError } from '../../Toast';
 
 type CrewAIFormProps = {
-  config: Crew;
-  updateConfig: any;
+  crew?: Crew;
+  saveCrew: (crew: Crew) => void;
 };
 
-const CrewAIForm: React.FC<CrewAIFormProps> = ({ config, updateConfig }) => {
-  const [input, setInput] = useState(JSON.stringify(config, null, 2)); // Add this line
+const CrewAIForm: React.FC<CrewAIFormProps> = ({ crew, saveCrew }) => {
+  const [input, setInput] = useState(JSON.stringify(crew, null, 2) || ''); // Add this line
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
+    if (!input) return;
     try {
       const newConfig = JSON.parse(input);
-      updateConfig(newConfig);
+      saveCrew(newConfig);
     } catch (error) {
       console.error('Invalid JSON');
+      toastifyError('Invalid JSON');
     }
   };
 

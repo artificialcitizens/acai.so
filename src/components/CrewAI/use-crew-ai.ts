@@ -77,75 +77,27 @@ const runCrewAi = async (crew: Crew) => {
 export const useCrewAi = () => {
   const crews = useLiveQuery(() => db.crews.toArray());
   const [output, setOutput] = useState<string>('');
-
   const saveCrew = async (crew: Crew) => {
-    await db.crews.add(crew);
     try {
-      const id = await db.crews.add(crew);
-      toastifyInfo(`Crew ${crew.name} saved with id ${id}`);
+      const id = await db.crews.put(crew);
+      toastifyInfo(`Crew ${crew.name} saved or updated with id ${id}`);
     } catch (error: any) {
-      toastifyError(`Crew ${crew.name} failed to save: ${error.message}`);
+      toastifyError(
+        `Crew ${crew.name} failed to save or update: ${error.message}`,
+      );
     }
   };
-  // const addAgent = (agent: Agent) => {
-  //   setCrew((prevConfig) => ({
-  //     ...prevConfig,
-  //     agents: [...prevConfig.agents, agent],
-  //   }));
-  // };
 
-  // const addTask = (task: Task) => {
-  //   setCrew((prevConfig) => ({
-  //     ...prevConfig,
-  //     tasks: [...prevConfig.tasks, task],
-  //   }));
-  // };
-
-  // const deleteAgent = (agentId: string) => {
-  //   setCrew((prevConfig) => ({
-  //     ...prevConfig,
-  //     agents: prevConfig.agents.filter((agent) => agent.id !== agentId),
-  //   }));
-  // };
-
-  // const deleteTask = (taskId: string) => {
-  //   setCrew((prevConfig) => ({
-  //     ...prevConfig,
-  //     tasks: prevConfig.tasks.filter((task) => task.id !== taskId),
-  //   }));
-  // };
-
-  // const updateAgent = (updatedAgent: Agent) => {
-  //   setCrew((prevConfig) => ({
-  //     ...prevConfig,
-  //     agents: prevConfig.agents.map((agent) =>
-  //       agent.id === updatedAgent.id ? updatedAgent : agent,
-  //     ),
-  //   }));
-  // };
-
-  // const updateTask = (updatedTask: Task) => {
-  //   setCrew((prevConfig) => ({
-  //     ...prevConfig,
-  //     tasks: prevConfig.tasks.map((task) =>
-  //       task.id === updatedTask.id ? updatedTask : task,
-  //     ),
-  //   }));
-  // };
-
-  // const addFile = (file: File) => {
-  //   setCrew((prevConfig) => ({
-  //     ...prevConfig,
-  //     files: [...(prevConfig.files || []), file], // Add the new file to the existing files
-  //   }));
-  // };
-
-  // const deleteFile = (fileId: string) => {
-  //   setCrew((prevConfig) => ({
-  //     ...prevConfig,
-  //     files: prevConfig.files?.filter((file) => file.id !== fileId), // Remove the file with the given id
-  //   }));
-  // };
+  const deleteCrew = async (crewId: string) => {
+    try {
+      await db.crews.delete(crewId);
+      toastifyInfo(`Crew with id ${crewId} deleted successfully`);
+    } catch (error: any) {
+      toastifyError(
+        `Failed to delete crew with id ${crewId}: ${error.message}`,
+      );
+    }
+  };
 
   const test = async (crewId: string) => {
     const crew = crews?.filter((crew) => crew.id === crewId)[0];
@@ -165,6 +117,7 @@ export const useCrewAi = () => {
   return {
     crews,
     saveCrew,
+    deleteCrew,
     // addAgent,
     // addTask,
     // deleteAgent,

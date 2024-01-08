@@ -18,11 +18,25 @@ const CrewAIContainer = () => {
     test,
     output,
   } = useCrewAi();
-
+  const [formVisible, setFormVisible] = useState(false);
   return (
-    crews && (
-      <div>
-        {crews.map((crew) => (
+    <div>
+      <button
+        className="w-full text-bold font-2xl border border-solid border-lighter rounded-md mb-6"
+        onClick={() => setFormVisible(!formVisible)}
+      >
+        {formVisible ? 'Cancel' : 'Add Crew'}
+      </button>
+      {formVisible && (
+        <CrewAIForm
+          saveCrew={(crew) => {
+            saveCrew(crew);
+            setFormVisible(false);
+          }}
+        />
+      )}
+      {crews &&
+        crews.map((crew) => (
           <CrewCard
             output={output}
             crew={crew}
@@ -31,8 +45,7 @@ const CrewAIContainer = () => {
             test={test}
           />
         ))}
-      </div>
-    )
+    </div>
   );
 };
 

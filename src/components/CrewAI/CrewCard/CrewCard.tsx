@@ -50,7 +50,7 @@ const CrewCard: React.FC<CrewCardProps> = ({
       {isFormVisible ? (
         <>
           <h3 className="text-xl font-bold">JSON Config</h3>
-          <CrewAIForm config={crew} updateConfig={onSave} />
+          <CrewAIForm crew={crew} saveCrew={onSave} />
         </>
       ) : (
         <CrewAIList
