@@ -100,32 +100,32 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
   const items: BubbleMenuItem[] = [
     {
       name: 'bold',
-      isActive: () => props.editor.isActive('bold'),
-      command: () => props.editor.chain().focus().toggleBold().run(),
+      isActive: () => props.editor?.isActive('bold'),
+      command: () => props.editor?.chain().focus().toggleBold().run(),
       icon: BoldIcon,
     },
     {
       name: 'italic',
-      isActive: () => props.editor.isActive('italic'),
-      command: () => props.editor.chain().focus().toggleItalic().run(),
+      isActive: () => props.editor?.isActive('italic'),
+      command: () => props.editor?.chain().focus().toggleItalic().run(),
       icon: ItalicIcon,
     },
     {
       name: 'underline',
-      isActive: () => props.editor.isActive('underline'),
-      command: () => props.editor.chain().focus().toggleUnderline().run(),
+      isActive: () => props.editor?.isActive('underline'),
+      command: () => props.editor?.chain().focus().toggleUnderline().run(),
       icon: UnderlineIcon,
     },
     {
       name: 'strike',
-      isActive: () => props.editor.isActive('strike'),
-      command: () => props.editor.chain().focus().toggleStrike().run(),
+      isActive: () => props.editor?.isActive('strike'),
+      command: () => props.editor?.chain().focus().toggleStrike().run(),
       icon: StrikethroughIcon,
     },
     {
       name: 'code',
-      isActive: () => props.editor.isActive('code'),
-      command: () => props.editor.chain().focus().toggleCode().run(),
+      isActive: () => props.editor?.isActive('code'),
+      command: () => props.editor?.chain().focus().toggleCode().run(),
       icon: CodeIcon,
     },
   ];
@@ -149,7 +149,7 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
           clearTimeout(timeoutId);
         }
         timeoutId = setTimeout(() => {
-          const selectedText = props.editor.state.doc.textBetween(from, to);
+          const selectedText = props.editor?.state.doc.textBetween(from, to);
           setSelectedText(selectedText);
           setCursorPosition({ from, to });
           // toastifyInfo(`Selected text: ${selectedText}`);
@@ -159,11 +159,11 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
     };
 
     // Subscribe to transaction updates
-    props.editor.on('transaction', handleTransaction);
+    props.editor?.on('transaction', handleTransaction);
 
     // Cleanup on unmount
     return () => {
-      props.editor.off('transaction', handleTransaction);
+      props.editor?.off('transaction', handleTransaction);
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
@@ -204,8 +204,8 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
               inputRef.current?.focus();
             }, 100);
             // setAskAiPopover(!askAiPopover);
-            // props.editor.commands.focus();
-            // props.editor.commands.insertContent(askAi);
+            // props.editor?.commands.focus();
+            // props.editor?.commands.insertContent(askAi);
           }}
           // onKeyDown={(e) => {
           //   if (e.key === 'Enter') {
@@ -225,7 +225,7 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
             onClick={(e) => {
               if (!askAiPopover) return;
               e.stopPropagation();
-              // props.editor.commands.blur();
+              // props.editor?.commands.blur();
               // inputRef.current?.focus();
             }}
             onKeyDown={(e) => {
@@ -233,7 +233,7 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
                 // e.currentTarget.blur();
                 setAskAiPopover(!askAiPopover);
                 setAiResponse('');
-                props.editor.commands.focus();
+                props.editor?.commands.focus();
               }
             }}
             style={{
@@ -269,9 +269,9 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
               onClick={(e) => {
                 e.preventDefault();
                 setAskAiPopover(!askAiPopover);
-                props.editor.commands.focus();
+                props.editor?.commands.focus();
                 setTimeout(() => {
-                  props.editor.commands.insertContent(aiResponse);
+                  props.editor?.commands.insertContent(aiResponse);
                 }, 100);
                 setAiResponse('');
                 setAskAi('');

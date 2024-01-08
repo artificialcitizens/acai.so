@@ -2,6 +2,11 @@ import requests
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
+from router.routes import get_route
+
+# config
+agent_server = "http://127.0.0.1:7589",
+
 
 # existing code...
 app = Flask(__name__)
@@ -33,8 +38,34 @@ def proxy():
 
 @app.route("/test", methods=["GET"])
 def test():
-    return "Hello world"
+    return jsonify({"response": "Hello World!"}), 200
 
+@app.route("/test-route", methods=["POST"])
+def test_route():
+    # fetch data from "http://localhost:5050/get-route"
+    # send data to "http://localhost:5050/v1/agent"
+    # return response from "http://localhost:5050/v1/agent"
+    try:
+        response = requests.post(
+            "http://127.0.0.1:7589/example",
+            json={
+                "query": "How is the weather today?",
+            },
+        )
+        print(response.text)
+        return response.text
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
+
+@app.route("/get-route", methods=["POST"])
+def fetch_route():
+    try:
+        payload = request.get_json()
+        query = payload.get("query")
+        route = get_route(query)
+        return jsonify({"route": route}), 200
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
 
 @app.route("/v1/agent", methods=["POST"])
 def agent():
@@ -72,6 +103,10 @@ def agent():
         print(e)
         return jsonify({"error": "An error occurred while processing the payload"}), 500
 
+
+@socketio.on('message')
+def handle_message(data):
+    print('received message: ' + data)
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5050)

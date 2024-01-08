@@ -11,12 +11,12 @@ CORS(app)
 app.config["SECRET_KEY"] = "your_secret_key"
 CORS(
     app,
-    origins=["http://192.168.4.74:5173", "http://localhost:5173", "http://www.acai.so"],
+    origins=["http://192.168.4.192:5173", "http://localhost:5173", "http://www.acai.so"],
 )
 socketio = SocketIO(
     app,
     cors_allowed_origins=[
-        "http://192.168.4.74:5173",
+        "http://192.168.4.192:5173",
         "http://localhost:5173",
         "http://www.acai.so",
     ],

@@ -17,6 +17,8 @@ import UserProfile from '../UserProfile/UserProfile';
 import KnowledgeUpload from '../Knowledge/Knowledge';
 import { useParams } from 'react-router-dom';
 import AudioSettings from './AudioSettings';
+import CrewAIForm from '../CrewAI/CrewAIForm/CrewAIForm';
+import CrewAIContainer from '../CrewAI/CrewAIContainer/CrewAIContainer';
 
 interface SettingsProps {
   initialTabIndex?: number;
@@ -57,6 +59,7 @@ const Settings: React.FC<SettingsProps> = ({
         <TabList className="m-2 border-b-2 border-solid border-dark text-acai-white flex">
           <Tab>Config</Tab>
           <Tab>Knowledge</Tab>
+          <Tab>Crew Manager</Tab>
           <Tab>Logs</Tab>
         </TabList>
 
@@ -91,6 +94,10 @@ const Settings: React.FC<SettingsProps> = ({
 
         <TabPanel>
           {workspaceId && <KnowledgeUpload workspaceId={workspaceId} />}
+        </TabPanel>
+
+        <TabPanel>
+          <CrewAIContainer />
         </TabPanel>
 
         <TabPanel>

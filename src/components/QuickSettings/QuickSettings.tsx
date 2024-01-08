@@ -71,6 +71,7 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
   } = useVoiceCommands();
   const { agentStateService, speechStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
+
   const micRecording = useSelector(
     speechStateService,
     (state) => state.context.micRecording,
@@ -93,6 +94,11 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
   }>();
 
   const workspaceId = rawWorkspaceId || 'docs';
+  const systemNotes =
+    useSelector(
+      agentStateService,
+      (state) => state.context[workspaceId]?.customPrompt,
+    ) || '';
   const recentChatHistory = state.context[workspaceId]?.recentChatHistory;
   const audioRef = React.useRef<HTMLAudioElement>(null);
   const srcRef = React.useRef<MediaElementAudioSourceNode | null>(null);
@@ -177,23 +183,23 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
         });
         const { response } = await queryAva({
           message: `${t.trim()}`,
-          systemMessage: '',
+          systemMessage: systemNotes,
         });
-        const sentenceDelimiters = ['.', '?', '!'];
-        const sentenceCount = sentenceDelimiters.reduce(
-          (count, delimiter) => count + response.split(delimiter).length - 1,
-          0,
-        );
+        // const sentenceDelimiters = ['.', '?', '!'];
+        // const sentenceCount = sentenceDelimiters.reduce(
+        //   (count, delimiter) => count + response.split(delimiter).length - 1,
+        //   0,
+        // );
 
-        let voiceResponse;
-        // if response is longer than 3 sentences implify it
-        if (sentenceCount > 3) {
-          voiceResponse = await simplifyResponseChain(
-            `User:${t}\n\nAssistant:${response}\n\nSingle Sentence Response:`,
-          );
-        } else {
-          voiceResponse = response;
-        }
+        const voiceResponse = response;
+        // // if response is longer than 3 sentences implify it
+        // if (sentenceCount > 3) {
+        //   voiceResponse = await simplifyResponseChain(
+        //     `User:${t}\n\nAssistant:${response}\n\nSingle Sentence Response:`,
+        //   );
+        // } else {
+        //   voiceResponse = response;
+        // }
         synthesizeAndPlay(voiceResponse).then(async () => {
           const res = await Promise.resolve(response);
           const assistantChatHistory: ChatHistory = {
