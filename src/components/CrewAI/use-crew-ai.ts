@@ -105,7 +105,7 @@ export const useCrewAi = () => {
       toastifyError(`Crew ${crewId} not found`);
       return;
     }
-    toastifyInfo(`Running Crew ${crew.name}...}`);
+    toastifyInfo(`Running Crew ${crew.name}`);
     try {
       const result = await runCrewAi(crew);
       setOutput(result.response);

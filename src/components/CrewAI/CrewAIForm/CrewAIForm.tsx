@@ -1,6 +1,7 @@
 import React, { FormEvent, useState } from 'react';
 import { Crew } from '../use-crew-ai';
 import { toastifyError } from '../../Toast';
+import { exampleData } from '../example-data';
 
 type CrewAIFormProps = {
   crew?: Crew;
@@ -26,9 +27,16 @@ const CrewAIForm: React.FC<CrewAIFormProps> = ({ crew, saveCrew }) => {
     <form onSubmit={handleSubmit}>
       <button
         type="submit"
-        className="bg-light text-acai-white text-base md:text-sm px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        className="bg-light mr-2 mb-4 text-acai-white text-base md:text-sm px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
       >
         Save
+      </button>
+      <button
+        type="button"
+        className="bg-light mr-2 mb-4 text-acai-white text-base md:text-sm px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        onClick={() => setInput(JSON.stringify(exampleData, null, 2))}
+      >
+        Insert Example
       </button>
       <pre className="flex w-full h-screen">
         <textarea
