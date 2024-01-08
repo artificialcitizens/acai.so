@@ -1,4 +1,3 @@
-import CrewAICard from '../CrewAIList/CrewAIList';
 import CrewAIForm from '../CrewAIForm/CrewAIForm';
 import { useCrewAi } from '../use-crew-ai';
 import { useState } from 'react';
@@ -13,6 +12,7 @@ const CrewAIContainer = () => {
     // updateAgent,
     // updateTask,
     // config,
+    deleteCrew,
     crews,
     saveCrew,
     test,
@@ -43,6 +43,7 @@ const CrewAIContainer = () => {
             onSave={saveCrew}
             key={crew.id}
             test={test}
+            deleteCrew={deleteCrew}
           />
         ))}
     </div>

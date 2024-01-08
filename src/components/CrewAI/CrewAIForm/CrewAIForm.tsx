@@ -24,6 +24,12 @@ const CrewAIForm: React.FC<CrewAIFormProps> = ({ crew, saveCrew }) => {
 
   return (
     <form onSubmit={handleSubmit}>
+      <button
+        type="submit"
+        className="bg-light text-acai-white text-base md:text-sm px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+      >
+        Save
+      </button>
       <pre className="flex w-full h-screen">
         <textarea
           id="config"
@@ -32,12 +38,6 @@ const CrewAIForm: React.FC<CrewAIFormProps> = ({ crew, saveCrew }) => {
           className="flex-grow text-acai-white text-base md:text-sm bg-base px-[2px] w-full h-full rounded-md"
         />
       </pre>
-      <button
-        type="submit"
-        className="bg-light text-acai-white text-base md:text-sm px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
-      >
-        Save
-      </button>
     </form>
   );
 };

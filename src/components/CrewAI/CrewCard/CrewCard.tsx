@@ -8,7 +8,7 @@ interface CrewCardProps {
   output: string;
   onSave: (crew: Crew) => void;
   test: (crew: string) => void;
-  // deleteCrew: (crewId: string) => void;
+  deleteCrew: (crewId: string) => void;
 }
 
 const CrewCard: React.FC<CrewCardProps> = ({
@@ -16,25 +16,42 @@ const CrewCard: React.FC<CrewCardProps> = ({
   output,
   onSave,
   test,
-  // deleteCrew,
+  deleteCrew,
 }) => {
   const [isFormVisible, setIsFormVisible] = useState(false);
+  const [moreInfo, showMoreInfo] = useState(false);
+
   return (
     <div>
-      <button
-        className="float-right"
-        onClick={() => setIsFormVisible(!isFormVisible)}
-      >
-        {isFormVisible ? 'View' : 'Edit'}
-      </button>
-      <button
-        className="float-right mr-2"
-        onClick={() => {
-          test(crew.id);
-        }}
-      >
-        Test
-      </button>
+      <div className="float-right">
+        <button className="mr-2" onClick={() => showMoreInfo(!moreInfo)}>
+          {moreInfo ? 'Collapse' : 'Expand'}
+        </button>
+        <button
+          className="mr-2"
+          onClick={() => setIsFormVisible(!isFormVisible)}
+        >
+          {isFormVisible ? 'Cancel' : 'Edit'}
+        </button>
+        <button
+          className="mr-2"
+          onClick={() => {
+            test(crew.id);
+          }}
+        >
+          Test
+        </button>
+        <button
+          className="mr-2"
+          onClick={() => {
+            if (window.confirm('Are you sure you want to delete this crew?')) {
+              deleteCrew(crew.id);
+            }
+          }}
+        >
+          Delete
+        </button>
+      </div>
       <div>
         {output && (
           <pre>
@@ -43,25 +60,23 @@ const CrewCard: React.FC<CrewCardProps> = ({
         )}
       </div>
       <h2>{crew.name} Crew</h2>
-      <div>
-        <h4>Test Output</h4>
-        {output && <p>{output}</p>}
-      </div>
-      {isFormVisible ? (
+      {moreInfo && (
         <>
-          <h3 className="text-xl font-bold">JSON Config</h3>
-          <CrewAIForm crew={crew} saveCrew={onSave} />
+          {output && (
+            <div>
+              <h4>Test Output</h4>
+              <p>{output}</p>
+            </div>
+          )}
+          {isFormVisible ? (
+            <>
+              <h3 className="text-xl font-bold">JSON Config</h3>
+              <CrewAIForm crew={crew} saveCrew={onSave} />
+            </>
+          ) : (
+            <CrewAIList config={crew} />
+          )}
         </>
-      ) : (
-        <CrewAIList
-          // addAgent={addAgent}
-          // addTask={addTask}
-          // deleteAgent={deleteAgent}
-          // deleteTask={deleteTask}
-          // updateAgent={updateAgent}
-          // updateTask={updateTask}
-          config={crew}
-        />
       )}
       <br />
     </div>
