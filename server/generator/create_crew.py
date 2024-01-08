@@ -1,7 +1,6 @@
 import json
 from crewai import Agent, Task, Crew, Process
 from langchain_community.chat_models import ChatOpenAI
-from langchain.tools import DuckDuckGoSearchRun
 
 def create_crew_from_config(config_string, tool_mapping):
     config = json.loads(config_string)

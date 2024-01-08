@@ -1,16 +1,13 @@
-from generator.create_crew import create_crew_from_config
-from flask import Flask, jsonify
-from teams.test import test
-import requests
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 
-# config
-agent_server = "http://127.0.0.1:7589",
+import requests
+import json
 
+from server.tools.default import tool_mapping
+from generator.create_crew import create_crew_from_config
 
-# existing code...
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "your_secret_key"
 
@@ -34,10 +31,6 @@ socketio = SocketIO(
     ],
 )
 
-from flask import request
-import json
-from langchain.tools import DuckDuckGoSearchRun
-
 @app.route("/run-crew", methods=["POST"])
 def create_crew():
     try:
@@ -46,11 +39,8 @@ def create_crew():
 
         # Convert the payload to a JSON string
         config_string = json.dumps(payload)
-        tool_mapping = {
-        "DuckDuckGoSearch": DuckDuckGoSearchRun()
-        }
-        # Call the function with the JSON string and the tool_mapping
-        # Replace `tool_mapping` with the actual tool mapping you have
+        # tool_mapping["CreateDoc"] = DuckDuckGoSearchRun()
+        # Call the function with the JSON string and the tool_mapping        
         crew = create_crew_from_config(config_string, tool_mapping)
         response = crew.kickoff()
         print(response)
@@ -61,6 +51,7 @@ def create_crew():
         # If something goes wrong, return an error response
         return jsonify({"status": "error", "message": str(e)}), 500
 
+# Forwards the request to input URL and returns the response
 @app.route("/proxy", methods=["GET"])
 def proxy():
     try:
