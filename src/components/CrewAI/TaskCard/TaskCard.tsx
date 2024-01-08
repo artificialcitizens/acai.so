@@ -23,7 +23,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
       </ul>
       <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
         <button className="mr-1" onClick={() => setShowDetails(!showDetails)}>
-          {showDetails ? 'x' : '...'}
+          {showDetails ? 'Collapse' : 'Expand'}
         </button>
         {/* <button
           onClick={() => {

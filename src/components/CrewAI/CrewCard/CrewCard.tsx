@@ -22,7 +22,7 @@ const CrewCard: React.FC<CrewCardProps> = ({
   const [moreInfo, showMoreInfo] = useState(false);
 
   return (
-    <div>
+    <div className="p-4 border border-solid border-lighter rounded-md mb-2">
       <div className="float-right">
         <button className="mr-2" onClick={() => showMoreInfo(!moreInfo)}>
           {moreInfo ? 'Collapse' : 'Expand'}
@@ -62,12 +62,6 @@ const CrewCard: React.FC<CrewCardProps> = ({
       <h2>{crew.name} Crew</h2>
       {moreInfo && (
         <>
-          {output && (
-            <div>
-              <h4>Test Output</h4>
-              <p>{output}</p>
-            </div>
-          )}
           {isFormVisible ? (
             <>
               <h3 className="text-xl font-bold">JSON Config</h3>
@@ -75,6 +69,12 @@ const CrewCard: React.FC<CrewCardProps> = ({
             </>
           ) : (
             <CrewAIList config={crew} />
+          )}
+          {output && (
+            <div>
+              <h4>Test Output</h4>
+              <p>{output}</p>
+            </div>
           )}
         </>
       )}

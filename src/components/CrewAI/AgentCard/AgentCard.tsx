@@ -17,6 +17,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent }) => {
           <>
             <li className="p-2">Role: {agent.role}</li>
             <li className="p-2">Goal: {agent.goal}</li>
+            <li className="p-2">Backstory: {agent.backstory}</li>
             <li className="p-2">LLM: {agent.llm.model_name}</li>
             <li className="p-2">Tools: {agent.tools?.join('|')}</li>
           </>
@@ -24,7 +25,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent }) => {
       </ul>
       <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
         <button className="mr-2" onClick={() => setShowDetails(!showDetails)}>
-          {showDetails ? 'x' : '...'}
+          {showDetails ? 'Collapse' : 'Expand'}
         </button>
         {/* <button
           onClick={() => {
