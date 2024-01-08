@@ -5,9 +5,9 @@ from flask_cors import CORS
 import requests
 import json
 
-from server.tools.default import tool_mapping
+from tools.default import tool_mapping
 from generator.create_crew import create_crew_from_config
-
+from models.chat_models import available_models
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "your_secret_key"
 
@@ -64,6 +64,21 @@ def proxy():
 @app.route("/test", methods=["GET"])
 def test():
     return jsonify({"response": "Hello World!"}), 200
+
+@app.route("/models", methods=["GET"])
+def models():
+    response = []
+    for model in available_models:
+        response.append(model)
+    return jsonify({"response": response}), 200
+
+
+@app.route("/tools", methods=["GET"])
+def tools():
+    response = []
+    for tool in tool_mapping:
+        response.append(tool)
+    return jsonify({"response": response}), 200
 
 @app.route("/v1/agent", methods=["POST"])
 def agent():

@@ -26,3 +26,4 @@ dist-ssr
 OAI_CONFIG_LIST.json
 cache.db
 dev-dist
+__pycache__
