@@ -73,6 +73,18 @@ const runCrewAi = async (crew: Crew) => {
   return data;
 };
 
+const fetchTools = async () => {
+  const response = await axios.get('http://localhost:5050/tools');
+  const data = await response.data;
+  return data;
+};
+
+const fetchModels = async () => {
+  const response = await axios.get('http://localhost:5050/models');
+  const data = await response.data;
+  return data;
+};
+
 // manages the crew and the tasks
 export const useCrewAi = () => {
   const crews = useLiveQuery(() => db.crews.toArray());
@@ -114,10 +126,30 @@ export const useCrewAi = () => {
     }
   };
 
+  const getTools = async () => {
+    try {
+      const result = await fetchTools();
+      return result.response;
+    } catch (e: any) {
+      setOutput(e.message);
+    }
+  };
+
+  const getModels = async () => {
+    try {
+      const result = await fetchModels();
+      setOutput(result.response);
+    } catch (e: any) {
+      setOutput(e.message);
+    }
+  };
+
   return {
     crews,
     saveCrew,
     deleteCrew,
+    getTools,
+    getModels,
     // addAgent,
     // addTask,
     // deleteAgent,
