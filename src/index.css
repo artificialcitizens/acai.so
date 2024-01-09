@@ -200,6 +200,10 @@ body {
   overflow: hidden;
 }
 
+.easy-edit-wrapper {
+  width: fit-content;
+}
+
 .easy-edit-inline-wrapper {
   @apply flex flex-col w-full;
 }

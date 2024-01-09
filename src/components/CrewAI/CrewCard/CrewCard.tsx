@@ -34,7 +34,7 @@ const CrewCard: React.FC<CrewCardProps> = ({
           className="mr-2"
           onClick={() => setIsFormVisible(!isFormVisible)}
         >
-          {isFormVisible ? 'Cancel' : 'Edit'}
+          {isFormVisible ? 'Close' : 'View JSON'}
         </button>
         <button
           className="mr-2"

@@ -10,7 +10,6 @@ export interface File {
   name: string;
   type: string;
   data: string;
-
   metadata: Record<string, string | number | JSON>;
 }
 
@@ -28,9 +27,6 @@ export interface Agent {
   backstory: string;
   tools: string[];
   llm: string;
-  /**
-   * List of file IDs that are used by this agent
-   */
   files: string[];
   allow_delegation: boolean;
   verbose: boolean;
@@ -43,10 +39,7 @@ export interface Task {
   description: string;
   agent: string;
   tools: string[];
-  /**
-   * List of file IDs that are used by this task
-   */
-  files: string[];
+  files: string[]; // probably just do a join table for files
   metadata: Record<string, string | number | JSON>;
 }
 
@@ -91,8 +84,6 @@ export const newTask = (id: string): Task => {
 };
 
 const crewServerURL = import.meta.env.VITE_CREW_SERVER_URL;
-const toolsCache: Record<string, Tool> = {};
-const modelsCache: Record<string, Tool> = {};
 
 const runCrewAi = async (crew: Crew) => {
   const response = await axios.post(`${crewServerURL}/run-crew`, crew);
@@ -148,7 +139,7 @@ export const useCrewAi = () => {
       tasks: [newTask(uuid())],
       files: [],
       metadata: {},
-      process: '',
+      process: 'sequential',
       // Add other necessary properties here
     };
 
@@ -321,6 +312,31 @@ export const useCrewAi = () => {
       toastifyError(e.message);
     }
   };
+
+  /**
+   * Adds a task to the beginning|end of the task list
+   */
+  const addTaskAndRun = ({ crewId, task }: { crewId: string; task: Task }) => {
+    if (!task) {
+      toastifyError(`Task not found`);
+      return;
+    }
+
+    const crew = crews?.filter((crew) => crew.id === crewId)[0];
+
+    if (!crew) {
+      toastifyError(`Crew ${crewId} not found`);
+      return;
+    }
+
+    const tempCrew: Crew = { ...crew };
+    tempCrew.tasks.unshift(task);
+
+    runCrewAi(tempCrew).then((result) => {
+      return result;
+    });
+  };
+
   const getFiles = async (crewId: string) => {
     const crew = await readCrew(crewId);
     if (!crew) {
@@ -348,5 +364,6 @@ export const useCrewAi = () => {
     getFiles,
     validateAgents,
     validateTasks,
+    addTaskAndRun,
   };
 };

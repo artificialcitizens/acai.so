@@ -103,8 +103,6 @@ def proxy():
 def test():
     return jsonify({"response": "Hello World!"}), 200
 
-
-
 @app.route("/v1/agent", methods=["POST"])
 def agent():
     try:

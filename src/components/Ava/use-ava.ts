@@ -27,6 +27,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../db';
 import { AIMessage, HumanMessage } from 'langchain/schema';
 import { askAi } from '../../lib/ac-langchain/chains/ask-ai-chain';
+import { Task, useCrewAi } from '../CrewAI/use-crew-ai';
 
 export type AvaChatResponse = {
   response: string;
@@ -103,6 +104,7 @@ export const useAva = (): {
   const currentAgent = agentState.context[workspaceId];
   const [streamingMessage, setStreamingMessage] = useState('');
   const [error, setError] = useState('');
+  const { addTaskAndRun } = useCrewAi();
   // const [abortController, setAbortController] =
   //   useState<AbortController | null>(null);
 
@@ -381,6 +383,30 @@ export const useAva = (): {
           return error.message;
         }
       }
+      // case 'crew': {
+      //   setLoading(true);
+      //   try {
+      //     const task: Task = {
+      //       id: Date.now().toString(),
+      //       name: 'New Task',
+      //       description: '',
+      //       agent: '',
+      //       tools: [],
+      //       files: [],
+      //       metadata: {},
+      //     };
+
+      //     const response = addTaskAndRun({
+      //       crewId: '1',
+      //       task,
+      //     });
+      //     setLoading(false);
+      //     return { response };
+      //   } catch (error: any) {
+      //     setLoading(false);
+      //     return error.message;
+      //   }
+      // }
 
       default: {
         setLoading(false);
