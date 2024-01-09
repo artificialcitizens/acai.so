@@ -61,9 +61,7 @@ def tools():
 
 @app.route("/models", methods=["GET"])
 def models():
-    response = []
-    for model in model_mapping:
-        response.append(model)
+    response = list(model_mapping.keys())
     return jsonify({"response": response}), 200
 
 @app.route("/run-crew", methods=["POST"])
@@ -80,7 +78,9 @@ def create_crew():
     try:
         payload = request.get_json()
         config_string = json.dumps(payload)
+        print(config_string)
         crew = create_crew_from_config(config_string, tool_mapping)
+        print('crew created')
         response = crew.kickoff()
         # output = capture_output()
         # print(output)

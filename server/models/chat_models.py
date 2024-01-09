@@ -1,4 +1,4 @@
-models = {
+model_mapping = {
     "open-hermes-2.5": {
       "base_url": "http://192.168.4.192:8080/v1",
       "model_name": "open-hermes-2.5",

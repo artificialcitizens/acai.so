@@ -91,6 +91,8 @@ export const newTask = (id: string): Task => {
 };
 
 const crewServerURL = import.meta.env.VITE_CREW_SERVER_URL;
+const toolsCache: Record<string, Tool> = {};
+const modelsCache: Record<string, Tool> = {};
 
 const runCrewAi = async (crew: Crew) => {
   const response = await axios.post(`${crewServerURL}/run-crew`, crew);
@@ -124,8 +126,8 @@ export const useCrewAi = () => {
     };
     const getModels = async () => {
       const result = await fetchModels();
-      const modelnames = result.response.map((model: any) => model.alias);
-      setModels(modelnames);
+
+      setModels(result.response);
     };
 
     getTools();
