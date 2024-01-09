@@ -8,6 +8,8 @@ interface MicRecorderProps {
   onTranscriptionComplete: (transcript: string) => void;
 }
 
+// @TODO: Use this component for uploading audio to the server for transcription
+// Modify to allow different transcription services
 const Whisper: React.FC<MicRecorderProps> = ({
   onRecordingComplete,
   onTranscriptionComplete,

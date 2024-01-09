@@ -4,10 +4,12 @@ from flask_cors import CORS
 
 import requests
 import json
+from tools.create_doc import SocketTool
 
-from tools.default import tool_mapping
 from generator.create_crew import create_crew_from_config
 from models.chat_models import available_models
+from langchain.tools import BaseTool, StructuredTool, tool
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "your_secret_key"
 
@@ -26,29 +28,65 @@ socketio = SocketIO(
     cors_allowed_origins=[
         "http://192.168.4.74:5173",
         "http://localhost:5173",
-        "http://www.acai.so",
+        "https://www.acai.so",
         "http://192.168.4.192:5173"  # And this line
     ],
 )
 
+from langchain.tools import DuckDuckGoSearchRun
+from tools.file_system_manager import toolkit
+
+
+@tool
+def create_doc(content: str) -> str:
+    """Create a document."""
+    socketio.emit(
+            "create-tab", {"title": "Hello Tab!", "content": f'Im called by the agent with {content}'}
+    )
+
+    return "success"
+
+tool_mapping = {
+"DuckDuckGoSearch": DuckDuckGoSearchRun(),
+"FileManagementToolkit": toolkit,
+"CreateDoc": create_doc,
+}
+
+@app.route("/tools", methods=["GET"])
+def tools():
+    response = []
+    for tool in tool_mapping:
+        response.append(tool)
+    return jsonify({"response": response}), 200
+
+@app.route("/models", methods=["GET"])
+def models():
+    response = []
+    for model in available_models:
+        response.append(model)
+    return jsonify({"response": response}), 200
+
 @app.route("/run-crew", methods=["POST"])
 def create_crew():
-    try:
-        # Get the JSON payload from the request body
-        payload = request.get_json()
+    # import io   
+    # import contextlib
+    # def capture_output():
+    
+    #     buffer = io.StringIO()
+    #     with contextlib.redirect_stdout(buffer):
+    #         crew.kickoff()
+    #     return buffer.getvalue()
 
-        # Convert the payload to a JSON string
+    try:
+        payload = request.get_json()
         config_string = json.dumps(payload)
-        # tool_mapping["CreateDoc"] = DuckDuckGoSearchRun()
-        # Call the function with the JSON string and the tool_mapping        
         crew = create_crew_from_config(config_string, tool_mapping)
         response = crew.kickoff()
-        print(response)
-        # If everything goes well, return a success response
+        # output = capture_output()
+        # print(output)
         return jsonify({"response": response, "status": "success"}), 200
     except Exception as e:
         print(e)
-        # If something goes wrong, return an error response
         return jsonify({"status": "error", "message": str(e)}), 500
 
 # Forwards the request to input URL and returns the response
@@ -65,20 +103,7 @@ def proxy():
 def test():
     return jsonify({"response": "Hello World!"}), 200
 
-@app.route("/models", methods=["GET"])
-def models():
-    response = []
-    for model in available_models:
-        response.append(model)
-    return jsonify({"response": response}), 200
 
-
-@app.route("/tools", methods=["GET"])
-def tools():
-    response = []
-    for tool in tool_mapping:
-        response.append(tool)
-    return jsonify({"response": response}), 200
 
 @app.route("/v1/agent", methods=["POST"])
 def agent():

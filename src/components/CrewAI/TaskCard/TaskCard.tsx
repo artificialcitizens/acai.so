@@ -1,23 +1,113 @@
-import React, { useState } from 'react';
-import { Task } from '../use-crew-ai'; // Assuming you have a types file
+import React, { useEffect, useState } from 'react';
+import { Task, useCrewAi } from '../use-crew-ai'; // Assuming you have a types file
+import TextBox from '../../InlineEdit/TextBox';
+import Checkbox from '../../InlineEdit/Checkbox';
+import Dropdown from '../../InlineEdit/Dropdown';
 
 interface TaskCardProps {
   task: Task;
-  // deleteTask: (taskId: string) => void;
+  crewId: string;
 }
 
-export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
+export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
   const [showDetails, setShowDetails] = useState(false);
+  const { crews, updateTaskInCrew, removeTaskFromCrew, tools, getFiles } =
+    useCrewAi();
+  const [agentRoles, setAgentRoles] = useState<string[]>([]);
+  const files = getFiles(crewId);
+
+  useEffect(() => {
+    if (!crews) return;
+    const crew = crews.find((crew) => crew.id === crewId);
+    if (crew) {
+      setAgentRoles(crew.agents.map((agent) => agent.role));
+    }
+  }, [crews, crewId]);
 
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
       <ul className="bg-darker rounded-md p-4 mb-2" key={task.id}>
-        <li className="p-2">Name: {task.name}</li>
+        <li className="p-2">{task.name}</li>
         {showDetails && (
           <>
-            <li className="p-2">Description: {task.description}</li>
-            <li className="p-2">Agent: {task.agent}</li>
-            <li className="p-2">Tools: {task.tools?.join('|')}</li>
+            <li className="p-2">
+              Name:
+              <TextBox
+                onCancel={() => {
+                  console.log('cancel');
+                }}
+                onSave={(value) => {
+                  updateTaskInCrew(crewId, { ...task, name: value });
+                }}
+                value={task.name}
+              />
+            </li>
+            <li className="p-2">
+              Description:
+              <TextBox
+                onCancel={() => {
+                  console.log('cancel');
+                }}
+                onSave={(value) => {
+                  updateTaskInCrew(crewId, { ...task, description: value });
+                }}
+                value={task.description}
+              />
+            </li>
+            <li className="p-2">
+              Agent:
+              <Dropdown
+                options={
+                  agentRoles?.map((role) => ({
+                    label: role,
+                    value: role,
+                  })) || []
+                }
+                onCancel={() => {
+                  console.log('cancel');
+                }}
+                onSave={(value) => {
+                  updateTaskInCrew(crewId, { ...task, agent: value });
+                }}
+                placeholder="Select an Agent"
+              />
+            </li>
+            <li className="p-2">
+              Tools:
+              <Checkbox
+                options={
+                  tools?.map((tool) => ({
+                    label: tool,
+                    value: tool,
+                  })) || []
+                }
+                onCancel={() => {
+                  console.log('cancel');
+                }}
+                onSave={(value) => {
+                  updateTaskInCrew(crewId, { ...task, tools: value });
+                }}
+                placeholder="Add tools"
+              />
+            </li>
+            {/* <li className="p-2">
+              Files:
+              <Checkbox
+                options={
+                  Object.entries(files).map(([key, value]) => ({
+                    label: value.name,
+                    value: value.id,
+                  })) || []
+                }
+                onCancel={() => {
+                  console.log('cancel');
+                }}
+                onSave={(value) => {
+                  updateTaskInCrew(crewId, { ...task, files: [value] });
+                }}
+                placeholder="Select files"
+              />
+            </li> */}
           </>
         )}
       </ul>
@@ -25,14 +115,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
         <button className="mr-1" onClick={() => setShowDetails(!showDetails)}>
           {showDetails ? 'Collapse' : 'Expand'}
         </button>
-        {/* <button
+        <button
           onClick={() => {
             window.confirm('Are you sure you want to delete this Task?') &&
-              deleteTask(task.id);
+              removeTaskFromCrew(crewId, task.id);
           }}
         >
           X
-        </button> */}
+        </button>
       </div>
     </div>
   );

@@ -4,28 +4,17 @@ import { useState } from 'react';
 import CrewCard from '../CrewCard/CrewCard';
 
 const CrewAIContainer = () => {
-  const {
-    // addAgent,
-    // addTask,
-    // deleteAgent,
-    // deleteTask,
-    // updateAgent,
-    // updateTask,
-    // config,
-    deleteCrew,
-    crews,
-    saveCrew,
-    test,
-    output,
-  } = useCrewAi();
+  const { newCrew, deleteCrew, crews, saveCrew, test, output } = useCrewAi();
   const [formVisible, setFormVisible] = useState(false);
   return (
     <div>
       <button
         className="w-full text-bold font-2xl border border-solid border-lighter rounded-md mb-6"
-        onClick={() => setFormVisible(!formVisible)}
+        onClick={() => {
+          newCrew();
+        }}
       >
-        {formVisible ? 'Cancel' : 'Add Crew'}
+        Add Crew
       </button>
       {formVisible && (
         <CrewAIForm
@@ -44,6 +33,7 @@ const CrewAIContainer = () => {
             key={crew.id}
             test={test}
             deleteCrew={deleteCrew}
+            saveCrew={saveCrew}
           />
         ))}
     </div>

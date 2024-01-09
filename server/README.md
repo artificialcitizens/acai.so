@@ -34,7 +34,7 @@ An api for creating and managing [CrewAI](https://github.com/joaomdmoura/crewAI)
 
 ```curl
 curl  -X POST \
-  'http://127.0.0.1:5050/run-crew' \
+  'http://localhost:5050/run-crew' \
   --header 'Accept: */*' \
   --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
   --header 'Content-Type: application/json' \

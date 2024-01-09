@@ -43,19 +43,14 @@ export const exampleData: Crew = {
   name: 'Knapsack',
   agents: [
     {
-      id: '1',
-      name: 'Grant',
-      role: 'Product Manager',
-      goal: 'Orchestrate the team to create the design system, based on the clients needs. You will be provided the goal for the sprint and you will need to create a task list for the team and assign the tasks to the team members.',
-      backstory:
-        'You manage the design system for Knapsack.cloud, It is called Toby. You run a small team of highly intelligent designers. You are responsible for the overall success of the design system. Provide the members of your team with a task list based off of the need of the current sprint.',
-      llm: {
-        base_url: 'http://192.168.4.192:8080/v1',
-        model_name: 'open-hermes-2.5',
-        openai_api_key: 'sk-xxx',
-      },
-      tools: ['DuckDuckGoSearch'],
-      files: ['1'],
+      id: 'f9edf10b-2012-4544-9cca-d76dc2a5eff6',
+      role: 'Researcher',
+      name: 'Phil',
+      goal: 'Find the best restaurants in Portland\n',
+      backstory: 'A foodie at heart',
+      llm: 'gpt-4',
+      tools: ['DuckDuckGoSearch', 'CreateDoc', 'FileManagementToolkit'],
+      files: [],
       metadata: {},
       verbose: true,
       allow_delegation: true,
@@ -68,11 +63,7 @@ export const exampleData: Crew = {
       backstory:
         'You are a Senior Research Analyst at a leading tech think tank. Your expertise lies in identifying emerging trends and technologies in AI and design systems. You have a knack for dissecting complex data and presenting actionable insights.',
       tools: ['DuckDuckGoSearch'],
-      llm: {
-        base_url: 'http://192.168.4.192:8080/v1',
-        model_name: 'open-hermes-2.5',
-        openai_api_key: 'sk-xxx',
-      },
+      llm: 'open-hermes-2.5',
       files: ['1'],
       metadata: {},
       verbose: true,
@@ -85,11 +76,7 @@ export const exampleData: Crew = {
       goal: 'Create a design system for Knapsack.cloud. The design system will be called Toby. Toby is a bear avatar an represents Tobias who came up with the Knapsack problem. Lets start by creating a set of design tokens',
       backstory:
         'A creative soul who translates complex tech jargon into beautiful designs for the masses, you write using simple words in a friendly and inviting tone that does not sounds like AI.',
-      llm: {
-        base_url: 'http://192.168.4.192:8080/v1',
-        model_name: 'open-hermes-2.5',
-        openai_api_key: 'sk-xxx',
-      },
+      llm: 'gpt-4',
       tools: [],
       files: ['1'],
       metadata: {},

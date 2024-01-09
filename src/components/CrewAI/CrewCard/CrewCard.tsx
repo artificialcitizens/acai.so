@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Crew } from '../use-crew-ai';
+import { Agent, Crew, Task } from '../use-crew-ai';
 import CrewAIForm from '../CrewAIForm/CrewAIForm';
 import CrewAIList from '../CrewAIList/CrewAIList';
+import TextBox from '../../InlineEdit/TextBox';
 
 interface CrewCardProps {
   crew: Crew;
   output: string;
   onSave: (crew: Crew) => void;
   test: (crew: string) => void;
+  saveCrew: (crew: Crew) => void;
   deleteCrew: (crewId: string) => void;
 }
 
@@ -16,6 +18,7 @@ const CrewCard: React.FC<CrewCardProps> = ({
   output,
   onSave,
   test,
+  saveCrew,
   deleteCrew,
 }) => {
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -59,7 +62,16 @@ const CrewCard: React.FC<CrewCardProps> = ({
           </pre>
         )}
       </div>
-      <h2>{crew.name} Crew</h2>
+      <TextBox
+        value={crew.name}
+        onCancel={() => {
+          console.log('cancel');
+        }}
+        onSave={(value) => {
+          const updatedCrew = { ...crew, name: value };
+          saveCrew(updatedCrew);
+        }}
+      />
       {moreInfo && (
         <>
           {isFormVisible ? (
@@ -68,7 +80,7 @@ const CrewCard: React.FC<CrewCardProps> = ({
               <CrewAIForm crew={crew} saveCrew={onSave} />
             </>
           ) : (
-            <CrewAIList config={crew} />
+            <CrewAIList crew={crew} />
           )}
           {output && (
             <div>
@@ -79,6 +91,31 @@ const CrewCard: React.FC<CrewCardProps> = ({
         </>
       )}
       <br />
+      {/*
+       <h5>Files</h5>
+       <ul>
+        {crew.files.map((file) => (
+          <li key={file.id}>
+            {file.name}
+            <button
+              onClick={() => {
+                window.confirm(
+                  `Are you sure you wish to delete this file? ID: ${file.id}`,
+                );
+              }}
+            >
+              Delete
+            </button>
+          </li>
+        ))}
+      </ul>
+      <li className="p-2">
+        Upload
+        <input
+          type="file"
+          onChange={() => toastifyInfo('Not implemented yet')}
+        />
+      </li> */}
     </div>
   );
 };

@@ -1,13 +1,15 @@
 import json
 from crewai import Agent, Task, Crew, Process
 from langchain_community.chat_models import ChatOpenAI
+from models.chat_models import model_mapping
 
 def create_crew_from_config(config_string, tool_mapping):
     config = json.loads(config_string)
     # Create the ChatOpenAI objects
     llms = {}
     for agent_config in config["agents"]:
-        llm_config = agent_config.pop("llm")
+        llm = agent_config.pop("llm")
+        llm_config = model_mapping[llm]
         llm_key = f"{llm_config['base_url']}_{llm_config['model_name']}"
         if llm_key not in llms:
             llms[llm_key] = ChatOpenAI(**llm_config)

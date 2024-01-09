@@ -130,6 +130,9 @@ dependencies:
   react-draggable:
     specifier: ^4.4.5
     version: 4.4.5(react-dom@18.2.0)(react@18.2.0)
+  react-easy-edit:
+    specifier: ^1.17.2
+    version: 1.17.2(react-dom@18.2.0)(react@18.2.0)
   react-markdown:
     specifier: ^8.0.5
     version: 8.0.5(@types/react@18.0.28)(react@18.2.0)
@@ -8033,6 +8036,16 @@ packages:
     dependencies:
       clsx: 1.2.1
       prop-types: 15.8.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /react-easy-edit@1.17.2(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-UdYch/aJGw2U6FmbhNDGqKq2JqBlgxymTALjBv92BTgjLBVrYbMjVZ5xqjhm22dmJtzAQIPot1eBR6VTZq0t5Q==}
+    peerDependencies:
+      react: ^18.2.0
+      react-dom: ^18.2.0
+    dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
