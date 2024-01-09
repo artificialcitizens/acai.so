@@ -160,9 +160,11 @@ export const useCrewAi = () => {
   };
 
   const saveCrew = async (crew: Crew) => {
+    crew.lastUpdated = new Date().toISOString();
+    validateCrew(crew);
     try {
-      const id = await db.crews.put(crew);
-      toastifyInfo(`Crew ${crew.name} saved or updated with id ${id}`);
+      await db.crews.put(crew);
+      toastifyInfo(`Crew ${crew.name} saved successfully}`);
     } catch (error: any) {
       toastifyError(
         `Crew ${crew.name} failed to save or update: ${error.message}`,
@@ -274,21 +276,51 @@ export const useCrewAi = () => {
     }
   };
 
+  const validateAgents = (agents: Agent[]) => {
+    return agents.every((agent) => agent.llm && agent.role && agent.goal);
+  };
+
+  const validateTasks = (tasks: Task[]) => {
+    return tasks.every((task) => task.name && task.description && task.agent);
+  };
+
+  const validateCrew = (crew: Crew) => {
+    // Check if all agents have llm, role, and description filled out
+    if (!validateAgents(crew.agents)) {
+      toastifyError(
+        'All agents do not have llm, role, and description filled out',
+      );
+      throw new Error(
+        'All agents do not have llm, role, and description filled out',
+      );
+    }
+
+    // Check if all tasks have name, description, and agent filled out
+    if (!validateTasks(crew.tasks)) {
+      toastifyError(
+        'All tasks do not have name, description, and agent filled out',
+      );
+      throw new Error(
+        'All tasks do not have name, description, and agent filled out',
+      );
+    }
+  };
+
   const test = async (crewId: string) => {
     const crew = crews?.filter((crew) => crew.id === crewId)[0];
     if (!crew) {
       toastifyError(`Crew ${crewId} not found`);
       return;
     }
-    toastifyInfo(`Running Crew ${crew.name}`);
     try {
+      validateCrew(crew);
+      toastifyInfo(`Running Crew ${crew.name}`);
       const result = await runCrewAi(crew);
       setOutput(result.response);
     } catch (e: any) {
-      setOutput(e.message);
+      toastifyError(e.message);
     }
   };
-
   const getFiles = async (crewId: string) => {
     const crew = await readCrew(crewId);
     if (!crew) {
@@ -314,5 +346,7 @@ export const useCrewAi = () => {
     test,
     output,
     getFiles,
+    validateAgents,
+    validateTasks,
   };
 };
