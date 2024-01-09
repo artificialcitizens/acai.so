@@ -6,6 +6,7 @@ interface CheckBoxProps {
   onCancel: () => void;
   placeholder?: string;
   instructions?: string;
+  value: string[];
 }
 
 const Checkbox: React.FC<CheckBoxProps> = ({
@@ -14,6 +15,7 @@ const Checkbox: React.FC<CheckBoxProps> = ({
   onCancel,
   placeholder,
   instructions,
+  value,
 }) => {
   return (
     <EasyEdit
@@ -25,6 +27,7 @@ const Checkbox: React.FC<CheckBoxProps> = ({
       instructions={instructions || ''}
       saveButtonLabel="Save"
       cancelButtonLabel="Cancel"
+      {...(value.length > 0 && { value })}
     />
   );
 };

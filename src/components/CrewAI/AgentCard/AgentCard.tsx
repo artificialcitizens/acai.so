@@ -114,6 +114,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
                   updateAgentInCrew(crewId, { ...agent, tools: value });
                 }}
                 placeholder="Add tools"
+                value={agent.tools}
               />
             </li>
             <li className="p-2">
@@ -132,6 +133,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
                   updateAgentInCrew(crewId, { ...agent, llm: value });
                 }}
                 placeholder="Select an LLM"
+                value={agent.llm || models[0]}
               />
             </li>
             {/* <li className="p-2">

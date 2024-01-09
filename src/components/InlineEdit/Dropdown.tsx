@@ -6,6 +6,7 @@ interface DropdownProps {
   onCancel: () => void;
   placeholder?: string;
   instructions?: string;
+  value?: string;
 }
 
 const Dropdown: React.FC<DropdownProps> = ({
@@ -14,6 +15,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   onCancel,
   placeholder,
   instructions,
+  value,
 }) => {
   return (
     <EasyEdit
@@ -25,6 +27,7 @@ const Dropdown: React.FC<DropdownProps> = ({
       instructions={instructions || ''}
       saveButtonLabel="Save"
       cancelButtonLabel="Cancel"
+      value={value}
     />
   );
 };

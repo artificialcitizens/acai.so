@@ -70,6 +70,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
                   updateTaskInCrew(crewId, { ...task, agent: value });
                 }}
                 placeholder="Select an Agent"
+                value={task.agent || agentRoles[0]}
               />
             </li>
             <li className="p-2">
@@ -88,6 +89,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
                   updateTaskInCrew(crewId, { ...task, tools: value });
                 }}
                 placeholder="Add tools"
+                //if task.tools is undefined, don't render value
+                value={task.tools}
               />
             </li>
             {/* <li className="p-2">
