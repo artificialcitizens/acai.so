@@ -7,7 +7,7 @@ import json
 from tools.create_doc import SocketTool
 
 from generator.create_crew import create_crew_from_config
-from models.chat_models import available_models
+from models.chat_models import model_mapping
 from langchain.tools import BaseTool, StructuredTool, tool
 
 app = Flask(__name__)
@@ -62,7 +62,7 @@ def tools():
 @app.route("/models", methods=["GET"])
 def models():
     response = []
-    for model in available_models:
+    for model in model_mapping:
         response.append(model)
     return jsonify({"response": response}), 200
 

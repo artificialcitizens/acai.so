@@ -101,11 +101,7 @@ const DropdownSettings: React.FC<DropdownSettingsProps> = ({ onClose }) => {
 
   const handleDeleteWorkspace = () => {
     if (!workspaceId) return;
-    const confirmDelete = window.prompt('Type "delete" to confirm');
-    if (confirmDelete?.toLowerCase() !== 'delete') {
-      alert('Deletion cancelled.');
-      return;
-    }
+    window.confirm('Are you sure you wish to delete this workspace?');
     globalServices.appStateService.send({
       type: 'DELETE_WORKSPACE',
       workspaceId,
@@ -200,10 +196,8 @@ const DropdownSettings: React.FC<DropdownSettingsProps> = ({ onClose }) => {
           onClick={async () => {
             if (!workspaceId || !activeTabId) return;
             onClose();
-            const confirmDelete = window.prompt('Type "delete" to confirm');
-            if (confirmDelete?.toLowerCase() !== 'delete') {
-              return;
-            }
+            window.confirm('Are you sure you wish to delete this document?');
+
             globalServices.appStateService.send({
               type: 'DELETE_DOC',
               id: activeTabId,

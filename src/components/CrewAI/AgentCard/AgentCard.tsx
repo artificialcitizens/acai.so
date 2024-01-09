@@ -111,7 +111,6 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
                   console.log('cancel');
                 }}
                 onSave={(value) => {
-                  alert(value);
                   updateAgentInCrew(crewId, { ...agent, tools: value });
                 }}
                 placeholder="Add tools"

@@ -15,6 +15,7 @@ import {
 import { ProjectLinks } from '../ProjectLinks/ProjectLinks';
 import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
 import { useLoadWorkspace } from '../../hooks/use-load-workspace';
+import { toastifyInfo } from '../Toast';
 
 export const SideNav: React.FC = () => {
   const navigate = useNavigate();
@@ -192,16 +193,10 @@ export const SideNav: React.FC = () => {
                                   <button
                                     className="p-0 px-1 flex-grow-0 text-red-900 rounded-full  opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                                     onClick={async () => {
-                                      const confirmDelete = window.prompt(
-                                        'Type "delete" to confirm',
+                                      window.confirm(
+                                        'Are you sure you wish to delete this document?',
                                       );
-                                      if (
-                                        confirmDelete?.toLowerCase() !==
-                                        'delete'
-                                      ) {
-                                        alert('Deletion cancelled.');
-                                        return;
-                                      }
+
                                       globalServices.appStateService.send({
                                         type: 'DELETE_DOC',
                                         id: tab.id,
