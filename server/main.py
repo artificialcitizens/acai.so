@@ -79,7 +79,7 @@ def create_crew():
         payload = request.get_json()
         config_string = json.dumps(payload)
         print(config_string)
-        crew = create_crew_from_config(config_string, tool_mapping)
+        crew = create_crew_from_config(config_string, tool_mapping, socketio)
         print('crew created')
         response = crew.kickoff()
         # output = capture_output()

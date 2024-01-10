@@ -1,9 +1,9 @@
 import json
-from crewai import Agent, Task, Crew, Process
+from crewai import Task, Crew, Process
 from langchain_community.chat_models import ChatOpenAI
 from models.chat_models import model_mapping
-
-def create_crew_from_config(config_string, tool_mapping):
+from agents.custom_agent import ExtendedAgent
+def create_crew_from_config(config_string, tool_mapping, socketio):
     config = json.loads(config_string)
     # Create the ChatOpenAI objects
     llms = {}
@@ -23,7 +23,10 @@ def create_crew_from_config(config_string, tool_mapping):
             agent_config["tools"] = [tool_mapping[tool_name] for tool_name in agent_config["tools"]]
 
     # Create the Agent objects
-    agents = {agent_config["role"]: Agent(**agent_config) for agent_config in config["agents"]}
+    agents = {
+        agent_config["role"]: ExtendedAgent(**agent_config, socketio=socketio)
+        for agent_config in config["agents"]
+    }
 
     # Create the Task objects
     tasks = []
