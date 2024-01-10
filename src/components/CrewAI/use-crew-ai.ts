@@ -110,14 +110,22 @@ const fetchModels = async (): Promise<string[]> => {
   return data.response;
 };
 
-const toolsCache = await fetchTools();
-const modelsCache = await fetchModels();
+let toolsCache: string[];
+let modelsCache: string[];
+
+fetchTools().then((tools) => {
+  toolsCache = tools;
+});
+
+fetchModels().then((models) => {
+  modelsCache = models;
+});
 // manages the crew and the tasks
 export const useCrewAi = () => {
   const crews = useLiveQuery(() => db.crews.toArray());
   const [output, setOutput] = useState<string>('');
-  const [tools] = useState<string[]>(toolsCache);
-  const [models] = useState<string[]>(modelsCache);
+  const [tools] = useState<string[]>(toolsCache || []);
+  const [models] = useState<string[]>(modelsCache || []);
   const newCrew = async () => {
     if (!crews) {
       toastifyError('Failed to create new crew');
