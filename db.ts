@@ -2,6 +2,7 @@
 import Dexie, { Table } from 'dexie';
 import { ACDoc, Workspace, AgentWorkspace } from './src/state';
 import { Crew } from './src/components/CrewAI/use-crew-ai';
+import { toastifyInfo } from './src/components/Toast';
 
 export interface AcaiMemoryVector {
   content: string;
@@ -31,6 +32,64 @@ export interface ACFile {
   fileName: string;
   createdAt: string;
   lastModified: string;
+}
+
+function getCanonicalComparableSchema(db: Dexie) {
+  return JSON.stringify(
+    db.tables
+      .map(({ name, schema }) => ({
+        name,
+        schema: [
+          schema.primKey.src,
+          ...schema.indexes.map((idx) => idx.src).sort(),
+        ].join(','),
+      }))
+      .sort((a, b) => (a.name < b.name ? 1 : -1)),
+  );
+}
+
+async function isDeclaredSchemaSameAsInstalled(db: Dexie) {
+  const declaredSchema = getCanonicalComparableSchema(db);
+  const dynDb = await new Dexie(db.name).open();
+  const installedSchema = getCanonicalComparableSchema(dynDb);
+  return declaredSchema === installedSchema;
+}
+
+function checkAndOpenDb() {
+  indexedDB
+    .databases()
+    .then((databases) => {
+      const dbExists = databases.some((dbInfo) => dbInfo.name === db.name);
+      if (dbExists) {
+        isDeclaredSchemaSameAsInstalled(db).then((same) => {
+          if (!same) {
+            console.log('Schema mismatch, deleting database');
+            // delete db in indexedDB
+            const req = indexedDB.deleteDatabase(db.name);
+            req.onsuccess = () => {
+              console.log('Deleted database successfully');
+              db.open().catch((err) => {
+                console.error(err.stack || err);
+              });
+              toastifyInfo(
+                'Your db schema was out of date, we deleted it and created a new one for you. Please refresh the page',
+              );
+            };
+          } else {
+            db.open().catch((err) => {
+              console.error(err.stack || err);
+            });
+          }
+        });
+      } else {
+        db.open().catch((err) => {
+          console.error(err.stack || err);
+        });
+      }
+    })
+    .catch((err) => {
+      console.error('Error checking for existing databases: ', err);
+    });
 }
 
 export class AcaiDexie extends Dexie {
@@ -78,6 +137,4 @@ export class AcaiDexie extends Dexie {
 
 export const db = new AcaiDexie();
 
-db.open().catch((err) => {
-  console.error(err.stack || err);
-});
+checkAndOpenDb();
