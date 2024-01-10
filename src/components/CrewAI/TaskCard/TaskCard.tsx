@@ -70,7 +70,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
                   updateTaskInCrew(crewId, { ...task, agent: value });
                 }}
                 placeholder="Select an Agent"
-                value={task.agent || agentRoles[0]}
+                value={agentRoles?.find((role) => role === task.agent)}
               />
             </li>
             <li className="p-2">

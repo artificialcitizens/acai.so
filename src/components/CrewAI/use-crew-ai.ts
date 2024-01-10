@@ -147,14 +147,13 @@ export const useCrewAi = () => {
           llm: models[0],
         }),
       ],
-      tasks: [newTask({ id: uuid() })],
+      tasks: [],
       files: [],
       metadata: {},
       process: 'sequential',
       // Add other necessary properties here
     };
 
-    crews.push(newCrew);
     await db.crews.put(newCrew);
     toastifyInfo(`Crew ${newCrew.name} added`);
 
@@ -167,6 +166,7 @@ export const useCrewAi = () => {
     try {
       await db.crews.put(crew);
       toastifyInfo(`Crew ${crew.name} saved successfully}`);
+      return crew;
     } catch (error: any) {
       toastifyError(
         `Crew ${crew.name} failed to save or update: ${error.message}`,
@@ -202,7 +202,8 @@ export const useCrewAi = () => {
       return;
     }
     crew.tasks.push(task);
-    await saveCrew(crew);
+    const savedCrew = await saveCrew(crew);
+    return savedCrew;
   };
 
   // Remove a task from a crew
@@ -213,7 +214,8 @@ export const useCrewAi = () => {
       return;
     }
     crew.tasks = crew.tasks.filter((task) => task.id !== taskId);
-    await saveCrew(crew);
+    const savedCrew = await saveCrew(crew);
+    return savedCrew;
   };
 
   // Add a new agent to a crew
@@ -224,7 +226,8 @@ export const useCrewAi = () => {
       return;
     }
     crew.agents.push(agent);
-    await saveCrew(crew);
+    const savedCrew = await saveCrew(crew);
+    return savedCrew;
   };
 
   // Remove an agent from a crew
@@ -235,11 +238,16 @@ export const useCrewAi = () => {
       return;
     }
     crew.agents = crew.agents.filter((agent) => agent.id !== agentId);
-    await saveCrew(crew);
+    const savedCrew = await saveCrew(crew);
+    return savedCrew;
   };
 
   // Update a task in a crew
-  const updateTaskInCrew = async (crewId: string, updatedTask: Task) => {
+  const updateTaskInCrew = async (
+    crewId: string,
+    updatedTask: Task,
+  ): Promise<Crew | undefined> => {
+    toastifyInfo(`Updating task ${updatedTask.name} in crew ${crewId}`);
     const crew = await db.crews.get(crewId);
     if (!crew) {
       toastifyError(`Crew ${crewId} not found`);
@@ -248,13 +256,9 @@ export const useCrewAi = () => {
     const taskIndex = crew.tasks.findIndex(
       (task) => task.id === updatedTask.id,
     );
-    if (taskIndex !== -1) {
-      crew.tasks[taskIndex] = updatedTask;
-      await db.crews.put(crew);
-      toastifyInfo(`Task ${updatedTask.name} updated in crew ${crew.name}`);
-    } else {
-      toastifyError(`Task ${updatedTask.name} not found in crew ${crew.name}`);
-    }
+    crew.tasks[taskIndex] = updatedTask;
+    await db.crews.put(crew);
+    toastifyInfo(`Task ${updatedTask.name} updated in crew ${crew.name}`);
   };
 
   // Update an agent in a crew

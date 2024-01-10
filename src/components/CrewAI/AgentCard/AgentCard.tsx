@@ -18,7 +18,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
       {/* <TextBox onCancel={() => {}} onSave={() => {}} value={agent.role} /> */}
-      <ul className="bg-darker rounded-md p-4 mb-2" key={agent.role}>
+      <ul className="bg-base rounded-md p-4 mb-2" key={agent.role}>
         <li className="p-2">{agent.role}</li>
         {showDetails && (
           <>
