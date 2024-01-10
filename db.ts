@@ -32,6 +32,27 @@ export interface ACFile {
   lastModified: string;
 }
 
+function getCanonicalComparableSchema(db: Dexie) {
+  return JSON.stringify(
+    db.tables
+      .map(({ name, schema }) => ({
+        name,
+        schema: [
+          schema.primKey.src,
+          ...schema.indexes.map((idx) => idx.src).sort(),
+        ].join(','),
+      }))
+      .sort((a, b) => (a.name < b.name ? 1 : -1)),
+  );
+}
+
+async function isDeclaredSchemaSameAsInstalled(db: Dexie) {
+  const declaredSchema = getCanonicalComparableSchema(db);
+  const dynDb = await new Dexie(db.name).open();
+  const installedSchema = getCanonicalComparableSchema(dynDb);
+  return declaredSchema === installedSchema;
+}
+
 export class AcaiDexie extends Dexie {
   // 'embeddings' is added by dexie when declaring the stores()
   // We just tell the typing system this is the case
@@ -66,7 +87,36 @@ export class AcaiDexie extends Dexie {
 }
 
 export const db = new AcaiDexie();
-
-db.open().catch((err) => {
-  console.error(err.stack || err);
-});
+indexedDB
+  .databases()
+  .then((databases) => {
+    const dbExists = databases.some((dbInfo) => dbInfo.name === db.name);
+    if (dbExists) {
+      isDeclaredSchemaSameAsInstalled(db).then((same) => {
+        if (!same) {
+          console.log('Schema mismatch, deleting database');
+          // delete db in indexedDB
+          const req = indexedDB.deleteDatabase(db.name);
+          req.onsuccess = () => {
+            console.log('Deleted database successfully');
+            db.open().catch((err) => {
+              console.error(err.stack || err);
+            });
+          };
+        } else {
+          db.open().catch((err) => {
+            console.error(err.stack || err);
+          });
+        }
+      });
+    } else {
+      console.log('Database does not exist.');
+      db.open().catch((err) => {
+        console.error(err.stack || err);
+      });
+      window.location.reload();
+    }
+  })
+  .catch((err) => {
+    console.error('Error checking for existing databases: ', err);
+  });
