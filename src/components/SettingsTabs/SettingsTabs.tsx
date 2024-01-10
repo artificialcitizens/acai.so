@@ -12,7 +12,6 @@ import {
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
 import ChatModelDropdown from '../ChatSettings';
-import { SocketManager } from '../SocketManager';
 import UserProfile from '../UserProfile/UserProfile';
 import KnowledgeUpload from '../Knowledge/Knowledge';
 import { useParams } from 'react-router-dom';

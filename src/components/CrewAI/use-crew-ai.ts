@@ -71,19 +71,25 @@ export const newAgent = ({ id, llm }: { id: string; llm: string }): Agent => {
   };
 };
 
-export const newTask = ({ id }: { id: string }): Task => {
+export const newTask = ({
+  id,
+  agent,
+}: {
+  id: string;
+  agent?: string;
+}): Task => {
   return {
     id,
     name: 'New Task',
     description: 'This is a test, return "bar"',
-    agent: 'New Agent',
+    agent: agent || 'New Agent',
     tools: [],
     files: [],
     metadata: {},
   };
 };
 
-const crewServerURL = import.meta.env.VITE_CREW_SERVER_URL;
+const crewServerURL = import.meta.env.VITE_CUSTOM_SERVER_URL;
 
 const runCrewAi = async (crew: Crew) => {
   const response = await axios.post(`${crewServerURL}/run-crew`, crew);

@@ -25,17 +25,23 @@ const CrewAIContainer = () => {
         />
       )}
       {crews &&
-        crews.map((crew) => (
-          <CrewCard
-            output={output}
-            crew={crew}
-            onSave={saveCrew}
-            key={crew.id}
-            test={test}
-            deleteCrew={deleteCrew}
-            saveCrew={saveCrew}
-          />
-        ))}
+        crews
+          .sort(
+            (a, b) =>
+              new Date(b.lastUpdated).getTime() -
+              new Date(a.lastUpdated).getTime(),
+          )
+          .map((crew) => (
+            <CrewCard
+              output={output}
+              crew={crew}
+              onSave={saveCrew}
+              key={crew.id}
+              test={test}
+              deleteCrew={deleteCrew}
+              saveCrew={saveCrew}
+            />
+          ))}
     </div>
   );
 };

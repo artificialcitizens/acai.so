@@ -37,112 +37,37 @@ export const exampleTools: Tool[] = [
 export type ExampleTools = (typeof exampleTools)[number];
 
 export const exampleData: Crew = {
-  id: '1',
-  createdAt: '2021-01-01',
-  lastUpdated: '2021-01-01',
-  name: 'Knapsack',
+  id: '57e106f8-7132-47bb-a50f-d5b30b984f87',
+  createdAt: '2024-01-10T01:28:07.184Z',
+  lastUpdated: '2024-01-10T01:28:07.184Z',
+  name: 'New Crew',
   agents: [
     {
-      id: 'f9edf10b-2012-4544-9cca-d76dc2a5eff6',
-      role: 'Researcher',
-      name: 'Phil',
-      goal: 'Find the best restaurants in Portland\n',
-      backstory: 'A foodie at heart',
-      llm: 'gpt-4',
-      tools: ['DuckDuckGoSearch', 'CreateDoc', 'FileManagementToolkit'],
+      id: '3dbceae4-35df-4559-86fd-17bf1ac50356',
+      role: 'New Agent',
+      name: '',
+      goal: 'test the app',
+      backstory: '',
+      tools: [],
+      llm: 'open-hermes-2.5',
+      verbose: false,
+      allow_delegation: false,
       files: [],
       metadata: {},
-      verbose: true,
-      allow_delegation: true,
-    },
-    {
-      id: '2',
-      role: 'Senior Research',
-      name: 'Jim',
-      goal: 'Research the best way to create a design system for Knapsack.cloud. The design system will be called Toby. Toby is a bear avatar an represents Tobias who came up with the Knapsack problem. Lets start by creating a set of design tokens',
-      backstory:
-        'You are a Senior Research Analyst at a leading tech think tank. Your expertise lies in identifying emerging trends and technologies in AI and design systems. You have a knack for dissecting complex data and presenting actionable insights.',
-      tools: ['DuckDuckGoSearch'],
-      llm: 'open-hermes-2.5',
-      files: ['1'],
-      metadata: {},
-      verbose: true,
-      allow_delegation: false,
-    },
-    {
-      id: '3',
-      name: 'Matt',
-      role: 'Designer',
-      goal: 'Create a design system for Knapsack.cloud. The design system will be called Toby. Toby is a bear avatar an represents Tobias who came up with the Knapsack problem. Lets start by creating a set of design tokens',
-      backstory:
-        'A creative soul who translates complex tech jargon into beautiful designs for the masses, you write using simple words in a friendly and inviting tone that does not sounds like AI.',
-      llm: 'gpt-4',
-      tools: [],
-      files: ['1'],
-      metadata: {},
-      verbose: true,
-      allow_delegation: true,
     },
   ],
   tasks: [
     {
-      id: '1',
-      name: 'AI Integration',
-      description:
-        'We need to create a integrate AI into our design system for Knapsack.cloud. The design system will be called Toby. Toby is a bear avatar an represents Tobias who came up with the Knapsack problem. Lets start by creating a set of design tokens. You can use your team to help you.',
-      agent: 'Product Manager',
-      tools: ['DuckDuckGoSearch'],
-      files: ['1'],
-      metadata: {
-        dueDate: '2021-01-01',
-      },
-    },
-    {
-      id: '2',
-      name: 'AI Research',
-      description:
-        'Conduct a comprehensive analysis of the latest advancements in AI in 2024. Identify key trends, breakthrough technologies, and potential industry impacts. Compile your findings in a detailed report. Your final answer MUST be a full analysis report',
-      agent: 'Senior Research',
-      files: ['1'],
+      id: '08f8d158-e0e9-4aa0-9e4f-c445eafb47f3',
+      name: 'New Task',
+      description: "This is a test, return 'bar'",
+      agent: 'New Agent',
       tools: [],
-      metadata: {
-        dueDate: '2021-01-01',
-      },
-    },
-    {
-      id: '3',
-      name: 'Color Tokens',
-      description:
-        'Lookup colors for knapsack.cloud. Toby is a bear avatar an represents Tobias who came up with the Knapsack problem.',
-      agent: 'Designer',
-      tools: [],
-      files: ['1'],
-      metadata: {
-        dueDate: '2021-01-01',
-      },
-    },
-    {
-      id: '4',
-      name: 'Create Color Tokens',
-      description:
-        'Create a list of color tokens to represent our design system Toby. Toby is a bear avatar an represents Tobias who came up with the Knapsack problem.',
-      agent: 'Designer',
-      tools: [],
-      files: ['1'],
-      metadata: {
-        dueDate: '2021-01-01',
-      },
-    },
-  ],
-  files: [
-    {
-      id: '1',
-      name: 'Toby Design System',
-      type: 'JSON',
-      data: '',
+      files: [],
       metadata: {},
     },
   ],
+  files: [],
   metadata: {},
   process: 'sequential',
 };

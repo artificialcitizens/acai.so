@@ -272,7 +272,7 @@ const createAgentArtifacts = ({
   const tools = [];
 
   const proxyUrl =
-    getToken('PROXY_SERVER_URL') || import.meta.env.VITE_PROXY_SERVER_URL;
+    getToken('CUSTOM_SERVER_URL') || import.meta.env.VITE_CUSTOM_SERVER_URL;
 
   if (!embeddings) {
     throw new Error('Embeddings is undefined');

@@ -1,13 +1,6 @@
 import { AgentCard } from '../AgentCard';
 import { TaskCard } from '../TaskCard';
-import {
-  Agent,
-  Crew,
-  Task,
-  newAgent,
-  newTask,
-  useCrewAi,
-} from '../use-crew-ai';
+import { Crew, newAgent, newTask, useCrewAi } from '../use-crew-ai';
 import { v4 as uuidv4 } from 'uuid';
 
 const CrewAIList = ({ crew }: { crew: Crew }) => {
@@ -16,7 +9,7 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
     <div className="w-full h-full flex flex-col overflow-y-auto">
       <div className="m-2 border-b-2 border-solid border-dark text-acai-white flex flex-col">
         <h3 className="text-2xl font-bold">Agents</h3>
-        {crew.agents.map((agent, index) => (
+        {crew.agents.map((agent) => (
           <AgentCard crewId={crew.id} agent={agent} key={agent.id} />
         ))}
       </div>
@@ -37,7 +30,7 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
 
       <h3 className="text-2xl font-bold m-2">Tasks</h3>
       <ul className="m-2 border-b-2 border-solid border-dark text-acai-white flex flex-col">
-        {crew.tasks.map((task, index) => (
+        {crew.tasks.map((task) => (
           <TaskCard crewId={crew.id} task={task} key={task.id} />
         ))}
       </ul>
@@ -48,6 +41,7 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
             crew.id,
             newTask({
               id: uuidv4(),
+              agent: crew.agents[0].role,
             }),
           );
         }}

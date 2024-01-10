@@ -357,7 +357,7 @@ export const useAva = (): {
           similaritySearchResults: knowledge,
         };
         const agentUrl =
-          getToken('CUSTOM_AGENT_URL') || import.meta.env.VITE_CUSTOM_AGENT_URL;
+          getToken('CUSTOM_SERVER_URL') || import.meta.env.VITE_CUSTOM_AGENT_URL;
 
         if (!agentUrl) {
           return {

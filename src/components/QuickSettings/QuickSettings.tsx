@@ -21,7 +21,6 @@ import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 import { simplifyResponseChain } from '../../lib/ac-langchain/chains/simplify-response-chain';
 import ChatModelDropdown from '../ChatSettings';
 import AudioSettings from '../SettingsTabs/AudioSettings';
-import { SocketManager } from '../SocketManager';
 import ScratchPad from '../ScratchPad/ScratchPad';
 import KnowledgeUpload from '../Knowledge/Knowledge';
 import { useXtts } from '../../hooks/tts-hooks/use-xtts';
@@ -308,16 +307,6 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
       className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow h-full`}
     >
       {workspaceId && <ChatModelDropdown workspaceId={workspaceId} />}
-      {workspaceId &&
-        agentStateService.getSnapshot().context[workspaceId]?.agentMode ===
-          'custom' && (
-          <>
-            <h5 className="text-acai-white text-sm md:text-xs pb-2 pl-3 font-bold mb-3 border-b border-b-light border-b-solid">
-              Custom Agent Server
-            </h5>
-            <SocketManager />
-          </>
-        )}
       <ScratchPad
         placeholder="Custom Prompt"
         content={customPrompt}

@@ -9,26 +9,46 @@ import React, {
 import { toastifyInfo, toastifySuccess } from '../Toast';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 
+enum Token {
+  OPENAI_API_BASE = 'OPENAI_API_BASE',
+  OPENAI_KEY = 'OPENAI_KEY',
+  GOOGLE_API_KEY = 'GOOGLE_API_KEY',
+  GOOGLE_CSE_ID = 'GOOGLE_CSE_ID',
+  ELEVENLABS_API_KEY = 'ELEVENLABS_API_KEY',
+  CUSTOM_SERVER_URL = 'CUSTOM_SERVER_URL',
+  CUSTOM_SERVER_PASSWORD = 'CUSTOM_SERVER_PASSWORD',
+}
+
 const TokenManager: React.FC = () => {
   const [openAIKey, setOpenAIKey] = useLocalStorageKeyValue(
-    'OPENAI_KEY',
+    Token.OPENAI_KEY,
     import.meta.env.VITE_OPENAI_KEY || '',
   );
   const [openAIBase, setOpenAIBase] = useLocalStorageKeyValue(
-    'OPENAI_API_BASE',
+    Token.OPENAI_API_BASE,
     import.meta.env.VITE_OPENAI_API_BASE || 'https://api.openai.com/v1',
   );
   const [googleApiKey, setGoogleApiKey] = useLocalStorageKeyValue(
-    'GOOGLE_API_KEY',
+    Token.GOOGLE_API_KEY,
     import.meta.env.VITE_GOOGLE_API_KEY || '',
   );
   const [googleCSEId, setGoogleCSEId] = useLocalStorageKeyValue(
-    'GOOGLE_CSE_ID',
+    Token.GOOGLE_CSE_ID,
     import.meta.env.VITE_GOOGLE_CSE_ID || '',
   );
   const [elevenlabsApiKey, setElevenlabsApiKey] = useLocalStorageKeyValue(
-    'ELEVENLABS_API_KEY',
+    Token.ELEVENLABS_API_KEY,
     import.meta.env.VITE_ELEVENLABS_API_KEY || '',
+  );
+
+  const [serverUrl, setServerUrl] = useLocalStorageKeyValue(
+    Token.CUSTOM_SERVER_URL,
+    '',
+  );
+
+  const [password, setPassword] = useLocalStorageKeyValue(
+    Token.CUSTOM_SERVER_PASSWORD,
+    '',
   );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -49,24 +69,39 @@ const TokenManager: React.FC = () => {
   const keys = useMemo(
     () => [
       {
-        id: 'OPENAI_API_BASE',
+        id: Token.OPENAI_API_BASE,
         name: 'OpenAI API Base URL',
+        placeholder: 'https://api.openai.com/v1',
         value: openAIBase,
         setValue: setOpenAIBase,
         type: 'text',
       },
       {
-        id: 'OPENAI_KEY',
+        id: Token.OPENAI_KEY,
         name: 'OpenAI API Key',
         value: openAIKey,
         setValue: setOpenAIKey,
         type: 'password',
       },
       {
-        id: 'ELEVENLABS_API_KEY',
+        id: Token.ELEVENLABS_API_KEY,
         name: 'Eleven Labs API Key',
         value: elevenlabsApiKey,
         setValue: setElevenlabsApiKey,
+        type: 'password',
+      },
+      {
+        id: Token.CUSTOM_SERVER_URL,
+        name: 'Custom Server URL',
+        value: serverUrl,
+        setValue: setServerUrl,
+        type: 'text',
+      },
+      {
+        id: Token.CUSTOM_SERVER_PASSWORD,
+        name: 'Custom Server Password',
+        value: password,
+        setValue: setPassword,
         type: 'password',
       },
       // {
@@ -89,6 +124,10 @@ const TokenManager: React.FC = () => {
       setOpenAIKey,
       elevenlabsApiKey,
       setElevenlabsApiKey,
+      serverUrl,
+      setServerUrl,
+      password,
+      setPassword,
     ],
   );
 
@@ -175,7 +214,7 @@ const TokenManager: React.FC = () => {
           Export Config
         </button>
       </span>
-      {keys.map(({ id, name, type }) => (
+      {keys.map(({ id, name, type, placeholder }) => (
         <span className="flex mb-4 items-center" key={id}>
           <label className="text-acai-white pr-2 w-[50%] text-base md:text-sm">
             {name}:
@@ -185,6 +224,7 @@ const TokenManager: React.FC = () => {
             className="text-acai-white text-base md:text-sm bg-base px-[2px]"
             value={values[id] || ''}
             onChange={(e) => setValues({ ...values, [id]: e.target.value })}
+            placeholder={placeholder || ''}
           />
         </span>
       ))}

@@ -1,60 +1,47 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
-import { toastifyAgentLog, toastifyError, toastifyInfo } from '../Toast';
-import { handleCreateDoc } from '../../state';
+
+import {
+  toastifyAgentLog,
+  toastifyError,
+  toastifyInfo,
+} from '../components/Toast';
+import { handleCreateDoc } from '../state';
 import { useNavigate, useParams } from 'react-router-dom';
+import { getToken } from '../utils/config';
 import {
   GlobalStateContext,
   GlobalStateContextValue,
-} from '../../context/GlobalStateContext';
-import SocketContext from '../../context/SocketContext';
+} from '../context/GlobalStateContext';
 
-export const SocketManager: React.FC = () => {
-  const [storedUrl, setStoredUrl] = useLocalStorageKeyValue(
-    'CUSTOM_AGENT_URL',
-    '',
-  );
-  const [storedPassword, setStoredPassword] = useLocalStorageKeyValue(
-    'CUSTOM_AGENT_SERVER_PASSWORD',
-    '',
-  );
-  const [url, setUrl] = useState(storedUrl);
-  const [password, setPassword] = useState(storedPassword);
+/**
+ * @TODO: Update to manage socket events in a more generic way
+ */
+export const useSocketManager = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const { workspaceId: rawWorkspaceId } = useParams<{
     workspaceId: string;
     domain: string;
     id: string;
   }>();
+  const globalServices: GlobalStateContextValue =
+    useContext(GlobalStateContext);
+  const serverUrl = getToken('CUSTOM_SERVER_URL') || '';
+  const serverPassword = getToken('CUSTOM_SERVER_PASSWORD') || '';
 
   const workspaceId = rawWorkspaceId || 'docs';
   const navigate = useNavigate();
-  const globalServices: GlobalStateContextValue =
-    useContext(GlobalStateContext);
 
   useEffect(() => {
-    setUrl(storedUrl);
-    setPassword(storedPassword);
-  }, [storedUrl, storedPassword]);
-
-  useEffect(() => {
-    if (!storedUrl) return;
     handleConnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storedUrl]);
-
-  const handleFormSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    setStoredUrl(url);
-    setStoredPassword(password);
-    handleConnect();
-  };
+  }, []);
 
   const handleConnect = () => {
-    const newSocket = io(storedUrl, {
+    if (!serverUrl) return;
+    const newSocket = io(serverUrl, {
       auth: {
-        password: storedPassword,
+        password: serverPassword,
       },
       autoConnect: false,
     });
@@ -78,10 +65,12 @@ export const SocketManager: React.FC = () => {
     if (!socket) return;
 
     const handleConnectCb = () => {
-      toastifyInfo('Connected to custom agent');
+      toastifyInfo('Connected to server');
       console.log(`Connected: ${socket.id}`);
     };
+
     const handleDisconnect = () => console.log(`Disconnected: ${socket.id}`);
+
     const handleTab = async (data: { title: string; content: string }) => {
       if (!workspaceId) toastifyError('No workspace active');
       const { title, content } = data;
@@ -128,39 +117,16 @@ export const SocketManager: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket]);
 
-  return (
-    <SocketContext.Provider value={socket}>
-      <form className="mb-4" onSubmit={handleFormSubmit}>
-        <span className="flex mb-2 items-center">
-          <label htmlFor="url" className="text-acai-white pr-2 w-[50%]">
-            URL:
-          </label>
-          <input
-            id="url"
-            className="text-acai-white bg-base px-[2px]"
-            type="password"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-          />
-        </span>
-        <span className="flex mb-2 items-center">
-          <label htmlFor="password" className="text-acai-white pr-2 w-[50%]">
-            Password:
-          </label>
-          <input
-            className="text-acai-white bg-base px-[2px]"
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </span>
-        <input
-          type="submit"
-          value="Connect"
-          className="bg-light text-acai-white px-4 py-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
-        />
-      </form>
-    </SocketContext.Provider>
-  );
+  function disconnectSocket(socket: Socket) {
+    socket.off('connect');
+    socket.off('disconnect');
+    socket.off('create-tab');
+    socket.off('error');
+    socket.off('agent-log');
+    socket.off('info-toast');
+
+    socket.disconnect();
+  }
+
+  return { socket, disconnectSocket };
 };
