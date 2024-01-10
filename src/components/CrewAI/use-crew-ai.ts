@@ -98,40 +98,26 @@ const runCrewAi = async (crew: Crew) => {
   return data;
 };
 
-const fetchTools = async () => {
+const fetchTools = async (): Promise<string[]> => {
   const response = await axios.get(`${crewServerURL}/tools`);
   const data = await response.data;
-  return data;
+  return data.response;
 };
 
-const fetchModels = async () => {
+const fetchModels = async (): Promise<string[]> => {
   const response = await axios.get(`${crewServerURL}/models`);
   const data = await response.data;
-  return data;
+  return data.response;
 };
 
+const toolsCache = await fetchTools();
+const modelsCache = await fetchModels();
 // manages the crew and the tasks
 export const useCrewAi = () => {
   const crews = useLiveQuery(() => db.crews.toArray());
   const [output, setOutput] = useState<string>('');
-  const [tools, setTools] = useState<string[]>([]);
-  const [models, setModels] = useState<string[]>([]);
-
-  useEffect(() => {
-    const getTools = async () => {
-      const result = await fetchTools();
-      setTools(result.response);
-    };
-    const getModels = async () => {
-      const result = await fetchModels();
-
-      setModels(result.response);
-    };
-
-    getTools();
-    getModels();
-  }, []);
-
+  const [tools] = useState<string[]>(toolsCache);
+  const [models] = useState<string[]>(modelsCache);
   const newCrew = async () => {
     if (!crews) {
       toastifyError('Failed to create new crew');
