@@ -11,7 +11,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 
 const CrewAIList = ({ crew }: { crew: Crew }) => {
-  const { addAgentToCrew, addTaskToCrew } = useCrewAi();
+  const { addAgentToCrew, addTaskToCrew, models } = useCrewAi();
   return (
     <div className="w-full h-full flex flex-col overflow-y-auto">
       <div className="m-2 border-b-2 border-solid border-dark text-acai-white flex flex-col">
@@ -23,7 +23,13 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
       <button
         className="w-full text-bold font-2xl  rounded-md mb-2"
         onClick={() => {
-          addAgentToCrew(crew.id, newAgent(uuidv4()));
+          addAgentToCrew(
+            crew.id,
+            newAgent({
+              id: uuidv4(),
+              llm: models[0],
+            }),
+          );
         }}
       >
         Add Agent
@@ -38,7 +44,12 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
       <button
         className="w-full text-bold font-2xl  rounded-md mb-2"
         onClick={() => {
-          addTaskToCrew(crew.id, newTask(uuidv4()));
+          addTaskToCrew(
+            crew.id,
+            newTask({
+              id: uuidv4(),
+            }),
+          );
         }}
       >
         Add Task

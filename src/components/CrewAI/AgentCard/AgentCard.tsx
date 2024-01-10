@@ -4,7 +4,6 @@ import TextBox from '../../InlineEdit/TextBox';
 import Dropdown from '../../InlineEdit/Dropdown';
 import Checkbox from '../../InlineEdit/Checkbox';
 import TextArea from '../../InlineEdit/TextArea';
-import { toastifyInfo } from '../../Toast';
 
 interface AgentCardProps {
   agent: Agent;
@@ -111,6 +110,9 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
                   console.log('cancel');
                 }}
                 onSave={(value) => {
+                  if (!value) {
+                    return;
+                  }
                   updateAgentInCrew(crewId, { ...agent, tools: value });
                 }}
                 placeholder="Add tools"
@@ -130,6 +132,9 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
                   console.log('cancel');
                 }}
                 onSave={(value) => {
+                  if (!value) {
+                    return;
+                  }
                   updateAgentInCrew(crewId, { ...agent, llm: value });
                 }}
                 placeholder="Select an LLM"
@@ -164,7 +169,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
         <button
           onClick={() => {
             window.confirm(
-              `Are you sure you wish to delete this agent? ID: ${agent.id}`,
+              `Are you sure you wish to delete this agent? ID: ${agent.role}`,
             ) && removeAgentFromCrew(crewId, agent.id);
           }}
         >

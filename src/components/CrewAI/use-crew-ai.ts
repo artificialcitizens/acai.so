@@ -55,15 +55,15 @@ export interface Crew {
   process: string;
 }
 
-export const newAgent = (id: string): Agent => {
+export const newAgent = ({ id, llm }: { id: string; llm: string }): Agent => {
   return {
     id,
     role: 'New Agent',
     name: '',
-    goal: '',
+    goal: 'Help the user test the system',
     backstory: '',
     tools: [],
-    llm: '',
+    llm: llm,
     verbose: false,
     allow_delegation: false,
     files: [],
@@ -71,12 +71,12 @@ export const newAgent = (id: string): Agent => {
   };
 };
 
-export const newTask = (id: string): Task => {
+export const newTask = ({ id }: { id: string }): Task => {
   return {
     id,
     name: 'New Task',
-    description: '',
-    agent: '',
+    description: 'This is a test, return "bar"',
+    agent: 'New Agent',
     tools: [],
     files: [],
     metadata: {},
@@ -135,8 +135,13 @@ export const useCrewAi = () => {
       createdAt: new Date().toISOString(),
       lastUpdated: new Date().toISOString(),
       name: 'New Crew',
-      agents: [newAgent(uuid())],
-      tasks: [newTask(uuid())],
+      agents: [
+        newAgent({
+          id: uuid(),
+          llm: models[0],
+        }),
+      ],
+      tasks: [newTask({ id: uuid() })],
       files: [],
       metadata: {},
       process: 'sequential',
