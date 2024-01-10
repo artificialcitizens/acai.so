@@ -1,6 +1,7 @@
 // db.ts
 import Dexie, { Table } from 'dexie';
 import { ACDoc, Workspace, AgentWorkspace } from './src/state';
+import { toastifyInfo } from './src/components/Toast';
 
 export interface AcaiMemoryVector {
   content: string;
@@ -53,6 +54,43 @@ async function isDeclaredSchemaSameAsInstalled(db: Dexie) {
   return declaredSchema === installedSchema;
 }
 
+function checkAndOpenDb() {
+  indexedDB
+    .databases()
+    .then((databases) => {
+      const dbExists = databases.some((dbInfo) => dbInfo.name === db.name);
+      if (dbExists) {
+        isDeclaredSchemaSameAsInstalled(db).then((same) => {
+          if (!same) {
+            console.log('Schema mismatch, deleting database');
+            // delete db in indexedDB
+            const req = indexedDB.deleteDatabase(db.name);
+            req.onsuccess = () => {
+              console.log('Deleted database successfully');
+              db.open().catch((err) => {
+                console.error(err.stack || err);
+              });
+              toastifyInfo(
+                'Your db schema was out of date, we deleted it and created a new one for you. Please refresh the page',
+              );
+            };
+          } else {
+            db.open().catch((err) => {
+              console.error(err.stack || err);
+            });
+          }
+        });
+      } else {
+        db.open().catch((err) => {
+          console.error(err.stack || err);
+        });
+      }
+    })
+    .catch((err) => {
+      console.error('Error checking for existing databases: ', err);
+    });
+}
+
 export class AcaiDexie extends Dexie {
   // 'embeddings' is added by dexie when declaring the stores()
   // We just tell the typing system this is the case
@@ -87,36 +125,5 @@ export class AcaiDexie extends Dexie {
 }
 
 export const db = new AcaiDexie();
-indexedDB
-  .databases()
-  .then((databases) => {
-    const dbExists = databases.some((dbInfo) => dbInfo.name === db.name);
-    if (dbExists) {
-      isDeclaredSchemaSameAsInstalled(db).then((same) => {
-        if (!same) {
-          console.log('Schema mismatch, deleting database');
-          // delete db in indexedDB
-          const req = indexedDB.deleteDatabase(db.name);
-          req.onsuccess = () => {
-            console.log('Deleted database successfully');
-            db.open().catch((err) => {
-              console.error(err.stack || err);
-            });
-          };
-        } else {
-          db.open().catch((err) => {
-            console.error(err.stack || err);
-          });
-        }
-      });
-    } else {
-      console.log('Database does not exist.');
-      db.open().catch((err) => {
-        console.error(err.stack || err);
-      });
-      window.location.reload();
-    }
-  })
-  .catch((err) => {
-    console.error('Error checking for existing databases: ', err);
-  });
+
+checkAndOpenDb();
