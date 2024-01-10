@@ -51,6 +51,7 @@ export interface Crew {
   agents: Agent[];
   tasks: Task[];
   files: File[];
+  example?: string;
   metadata: Record<string, string | number | JSON>;
   process: string;
 }
@@ -150,6 +151,7 @@ export const useCrewAi = () => {
       tasks: [],
       files: [],
       metadata: {},
+      example: '',
       process: 'sequential',
       // Add other necessary properties here
     };
@@ -323,6 +325,8 @@ export const useCrewAi = () => {
       toastifyInfo(`Running Crew ${crew.name}`);
       const result = await runCrewAi(crew);
       setOutput(result.response);
+      crew.example = result.response;
+      await saveCrew(crew);
     } catch (e: any) {
       toastifyError(e.message);
     }

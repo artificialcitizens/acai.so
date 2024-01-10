@@ -82,10 +82,10 @@ const CrewCard: React.FC<CrewCardProps> = ({
           ) : (
             <CrewAIList crew={crew} />
           )}
-          {output && (
+          {crew.example && (
             <div>
-              <h4>Test Output</h4>
-              <p>{output}</p>
+              <h4>Example Output</h4>
+              <p>{crew.example}</p>
             </div>
           )}
         </>

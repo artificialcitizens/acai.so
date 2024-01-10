@@ -45,6 +45,7 @@ type Message = {
 
 export const agentMode = [
   'chat',
+  'crew',
   // maps to rag agent
   'knowledge',
   'custom',
@@ -85,6 +86,7 @@ export const useAva = (): {
   }>();
 
   const workspaceId = rawWorkspaceId || 'docs';
+  const { models, tools, crews } = useCrewAi();
 
   // @TODO - Seems to need to be here to get the context to load, why though?
   const knowledgeItems = useLiveQuery(async () => {
@@ -357,7 +359,8 @@ export const useAva = (): {
           similaritySearchResults: knowledge,
         };
         const agentUrl =
-          getToken('CUSTOM_SERVER_URL') || import.meta.env.VITE_CUSTOM_AGENT_URL;
+          getToken('CUSTOM_SERVER_URL') ||
+          import.meta.env.VITE_CUSTOM_AGENT_URL;
 
         if (!agentUrl) {
           return {
@@ -384,24 +387,30 @@ export const useAva = (): {
         }
       }
       // case 'crew': {
+      //   if (!crews) {
+      //     setLoading(false);
+      //     return {
+      //       response: 'No crews found',
+      //     };
+      //   }
       //   setLoading(true);
       //   try {
       //     const task: Task = {
       //       id: Date.now().toString(),
-      //       name: 'New Task',
-      //       description: '',
-      //       agent: '',
+      //       name: 'Answer the users query',
+      //       description: message,
+      //       agent: crews[0].agents[0].role,
       //       tools: [],
       //       files: [],
       //       metadata: {},
       //     };
 
-      //     const response = addTaskAndRun({
-      //       crewId: '1',
+      //     const response = await addTaskAndRun({
+      //       crewId: crews[0].id,
       //       task,
       //     });
       //     setLoading(false);
-      //     return { response };
+      //     return { response: response.response };
       //   } catch (error: any) {
       //     setLoading(false);
       //     return error.message;

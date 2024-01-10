@@ -1,5 +1,5 @@
-import { AgentCard } from '../AgentCard';
-import { TaskCard } from '../TaskCard';
+import { AgentCard } from '../Agent';
+import { TaskCard } from '../Task';
 import { Crew, newAgent, newTask, useCrewAi } from '../use-crew-ai';
 import { v4 as uuidv4 } from 'uuid';
 
