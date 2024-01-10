@@ -23,3 +23,7 @@ pnpm i
 ```
 pnpm run dev
 ```
+
+Add your custom server to the custom server url settings in the acai interface
+
+Setup your crew by going to settings and the Crew Manager tab
