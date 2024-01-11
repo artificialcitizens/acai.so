@@ -187,7 +187,9 @@ export const useAva = (): {
           };
         } catch (error: any) {
           setLoading(false);
-          return error.message;
+          return {
+            response: error.message || 'Something went wrong',
+          };
         }
       }
       case 'document': {
