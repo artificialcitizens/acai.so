@@ -29,6 +29,8 @@ import { Button } from '../Button/Button';
 import { SendIcon, SpinnerIcon, StopIcon, TrashIcon } from '../Icons/Icons';
 import { MessageRole } from '../Ava/use-ava';
 import { v4 as uuidv4 } from 'uuid';
+import { getToken } from '../../utils/config';
+import { toastifyError } from '../Toast';
 
 const markdownComponents = {
   code: ({ node, inline, className, children, ...props }: any) => {
@@ -157,6 +159,7 @@ const Chat: React.FC<ChatProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [msgInputValue, setMsgInputValue] = useState(startingValue);
   const [state, send] = useActor(agentStateService);
+  const apiToken = getToken('OPENAI_KEY');
 
   // const [controller, setController] = useState<AbortController | null>(
   //   abortController,
@@ -272,6 +275,19 @@ const Chat: React.FC<ChatProps> = ({
 
   const handleSend = useCallback(
     async (message: string) => {
+      if ((!apiToken || apiToken === 'undefined') && !import.meta.env.DEV) {
+        toastifyError('Please enter your OpenAI API key in the settings menu.');
+        return;
+      } else if (
+        (!apiToken || apiToken === 'undefined') &&
+        import.meta.env.DEV &&
+        !import.meta.env.VITE_OPENAI_KEY
+      ) {
+        toastifyError(
+          'Please enter your OpenAI API key in the settings menu or in the .env file.',
+        );
+        return;
+      }
       const userChatHistory = addMessage(message, 'user', 'outgoing');
       setMsgInputValue('');
       if (!/Android|webOS|iPhone|iPad|/i.test(navigator.userAgent)) {
@@ -318,6 +334,7 @@ const Chat: React.FC<ChatProps> = ({
       recentChatHistory,
       send,
       workspaceId,
+      apiToken,
     ],
   );
 
