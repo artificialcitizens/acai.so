@@ -4,11 +4,12 @@ from flask_cors import CORS
 
 import requests
 import json
-from tools.create_doc import SocketTool
 
-from generator.create_crew import create_crew_from_config
+from langchain.tools import BaseTool, StructuredTool, tool, DuckDuckGoSearchRun
+
+from tools.file_system_manager import file_manager
 from models.chat_models import model_mapping
-from langchain.tools import BaseTool, StructuredTool, tool
+from generator.create_crew import create_crew_from_config
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "your_secret_key"
@@ -33,23 +34,47 @@ socketio = SocketIO(
     ],
 )
 
-from langchain.tools import DuckDuckGoSearchRun
-from tools.file_system_manager import toolkit
-
-
 @tool
 def create_doc(content: str) -> str:
-    """Create a document."""
+    """Create and send a document to the user. Input is a string"""
     socketio.emit(
-            "create-tab", {"title": "Hello Tab!", "content": f'Im called by the agent with {content}'}
+            "create-tab", {"title": "Crew Message", "content": f'{content}'}
     )
 
     return "success"
 
+from threading import Event
+
+
+response_data = {}
+response_received = Event()
+
+@socketio.on('human-in-the-loop-response')
+def handle_human_in_the_loop(json):
+    print('received json: ' + str(json))
+    response_data['response'] = json
+    response_received.set()
+
+@tool
+def human_in_the_loop(content: str) -> str:
+    """Ask the user for input. Input is your question to the user"""
+    response_received.clear()
+    socketio.emit("human-in-the-loop", {"question": f'{content}'})
+
+    # Wait for the event or timeout after 10 seconds
+    response_received.wait(timeout=15)
+
+    if not response_received.is_set():
+        print('timeout')
+        return 'Timeout waiting for response'
+
+    return response_data.get('response', 'No response received')
+
 tool_mapping = {
 "DuckDuckGoSearch": DuckDuckGoSearchRun(),
-"FileManagementToolkit": toolkit,
+"FileManagementToolkit": file_manager,
 "CreateDoc": create_doc,
+"HumanInTheLoop": human_in_the_loop
 }
 
 @app.route("/tools", methods=["GET"])
@@ -66,15 +91,6 @@ def models():
 
 @app.route("/run-crew", methods=["POST"])
 def create_crew():
-    # import io   
-    # import contextlib
-    # def capture_output():
-    
-    #     buffer = io.StringIO()
-    #     with contextlib.redirect_stdout(buffer):
-    #         crew.kickoff()
-    #     return buffer.getvalue()
-
     try:
         payload = request.get_json()
         config_string = json.dumps(payload)
