@@ -4,6 +4,7 @@ import TextBox from '../../InlineEdit/TextBox';
 import Dropdown from '../../InlineEdit/Dropdown';
 import Checkbox from '../../InlineEdit/Checkbox';
 import TextArea from '../../InlineEdit/TextArea';
+import { toastifyInfo } from '../../Toast';
 
 interface AgentCardProps {
   agent: Agent;
@@ -96,6 +97,9 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
                   });
                 }}
               />
+              <p className="text-xs">
+                Recommended to use with multiple agents only
+              </p>
             </li>
             <li className="p-2">
               Tools:
@@ -133,6 +137,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
                 }}
                 onSave={(value) => {
                   if (!value) {
+                    toastifyInfo('LLM cannot be empty');
                     return;
                   }
                   updateAgentInCrew(crewId, { ...agent, llm: value });

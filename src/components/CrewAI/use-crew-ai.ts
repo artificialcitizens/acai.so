@@ -1,9 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { toastifyError, toastifyInfo } from '../Toast';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../db';
 import { v4 as uuid } from 'uuid';
+import { getToken } from '../../utils/config';
+
+export interface CrewLog {
+  crewId: string;
+  createdAt: string;
+  logs: string[];
+}
 
 export interface File {
   id: string;
@@ -53,6 +60,7 @@ export interface Crew {
   files: File[];
   example?: string;
   metadata: Record<string, string | number | JSON>;
+  logs?: CrewLog[];
   process: string;
 }
 
@@ -90,21 +98,28 @@ export const newTask = ({
   };
 };
 
-const crewServerURL = import.meta.env.VITE_CUSTOM_SERVER_URL;
-
-const runCrewAi = async (crew: Crew) => {
+// returns {response: string, status: string}
+const runCrewAi = async (
+  crew: Crew,
+): Promise<{ response: string; status: string }> => {
+  const crewServerURL =
+    getToken('CUSTOM_SERVER_URL') || import.meta.env.VITE_CREW_SERVER_URL;
   const response = await axios.post(`${crewServerURL}/run-crew`, crew);
   const data = await response.data;
   return data;
 };
 
 const fetchTools = async (): Promise<string[]> => {
+  const crewServerURL =
+    getToken('CUSTOM_SERVER_URL') || import.meta.env.VITE_CREW_SERVER_URL;
   const response = await axios.get(`${crewServerURL}/tools`);
   const data = await response.data;
   return data.response;
 };
 
 const fetchModels = async (): Promise<string[]> => {
+  const crewServerURL =
+    getToken('CUSTOM_SERVER_URL') || import.meta.env.VITE_CREW_SERVER_URL;
   const response = await axios.get(`${crewServerURL}/models`);
   const data = await response.data;
   return data.response;
@@ -329,25 +344,37 @@ export const useCrewAi = () => {
   /**
    * Adds a task to the beginning|end of the task list
    */
-  const addTaskAndRun = ({ crewId, task }: { crewId: string; task: Task }) => {
+  const addTaskAndRun = async ({
+    crewId,
+    task,
+  }: {
+    crewId: string;
+    task: Task;
+  }) => {
     if (!task) {
       toastifyError(`Task not found`);
-      return;
+      return {
+        response: 'Task not found',
+        status: 'error',
+      };
     }
 
     const crew = crews?.filter((crew) => crew.id === crewId)[0];
 
     if (!crew) {
       toastifyError(`Crew ${crewId} not found`);
-      return;
+      return {
+        response: `Crew ${crewId} not found`,
+        status: 'error',
+      };
     }
-
-    const tempCrew: Crew = { ...crew };
+    // cheap deep copy
+    const tempCrew: Crew = JSON.parse(JSON.stringify(crew));
     tempCrew.tasks.unshift(task);
 
-    runCrewAi(tempCrew).then((result) => {
-      return result;
-    });
+    const response = runCrewAi(tempCrew);
+
+    return response;
   };
 
   const getFiles = async (crewId: string) => {

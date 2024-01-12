@@ -119,11 +119,7 @@ export class AcaiDexie extends Dexie {
     });
     this.version(4).stores({
       crews:
-        '++id, createdAt, lastUpdated, name, agents, tasks, files, metadata, process',
-    });
-    this.version(5).stores({
-      crews:
-        '++id, createdAt, lastUpdated, name, agents, tasks, files, metadata, process, example',
+        '++id, createdAt, lastUpdated, name, agents, tasks, files, metadata, process, logs, example',
     });
 
     this.knowledge = this.table('knowledge');

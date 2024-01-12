@@ -3,6 +3,7 @@ import { Task, useCrewAi } from '../use-crew-ai'; // Assuming you have a types f
 import TextBox from '../../InlineEdit/TextBox';
 import Checkbox from '../../InlineEdit/Checkbox';
 import Dropdown from '../../InlineEdit/Dropdown';
+import { toastifyInfo } from '../../Toast';
 
 interface TaskCardProps {
   task: Task;
@@ -37,6 +38,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
                   console.log('cancel');
                 }}
                 onSave={(value) => {
+                  if (!value) {
+                    toastifyInfo('Task name cannot be empty');
+                    return;
+                  }
                   updateTaskInCrew(crewId, { ...task, name: value });
                 }}
                 value={task.name}
@@ -49,6 +54,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
                   console.log('cancel');
                 }}
                 onSave={(value) => {
+                  if (!value) {
+                    toastifyInfo('Task description cannot be empty');
+                    return;
+                  }
                   updateTaskInCrew(crewId, { ...task, description: value });
                 }}
                 value={task.description}
@@ -67,6 +76,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
                   console.log('cancel');
                 }}
                 onSave={(value) => {
+                  if (!value) {
+                    toastifyInfo('Task agent cannot be empty');
+                    return;
+                  }
                   updateTaskInCrew(crewId, { ...task, agent: value });
                 }}
                 placeholder="Select an Agent"
@@ -86,6 +99,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
                   console.log('cancel');
                 }}
                 onSave={(value) => {
+                  if (!value) {
+                    return;
+                  }
                   updateTaskInCrew(crewId, { ...task, tools: value });
                 }}
                 placeholder="Add tools"
