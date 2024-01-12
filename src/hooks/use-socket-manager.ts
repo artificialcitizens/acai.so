@@ -14,9 +14,6 @@ import {
   GlobalStateContextValue,
 } from '../context/GlobalStateContext';
 
-/**
- * @TODO: Update to manage socket events in a more generic way
- */
 export const useSocketManager = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const { workspaceId: rawWorkspaceId } = useParams<{
@@ -26,8 +23,11 @@ export const useSocketManager = () => {
   }>();
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
-  const serverUrl = getToken('CUSTOM_SERVER_URL') || '';
-  const serverPassword = getToken('CUSTOM_SERVER_PASSWORD') || '';
+  const serverUrl =
+    getToken('CUSTOM_SERVER_URL') || import.meta.env.VITE_CUSTOM_SERVER_URL;
+  const serverPassword =
+    getToken('CUSTOM_SERVER_PASSWORD') ||
+    import.meta.env.VITE_CUSTOM_SERVER_PASSWORD;
 
   const workspaceId = rawWorkspaceId || 'docs';
   const navigate = useNavigate();
@@ -61,69 +61,96 @@ export const useSocketManager = () => {
     setSocket(newSocket);
   };
 
+  const handleConnectCb = () => {
+    if (!socket) return;
+    toastifyInfo('Connected to server');
+    console.log(`Connected: ${socket.id}`);
+  };
+
+  const handleDisconnect = () => {
+    if (!socket) return;
+
+    console.log(`Disconnected: ${socket.id}`);
+  };
+
+  const handleTab = async (data: { title: string; content: string }) => {
+    if (!workspaceId) toastifyError('No workspace active');
+    const { title, content } = data;
+    const tab = await handleCreateDoc({ title, content }, workspaceId);
+    globalServices.appStateService.send({
+      type: 'ADD_DOC',
+      doc: tab,
+    });
+    setTimeout(() => {
+      navigate(`/${workspaceId}/documents/${tab.id}`);
+    }, 250);
+  };
+
+  const handleHumanInTheLoop = (data: { question: string }) => {
+    if (!socket) return;
+    const response = window.prompt(data.question);
+    if (response) {
+      toastifyInfo(`Sending response to server ${response}`);
+      socket?.emit('human-in-the-loop-response', response);
+    } else {
+      socket?.emit('human-in-the-loop-response', 'The user did not respond');
+    }
+  };
+  const events = [
+    { name: 'connect', handler: handleConnectCb },
+    { name: 'disconnect', handler: handleDisconnect },
+    { name: 'create-tab', handler: handleTab },
+    {
+      name: 'error',
+      handler: (err: any) => {
+        console.error(err);
+        toastifyError(err.message);
+      },
+    },
+    {
+      name: 'agent-log',
+      handler: (data: string) => {
+        toastifyAgentLog(data);
+      },
+    },
+    {
+      name: 'crew-log',
+      handler: (data: string) => {
+        toastifyAgentLog(data);
+      },
+    },
+    {
+      name: 'info-toast',
+      handler: (data: { info: string }) => {
+        console.log(data.info);
+        toastifyInfo(data.info);
+      },
+    },
+    {
+      name: 'human-in-the-loop',
+      handler: handleHumanInTheLoop,
+    },
+  ];
+
   useEffect(() => {
     if (!socket) return;
 
-    const handleConnectCb = () => {
-      toastifyInfo('Connected to server');
-      console.log(`Connected: ${socket.id}`);
-    };
-
-    const handleDisconnect = () => console.log(`Disconnected: ${socket.id}`);
-
-    const handleTab = async (data: { title: string; content: string }) => {
-      if (!workspaceId) toastifyError('No workspace active');
-      const { title, content } = data;
-      const tab = await handleCreateDoc({ title, content }, workspaceId);
-      globalServices.appStateService.send({
-        type: 'ADD_DOC',
-        doc: tab,
-      });
-      setTimeout(() => {
-        navigate(`/${workspaceId}/documents/${tab.id}`);
-      }, 250);
-    };
-    socket.on('connect', handleConnectCb);
-    socket.on('disconnect', handleDisconnect);
-    socket.on('create-tab', handleTab);
-    socket.on('error', (err: any) => {
-      console.error(err);
-      toastifyError(err.message);
-    });
-    socket.on('agent-log', (data: string) => {
-      toastifyAgentLog(data);
-    });
-    socket.on('info-toast', (data: { info: string }) => {
-      console.log(data.info);
-      toastifyInfo(data.info);
+    events.forEach((event) => {
+      socket.on(event.name, event.handler);
     });
 
     return () => {
-      socket.off('connect', handleConnect);
-      socket.off('disconnect', handleDisconnect);
-      socket.off('create-tab', handleTab);
-      socket.off('error', (err: any) => {
-        console.error(err);
-        toastifyError(err.message);
-      });
-      socket.off('agent-log', (data: string) => {
-        toastifyAgentLog(data);
-      });
-      socket.off('info-toast', (err: any) => {
-        console.error(err);
-        toastifyInfo(err.message);
+      events.forEach((event) => {
+        socket.off(event.name, event.handler);
       });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket]);
 
   function disconnectSocket(socket: Socket) {
-    socket.off('connect');
-    socket.off('disconnect');
-    socket.off('create-tab');
-    socket.off('error');
-    socket.off('agent-log');
-    socket.off('info-toast');
+    events.forEach((event) => {
+      socket.off(event.name);
+    });
 
     socket.disconnect();
   }
