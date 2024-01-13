@@ -28,3 +28,4 @@ cache.db
 dev-dist
 __pycache__
 server/env.py
+__pycache__
