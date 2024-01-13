@@ -11,10 +11,10 @@ interface TaskCardProps {
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
-  const [showDetails, setShowDetails] = useState(false);
   const { crews, updateTaskInCrew, removeTaskFromCrew, tools, getFiles } =
     useCrewAi();
   const [agentRoles, setAgentRoles] = useState<string[]>([]);
+  const [showDetails, setShowDetails] = useState<boolean>(false);
   const files = getFiles(crewId);
 
   useEffect(() => {
@@ -26,7 +26,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
   }, [crews, crewId]);
 
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
+    <div
+      className="w-full"
+      style={{ position: 'relative', display: 'inline-block' }}
+    >
       <ul className="bg-darker rounded-md p-4 mb-2" key={task.id}>
         <li className="p-2">{task.name}</li>
         {showDetails && (

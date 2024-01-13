@@ -1,17 +1,118 @@
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { useSortable, SortableContext } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { AgentCard } from '../Agent';
 import { TaskCard } from '../Task';
-import { Crew, newAgent, newTask, useCrewAi } from '../use-crew-ai';
+import { Crew, Task, newAgent, newTask, useCrewAi } from '../use-crew-ai';
 import { v4 as uuidv4 } from 'uuid';
+import { useState } from 'react';
+
+interface DraggableProps {
+  id: string;
+  parent: string;
+  setParent: (parent: string) => void;
+  children: React.ReactNode;
+}
+
+const DraggableTask: React.FC<DraggableProps> = ({
+  id,
+  parent,
+  setParent,
+  children,
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    width: '100%',
+  };
+  return (
+    <li ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </li>
+  );
+};
 
 const CrewAIList = ({ crew }: { crew: Crew }) => {
-  const { addAgentToCrew, addTaskToCrew, models } = useCrewAi();
+  const { addAgentToCrew, addTaskToCrew, models, saveCrew } = useCrewAi();
+  const [parent, setParent] = useState<string>('');
+  async function handleAgentDragEnd(event: { active: any; over: any }) {
+    const { active, over } = event;
+
+    if (over) {
+      const oldIndex = crew.agents.findIndex((agent) => agent.id === active.id);
+      const newIndex = crew.agents.findIndex((agent) => agent.id === over.id);
+
+      const newAgents = Array.from(crew.agents);
+      const [removed] = newAgents.splice(oldIndex, 1);
+      newAgents.splice(newIndex, 0, removed);
+
+      const newCrew = {
+        ...crew,
+        agents: newAgents,
+      };
+
+      saveCrew(newCrew);
+    }
+  }
+
+  async function handleTaskDragEnd(event: { active: any; over: any }) {
+    const { active, over } = event;
+
+    if (over) {
+      const oldIndex = crew.tasks.findIndex((task) => task.id === active.id);
+      const newIndex = crew.tasks.findIndex((task) => task.id === over.id);
+
+      const newTasks = Array.from(crew.tasks);
+      const [removed] = newTasks.splice(oldIndex, 1);
+      newTasks.splice(newIndex, 0, removed);
+
+      const newCrew = {
+        ...crew,
+        tasks: newTasks,
+      };
+
+      saveCrew(newCrew);
+    }
+  }
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+  );
   return (
     <div className="w-full h-full flex flex-col overflow-y-auto">
       <div className="m-2 border-b-2 border-solid border-dark text-acai-white flex flex-col">
         <h3 className="text-2xl font-bold">Agents</h3>
-        {crew.agents.map((agent) => (
-          <AgentCard crewId={crew.id} agent={agent} key={agent.id} />
-        ))}
+        <DndContext onDragEnd={handleAgentDragEnd} sensors={sensors}>
+          <ul className="m-2 border-b-2 border-solid border-dark text-acai-white flex flex-col">
+            <SortableContext items={crew.agents}>
+              {crew.agents.map((agent, index) => (
+                <DraggableTask
+                  key={agent.id}
+                  id={agent.id}
+                  parent={parent}
+                  setParent={setParent}
+                >
+                  <AgentCard crewId={crew.id} agent={agent} />
+                </DraggableTask>
+              ))}
+            </SortableContext>
+          </ul>
+        </DndContext>
       </div>
       <button
         className="w-full text-bold font-2xl  rounded-md mb-2"
@@ -29,11 +130,22 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
       </button>
 
       <h3 className="text-2xl font-bold m-2">Tasks</h3>
-      <ul className="m-2 border-b-2 border-solid border-dark text-acai-white flex flex-col">
-        {crew.tasks.map((task) => (
-          <TaskCard crewId={crew.id} task={task} key={task.id} />
-        ))}
-      </ul>
+      <DndContext onDragEnd={handleTaskDragEnd} sensors={sensors}>
+        <ul className="m-2 border-b-2 border-solid border-dark text-acai-white flex flex-col">
+          <SortableContext items={crew.tasks}>
+            {crew.tasks.map((task, index) => (
+              <DraggableTask
+                key={task.id}
+                id={task.id}
+                parent={parent}
+                setParent={setParent}
+              >
+                <TaskCard crewId={crew.id} task={task} />
+              </DraggableTask>
+            ))}
+          </SortableContext>
+        </ul>
+      </DndContext>
       <button
         className="w-full text-bold font-2xl  rounded-md mb-2"
         onClick={() => {

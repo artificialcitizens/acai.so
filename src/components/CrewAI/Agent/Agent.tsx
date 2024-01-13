@@ -17,7 +17,10 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
     useCrewAi();
   const files = getFiles(crewId);
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
+    <div
+      className="w-full"
+      style={{ position: 'relative', display: 'inline-block' }}
+    >
       {/* <TextBox onCancel={() => {}} onSave={() => {}} value={agent.role} /> */}
       <ul className="bg-base rounded-md p-4 mb-2" key={agent.role}>
         <li className="p-2">{agent.role}</li>
