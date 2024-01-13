@@ -22,11 +22,11 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
       style={{ position: 'relative', display: 'inline-block' }}
     >
       {/* <TextBox onCancel={() => {}} onSave={() => {}} value={agent.role} /> */}
-      <ul className="bg-base rounded-md p-4 mb-2" key={agent.role}>
-        <li className="p-2">{agent.role}</li>
+      <ul className="bg-dark rounded-md p-4 mb-2 text-sm" key={agent.role}>
+        <li className="p-2  font-bold text-sm">{agent.role}</li>
         {showDetails && (
           <>
-            <li className="p-2">
+            <li className="p-2 text-sm font-medium">
               Role:
               <TextBox
                 onCancel={() => {
@@ -38,7 +38,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
                 value={agent.role}
               />
             </li>
-            <li className="p-2">
+            <li className="p-2 text-sm font-medium">
               Name:
               <TextBox
                 onCancel={() => {
@@ -51,7 +51,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
               />
             </li>
 
-            <li className="p-2">
+            <li className="p-2 text-sm font-medium">
               Goal:
               <TextArea
                 onCancel={() => {
@@ -63,7 +63,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
                 value={agent.goal}
               />
             </li>
-            <li className="p-2">
+            <li className="p-2 text-sm font-medium">
               Backstory:
               <TextArea
                 onCancel={() => {
@@ -75,7 +75,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
                 value={agent.backstory}
               />
             </li>
-            <li className="p-2">
+            <li className="p-2 text-sm font-medium">
               Verbose:
               <input
                 type="checkbox"
@@ -88,7 +88,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
                 }}
               />
             </li>
-            <li className="p-2">
+            <li className="p-2 text-sm font-medium">
               Allow Delegation:
               <input
                 type="checkbox"
@@ -104,7 +104,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
                 Recommended to use with multiple agents only
               </p>
             </li>
-            <li className="p-2">
+            <li className="p-2 text-sm font-medium">
               Tools:
               <Checkbox
                 options={
@@ -126,7 +126,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
                 value={agent.tools}
               />
             </li>
-            <li className="p-2">
+            <li className="p-2 text-sm font-medium">
               LLM:
               <Dropdown
                 options={
@@ -149,7 +149,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
                 value={agent.llm || models[0]}
               />
             </li>
-            {/* <li className="p-2">
+            {/* <li className="p-2 text-sm font-medium">
               Files:
               <Checkbox
                 options={

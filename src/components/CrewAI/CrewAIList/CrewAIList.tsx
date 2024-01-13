@@ -84,7 +84,7 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
   return (
     <div className="w-full h-full flex flex-col overflow-y-auto">
       <div className="m-2 border-b-2 border-solid border-dark text-acai-white flex flex-col">
-        <h3 className="text-2xl font-bold">Agents</h3>
+        <h2 className="text-acai-white text-sm mb-4">Agents</h2>
         <DndContext onDragEnd={handleAgentDragEnd} sensors={sensors}>
           <ul className="m-2 border-b-2 border-solid border-dark text-acai-white flex flex-col">
             <SortableContext items={crew.agents}>
@@ -103,7 +103,7 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
         </DndContext>
       </div>
       <button
-        className="w-full text-bold font-2xl  rounded-md mb-2"
+        className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 mb-2 mx-8 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
         onClick={() => {
           addAgentToCrew(
             crew.id,
@@ -117,7 +117,7 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
         Add Agent
       </button>
 
-      <h3 className="text-2xl font-bold m-2">Tasks</h3>
+      <h2 className="text-acai-white text-sm mb-4">Tasks</h2>
       <DndContext onDragEnd={handleTaskDragEnd} sensors={sensors}>
         <ul className="m-2 border-b-2 border-solid border-dark text-acai-white flex flex-col">
           <SortableContext items={crew.tasks}>
@@ -135,7 +135,7 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
         </ul>
       </DndContext>
       <button
-        className="w-full text-bold font-2xl  rounded-md mb-2"
+        className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 mb-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
         onClick={() => {
           addTaskToCrew(
             crew.id,

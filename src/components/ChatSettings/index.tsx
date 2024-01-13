@@ -1,3 +1,3 @@
-import { ChatModelDropdown } from './ChatSettings';
+import { ChatSettings } from './ChatSettings';
 
-export default ChatModelDropdown;
+export default ChatSettings;

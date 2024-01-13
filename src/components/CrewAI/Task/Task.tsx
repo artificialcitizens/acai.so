@@ -30,11 +30,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
       className="w-full"
       style={{ position: 'relative', display: 'inline-block' }}
     >
-      <ul className="bg-darker rounded-md p-4 mb-2" key={task.id}>
-        <li className="p-2">{task.name}</li>
+      <ul className="bg-dark rounded-md p-4 mb-2" key={task.id}>
+        <li className="p-2  font-bold text-sm">{task.name}</li>
         {showDetails && (
           <>
-            <li className="p-2">
+            <li className="text-sm font-medium">
               Name:
               <TextBox
                 onCancel={() => {
@@ -50,7 +50,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
                 value={task.name}
               />
             </li>
-            <li className="p-2">
+            <li className="text-sm font-medium">
               Description:
               <TextBox
                 onCancel={() => {
@@ -66,7 +66,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
                 value={task.description}
               />
             </li>
-            <li className="p-2">
+            <li className="text-sm font-medium">
               Agent:
               <Dropdown
                 options={
@@ -89,7 +89,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
                 value={agentRoles?.find((role) => role === task.agent)}
               />
             </li>
-            <li className="p-2">
+            <li className="text-sm font-medium">
               Tools:
               <Checkbox
                 options={
@@ -112,7 +112,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
                 value={task.tools}
               />
             </li>
-            {/* <li className="p-2">
+            {/* <li className="text-sm font-medium">
               Files:
               <Checkbox
                 options={

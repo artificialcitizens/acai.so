@@ -201,6 +201,7 @@ body {
 }
 
 .easy-edit-wrapper {
+  @apply font-bold;
   width: fit-content;
 }
 

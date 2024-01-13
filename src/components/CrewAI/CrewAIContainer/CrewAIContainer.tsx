@@ -7,15 +7,7 @@ const CrewAIContainer = () => {
   const { newCrew, deleteCrew, crews, saveCrew, test, output } = useCrewAi();
   const [formVisible, setFormVisible] = useState(false);
   return (
-    <div>
-      <button
-        className="w-full text-bold font-2xl border border-solid border-lighter rounded-md mb-6"
-        onClick={() => {
-          newCrew();
-        }}
-      >
-        Add Crew
-      </button>
+    <div className="text-acai-white">
       {formVisible && (
         <CrewAIForm
           saveCrew={(crew) => {
@@ -42,6 +34,15 @@ const CrewAIContainer = () => {
               saveCrew={saveCrew}
             />
           ))}
+      <button
+        type="button"
+        className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 mb-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        onClick={() => {
+          newCrew();
+        }}
+      >
+        Add Crew
+      </button>
     </div>
   );
 };

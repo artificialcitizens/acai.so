@@ -9,7 +9,7 @@ import { useElevenlabs } from '../../hooks/tts-hooks/use-elevenlabs';
 import { useVoiceCommands } from '../../state/use-voice-command';
 import { useWebSpeechSynthesis } from '../../hooks/tts-hooks/use-web-tts';
 import { getToken } from '../../utils/config';
-import { toastifyError, toastifyInfo } from '../Toast';
+import { toastifyError } from '../Toast';
 import { useActor, useSelector } from '@xstate/react';
 import {
   GlobalStateContextValue,
@@ -18,11 +18,8 @@ import {
 import { useParams } from 'react-router-dom';
 import { ChatHistory } from '../../state';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
-import { simplifyResponseChain } from '../../lib/ac-langchain/chains/simplify-response-chain';
-import ChatModelDropdown from '../ChatSettings';
+// import { simplifyResponseChain } from '../../lib/ac-langchain/chains/simplify-response-chain';
 import AudioSettings from '../SettingsTabs/AudioSettings';
-import ScratchPad from '../ScratchPad/ScratchPad';
-import KnowledgeUpload from '../Knowledge/Knowledge';
 import { useXtts } from '../../hooks/tts-hooks/use-xtts';
 
 interface VoiceRecognitionProps {
@@ -31,20 +28,13 @@ interface VoiceRecognitionProps {
 }
 
 // @TODO: Rename this to the voice recognition components and remove non-voice related components
-const QuickSettings: React.FC<VoiceRecognitionProps> = ({
+const VoiceSynthesis: React.FC<VoiceRecognitionProps> = ({
   onVoiceActivation,
   audioContext,
 }) => {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const { queryAva, loading: avaLoading } = useAva();
-  const {
-    file,
-    setFile,
-    loading: xttsLoading,
-    handleFileChange,
-    handleUpload,
-    handleTTS,
-  } = useXtts();
+  const { loading: xttsLoading, handleUpload, handleTTS } = useXtts();
   const [ttsLoading, setTtsLoading] = useState<boolean>(false);
   const elevenlabsKey = useLocalStorageKeyValue(
     'ELEVENLABS_API_KEY',
@@ -102,15 +92,6 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
   const audioRef = React.useRef<HTMLAudioElement>(null);
   const srcRef = React.useRef<MediaElementAudioSourceNode | null>(null);
   const gainNodeRef = React.useRef<GainNode | null>(null);
-
-  const customPrompt = useSelector(agentStateService, (state) =>
-    workspaceId ? state.context[workspaceId]?.customPrompt : '',
-  );
-  const handleCustomPromptInput = (e: { target: { value: any } }) =>
-    agentStateService.send('UPDATE_CUSTOM_PROMPT', {
-      workspaceId: workspaceId,
-      customPrompt: e.target.value,
-    });
 
   const normalizedAudioElement = async (
     audioElem: HTMLAudioElement,
@@ -306,12 +287,6 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
     <div
       className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow h-full`}
     >
-      {workspaceId && <ChatModelDropdown workspaceId={workspaceId} />}
-      <ScratchPad
-        placeholder="Custom Prompt"
-        content={customPrompt}
-        handleInputChange={handleCustomPromptInput}
-      />
       <AudioSettings handleUpload={handleUpload} />
       {/* <form
         className="text-acai-white w-full flex flex-col flex-grow mb-4"
@@ -366,12 +341,8 @@ const QuickSettings: React.FC<VoiceRecognitionProps> = ({
           }}
         />
       )}
-      {/* 
-      <hr />
-      <p className="mb-2 ml-2 text-sm md:text-xs font-semibold">Knowledge</p>
-      {workspaceId && <KnowledgeUpload workspaceId={workspaceId} />} */}
     </div>
   );
 };
 
-export default QuickSettings;
+export default VoiceSynthesis;
