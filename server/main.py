@@ -1,15 +1,10 @@
-from flask import Flask, request, jsonify
-from flask_socketio import SocketIO, emit
-from flask_cors import CORS
-
+from threading import Event
 import requests
 import json
 
-from langchain.tools import BaseTool, StructuredTool, tool, DuckDuckGoSearchRun
-
-from tools.file_system_manager import file_manager
-from models.chat_models import model_mapping
-from generator.create_crew import create_crew_from_config
+from flask import Flask, request, jsonify
+from flask_socketio import SocketIO, emit
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "your_secret_key"
@@ -30,9 +25,18 @@ socketio = SocketIO(
         "http://192.168.4.74:5173",
         "http://localhost:5173",
         "https://www.acai.so",
-        "http://192.168.4.192:5173"  # And this line
+        "http://192.168.4.192:5173"
     ],
 )
+
+####################
+# TOOLS
+####################
+from langchain.tools import BaseTool, StructuredTool, tool, DuckDuckGoSearchRun
+from langchain.agents import load_tools, Tool
+from langchain_experimental.utilities import PythonREPL
+from langchain_community.utilities import TextRequestsWrapper
+from tools.file_system_manager import file_manager_toolkit, get_file_tool
 
 @tool
 def create_doc(content: str) -> str:
@@ -42,10 +46,9 @@ def create_doc(content: str) -> str:
     )
 
     return "success"
+# ----
 
-from threading import Event
-
-
+# Human in the loop
 response_data = {}
 response_received = Event()
 
@@ -70,12 +73,41 @@ def human_in_the_loop(content: str) -> str:
 
     return response_data.get('response', 'No response received')
 
+@tool
+def get_request(url: str) -> str:
+    """A portal to the internet. Use this when you need to get specific content from a website. Input should be a  url (i.e. https://www.google.com). The output will be the text response of the GET request"""
+    url = request.args.get("url")
+    try:
+        response = requests.get(url, timeout=5)
+        return response.text
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
+
+@tool
+def python_repl_tool(content: str) -> str:
+    """A Python shell. Use this to execute python commands. Input should be a valid python command. If you want to see the output of a value, you should print it out with `print(...)`."""
+    python_repl = PythonREPL()
+    return python_repl.run(content)
+
+
 tool_mapping = {
-"DuckDuckGoSearch": DuckDuckGoSearchRun(),
-"FileManagementToolkit": file_manager,
-"CreateDoc": create_doc,
-"HumanInTheLoop": human_in_the_loop
+    "DuckDuckGoSearch": DuckDuckGoSearchRun(),
+    "Requests": get_request,
+    "CreateDoc": create_doc,
+    "HumanInTheLoop": human_in_the_loop,
+    "PythonREPL": python_repl_tool,
+    # uses a temporary directory currently
+    # "CopyFileTool": get_file_tool(file_manager_toolkit, 'copy_file'),
+    # "DeleteFileTool": get_file_tool(file_manager_toolkit, 'file_delete'),
+    # "SearchFileTool": get_file_tool(file_manager_toolkit, 'file_search'),
+    # "MoveFileTool": get_file_tool(file_manager_toolkit, 'move_file'),
+    # "ReadFileTool": get_file_tool(file_manager_toolkit, 'read_file'),
+    # "WriteFileTool": get_file_tool(file_manager_toolkit, 'write_file'),
+    # "ListFilesTool": get_file_tool(file_manager_toolkit, 'list_directory'),
 }
+
+from models.chat_models import model_mapping
+from crew.create_crew import create_crew_from_config
 
 @app.route("/tools", methods=["GET"])
 def tools():
@@ -94,6 +126,7 @@ def create_crew():
     try:
         payload = request.get_json()
         config_string = json.dumps(payload)
+        print('config string -------------------')
         print(config_string)
         crew = create_crew_from_config(config_string, tool_mapping, socketio)
         print('crew created')
