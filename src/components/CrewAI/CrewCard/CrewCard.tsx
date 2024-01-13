@@ -25,7 +25,7 @@ const CrewCard: React.FC<CrewCardProps> = ({
   const [moreInfo, showMoreInfo] = useState(false);
 
   return (
-    <div className="text-acai-white p-4 border border-solid border-lighter rounded-md mb-2 bg-darker">
+    <div className="text-acai-white p-2 border border-solid border-lighter rounded-md mb-2 bg-darker">
       <div className="float-right">
         <button className="mr-2" onClick={() => showMoreInfo(!moreInfo)}>
           {moreInfo ? 'Collapse' : 'Expand'}
