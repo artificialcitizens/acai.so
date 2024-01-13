@@ -13,6 +13,7 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../context/GlobalStateContext';
+import { useCrewAi } from '../components/CrewAI/use-crew-ai';
 
 export const useSocketManager = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -31,6 +32,7 @@ export const useSocketManager = () => {
 
   const workspaceId = rawWorkspaceId || 'docs';
   const navigate = useNavigate();
+  const { addLogsToCrew } = useCrewAi();
 
   useEffect(() => {
     handleConnect();
@@ -114,16 +116,20 @@ export const useSocketManager = () => {
       },
     },
     {
-      name: 'crew-log',
-      handler: (data: string) => {
-        toastifyAgentLog(data);
-      },
-    },
-    {
       name: 'info-toast',
       handler: (data: { info: string }) => {
         console.log(data.info);
         toastifyInfo(data.info);
+      },
+    },
+    {
+      name: 'crew-log',
+      handler: (data: { log: string }) => {
+        // const { id, timestamp, agent, task, output, context, tools } = jsonData;
+        toastifyInfo(data.log);
+        const jsonData = JSON.parse(data.log);
+        console.log(jsonData);
+        addLogsToCrew(jsonData);
       },
     },
     {

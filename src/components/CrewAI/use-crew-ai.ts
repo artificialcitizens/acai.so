@@ -7,9 +7,14 @@ import { v4 as uuid } from 'uuid';
 import { getToken } from '../../utils/config';
 
 export interface CrewLog {
-  crewId: string;
-  createdAt: string;
-  logs: string[];
+  // crewId
+  id: string;
+  timestamp: string;
+  task: string;
+  agent: string;
+  output: string;
+  context: string;
+  tools: string;
 }
 
 export interface File {
@@ -141,6 +146,7 @@ export const useCrewAi = () => {
   const [output, setOutput] = useState<string>('');
   const [tools] = useState<string[]>(toolsCache || []);
   const [models] = useState<string[]>(modelsCache || []);
+
   const newCrew = async () => {
     if (!crews) {
       toastifyError('Failed to create new crew');
@@ -159,6 +165,7 @@ export const useCrewAi = () => {
       ],
       tasks: [],
       files: [],
+      logs: [],
       metadata: {},
       example: '',
       process: 'sequential',
@@ -259,7 +266,7 @@ export const useCrewAi = () => {
     updatedTask: Task,
   ): Promise<Crew | undefined> => {
     toastifyInfo(`Updating task ${updatedTask.name} in crew ${crewId}`);
-    const crew = await db.crews.get(crewId);
+    const crew = await readCrew(crewId);
     if (!crew) {
       toastifyError(`Crew ${crewId} not found`);
       return;
@@ -274,23 +281,48 @@ export const useCrewAi = () => {
 
   // Update an agent in a crew
   const updateAgentInCrew = async (crewId: string, updatedAgent: Agent) => {
-    const crew = await db.crews.get(crewId);
+    const crew = await readCrew(crewId);
     if (!crew) {
       toastifyError(`Crew ${crewId} not found`);
       return;
     }
+    const crewClone = JSON.parse(JSON.stringify(crew));
     const agentIndex = crew.agents.findIndex(
       (agent) => agent.id === updatedAgent.id,
     );
     if (agentIndex !== -1) {
-      crew.agents[agentIndex] = updatedAgent;
-      await db.crews.put(crew);
+      crewClone.agents[agentIndex] = updatedAgent;
+      saveCrew(crewClone);
       toastifyInfo(`Agent ${updatedAgent.name} updated in crew ${crew.name}`);
     } else {
       toastifyError(
         `Agent ${updatedAgent.name} not found in crew ${crew.name}`,
       );
     }
+  };
+
+  const addLogsToCrew = async (log: CrewLog) => {
+    if (!log) {
+      toastifyError(`No logs to add`);
+      return;
+    }
+    console.log(log);
+    toastifyInfo(`Adding logs to crew ${log.id}`);
+    const crew = await readCrew(log.id);
+    if (!crew) {
+      toastifyError(`Crew ${log.id} not found`);
+      return;
+    }
+    const crewClone = JSON.parse(JSON.stringify(crew));
+    if (!crewClone.logs) crewClone.logs = [];
+    crewClone.logs.push(log);
+    console.log(crewClone);
+    const savedCrew = await saveCrew(crewClone);
+    if (!savedCrew) {
+      toastifyError(`Failed to save crew ${log.id}`);
+      return;
+    }
+    toastifyInfo(`Logs added to crew ${savedCrew.name}`);
   };
 
   const validateAgents = (agents: Agent[]) => {
@@ -399,6 +431,7 @@ export const useCrewAi = () => {
     removeAgentFromCrew,
     updateAgentInCrew,
     updateTaskInCrew,
+    addLogsToCrew,
     test,
     output,
     getFiles,

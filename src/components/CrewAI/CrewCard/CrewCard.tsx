@@ -88,6 +88,20 @@ const CrewCard: React.FC<CrewCardProps> = ({
               <p>{crew.example}</p>
             </div>
           )}
+          <h5>Logs</h5>
+          <ul>
+            {crew.logs &&
+              crew.logs.map((log) => (
+                <li key={log.timestamp}>
+                  <h6>Agent: {log.agent}</h6>
+                  <p>Time: {log.timestamp}</p>
+                  <p>Task: {log.task}</p>
+                  <p>Context: {log.context}</p>
+                  <p>Response: {log.tools}</p>
+                  <p>Output: {log.output}</p>
+                </li>
+              ))}
+          </ul>
         </>
       )}
       <br />
