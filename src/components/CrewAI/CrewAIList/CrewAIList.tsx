@@ -1,6 +1,5 @@
 import {
   DndContext,
-  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
@@ -20,20 +19,9 @@ interface DraggableProps {
   children: React.ReactNode;
 }
 
-const DraggableTask: React.FC<DraggableProps> = ({
-  id,
-  parent,
-  setParent,
-  children,
-}) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: id });
+const DraggableTask: React.FC<DraggableProps> = ({ id, children }) => {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
