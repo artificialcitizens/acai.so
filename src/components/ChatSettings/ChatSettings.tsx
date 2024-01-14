@@ -97,7 +97,9 @@ export const ChatSettings: React.FC<ChatModelProps> = ({ workspaceId }) => {
           />
         </>
       )}
-      {state.context[workspaceId]?.agentMode === 'crew' && <CrewAIContainer />}
+      {state.context[workspaceId]?.agentMode === 'crew' && (
+        <CrewAIContainer displayDropdown />
+      )}
       {state.context[workspaceId]?.agentMode === 'knowledge' && (
         <div className="mt-2">
           <label className="inline-flex items-center text-acai-white">

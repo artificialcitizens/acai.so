@@ -4,7 +4,11 @@ import { useState } from 'react';
 import CrewCard from '../CrewCard/CrewCard';
 import Dropdown from '../../DropDown';
 
-const CrewAIContainer = () => {
+const CrewAIContainer = ({
+  displayDropdown,
+}: {
+  displayDropdown?: boolean;
+}) => {
   const { newCrew, deleteCrew, crews, saveCrew, test, output } = useCrewAi();
   const [formVisible, setFormVisible] = useState(false);
   const [currentCrew, setCurrentCrew] = useState<string | null>(
@@ -21,12 +25,14 @@ const CrewAIContainer = () => {
   if (!crews) return null;
   return (
     <div className="text-acai-white">
-      <Dropdown
-        label="Use Crew:"
-        options={crews.map((crew) => ({ value: crew.id, label: crew.name }))}
-        value={currentCrew || crews[0].id}
-        onChange={handleModeChange}
-      />
+      {displayDropdown && (
+        <Dropdown
+          label="Use Crew:"
+          options={crews.map((crew) => ({ value: crew.id, label: crew.name }))}
+          value={currentCrew || crews[0].id}
+          onChange={handleModeChange}
+        />
+      )}
       {formVisible && (
         <CrewAIForm
           saveCrew={(crew) => {

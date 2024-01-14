@@ -83,7 +83,7 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
   );
   return (
     <div className="w-full max-h-full flex flex-col overflow-y-auto">
-      <div className=" text-acai-white flex flex-col">
+      <div className=" text-acai-white flex flex-col mb-4">
         <h2 className="text-acai-white text-sm mb-4">Agents</h2>
         <DndContext onDragEnd={handleAgentDragEnd} sensors={sensors}>
           <ul className=" text-acai-white flex flex-col">
@@ -103,7 +103,7 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
         </DndContext>
       </div>
       <button
-        className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 mb-2 mx-8 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        className="max-w-fit bg-light text-sm md:text-xs text-acai-white px-4 py-2 mb-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
         onClick={() => {
           addAgentToCrew(
             crew.id,
@@ -136,7 +136,7 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
         </ul>
       </DndContext>
       <button
-        className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 mb-2 mx-8 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        className="max-w-fit bg-light text-sm md:text-xs text-acai-white px-4 py-2 mb-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
         onClick={() => {
           addTaskToCrew(
             crew.id,
