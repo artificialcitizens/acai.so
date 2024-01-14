@@ -12,7 +12,7 @@ const CrewAIContainer = ({
   const { newCrew, deleteCrew, crews, saveCrew, test, output } = useCrewAi();
   const [formVisible, setFormVisible] = useState(false);
   const [currentCrew, setCurrentCrew] = useState<string | null>(
-    localStorage.getItem('currentCrew') || crews?.[0].id || null,
+    localStorage.getItem('currentCrew') || crews?.[0]?.id || null,
   );
 
   const handleModeChange = (crew: string) => {
