@@ -48,10 +48,10 @@ const markdownComponents = {
     );
   },
   p: ({ children }: { children: ReactNode }) => (
-    <p className="text-sm">{children}</p>
+    <p className="text-sm mb-0">{children}</p>
   ),
   li: ({ children }: { children: ReactNode }) => (
-    <li className="list-disc ml-1 mb-0 pb-0">{children}</li>
+    <li className="list-disc text-sm ml-1 mb-0 pb-0">{children}</li>
   ),
   h1: ({ children }: { children: ReactNode }) => (
     <h1 className="text-2xl font-bold py-2">{children}</h1>
@@ -78,7 +78,7 @@ const markdownComponents = {
     <del className="line-through">{children}</del>
   ),
   ul: ({ children }: { children: ReactNode }) => (
-    <ul className="list-disc ml-2 mb-0 py-0">{children}</ul>
+    <ul className="list-disc text-sm ml-2 mb-0 py-0">{children}</ul>
   ),
   ol: (props: {
     children: ReactNode;
@@ -86,7 +86,7 @@ const markdownComponents = {
     ordered?: boolean;
     depth: number;
   }) => (
-    <ol className="list-decimal ml-4" start={props.start}>
+    <ol className="list-decimal text-sm ml-4" start={props.start}>
       {props.children}
     </ol>
   ),
@@ -99,7 +99,7 @@ const markdownComponents = {
     return (
       <a
         href={href}
-        className="text-blue-500 hover:underline"
+        className="text-blue-500 text-sm hover:underline"
         {...(isLocalLink
           ? {}
           : { target: '_blank', rel: 'noopener noreferrer' })}
