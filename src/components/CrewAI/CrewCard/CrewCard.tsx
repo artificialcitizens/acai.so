@@ -25,7 +25,7 @@ const CrewCard: React.FC<CrewCardProps> = ({
   const [moreInfo, showMoreInfo] = useState(false);
 
   return (
-    <div className="text-acai-white p-2 border border-solid border-lighter rounded-md mb-2 bg-darker">
+    <div className="text-acai-white p-2 rounded-md mb-2 bg-dark border border-solid border-lighter">
       <div className="float-right">
         <button className="mr-2" onClick={() => showMoreInfo(!moreInfo)}>
           {moreInfo ? 'Collapse' : 'Expand'}
@@ -55,7 +55,7 @@ const CrewCard: React.FC<CrewCardProps> = ({
           Delete
         </button>
       </div>
-      <div className="font-bold text-[.75rem] flex">
+      <div className="font-bold text-[.85rem] flex">
         <TextBox
           value={crew.name}
           onCancel={() => {
@@ -78,14 +78,14 @@ const CrewCard: React.FC<CrewCardProps> = ({
           ) : (
             <CrewAIList crew={crew} />
           )}
-          {crew.example && (
+          {/* {crew.example && (
             <div className="bg-dark rounded-md p-4 mb-2">
               <h2 className="text-acai-white text-sm mb-4">Example Output</h2>
 
               <p className="text-sm">{crew.example}</p>
             </div>
-          )}
-          <h2 className="text-acai-white text-sm mb-4">Logs</h2>
+          )} */}
+          {/* <h2 className="text-acai-white text-sm mb-4">Logs</h2>
 
           <div className="max-w-full max-h-[25vh] whitespace-pre-line p-2 text-xs overflow-scroll bg-dark rounded-md">
             <ul>
@@ -93,7 +93,7 @@ const CrewCard: React.FC<CrewCardProps> = ({
                 crew.logs.map((log) => (
                   <li
                     key={log.timestamp}
-                    className="p-4 border border-solid border-light rounded-md mb-2 text-sm"
+                    className="p-4 border-b border-solid border-lighter mb-2 text-sm"
                   >
                     <h6 className="text-sm">Agent: {log.agent}</h6>
                     <p className="text-sm">Time: {log.timestamp}</p>
@@ -104,7 +104,7 @@ const CrewCard: React.FC<CrewCardProps> = ({
                   </li>
                 ))}
             </ul>
-          </div>
+          </div> */}
         </>
       )}
       <br />

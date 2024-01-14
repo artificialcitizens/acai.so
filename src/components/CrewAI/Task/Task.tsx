@@ -30,8 +30,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
       className="w-full"
       style={{ position: 'relative', display: 'inline-block' }}
     >
-      <ul className="bg-dark rounded-md p-4 mb-2" key={task.id}>
-        <li className="p-2  font-bold text-sm">{task.name}</li>
+      <ul
+        className="bg-dark border border-solid border-lighter rounded-md p-3 mb-2"
+        key={task.id}
+      >
+        <li className="font-bold text-sm">{task.name}</li>
         {showDetails && (
           <>
             <li className="text-sm font-medium">

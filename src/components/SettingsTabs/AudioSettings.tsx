@@ -130,7 +130,7 @@ const AudioSettings: React.FC<AudioSettingsProps> = ({ handleUpload }) => {
       className={`rounded-lg mb-2 items-center justify-between flex-col flex-grow `}
     >
       <hr />
-      <h2 className="text-acai-white text-sm mb-4">Voice Settings</h2>
+      <h2 className="text-acai-white text-xs mb-4">Voice Settings</h2>
       <p className="text-acai-white text-sm md:text-xs mb-2 ml-2">
         User Transcript
       </p>

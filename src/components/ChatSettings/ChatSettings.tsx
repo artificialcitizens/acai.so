@@ -72,7 +72,7 @@ export const ChatSettings: React.FC<ChatModelProps> = ({ workspaceId }) => {
   };
   return (
     <span className="flex flex-col justify-between">
-      <h2 className="text-acai-white text-sm mb-4">Chat Settings</h2>
+      <h2 className="text-acai-white text-xs mb-4">Chat Settings</h2>
       <Dropdown
         label="Agent Mode"
         options={agentMode.map((mode) => ({ value: mode, label: mode }))}

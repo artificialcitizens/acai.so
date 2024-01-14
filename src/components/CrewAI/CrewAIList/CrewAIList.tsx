@@ -82,11 +82,11 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
   return (
-    <div className="w-full h-full flex flex-col overflow-y-auto">
-      <div className="m-2 border-b-2 border-solid border-dark text-acai-white flex flex-col">
+    <div className="w-full max-h-full flex flex-col overflow-y-auto">
+      <div className=" text-acai-white flex flex-col">
         <h2 className="text-acai-white text-sm mb-4">Agents</h2>
         <DndContext onDragEnd={handleAgentDragEnd} sensors={sensors}>
-          <ul className="m-2 border-b-2 border-solid border-dark text-acai-white flex flex-col">
+          <ul className=" text-acai-white flex flex-col">
             <SortableContext items={crew.agents}>
               {crew.agents.map((agent, index) => (
                 <DraggableTask
@@ -118,8 +118,9 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
       </button>
 
       <h2 className="text-acai-white text-sm mb-4">Tasks</h2>
+
       <DndContext onDragEnd={handleTaskDragEnd} sensors={sensors}>
-        <ul className="m-2 border-b-2 border-solid border-dark text-acai-white flex flex-col">
+        <ul className="text-acai-white flex flex-col">
           <SortableContext items={crew.tasks}>
             {crew.tasks.map((task, index) => (
               <DraggableTask
@@ -135,7 +136,7 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
         </ul>
       </DndContext>
       <button
-        className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 mb-2 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
+        className="bg-light text-sm md:text-xs text-acai-white px-4 py-2 mb-2 mx-8 rounded-md transition-colors duration-200 ease-in-out hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-opacity-50 cursor-pointer"
         onClick={() => {
           addTaskToCrew(
             crew.id,

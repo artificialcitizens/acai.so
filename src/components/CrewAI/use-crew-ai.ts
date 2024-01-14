@@ -219,8 +219,9 @@ export const useCrewAi = () => {
       toastifyError(`Crew ${crewId} not found`);
       return;
     }
-    crew.tasks.push(task);
-    const savedCrew = await saveCrew(crew);
+    const crewClone = JSON.parse(JSON.stringify(crew));
+    crewClone.tasks.push(task);
+    const savedCrew = await saveCrew(crewClone);
     return savedCrew;
   };
 
@@ -231,8 +232,9 @@ export const useCrewAi = () => {
       toastifyError(`Crew ${crewId} not found`);
       return;
     }
-    crew.tasks = crew.tasks.filter((task) => task.id !== taskId);
-    const savedCrew = await saveCrew(crew);
+    const crewClone = JSON.parse(JSON.stringify(crew));
+    crewClone.tasks = crew.tasks.filter((task) => task.id !== taskId);
+    const savedCrew = await saveCrew(crewClone);
     return savedCrew;
   };
 
@@ -243,7 +245,8 @@ export const useCrewAi = () => {
       toastifyError(`Crew ${crewId} not found`);
       return;
     }
-    crew.agents.push(agent);
+    const crewClone = JSON.parse(JSON.stringify(crew));
+    crewClone.agents.push(agent);
     const savedCrew = await saveCrew(crew);
     return savedCrew;
   };
@@ -255,8 +258,9 @@ export const useCrewAi = () => {
       toastifyError(`Crew ${crewId} not found`);
       return;
     }
-    crew.agents = crew.agents.filter((agent) => agent.id !== agentId);
-    const savedCrew = await saveCrew(crew);
+    const crewClone = JSON.parse(JSON.stringify(crew));
+    crewClone.agents = crew.agents.filter((agent) => agent.id !== agentId);
+    const savedCrew = await saveCrew(crewClone);
     return savedCrew;
   };
 
@@ -274,8 +278,9 @@ export const useCrewAi = () => {
     const taskIndex = crew.tasks.findIndex(
       (task) => task.id === updatedTask.id,
     );
-    crew.tasks[taskIndex] = updatedTask;
-    await db.crews.put(crew);
+    const crewClone = JSON.parse(JSON.stringify(crew));
+    crewClone.tasks[taskIndex] = updatedTask;
+    await db.crews.put(crewClone);
     toastifyInfo(`Task ${updatedTask.name} updated in crew ${crew.name}`);
   };
 
@@ -306,7 +311,6 @@ export const useCrewAi = () => {
       toastifyError(`No logs to add`);
       return;
     }
-    console.log(log);
     toastifyInfo(`Adding logs to crew ${log.id}`);
     const crew = await readCrew(log.id);
     if (!crew) {
@@ -316,7 +320,6 @@ export const useCrewAi = () => {
     const crewClone = JSON.parse(JSON.stringify(crew));
     if (!crewClone.logs) crewClone.logs = [];
     crewClone.logs.push(log);
-    console.log(crewClone);
     const savedCrew = await saveCrew(crewClone);
     if (!savedCrew) {
       toastifyError(`Failed to save crew ${log.id}`);
@@ -366,8 +369,10 @@ export const useCrewAi = () => {
       toastifyInfo(`Running Crew ${crew.name}`);
       const result = await runCrewAi(crew);
       setOutput(result.response);
-      crew.example = result.response;
-      await saveCrew(crew);
+      console.log(result.response);
+      const crewClone = JSON.parse(JSON.stringify(crew));
+      crewClone.example = result.response;
+      await saveCrew(crewClone);
     } catch (e: any) {
       toastifyError(e.message);
     }

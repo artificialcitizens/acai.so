@@ -18,12 +18,12 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, crewId }) => {
   const files = getFiles(crewId);
   return (
     <div
-      className="w-full"
+      className="w-full border border-solid border-lighter rounded-md mb-2"
       style={{ position: 'relative', display: 'inline-block' }}
     >
       {/* <TextBox onCancel={() => {}} onSave={() => {}} value={agent.role} /> */}
-      <ul className="bg-dark rounded-md p-4 mb-2 text-sm" key={agent.role}>
-        <li className="p-2  font-bold text-sm">{agent.role}</li>
+      <ul className="bg-dark rounded-md p-3 text-sm" key={agent.role}>
+        <li className="font-bold text-sm">{agent.role}</li>
         {showDetails && (
           <>
             <li className="p-2 text-sm font-medium">
