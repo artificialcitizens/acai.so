@@ -55,7 +55,7 @@ const CrewCard: React.FC<CrewCardProps> = ({
           Delete
         </button>
       </div>
-      <div className="font-bold text-[.85rem] flex">
+      <div className="font-bold text-[.85rem] flex mb-6">
         <TextBox
           value={crew.name}
           onCancel={() => {

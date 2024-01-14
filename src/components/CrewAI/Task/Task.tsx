@@ -31,13 +31,13 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
       style={{ position: 'relative', display: 'inline-block' }}
     >
       <ul
-        className="bg-dark border border-solid border-lighter rounded-md p-3 mb-2"
+        className="bg-light border border-solid border-lighter rounded-md p-3 mb-2"
         key={task.id}
       >
-        <li className="font-bold text-sm">{task.name}</li>
+        <li className="font-semibold text-sm">{task.name}</li>
         {showDetails && (
           <>
-            <li className="text-sm font-medium">
+            <li className="p-2 text-sm font-medium">
               Name:
               <TextBox
                 onCancel={() => {
@@ -53,7 +53,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
                 value={task.name}
               />
             </li>
-            <li className="text-sm font-medium">
+            <li className="p-2 text-sm font-medium">
               Description:
               <TextBox
                 onCancel={() => {
@@ -69,7 +69,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
                 value={task.description}
               />
             </li>
-            <li className="text-sm font-medium">
+            <li className="p-2 text-sm font-medium">
               Agent:
               <Dropdown
                 options={
@@ -92,7 +92,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
                 value={agentRoles?.find((role) => role === task.agent)}
               />
             </li>
-            <li className="text-sm font-medium">
+            <li className="p-2 text-sm font-medium">
               Tools:
               <Checkbox
                 options={
@@ -115,7 +115,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, crewId }) => {
                 value={task.tools}
               />
             </li>
-            {/* <li className="text-sm font-medium">
+            {/* <li className="p-2 text-sm font-medium">
               Files:
               <Checkbox
                 options={
