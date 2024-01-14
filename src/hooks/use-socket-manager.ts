@@ -92,10 +92,9 @@ export const useSocketManager = () => {
     if (!socket) return;
     const response = window.prompt(data.question);
     if (response) {
-      toastifyInfo(`Sending response to server ${response}`);
-      socket?.emit('human-in-the-loop-response', response);
+      socket.emit('human-in-the-loop-response', response);
     } else {
-      socket?.emit('human-in-the-loop-response', 'The user did not respond');
+      socket.emit('human-in-the-loop-response', 'The user did not respond');
     }
   };
   const events = [
@@ -125,10 +124,9 @@ export const useSocketManager = () => {
     {
       name: 'crew-log',
       handler: (data: { log: string }) => {
-        // const { id, timestamp, agent, task, output, context, tools } = jsonData;
-        toastifyInfo(data.log);
         const jsonData = JSON.parse(data.log);
-        console.log(jsonData);
+        const { id, timestamp, agent, task, output, context, tools } = jsonData;
+        toastifyInfo(`${agent} finished the task: ${task}`);
         addLogsToCrew(jsonData);
       },
     },

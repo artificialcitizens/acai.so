@@ -200,19 +200,27 @@ export const useAva = (): {
           };
         }
         setLoading(true);
+        const crewId = localStorage.getItem('currentCrew') || crews[0].id;
+        const crew = crews.find((c) => c.id === crewId);
+        if (!crew) {
+          setLoading(false);
+          return {
+            response: 'No crews found',
+          };
+        }
         try {
           const task: Task = {
             id: Date.now().toString(),
             name: 'Answer the users query',
             description: message,
-            agent: crews[0].agents[0].role,
+            agent: crew.agents[0].role || 'agent',
             tools: [],
             files: [],
             metadata: {},
           };
 
           const response = await addTaskAndRun({
-            crewId: crews[0].id,
+            crewId,
             task,
           });
           setLoading(false);

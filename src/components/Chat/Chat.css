@@ -79,6 +79,10 @@
   @apply text-blue-300 hover:text-blue-400 font-medium underline;
 }
 
+.cs-message__custom-content li > * {
+  @apply -mt-4;
+}
+
 .cs-input-toolbox {
   @apply mt-1;
 }

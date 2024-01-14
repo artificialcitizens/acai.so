@@ -173,7 +173,6 @@ export const useCrewAi = () => {
     };
 
     await db.crews.put(newCrew);
-    toastifyInfo(`Crew ${newCrew.name} added`);
 
     return newCrew;
   };
@@ -183,7 +182,6 @@ export const useCrewAi = () => {
     validateCrew(crew);
     try {
       await db.crews.put(crew);
-      toastifyInfo(`Crew ${crew.name} saved successfully}`);
       return crew;
     } catch (error: any) {
       toastifyError(
@@ -195,7 +193,6 @@ export const useCrewAi = () => {
   const deleteCrew = async (crewId: string) => {
     try {
       await db.crews.delete(crewId);
-      toastifyInfo(`Crew with id ${crewId} deleted successfully`);
     } catch (error: any) {
       toastifyError(
         `Failed to delete crew with id ${crewId}: ${error.message}`,
@@ -269,7 +266,6 @@ export const useCrewAi = () => {
     crewId: string,
     updatedTask: Task,
   ): Promise<Crew | undefined> => {
-    toastifyInfo(`Updating task ${updatedTask.name} in crew ${crewId}`);
     const crew = await readCrew(crewId);
     if (!crew) {
       toastifyError(`Crew ${crewId} not found`);
@@ -281,7 +277,6 @@ export const useCrewAi = () => {
     const crewClone = JSON.parse(JSON.stringify(crew));
     crewClone.tasks[taskIndex] = updatedTask;
     await db.crews.put(crewClone);
-    toastifyInfo(`Task ${updatedTask.name} updated in crew ${crew.name}`);
   };
 
   // Update an agent in a crew
@@ -298,7 +293,6 @@ export const useCrewAi = () => {
     if (agentIndex !== -1) {
       crewClone.agents[agentIndex] = updatedAgent;
       saveCrew(crewClone);
-      toastifyInfo(`Agent ${updatedAgent.name} updated in crew ${crew.name}`);
     } else {
       toastifyError(
         `Agent ${updatedAgent.name} not found in crew ${crew.name}`,
@@ -311,7 +305,6 @@ export const useCrewAi = () => {
       toastifyError(`No logs to add`);
       return;
     }
-    toastifyInfo(`Adding logs to crew ${log.id}`);
     const crew = await readCrew(log.id);
     if (!crew) {
       toastifyError(`Crew ${log.id} not found`);
@@ -325,7 +318,6 @@ export const useCrewAi = () => {
       toastifyError(`Failed to save crew ${log.id}`);
       return;
     }
-    toastifyInfo(`Logs added to crew ${savedCrew.name}`);
   };
 
   const validateAgents = (agents: Agent[]) => {

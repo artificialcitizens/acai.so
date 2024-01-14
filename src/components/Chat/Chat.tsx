@@ -36,7 +36,7 @@ const markdownComponents = {
   code: ({ node, inline, className, children, ...props }: any) => {
     const match = /language-(\w+)/.exec(className || '');
     return !inline && match ? (
-      <pre className="p-2">
+      <pre className="p-2 whitespace-pre-line">
         <code className="text-sm" {...props}>
           {String(children).replace(/\n$/, '')}
         </code>
@@ -48,10 +48,10 @@ const markdownComponents = {
     );
   },
   p: ({ children }: { children: ReactNode }) => (
-    <p className="mb-1 text-sm">{children}</p>
+    <p className="text-sm">{children}</p>
   ),
   li: ({ children }: { children: ReactNode }) => (
-    <li className="text-sm list-disc ml-1 mb-0 pb-0">{children}</li>
+    <li className="list-disc ml-1 mb-0 pb-0">{children}</li>
   ),
   h1: ({ children }: { children: ReactNode }) => (
     <h1 className="text-2xl font-bold py-2">{children}</h1>
@@ -78,7 +78,7 @@ const markdownComponents = {
     <del className="line-through">{children}</del>
   ),
   ul: ({ children }: { children: ReactNode }) => (
-    <ul className="list-disc ml-6 mb-0 py-0">{children}</ul>
+    <ul className="list-disc ml-2 mb-0 py-0">{children}</ul>
   ),
   ol: (props: {
     children: ReactNode;
@@ -86,7 +86,7 @@ const markdownComponents = {
     ordered?: boolean;
     depth: number;
   }) => (
-    <ol className="list-decimal ml-6" start={props.start}>
+    <ol className="list-decimal ml-4" start={props.start}>
       {props.children}
     </ol>
   ),
