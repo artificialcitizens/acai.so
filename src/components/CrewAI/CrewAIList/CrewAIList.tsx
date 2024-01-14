@@ -11,6 +11,7 @@ import { TaskCard } from '../Task';
 import { Crew, Task, newAgent, newTask, useCrewAi } from '../use-crew-ai';
 import { v4 as uuidv4 } from 'uuid';
 import { useState } from 'react';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 
 interface DraggableProps {
   id: string;
@@ -85,7 +86,11 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
     <div className="w-full max-h-full flex flex-col overflow-y-auto">
       <div className=" text-acai-white flex flex-col mb-4">
         <h2 className="text-acai-white text-sm mb-4">Agents</h2>
-        <DndContext onDragEnd={handleAgentDragEnd} sensors={sensors}>
+        <DndContext
+          onDragEnd={handleAgentDragEnd}
+          sensors={sensors}
+          modifiers={[restrictToVerticalAxis]}
+        >
           <ul className=" text-acai-white flex flex-col">
             <SortableContext items={crew.agents}>
               {crew.agents.map((agent, index) => (
@@ -119,7 +124,11 @@ const CrewAIList = ({ crew }: { crew: Crew }) => {
 
       <h2 className="text-acai-white text-sm mb-4">Tasks</h2>
 
-      <DndContext onDragEnd={handleTaskDragEnd} sensors={sensors}>
+      <DndContext
+        onDragEnd={handleTaskDragEnd}
+        sensors={sensors}
+        modifiers={[restrictToVerticalAxis]}
+      >
         <ul className="text-acai-white flex flex-col">
           <SortableContext items={crew.tasks}>
             {crew.tasks.map((task, index) => (
