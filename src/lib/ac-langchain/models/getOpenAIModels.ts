@@ -51,8 +51,8 @@ export const getLocalLLMs = async () => {
   const configuration = new Configuration({
     apiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
     basePath:
-      getToken('CUSTOM_OPENAI_API_BASE_URL') ||
-      import.meta.env.VITE_CUSTOM_OPENAI_BASE_URL ||
+      getToken('OPENAI_API_BASE_URL') ||
+      import.meta.env.VITE_OPENAI_BASE_URL ||
       'http://localhost:8080/v1',
   });
   const openai = new OpenAIApi(configuration);

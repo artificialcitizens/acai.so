@@ -6,11 +6,12 @@ import React, {
   ChangeEvent,
   useRef,
 } from 'react';
-import { toastifyInfo, toastifySuccess } from '../Toast';
+import { toastifyInfo } from '../Toast';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
 
-enum Token {
+export enum Token {
   OPENAI_API_BASE = 'OPENAI_API_BASE',
+  OPENAI_EMBEDDING_API_BASE_URL = 'OPENAI_EMBEDDING_API_BASE_URL',
   OPENAI_KEY = 'OPENAI_KEY',
   GOOGLE_API_KEY = 'GOOGLE_API_KEY',
   GOOGLE_CSE_ID = 'GOOGLE_CSE_ID',
@@ -26,7 +27,12 @@ const TokenManager: React.FC = () => {
   );
   const [openAIBase, setOpenAIBase] = useLocalStorageKeyValue(
     Token.OPENAI_API_BASE,
-    import.meta.env.VITE_OPENAI_API_BASE || 'https://api.openai.com/v1',
+    import.meta.env.VITE_OPENAI_BASE_URL || 'https://api.openai.com/v1',
+  );
+  const [openAIEmbeddingBase, setOpenAIEmbeddingBase] = useLocalStorageKeyValue(
+    Token.OPENAI_EMBEDDING_API_BASE_URL,
+    import.meta.env.VITE_OPENAI_EMBEDDING_API_BASE ||
+      'https://api.openai.com/v1',
   );
   const [googleApiKey, setGoogleApiKey] = useLocalStorageKeyValue(
     Token.GOOGLE_API_KEY,
@@ -77,6 +83,14 @@ const TokenManager: React.FC = () => {
         type: 'text',
       },
       {
+        id: Token.OPENAI_EMBEDDING_API_BASE_URL,
+        name: 'OpenAI Embedding API Base URL',
+        placeholder: 'https://api.openai.com/v1',
+        value: openAIEmbeddingBase,
+        setValue: setOpenAIEmbeddingBase,
+        type: 'text',
+      },
+      {
         id: Token.OPENAI_KEY,
         name: 'OpenAI API Key',
         value: openAIKey,
@@ -120,6 +134,8 @@ const TokenManager: React.FC = () => {
     [
       openAIBase,
       setOpenAIBase,
+      openAIEmbeddingBase,
+      setOpenAIEmbeddingBase,
       openAIKey,
       setOpenAIKey,
       elevenlabsApiKey,

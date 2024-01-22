@@ -25,7 +25,7 @@ const setDefaults = () => {
 
 // Need a central way to assign acai-managed config
 // Only supports OpenAI for now
-export function handleAcaiChat(fields: any = {}) {
+export function loadChatModel(fields: any = {}) {
   return {
     chat: new ChatOpenAI({
       modelName: 'gpt-3.5-turbo',
@@ -45,12 +45,13 @@ export function handleAcaiLLM(fields: any = {}) {
   };
 }
 
-export function handleAcaiEmbeddings(fields: any = {}) {
+export function loadEmbeddingModel(fields: any = {}) {
   const auth = {
     openAIApiKey: getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY,
     configuration: {
       baseURL:
-        getToken('OPENAI_API_BASE') ?? import.meta.env.VITE_OPENAI_API_BASE,
+        getToken('OPENAI_EMBEDDING_API_BASE_URL') ??
+        import.meta.env.VITE_OPENAI_EMBEDDING_BASE_URL,
     },
   };
   return {
