@@ -32,11 +32,32 @@ socketio = SocketIO(
 ####################
 # TOOLS
 ####################
-from langchain.tools import BaseTool, StructuredTool, tool, DuckDuckGoSearchRun
+from langchain.tools import BaseTool, StructuredTool, tool
 from langchain.agents import load_tools, Tool
 from langchain_experimental.utilities import PythonREPL
 from langchain_community.utilities import TextRequestsWrapper
+from langchain_community.tools import DuckDuckGoSearchRun
 from tools.file_system_manager import file_manager_toolkit, get_file_tool
+from tools.web_scraper.loaders.github import load_github_trending
+from tools.loaders.weather import get_weather
+
+@tool
+def get_weather_tool(zip_code: str) -> str:
+    """Get the weather for a zip code. Input is a zip code."""
+    try:
+        page = get_weather(zip_code=zip_code)
+        return page
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
+
+@tool
+def get_github_trending(query: str) -> str:
+    """Get the trending repositories from GitHub, no input required."""
+    try:
+        page = load_github_trending()
+        return page
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
 
 @tool
 def create_doc(content: str) -> str:
@@ -96,6 +117,8 @@ tool_mapping = {
     "CreateDoc": create_doc,
     "HumanInTheLoop": human_in_the_loop,
     "PythonREPL": python_repl_tool,
+    "GetGithubTrending": get_github_trending,
+    "GetWeather": get_weather_tool,
     # uses a temporary directory currently
     # "CopyFileTool": get_file_tool(file_manager_toolkit, 'copy_file'),
     # "DeleteFileTool": get_file_tool(file_manager_toolkit, 'file_delete'),
@@ -106,7 +129,7 @@ tool_mapping = {
     # "ListFilesTool": get_file_tool(file_manager_toolkit, 'list_directory'),
 }
 
-from models.chat_models import model_mapping
+from models.crew_config import model_mapping
 from crew.create_crew import create_crew_from_config
 
 @app.route("/tools", methods=["GET"])

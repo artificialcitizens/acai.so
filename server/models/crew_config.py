@@ -1,8 +1,12 @@
-from env import openai_api_key
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
 model_mapping = {
     "open-hermes-2.5": {
-      "base_url": "http://192.168.4.192:8080/v1",
+      "base_url": "http://127.0.0.1:8080/v1",
       "model_name": "open-hermes-2.5",
       "openai_api_key": "sk-xxx"
     },

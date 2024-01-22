@@ -1,7 +1,7 @@
 import json
 from crewai import Task, Crew, Process
 from langchain_community.chat_models import ChatOpenAI
-from models.chat_models import model_mapping
+from models.crew_config import model_mapping
 from agents.custom_agent import ExtendedAgent
 
 def create_crew_from_config(config_string, tool_mapping, socketio):
