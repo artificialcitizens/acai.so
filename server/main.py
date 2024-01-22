@@ -38,7 +38,7 @@ from langchain_experimental.utilities import PythonREPL
 from langchain_community.utilities import TextRequestsWrapper
 from langchain_community.tools import DuckDuckGoSearchRun
 from tools.file_system_manager import file_manager_toolkit, get_file_tool
-from tools.web_scraper.loaders.github import load_github_trending
+from tools.loaders.github import load_github_trending
 from tools.loaders.weather import get_weather
 
 @tool
