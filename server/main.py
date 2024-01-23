@@ -5,6 +5,9 @@ import json
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
+from flask import Flask, request
+from werkzeug.utils import secure_filename
+import os
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "your_secret_key"
@@ -12,7 +15,7 @@ app.config["SECRET_KEY"] = "your_secret_key"
 CORS(
     app,
     origins=[
-        "http://192.168.4.74:5173", 
+        "http://192.168.4.*", 
         "http://localhost:5173", 
         "http://www.acai.so",
         "http://192.168.4.192:5173"  # Add this line
@@ -22,7 +25,7 @@ CORS(
 socketio = SocketIO(
     app,
     cors_allowed_origins=[
-        "http://192.168.4.74:5173",
+        "http://192.168.4.*", 
         "http://localhost:5173",
         "https://www.acai.so",
         "http://192.168.4.192:5173"
@@ -37,10 +40,11 @@ from langchain.agents import load_tools, Tool
 from langchain_experimental.utilities import PythonREPL
 from langchain_community.utilities import TextRequestsWrapper
 from langchain_community.tools import DuckDuckGoSearchRun
-from tools.file_system_manager import file_manager_toolkit, get_file_tool
 from tools.loaders.github import load_github_trending
 from tools.loaders.weather import get_weather
 from tools.loaders.wiki_search import wiki_search
+
+from tools.audio.whisperx_transcription import create_transcript
 
 @tool
 def wiki_search_tool(query: str) -> str:
@@ -130,14 +134,6 @@ tool_mapping = {
     "GetGithubTrending": get_github_trending,
     "GetWeather": get_weather_tool,
     "WikiSearch": wiki_search_tool,
-    # uses a temporary directory currently
-    # "CopyFileTool": get_file_tool(file_manager_toolkit, 'copy_file'),
-    # "DeleteFileTool": get_file_tool(file_manager_toolkit, 'file_delete'),
-    # "SearchFileTool": get_file_tool(file_manager_toolkit, 'file_search'),
-    # "MoveFileTool": get_file_tool(file_manager_toolkit, 'move_file'),
-    # "ReadFileTool": get_file_tool(file_manager_toolkit, 'read_file'),
-    # "WriteFileTool": get_file_tool(file_manager_toolkit, 'write_file'),
-    # "ListFilesTool": get_file_tool(file_manager_toolkit, 'list_directory'),
 }
 
 from models.crew_config import model_mapping
@@ -185,6 +181,20 @@ def proxy():
 @app.route("/test", methods=["GET"])
 def test():
     return jsonify({"response": "Hello World!"}), 200
+
+@app.route('/transcribe', methods=['POST'])
+def transcribe():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part in the request"}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No file selected for uploading"}), 400
+    if file:
+        filename = secure_filename(file.filename)
+        filepath = os.path.join('/tmp', filename)
+        file.save(filepath)
+        transcript, suggested_speakers = create_transcript(filepath)
+        return jsonify({"transcript": transcript, "suggested_speakers": suggested_speakers}), 200
 
 @app.route("/v1/agent", methods=["POST"])
 def agent():
