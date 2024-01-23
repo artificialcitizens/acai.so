@@ -40,6 +40,16 @@ from langchain_community.tools import DuckDuckGoSearchRun
 from tools.file_system_manager import file_manager_toolkit, get_file_tool
 from tools.loaders.github import load_github_trending
 from tools.loaders.weather import get_weather
+from tools.loaders.wiki_search import wiki_search
+
+@tool
+def wiki_search_tool(query: str) -> str:
+    """Search Wikipedia for the query. Input is the query to search for."""
+    try:
+        results = wiki_search(query=query)
+        return results[0]
+    except Exception as error:
+        return jsonify({"error": str(error)}), 500
 
 @tool
 def get_weather_tool(zip_code: str) -> str:
@@ -119,6 +129,7 @@ tool_mapping = {
     "PythonREPL": python_repl_tool,
     "GetGithubTrending": get_github_trending,
     "GetWeather": get_weather_tool,
+    "WikiSearch": wiki_search_tool,
     # uses a temporary directory currently
     # "CopyFileTool": get_file_tool(file_manager_toolkit, 'copy_file'),
     # "DeleteFileTool": get_file_tool(file_manager_toolkit, 'file_delete'),
