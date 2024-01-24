@@ -16,5 +16,9 @@ chain = create_title_prompt | model | StrOutputParser()
 
 def create_title(content:str) -> str:
   '''Given content, create an appropriate title'''
-  return chain.invoke({"content": content})
+  try:
+      return chain.invoke({"content": content})
+  except Exception as e:
+      # Appropriate error logging and handling
+      return str(e)
 

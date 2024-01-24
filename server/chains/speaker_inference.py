@@ -32,5 +32,5 @@ Yo...
  )
   split_text = text_splitter.split_text(query)
 
-  return chain.invoke({"transcript": split_text[0]})
+  return chain.invoke({"transcript": split_text})
 

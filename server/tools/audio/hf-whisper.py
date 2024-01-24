@@ -1,6 +1,8 @@
 import torch
 from transformers import pipeline
 from transformers.utils import is_flash_attn_2_available
+if not torch.cuda.is_available() and not is_flash_attn_2_available():
+    raise RuntimeError("Neither CUDA nor MPS device is available for transcription.")
 
 def transcribe_audio(audio_data):
     pipe = pipeline(
