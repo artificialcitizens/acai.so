@@ -40,6 +40,8 @@ from langchain.agents import load_tools, Tool
 from langchain_experimental.utilities import PythonREPL
 from langchain_community.utilities import TextRequestsWrapper
 from langchain_community.tools import DuckDuckGoSearchRun
+
+from tools.summarization.summary_and_title import create_title_and_summary
 from tools.loaders.github import load_github_trending
 from tools.loaders.weather import get_weather
 from tools.loaders.wiki_search import wiki_search
@@ -184,8 +186,9 @@ def test():
 
 @app.route('/transcribe', methods=['POST'])
 def transcribe():
+    
     if 'file' not in request.files:
-        return jsonify({"error": "No file part in the request"}), 400
+            return jsonify({"error": "No file selected for uploading"}), 400
     file = request.files['file']
     if file.filename == '':
         return jsonify({"error": "No file selected for uploading"}), 400
@@ -194,7 +197,9 @@ def transcribe():
         filepath = os.path.join('/tmp', filename)
         file.save(filepath)
         transcript, suggested_speakers = create_transcript(filepath)
-        return jsonify({"transcript": transcript, "suggested_speakers": suggested_speakers}), 200
+        title, lite_summary, summary = create_title_and_summary(text=transcript)
+
+        return jsonify({"title": title, "lite_summary": lite_summary, "summary": summary, "transcript": transcript, "suggested_speakers": suggested_speakers}), 200
 
 @app.route("/v1/agent", methods=["POST"])
 def agent():

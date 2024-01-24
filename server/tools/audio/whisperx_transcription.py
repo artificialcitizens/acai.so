@@ -128,6 +128,13 @@ def create_transcription(transcript_list):
     '''Create a transcription from a list of sentences'''
     return '\n\n'.join(transcript_list)
 
+def quick_transcribe(audio_file):
+    '''Transcribe audio and return a chunk of text'''
+    segments = transcribe_audio_file(audio_file=audio_file)
+    transcript_list = format_transcript(segments)
+    combined_text = ' '.join([segment['text'] for segment in transcript_list])
+    return combined_text
+
 from chains.speaker_inference import infer_speakers
 
 def create_transcript(audio_file):

@@ -3,8 +3,13 @@ from langchain_community.document_loaders import WebBaseLoader
 from langchain_openai import ChatOpenAI
 from time import time
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if OPENAI_API_KEY is None:
+    raise Exception("Must set OPENAI_API_KEY in .env file")
 
 ####################
 # STUFF CHAIN #
