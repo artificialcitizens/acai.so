@@ -174,6 +174,18 @@ curl  -X POST \
 curl -X POST -F "file=@audio.wav" -F "quickTranscribe=true" http://localhost:5000/transcribe
 ```
 
+```bash
+curl  -X POST \
+  'http://127.0.0.1:5050/transcribe' \
+  --header 'Accept: */*' \
+  --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
+  --form 'url="https://www.youtube.com/watch?v=12jdFZrh8j4"' \
+  --form 'quickTranscribe="True"' \
+  --form 'diarization="True"' \
+  --form 'minSpeakers="3"' \
+  --form 'maxSpeakers="3"'
+```
+
 **Example Response:**
 
 ```json
