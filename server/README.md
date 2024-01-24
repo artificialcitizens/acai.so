@@ -7,7 +7,10 @@ Setup local environment:
 ```
 conda create -n ava python=3.10
 conda activate ava
+conda install -c pytorch faiss-gpu
+conda install pytorch==2.0.0 torchaudio==2.0.0 pytorch-cuda=11.8 -c pytorch -c nvidia
 pip install -r requirements.txt
+
 ```
 
 Run:
@@ -31,6 +34,9 @@ docker run -p 5050:5050 ava
 ## Crew Manager
 
 An api for creating and managing [CrewAI](https://github.com/joaomdmoura/crewAI) agents.
+
+<details>
+<summary>Curl examples</summary>
 
 ```curl
 curl  -X POST \
@@ -143,6 +149,8 @@ curl  -X POST \
 }
 '
 ```
+
+</details>
 
 ## Transcription
 

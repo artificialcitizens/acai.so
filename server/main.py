@@ -272,6 +272,25 @@ class CreateEmbeddingResponse(BaseModel):
     model: str
     usage: Usage
 
+# prevents error
+    # ERROR: Task was destroyed but it is pending!                      base_events.py:1771
+        #  task: <Task pending name='Task-31' coro=<BatchHandler._delayed_warmup() done, defined at                             
+        #  /home/josh/miniconda3/envs/thecrew/lib/python3.11/site-packages/infinity_emb/inference/batch_hand                    
+        #  ler.py:364> wait_for=<Future pending cb=[Task.task_wakeup()]>>  
+    # but makes the function 4x as slow. Error doesn't seem to affect anything.
+# def embed_sync(sentences):
+#     loop = asyncio.new_event_loop()
+#     asyncio.set_event_loop(loop)
+    
+#     async def embed():
+#         async with engine:
+#             return await engine.embed(sentences=sentences)
+
+#     result = loop.run_until_complete(embed())
+#     loop.run_until_complete(asyncio.gather(*asyncio.all_tasks(loop)))
+#     loop.close()
+#     return result
+
 
 def embed_sync(sentences):
     loop = asyncio.new_event_loop()
