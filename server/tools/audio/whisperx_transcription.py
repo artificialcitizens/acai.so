@@ -118,29 +118,23 @@ def transcribe_audio_file(audio_file, diarization=False, min_speakers=1, max_spe
     transcript_list = format_transcript(segments)
     return transcript_list
 
-def transcribe_raw_audio(audio, diarization=False, min_speakers=1, max_speakers=2):
-    '''Transcribe audio and return a list of sentences'''
-    segments = transcribe_audio(audio=audio, diarization=diarization, min_speakers=min_speakers, max_speakers=max_speakers)
-    transcript_list = format_transcript(segments)
-    return transcript_list
-
-def create_transcription(transcript_list):
+def create_transcription_text(transcript_list):
     '''Create a transcription from a list of sentences'''
     return '\n\n'.join(transcript_list)
 
 def quick_transcribe(audio_file):
     '''Transcribe audio and return a chunk of text'''
     segments = transcribe_audio_file(audio_file=audio_file)
-    transcript_list = format_transcript(segments)
-    combined_text = ' '.join([segment['text'] for segment in transcript_list])
-    return combined_text
+    print(segments)
+    # combined_text = ' '.join([segment['text'] for segment in segments])
+    return segments[0]
 
 from chains.speaker_inference import infer_speakers
 
-def create_transcript(audio_file):
+def create_transcript(audio_file, diarization=False, min_speakers=1, max_speakers=3):
     '''Create a transcript from an audio file'''
-    transcript_list = transcribe_audio_file(audio_file, diarization=True, min_speakers=1, max_speakers=3)
-    transcript = create_transcription(transcript_list)
+    transcript_list = transcribe_audio_file(audio_file, diarization=diarization, min_speakers=min_speakers, max_speakers=max_speakers)
+    transcript = create_transcription_text(transcript_list)
     sample_list = transcript_list[:10]
     suggested_speakers = infer_speakers('\n\n'.join(sample_list))
     return transcript, suggested_speakers
@@ -149,12 +143,10 @@ if __name__ == "__main__":
     from chains.speaker_inference import infer_speakers
 
     audio_file="/home/josh/dev/acai.so/server/tools/audio/example.wav"
-    audio = whisperx.load_audio(audio_file)
-    output_dir = './data/files/test/dsp-transcripts'
-    output_file = 'dsp-96-transcript.txt'
+    output_dir = './data/files/test'
+    output_file = 'example-transcript.txt'
     
-    # transcript_list = transcribe_audio_file(audio_file, diarization=True, min_speakers=1, max_speakers=3)
-    transcript_list = transcribe_raw_audio(audio=audio, diarization=True, min_speakers=1, max_speakers=3)
+    transcript_list = transcribe_audio_file(audio_file=audio_file, diarization=True, min_speakers=1, max_speakers=3)
     
     # For testing if llm can infer names for speakers
     sample_list = transcript_list[:10]
@@ -166,7 +158,7 @@ if __name__ == "__main__":
     os.makedirs(output_dir, exist_ok=True)
 
     # Write transcript to file
-    transcript = create_transcription(transcript_list)
+    transcript = create_transcription_text(transcript_list)
 
     with open(os.path.join(output_dir, output_file), 'w') as f:
         f.write(transcript)
