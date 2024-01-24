@@ -5,6 +5,9 @@ import json
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
+from flask import Flask, request
+from werkzeug.utils import secure_filename
+import os
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "your_secret_key"
@@ -22,7 +25,7 @@ CORS(
 socketio = SocketIO(
     app,
     cors_allowed_origins=[
-        "http://192.168.4.74:5173",
+        "http://192.168.4.74:5173",  
         "http://localhost:5173",
         "https://www.acai.so",
         "http://192.168.4.192:5173"
@@ -37,10 +40,14 @@ from langchain.agents import load_tools, Tool
 from langchain_experimental.utilities import PythonREPL
 from langchain_community.utilities import TextRequestsWrapper
 from langchain_community.tools import DuckDuckGoSearchRun
-from tools.file_system_manager import file_manager_toolkit, get_file_tool
+
+from tools.summarization.summary_and_title import create_title_and_summary
 from tools.loaders.github import load_github_trending
 from tools.loaders.weather import get_weather
 from tools.loaders.wiki_search import wiki_search
+from tools.loaders.youtube_ripper import rip_youtube
+
+from tools.audio.whisperx_transcription import create_transcript, quick_transcribe
 
 @tool
 def wiki_search_tool(query: str) -> str:
@@ -130,14 +137,6 @@ tool_mapping = {
     "GetGithubTrending": get_github_trending,
     "GetWeather": get_weather_tool,
     "WikiSearch": wiki_search_tool,
-    # uses a temporary directory currently
-    # "CopyFileTool": get_file_tool(file_manager_toolkit, 'copy_file'),
-    # "DeleteFileTool": get_file_tool(file_manager_toolkit, 'file_delete'),
-    # "SearchFileTool": get_file_tool(file_manager_toolkit, 'file_search'),
-    # "MoveFileTool": get_file_tool(file_manager_toolkit, 'move_file'),
-    # "ReadFileTool": get_file_tool(file_manager_toolkit, 'read_file'),
-    # "WriteFileTool": get_file_tool(file_manager_toolkit, 'write_file'),
-    # "ListFilesTool": get_file_tool(file_manager_toolkit, 'list_directory'),
 }
 
 from models.crew_config import model_mapping
@@ -185,6 +184,69 @@ def proxy():
 @app.route("/test", methods=["GET"])
 def test():
     return jsonify({"response": "Hello World!"}), 200
+
+from urllib.parse import urlparse
+
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = set(['wav', 'mp3', 'flac', 'aac', 'ogg', 'm4a', 'mp4'])
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/transcribe', methods=['POST'])
+def transcribe():
+    file = None
+    if 'file' in request.files:
+        file = request.files['file']
+    elif 'url' in request.form:
+        url = request.form['url']
+        parsed_url = urlparse(url)
+        filename = os.path.basename(parsed_url.path)
+        file_extension = os.path.splitext(filename)[1]
+        audio_extensions = ['.wav', '.mp3', '.flac', '.aac', '.ogg', '.m4a']
+        if file_extension in audio_extensions:
+            response = requests.get(url, stream=True)
+            if response.status_code == 200:
+                file = response.content
+                filepath = os.path.join('/tmp', filename)
+                with open(filepath, 'wb') as f:
+                    f.write(file)
+                file = type('File', (object,), {'filename': filename})
+            else:
+                return jsonify({"error": "Unable to download file from provided URL"}), 400
+        elif 'youtube.com' in url or 'youtu.be' in url:
+            audio_data = rip_youtube(url)
+            filename = 'youtube_audio.mp4'
+            filepath = os.path.join('/tmp', filename)
+            with open(filepath, 'wb') as f:
+                f.write(audio_data.getvalue())
+            file = type('File', (object,), {'filename': filename})
+        else:
+            return jsonify({"error": "Provided URL does not point to a valid audio file or YouTube video"}), 400
+    if file and file.filename != '':
+        if not allowed_file(file.filename):
+            return jsonify({"error": "File type not permitted"}), 400
+        filename = secure_filename(file.filename)
+        filepath = os.path.join('/tmp', filename)
+        if 'file' in request.files:
+            file.save(filepath)
+
+        if 'quickTranscribe' in request.form:
+            try:
+                transcript = quick_transcribe(audio_file=filepath)
+                return jsonify({"transcript": transcript, "src": filename}), 200
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+        else:
+            diarization = request.form.get('diarization', True)
+            min_speakers = request.form.get('minSpeakers', 1)
+            max_speakers = request.form.get('maxSpeakers', 3)
+            file_name = request.form.get('url', filename)
+            transcript, suggested_speakers = create_transcript(audio_file=filepath, diarization=diarization, min_speakers=int(min_speakers), max_speakers=int(max_speakers))
+            title, lite_summary, summary = create_title_and_summary(text=transcript)
+
+            return jsonify({"title": title, "lite_summary": lite_summary, "summary": summary, "transcript": transcript, "suggested_speakers": suggested_speakers, "src": file_name}), 200
+    else:
+        return jsonify({"error": "No file or URL provided"}), 400
 
 @app.route("/v1/agent", methods=["POST"])
 def agent():

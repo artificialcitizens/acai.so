@@ -143,3 +143,73 @@ curl  -X POST \
 }
 '
 ```
+
+## Transcription
+
+---
+
+**Endpoint:** `/transcribe`
+
+**Method:** `POST`
+
+**Description:** This endpoint is used to transcribe audio files. It accepts either a file upload or a URL pointing to an audio file or YouTube video.
+
+**Request Parameters:**
+
+- `file`: An audio file to be transcribed. This should be included in the request's files.
+- `url`: A URL pointing to an audio file or YouTube video to be transcribed. This should be included in the request's form data.
+- `quickTranscribe`: A boolean indicating whether to perform a quick transcription. This should be included in the request's form data.
+- `diarization`: A boolean indicating whether to perform speaker diarization. This should be included in the request's form data.
+- `minSpeakers`: The minimum number of speakers to consider during diarization. This should be included in the request's form data.
+- `maxSpeakers`: The maximum number of speakers to consider during diarization. This should be included in the request's form data.
+
+**Response:**
+
+- If the transcription is successful, the endpoint returns a JSON object containing the transcription, title, summary, lite summary, suggested speakers, and source file name.
+- If an error occurs, the endpoint returns a JSON object containing an error message.
+
+**Example Request:**
+
+```bash
+curl -X POST -F "file=@audio.wav" -F "quickTranscribe=true" http://localhost:5000/transcribe
+```
+
+```bash
+curl  -X POST \
+  'http://127.0.0.1:5050/transcribe' \
+  --header 'Accept: */*' \
+  --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
+  --form 'url="https://www.youtube.com/watch?v=12jdFZrh8j4"' \
+  --form 'quickTranscribe="True"' \
+  --form 'diarization="True"' \
+  --form 'minSpeakers="3"' \
+  --form 'maxSpeakers="3"'
+```
+
+**Example Response:**
+
+```json
+{
+  "title": "Transcription Title",
+  "lite_summary": "Lite Summary",
+  "summary": "Summary",
+  "transcript": "Transcription",
+  "suggested_speakers": "2",
+  "src": "audio.wav"
+}
+```
+
+**Error Response:**
+
+```json
+{
+  "error": "No file or URL provided"
+}
+```
+
+**Notes:**
+
+- The `file` and `url` parameters are mutually exclusive. If both are provided, the `file` parameter will be used.
+- If the `quickTranscribe` parameter is set to `true`, the endpoint will return a quick transcription without performing speaker diarization or generating a title and summary.
+- The `diarization`, `minSpeakers`, and `maxSpeakers` parameters are only used if the `quickTranscribe` parameter is not set to `true`.
+- The endpoint supports `.wav`, `.mp3`, `.flac`, `.aac`, `.ogg`, and `.m4a` audio files, as well as YouTube videos.
