@@ -1,10 +1,6 @@
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from langchain.text_splitter import CharacterTextSplitter
 
 from models.chat_model import model
 
@@ -31,5 +27,10 @@ SPEAKER_02 [00:02:56]:
 Yo...
 ```
   '''
-  return chain.invoke({"transcript": query})
+  text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
+    chunk_size=4000, chunk_overlap=0
+ )
+  split_text = text_splitter.split_text(query)
+
+  return chain.invoke({"transcript": split_text[0]})
 
