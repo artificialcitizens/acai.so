@@ -46,7 +46,7 @@ from tools.loaders.github import load_github_trending
 from tools.loaders.weather import get_weather
 from tools.loaders.wiki_search import wiki_search
 
-from tools.audio.whisperx_transcription import create_transcript
+from tools.audio.whisperx_transcription import create_transcript, quick_transcribe
 
 @tool
 def wiki_search_tool(query: str) -> str:
@@ -184,22 +184,53 @@ def proxy():
 def test():
     return jsonify({"response": "Hello World!"}), 200
 
+from urllib.parse import urlparse
+
 @app.route('/transcribe', methods=['POST'])
 def transcribe():
-    
-    if 'file' not in request.files:
-            return jsonify({"error": "No file selected for uploading"}), 400
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({"error": "No file selected for uploading"}), 400
-    if file:
+    file = None
+    if 'file' in request.files:
+        file = request.files['file']
+    elif 'url' in request.form:
+        url = request.form['url']
+        parsed_url = urlparse(url)
+        filename = os.path.basename(parsed_url.path)
+        
+        # Check if the file extension is valid
+        file_extension = os.path.splitext(filename)[1]
+        audio_extensions = ['.wav', '.mp3', '.flac', '.aac', '.ogg', '.m4a']
+        if file_extension not in audio_extensions:
+            return jsonify({"error": "Provided URL does not point to a valid audio file"}), 400
+        
+        response = requests.get(url, stream=True)
+        if response.status_code == 200:
+            file = response.content
+            filepath = os.path.join('/tmp', filename)
+            with open(filepath, 'wb') as f:
+                f.write(file)
+            file = type('File', (object,), {'filename': filename})
+        else:
+            return jsonify({"error": "Unable to download file from provided URL"}), 400
+
+    if file and file.filename != '':
         filename = secure_filename(file.filename)
         filepath = os.path.join('/tmp', filename)
-        file.save(filepath)
-        transcript, suggested_speakers = create_transcript(filepath)
-        title, lite_summary, summary = create_title_and_summary(text=transcript)
+        if 'file' in request.files:
+            file.save(filepath)
 
-        return jsonify({"title": title, "lite_summary": lite_summary, "summary": summary, "transcript": transcript, "suggested_speakers": suggested_speakers}), 200
+        if 'quickTranscribe' in request.form:
+            transcript = quick_transcribe(audio_file=filepath)
+            return jsonify({"transcript": transcript, "src": filename}), 200
+        else:
+            diarization = request.form.get('diarization', True)
+            min_speakers = request.form.get('minSpeakers', 1)
+            max_speakers = request.form.get('maxSpeakers', 3)
+            transcript, suggested_speakers = create_transcript(audio_file=filepath, diarization=diarization, min_speakers=min_speakers, max_speakers=max_speakers)
+            title, lite_summary, summary = create_title_and_summary(text=transcript)
+
+            return jsonify({"title": title, "lite_summary": lite_summary, "summary": summary, "transcript": transcript, "suggested_speakers": suggested_speakers, "src": filename}), 200
+    else:
+        return jsonify({"error": "No file or URL provided"}), 400
 
 @app.route("/v1/agent", methods=["POST"])
 def agent():
