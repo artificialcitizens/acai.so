@@ -187,6 +187,11 @@ def test():
 
 from urllib.parse import urlparse
 
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = set(['wav', 'mp3', 'flac', 'aac', 'ogg', 'm4a', 'mp4'])
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route('/transcribe', methods=['POST'])
 def transcribe():
     file = None
@@ -218,14 +223,19 @@ def transcribe():
         else:
             return jsonify({"error": "Provided URL does not point to a valid audio file or YouTube video"}), 400
     if file and file.filename != '':
+        if not allowed_file(file.filename):
+            return jsonify({"error": "File type not permitted"}), 400
         filename = secure_filename(file.filename)
         filepath = os.path.join('/tmp', filename)
         if 'file' in request.files:
             file.save(filepath)
 
         if 'quickTranscribe' in request.form:
-            transcript = quick_transcribe(audio_file=filepath)
-            return jsonify({"transcript": transcript, "src": filename}), 200
+            try:
+                transcript = quick_transcribe(audio_file=filepath)
+                return jsonify({"transcript": transcript, "src": filename}), 200
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
         else:
             diarization = request.form.get('diarization', True)
             min_speakers = request.form.get('minSpeakers', 1)
