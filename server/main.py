@@ -45,6 +45,7 @@ from tools.summarization.summary_and_title import create_title_and_summary
 from tools.loaders.github import load_github_trending
 from tools.loaders.weather import get_weather
 from tools.loaders.wiki_search import wiki_search
+from tools.loaders.youtube_ripper import rip_youtube
 
 from tools.audio.whisperx_transcription import create_transcript, quick_transcribe
 
@@ -195,23 +196,27 @@ def transcribe():
         url = request.form['url']
         parsed_url = urlparse(url)
         filename = os.path.basename(parsed_url.path)
-        
-        # Check if the file extension is valid
         file_extension = os.path.splitext(filename)[1]
         audio_extensions = ['.wav', '.mp3', '.flac', '.aac', '.ogg', '.m4a']
-        if file_extension not in audio_extensions:
-            return jsonify({"error": "Provided URL does not point to a valid audio file"}), 400
-        
-        response = requests.get(url, stream=True)
-        if response.status_code == 200:
-            file = response.content
+        if file_extension in audio_extensions:
+            response = requests.get(url, stream=True)
+            if response.status_code == 200:
+                file = response.content
+                filepath = os.path.join('/tmp', filename)
+                with open(filepath, 'wb') as f:
+                    f.write(file)
+                file = type('File', (object,), {'filename': filename})
+            else:
+                return jsonify({"error": "Unable to download file from provided URL"}), 400
+        elif 'youtube.com' in url or 'youtu.be' in url:
+            audio_data = rip_youtube(url)
+            filename = 'youtube_audio.mp4'
             filepath = os.path.join('/tmp', filename)
             with open(filepath, 'wb') as f:
-                f.write(file)
+                f.write(audio_data.getvalue())
             file = type('File', (object,), {'filename': filename})
         else:
-            return jsonify({"error": "Unable to download file from provided URL"}), 400
-
+            return jsonify({"error": "Provided URL does not point to a valid audio file or YouTube video"}), 400
     if file and file.filename != '':
         filename = secure_filename(file.filename)
         filepath = os.path.join('/tmp', filename)
@@ -225,10 +230,11 @@ def transcribe():
             diarization = request.form.get('diarization', True)
             min_speakers = request.form.get('minSpeakers', 1)
             max_speakers = request.form.get('maxSpeakers', 3)
-            transcript, suggested_speakers = create_transcript(audio_file=filepath, diarization=diarization, min_speakers=min_speakers, max_speakers=max_speakers)
+            file_name = request.form.get('url', filename)
+            transcript, suggested_speakers = create_transcript(audio_file=filepath, diarization=diarization, min_speakers=int(min_speakers), max_speakers=int(max_speakers))
             title, lite_summary, summary = create_title_and_summary(text=transcript)
 
-            return jsonify({"title": title, "lite_summary": lite_summary, "summary": summary, "transcript": transcript, "suggested_speakers": suggested_speakers, "src": filename}), 200
+            return jsonify({"title": title, "lite_summary": lite_summary, "summary": summary, "transcript": transcript, "suggested_speakers": suggested_speakers, "src": file_name}), 200
     else:
         return jsonify({"error": "No file or URL provided"}), 400
 
