@@ -214,6 +214,7 @@ python-engineio==4.8.1
 python-socketio==5.10.0
 pytorch-lightning==2.1.3
 pytorch-metric-learning==2.4.1
+pytube==15.0.0
 pytz==2023.3.post1
 PyYAML==6.0.1
 questionary==2.0.1
@@ -291,6 +292,7 @@ weasel==0.3.4
 websocket-client==1.7.0
 websockets==12.0
 Werkzeug==3.0.1
+whisperx @ git+https://github.com/m-bain/whisperx.git@8227807fa9e076901ea4b4fbbf79c9777a6f5e03
 wikipedia==1.4.0
 wrapt==1.16.0
 wsproto==1.2.0
