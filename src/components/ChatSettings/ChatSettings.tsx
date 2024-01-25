@@ -111,7 +111,7 @@ export const ChatSettings: React.FC<ChatModelProps> = ({ workspaceId }) => {
           />
         </>
       )}
-      {state.context[workspaceId]?.agentMode === 'crew' && crews && (
+      {state.context[workspaceId]?.agentMode === 'crew' && crews?.length && (
         <Dropdown
           label="Use Crew:"
           options={crews.map((crew) => ({ value: crew.id, label: crew.name }))}
