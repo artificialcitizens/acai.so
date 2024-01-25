@@ -1,38 +1,15 @@
 import CrewAIForm from '../CrewAIForm/CrewAIForm';
-import { Crew, useCrewAi } from '../use-crew-ai';
+import { useCrewAi } from '../use-crew-ai';
 import { useState } from 'react';
 import CrewCard from '../CrewCard/CrewCard';
-import Dropdown from '../../DropDown';
 
-const CrewAIContainer = ({
-  displayDropdown,
-}: {
-  displayDropdown?: boolean;
-}) => {
+const CrewAIContainer = () => {
   const { newCrew, deleteCrew, crews, saveCrew, test, output } = useCrewAi();
   const [formVisible, setFormVisible] = useState(false);
-  const [currentCrew, setCurrentCrew] = useState<string | null>(
-    localStorage.getItem('currentCrew') || crews?.[0]?.id || null,
-  );
-
-  const handleModeChange = (crew: string) => {
-    if (!crews) return;
-    console.log(crew);
-    localStorage.setItem('currentCrew', crew);
-    setCurrentCrew(crew);
-  };
 
   if (!crews) return null;
   return (
     <div className="text-acai-white">
-      {displayDropdown && (
-        <Dropdown
-          label="Use Crew:"
-          options={crews.map((crew) => ({ value: crew.id, label: crew.name }))}
-          value={currentCrew || crews[0].id}
-          onChange={handleModeChange}
-        />
-      )}
       {formVisible && (
         <CrewAIForm
           saveCrew={(crew) => {
