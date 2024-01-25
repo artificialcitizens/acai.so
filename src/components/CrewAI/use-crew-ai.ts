@@ -244,7 +244,7 @@ export const useCrewAi = () => {
     }
     const crewClone = JSON.parse(JSON.stringify(crew));
     crewClone.agents.push(agent);
-    const savedCrew = await saveCrew(crew);
+    const savedCrew = await saveCrew(crewClone);
     return savedCrew;
   };
 
