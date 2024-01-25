@@ -18,6 +18,7 @@ CORS(
         "http://192.168.4.74:5173", 
         "http://localhost:5173", 
         "http://www.acai.so",
+        "http://192.168.4.195:5173", # Add this line
         "http://192.168.4.192:5173"  # Add this line
     ],
 )
@@ -28,6 +29,7 @@ socketio = SocketIO(
         "http://192.168.4.74:5173",  
         "http://localhost:5173",
         "https://www.acai.so",
+        "http://192.168.4.195:5173",
         "http://192.168.4.192:5173"
     ],
 )
@@ -38,7 +40,6 @@ socketio = SocketIO(
 from langchain.tools import BaseTool, StructuredTool, tool
 from langchain.agents import load_tools, Tool
 from langchain_experimental.utilities import PythonREPL
-from langchain_community.utilities import TextRequestsWrapper
 from langchain_community.tools import DuckDuckGoSearchRun
 
 from tools.summarization.summary_and_title import create_title_and_summary
@@ -251,10 +252,10 @@ def transcribe():
 # Setup embedding engine
 import asyncio
 from infinity_emb import AsyncEmbeddingEngine
-MODEL_NAME = "BAAI/bge-large-en-v1.5"
-engine = AsyncEmbeddingEngine(model_name_or_path = MODEL_NAME, engine="torch")
+
 from pydantic import BaseModel, Field
 from typing import List, Optional, Union
+
 class Embedding(BaseModel):
     object: str
     embedding: List[float]
@@ -291,6 +292,9 @@ class CreateEmbeddingResponse(BaseModel):
 #     loop.close()
 #     return result
 
+# @TODO: Look into removing from memory when not in use, there is a stop and start method
+MODEL_NAME = "BAAI/bge-large-en-v1.5"
+engine = AsyncEmbeddingEngine(model_name_or_path = MODEL_NAME, engine="torch")
 
 def embed_sync(sentences):
     loop = asyncio.new_event_loop()

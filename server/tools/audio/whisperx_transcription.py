@@ -64,6 +64,11 @@ def transcribe_audio(
     # combined_text = ' '.join([segment['text'] for segment in result["segments"]])
     # print(combined_text)
     print(f"Completed audio transcription in {time.time() - transcribe_function_start_time} seconds")
+    
+    del diarize_model
+    gc.collect()
+    torch.cuda.empty_cache()
+
     return result["segments"]
 
 def format_transcript(segments):

@@ -288,7 +288,7 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
         onSubmit={async (val: string) => {
           if (!vectorContext) return;
           const response = await vectorContext.similaritySearchWithScore(val);
-          const results = vectorContext.filterAndCombineContent(response, 0.6);
+          const results = vectorContext.filterAndCombineContent(response, 0.4);
           const newTab: ACDoc = {
             id: Date.now().toString(),
             title: val,

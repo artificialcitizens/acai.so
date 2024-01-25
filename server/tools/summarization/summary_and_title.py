@@ -3,7 +3,6 @@ from time import time
 from chains.title_creator import create_title
 from models.chat_model import model
 
-from langchain_openai import ChatOpenAI
 from langchain.chains.summarize import load_summarize_chain
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.prompts import PromptTemplate
