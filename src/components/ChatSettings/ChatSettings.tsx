@@ -5,17 +5,18 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
-import { useActor } from '@xstate/react';
+import { useActor, useSelector } from '@xstate/react';
 import { agentMode } from '../Ava/use-ava';
 import { useLocalStorageKeyValue } from '../../hooks/use-local-storage';
+import ScratchPad from '../ScratchPad/ScratchPad';
+import CrewAIContainer from '../CrewAI/CrewAIContainer/CrewAIContainer';
+import { useCrewAi } from '../CrewAI/use-crew-ai';
 
 interface ChatModelProps {
   workspaceId: string;
 }
 
-export const ChatModelDropdown: React.FC<ChatModelProps> = ({
-  workspaceId,
-}) => {
+export const ChatSettings: React.FC<ChatModelProps> = ({ workspaceId }) => {
   const [openAIModels, setOpenAIModels] = useState<string[]>([]);
   const [openAIKey] = useLocalStorageKeyValue(
     'OPENAI_KEY',
@@ -31,7 +32,14 @@ export const ChatModelDropdown: React.FC<ChatModelProps> = ({
   const { agentStateService }: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const [state, send] = useActor(agentStateService);
-
+  const customPrompt = useSelector(agentStateService, (state) =>
+    workspaceId ? state.context[workspaceId]?.customPrompt : '',
+  );
+  const handleCustomPromptInput = (e: { target: { value: any } }) =>
+    agentStateService.send('UPDATE_CUSTOM_PROMPT', {
+      workspaceId: workspaceId,
+      customPrompt: e.target.value,
+    });
   const handleModelChange = (modelName: string) => {
     send({
       type: 'SET_OPENAI_CHAT_MODEL',
@@ -63,8 +71,22 @@ export const ChatModelDropdown: React.FC<ChatModelProps> = ({
       ragResults: event.target.checked,
     });
   };
+  const { crews } = useCrewAi();
+
+  const [currentCrew, setCurrentCrew] = useState<string | null>(
+    localStorage.getItem('currentCrew') || crews?.[0]?.id || null,
+  );
+
+  const handleCrewChange = (crew: string) => {
+    if (!crews) return;
+    console.log(crew);
+    localStorage.setItem('currentCrew', crew);
+    setCurrentCrew(crew);
+  };
+
   return (
     <span className="flex flex-col justify-between">
+      <h2 className="text-acai-white text-xs mb-4">Chat Settings</h2>
       <Dropdown
         label="Agent Mode"
         options={agentMode.map((mode) => ({ value: mode, label: mode }))}
@@ -72,14 +94,29 @@ export const ChatModelDropdown: React.FC<ChatModelProps> = ({
         onChange={handleModeChange}
       />
       {state.context[workspaceId]?.agentMode === 'chat' && (
+        <>
+          <Dropdown
+            label="Chat Model"
+            options={openAIModels.map((model) => ({
+              value: model,
+              label: model,
+            }))}
+            value={state.context[workspaceId]?.openAIChatModel || ''}
+            onChange={handleModelChange}
+          />
+          <ScratchPad
+            placeholder="Custom Prompt"
+            content={customPrompt}
+            handleInputChange={handleCustomPromptInput}
+          />
+        </>
+      )}
+      {state.context[workspaceId]?.agentMode === 'crew' && crews?.length && (
         <Dropdown
-          label="Chat Model"
-          options={openAIModels.map((model) => ({
-            value: model,
-            label: model,
-          }))}
-          value={state.context[workspaceId]?.openAIChatModel || ''}
-          onChange={handleModelChange}
+          label="Use Crew:"
+          options={crews.map((crew) => ({ value: crew.id, label: crew.name }))}
+          value={currentCrew || crews[0].id}
+          onChange={handleCrewChange}
         />
       )}
       {state.context[workspaceId]?.agentMode === 'knowledge' && (

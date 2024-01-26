@@ -2,32 +2,29 @@ import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { AcaiMemoryVector } from '../../../../db';
 import { Document } from 'langchain/document';
 import { Embeddings } from 'langchain/embeddings/base';
-import { handleAcaiEmbeddings } from '../models/chat';
-// import { HuggingFaceTransformersEmbeddings } from 'langchain/embeddings/hf_transformers';
+import { loadEmbeddingModel } from '../models/chat';
+import { HuggingFaceTransformersEmbeddings } from 'langchain/embeddings/hf_transformers';
 
-// export const initializeMemoryVectorStore = async ({
-//   docs,
-// }: {
-//   docs: Document[];
-// }) => {
-//   const openAIApiKey =
-//     getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY;
-//   const vectorStore = await MemoryVectorStore.fromDocuments(
-//     docs,
-//     new HuggingFaceTransformersEmbeddings({
-//       modelName: 'Xenova/bge-base-en',
-//     }),
-//   );
-//   return vectorStore;
-// };
+const huggingFaceEmbeddings = import.meta.env.VITE_HUGGING_FACE_EMBEDDINGS;
+
 export const initializeMemoryVectorStore = async ({
   docs,
 }: {
   docs: Document[];
 }) => {
-  const { embeddings } = handleAcaiEmbeddings();
-  const vectorStore = await MemoryVectorStore.fromDocuments(docs, embeddings);
-  return vectorStore;
+  if (huggingFaceEmbeddings === 'true') {
+    const vectorStore = await MemoryVectorStore.fromDocuments(
+      docs,
+      new HuggingFaceTransformersEmbeddings({
+        modelName: 'Xenova/bge-base-en',
+      }),
+    );
+    return vectorStore;
+  } else {
+    const { embeddings } = loadEmbeddingModel();
+    const vectorStore = await MemoryVectorStore.fromDocuments(docs, embeddings);
+    return vectorStore;
+  }
 };
 
 /**

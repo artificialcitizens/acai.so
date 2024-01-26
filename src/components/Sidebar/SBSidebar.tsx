@@ -19,7 +19,7 @@ const isMobile = () => {
   return true;
 };
 const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
-  const calculatedWidth = window.innerWidth < 786 ? 100 : 50;
+  const calculatedWidth = window.innerWidth < 786 ? 100 : 75;
   const minWidth = 0;
   const defaultWidth = calculatedWidth;
   const [width, setWidth] = useState<number | null>(null);
@@ -122,13 +122,12 @@ const SBSidebar: React.FC<SBSidebarProps> = ({ children }) => {
           aria-valuemax={100}
           aria-valuenow={width}
           tabIndex={0}
-          className="md:hover:bg-acai-darker pointer-events-none md:pointer-events-auto"
+          className="md:hover:bg-acai-darker"
           style={{
-            width: width < 3 ? '20px' : '10px',
+            width: '10px',
             cursor: 'ew-resize',
             position: 'absolute',
             height: '100%',
-            backgroundColor: width < 3 ? '#2f2f2f' : '',
           }}
           onMouseDown={handleMouseDown}
         />

@@ -261,11 +261,10 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
             <button
               className="p-0 px-1  rounded-full font-medium text-red-900"
               onClick={async () => {
-                const confirmDelete = window.prompt('Type "delete" to confirm');
-                if (confirmDelete?.toLowerCase() !== 'delete') {
-                  alert('Deletion cancelled.');
-                  return;
-                }
+                window.confirm(
+                  'Are you sure you wish to delete this knowledge entry?',
+                );
+
                 const itemsToDelete = knowledgeItems.filter((item) =>
                   item.id.startsWith(parsedId),
                 );
@@ -289,7 +288,7 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
         onSubmit={async (val: string) => {
           if (!vectorContext) return;
           const response = await vectorContext.similaritySearchWithScore(val);
-          const results = vectorContext.filterAndCombineContent(response, 0.6);
+          const results = vectorContext.filterAndCombineContent(response, 0.4);
           const newTab: ACDoc = {
             id: Date.now().toString(),
             title: val,

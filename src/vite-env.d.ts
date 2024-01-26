@@ -2,3 +2,4 @@
 declare module 'react-audio-voice-recorder';
 declare module '@uidotdev/usehooks';
 declare module 'use-debounce';
+declare module 'react-easy-edit';

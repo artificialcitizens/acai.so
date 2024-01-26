@@ -62,11 +62,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({ editor, tipTapEditorId }) => {
         disabled={workspaceId === 'docs'}
         onClick={() => {
           if (!workspaceId) return;
-          const confirmDelete = window.prompt('Type "delete" to confirm');
-          if (confirmDelete?.toLowerCase() !== 'delete') {
-            toastifyInfo('Deletion cancelled.');
-            return;
-          }
+          window.confirm('Are you sure you wish to delete this document?');
 
           send({
             type: 'DELETE_DOC',

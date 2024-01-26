@@ -6,7 +6,7 @@ import {
   LLMResult,
   BaseMessage,
 } from 'langchain/schema';
-import { handleAcaiChat } from '../models/chat';
+import { loadChatModel } from '../models/chat';
 import { toastifyError } from '../../../components/Toast';
 
 type ChatResponse = {
@@ -62,7 +62,7 @@ export const askAi = async ({
   };
 }): Promise<ChatResponse> => {
   const controller = new AbortController();
-  const { chat } = handleAcaiChat({
+  const { chat } = loadChatModel({
     modelName,
     temperature,
   });

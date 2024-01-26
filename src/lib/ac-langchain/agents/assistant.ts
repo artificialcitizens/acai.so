@@ -1,5 +1,5 @@
 import { SystemMessage, HumanMessage } from 'langchain/schema';
-import { handleAcaiChat } from '../models/chat';
+import { loadChatModel } from '../models/chat';
 
 /**
  * Query OpenAI Chat Model
@@ -15,7 +15,7 @@ export const queryAssistant = async ({
   modelName: string;
   temperature?: number;
 }): Promise<string> => {
-  const { chat } = handleAcaiChat({
+  const { chat } = loadChatModel({
     modelName,
     temperature: temperature,
   });

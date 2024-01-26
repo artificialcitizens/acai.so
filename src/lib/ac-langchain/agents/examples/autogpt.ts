@@ -2,7 +2,7 @@ import { AutoGPT } from 'langchain/experimental/autogpt';
 import { ReadFileTool, WriteFileTool, SerpAPI } from 'langchain/tools';
 import { InMemoryFileStore } from 'langchain/stores/file/in_memory';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { handleAcaiChat, handleAcaiEmbeddings } from '../../models/chat';
+import { loadChatModel, loadEmbeddingModel } from '../../models/chat';
 
 const store = new InMemoryFileStore();
 
@@ -16,10 +16,10 @@ const tools = [
   }),
 ];
 
-const { embeddings } = handleAcaiEmbeddings();
+const { embeddings } = loadEmbeddingModel();
 const vectorStore = new MemoryVectorStore(embeddings);
 
-const { chat } = handleAcaiChat();
+const { chat } = loadChatModel();
 const autogpt = AutoGPT.fromLLMAndTools(chat, tools, {
   memory: vectorStore.asRetriever(),
   aiName: 'Tom',

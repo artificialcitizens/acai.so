@@ -27,6 +27,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../../db';
 import { AIMessage, HumanMessage } from 'langchain/schema';
 import { askAi } from '../../lib/ac-langchain/chains/ask-ai-chain';
+import { Task, useCrewAi } from '../CrewAI/use-crew-ai';
 
 export type AvaChatResponse = {
   response: string;
@@ -44,6 +45,7 @@ type Message = {
 
 export const agentMode = [
   'chat',
+  'crew',
   // maps to rag agent
   'knowledge',
   'custom',
@@ -84,6 +86,7 @@ export const useAva = (): {
   }>();
 
   const workspaceId = rawWorkspaceId || 'docs';
+  const { models, tools, crews } = useCrewAi();
 
   // @TODO - Seems to need to be here to get the context to load, why though?
   const knowledgeItems = useLiveQuery(async () => {
@@ -103,6 +106,7 @@ export const useAva = (): {
   const currentAgent = agentState.context[workspaceId];
   const [streamingMessage, setStreamingMessage] = useState('');
   const [error, setError] = useState('');
+  const { addTaskAndRun } = useCrewAi();
   // const [abortController, setAbortController] =
   //   useState<AbortController | null>(null);
 
@@ -188,49 +192,44 @@ export const useAva = (): {
           };
         }
       }
-      case 'document': {
-        // @TODO: Add config for special rules for document agent
-        // const sysMessage = customPrompt;
-        // console.log(currentAgent?.recentChatHistory)
-        try {
-          const response = await askAi({
-            documentContext: editor?.getText() || '',
-            task: args?.task || '',
-            highlighted: args?.highlighted || '',
-            messages: [],
-            modelName: currentAgent.openAIChatModel,
-            callbacks: {
-              handleLLMStart: () => {
-                setLoading(true);
-                // console.log({ llm, prompts });
-              },
-              handleLLMNewToken: (token) => {
-                setStreamingMessage((prev) => prev + token);
-                // console.log(token);
-              },
-              handleLLMEnd: () => {
-                setLoading(false);
-                setStreamingMessage('');
-                // console.log({ output });
-              },
-              handleLLMError: (err) => {
-                setError(err.message);
-                setLoading(false);
-                // console.log({ err });
-              },
-            },
-          });
-          // setAbortController(response.abortController);
+      case 'crew': {
+        if (!crews) {
+          setLoading(false);
           return {
-            response: response.response,
-            // abortController: response.abortController,
+            response: 'No crews found',
           };
+        }
+        setLoading(true);
+        const crewId = localStorage.getItem('currentCrew') || crews[0].id;
+        const crew = crews.find((c) => c.id === crewId) || crews[0];
+        if (!crew) {
+          setLoading(false);
+          return {
+            response: 'No crews found',
+          };
+        }
+        try {
+          const task: Task = {
+            id: Date.now().toString(),
+            name: 'Answer the users query',
+            description: message,
+            agent: crew.agents[0].role || 'agent',
+            tools: [],
+            files: [],
+            metadata: {},
+          };
+
+          const response = await addTaskAndRun({
+            crewId,
+            task,
+          });
+          setLoading(false);
+          return { response: response.response };
         } catch (error: any) {
           setLoading(false);
           return error.message;
         }
       }
-
       // maps to rag agent
       case 'knowledge': {
         if (!vectorContext) {
@@ -244,9 +243,10 @@ export const useAva = (): {
         const contextResults = await vectorContext.similaritySearchWithScore(
           message,
         );
+
         const formattedResults = vectorContext.filterAndCombineContent(
           contextResults,
-          0.6,
+          0.4,
         );
         const response = await ragAgentResponse({
           query: message,
@@ -343,7 +343,7 @@ export const useAva = (): {
           );
           const formattedResults = vectorContext.filterAndCombineContent(
             contextResults,
-            0.6,
+            0.4,
           );
           knowledge = formattedResults;
         }
@@ -357,7 +357,8 @@ export const useAva = (): {
           similaritySearchResults: knowledge,
         };
         const agentUrl =
-          getToken('CUSTOM_AGENT_URL') || import.meta.env.VITE_CUSTOM_AGENT_URL;
+          getToken('CUSTOM_SERVER_URL') ||
+          import.meta.env.VITE_CUSTOM_AGENT_URL;
 
         if (!agentUrl) {
           return {
@@ -383,6 +384,36 @@ export const useAva = (): {
           return error.message;
         }
       }
+      // case 'crew': {
+      //   if (!crews) {
+      //     setLoading(false);
+      //     return {
+      //       response: 'No crews found',
+      //     };
+      //   }
+      //   setLoading(true);
+      //   try {
+      //     const task: Task = {
+      //       id: Date.now().toString(),
+      //       name: 'Answer the users query',
+      //       description: message,
+      //       agent: crews[0].agents[0].role,
+      //       tools: [],
+      //       files: [],
+      //       metadata: {},
+      //     };
+
+      //     const response = await addTaskAndRun({
+      //       crewId: crews[0].id,
+      //       task,
+      //     });
+      //     setLoading(false);
+      //     return { response: response.response };
+      //   } catch (error: any) {
+      //     setLoading(false);
+      //     return error.message;
+      //   }
+      // }
 
       default: {
         setLoading(false);
