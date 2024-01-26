@@ -243,7 +243,7 @@ export const useAva = (): {
         const contextResults = await vectorContext.similaritySearchWithScore(
           message,
         );
-        console.log({ contextResults });
+
         const formattedResults = vectorContext.filterAndCombineContent(
           contextResults,
           0.4,
