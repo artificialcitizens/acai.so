@@ -91,7 +91,7 @@ export const ChatSettings: React.FC<ChatModelProps> = ({ workspaceId }) => {
         label="Agent Mode"
         options={agentMode.map((mode) => ({ value: mode, label: mode }))}
         value={state.context[workspaceId]?.agentMode || ''}
-        onChange={handleCrewChange}
+        onChange={handleModeChange}
       />
       {state.context[workspaceId]?.agentMode === 'chat' && (
         <>
@@ -111,12 +111,12 @@ export const ChatSettings: React.FC<ChatModelProps> = ({ workspaceId }) => {
           />
         </>
       )}
-      {state.context[workspaceId]?.agentMode === 'crew' && crews && (
+      {state.context[workspaceId]?.agentMode === 'crew' && crews?.length && (
         <Dropdown
           label="Use Crew:"
           options={crews.map((crew) => ({ value: crew.id, label: crew.name }))}
           value={currentCrew || crews[0].id}
-          onChange={handleModeChange}
+          onChange={handleCrewChange}
         />
       )}
       {state.context[workspaceId]?.agentMode === 'knowledge' && (

@@ -201,7 +201,7 @@ export const useAva = (): {
         }
         setLoading(true);
         const crewId = localStorage.getItem('currentCrew') || crews[0].id;
-        const crew = crews.find((c) => c.id === crewId);
+        const crew = crews.find((c) => c.id === crewId) || crews[0];
         if (!crew) {
           setLoading(false);
           return {
@@ -243,6 +243,7 @@ export const useAva = (): {
         const contextResults = await vectorContext.similaritySearchWithScore(
           message,
         );
+
         const formattedResults = vectorContext.filterAndCombineContent(
           contextResults,
           0.4,
@@ -342,7 +343,7 @@ export const useAva = (): {
           );
           const formattedResults = vectorContext.filterAndCombineContent(
             contextResults,
-            0.6,
+            0.4,
           );
           knowledge = formattedResults;
         }

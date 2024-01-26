@@ -8,6 +8,11 @@ WORKDIR /app
 ADD . /app
 
 
+# Install git
+RUN apt-get update && \
+    apt-get install -y git && \
+    rm -rf /var/lib/apt/lists/*
+
 RUN pip install --no-cache-dir -r requirements.txt && \
     apt-get autoremove -y && \
     apt-get clean && \
@@ -15,7 +20,8 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
-
+# Install faiss-gpu
+RUN pip install faiss-gpu
 # Make port 5050 available to the world outside this container
 EXPOSE 5050
 
