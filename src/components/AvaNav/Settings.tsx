@@ -7,8 +7,8 @@ import {
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
 import { ACDoc, Workspace, handleCreateDoc } from '../../state';
-import { useLoadWorkspace } from '../../hooks/use-load-workspace';
-import { useSaveWorkspace } from '../../hooks/use-save-workspace';
+import { useImportWorkspace } from '../../hooks/use-import-workspace';
+import { useExportWorkspace } from '../../hooks/use-export-workspace';
 import { toastifyInfo } from '../Toast';
 // import { EditorContext } from '../../context/EditorContext';
 // import { toastifyInfo } from '../Toast';
@@ -30,8 +30,8 @@ const DropdownSettings: React.FC<DropdownSettingsProps> = ({ onClose }) => {
     workspaceId: string;
     id: string;
   }>();
-  const { loadWorkspace } = useLoadWorkspace();
-  const { saveWorkspace } = useSaveWorkspace();
+  const { loadWorkspace } = useImportWorkspace();
+  const { saveWorkspace } = useExportWorkspace();
   // const doc = useSelector(globalServices.appStateService, (state) => {
   //   if (!activeTabId) return;
   //   return state.context?.docs?.[activeTabId];

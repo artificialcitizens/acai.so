@@ -8,7 +8,7 @@ import {
   GlobalStateContextValue,
 } from '../context/GlobalStateContext';
 
-export const useLoadWorkspace = () => {
+export const useImportWorkspace = () => {
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const loadWorkspace = useCallback(

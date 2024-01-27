@@ -14,7 +14,7 @@ import {
 } from '../../context/GlobalStateContext';
 import { ProjectLinks } from '../ProjectLinks/ProjectLinks';
 import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
-import { useLoadWorkspace } from '../../hooks/use-load-workspace';
+import { useImportWorkspace } from '../../hooks/use-import-workspace';
 import { toastifyInfo } from '../Toast';
 
 export const SideNav: React.FC = () => {
@@ -49,7 +49,7 @@ export const SideNav: React.FC = () => {
     globalServices.uiStateService.send({ type: 'TOGGLE_SIDE_NAV' });
   });
 
-  const { loadWorkspace } = useLoadWorkspace();
+  const { loadWorkspace } = useImportWorkspace();
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
