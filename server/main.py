@@ -8,6 +8,7 @@ from flask_cors import CORS
 from flask import Flask, request
 from werkzeug.utils import secure_filename
 import os
+from utility.yaml_utils import read_data_from_yaml, write_data_to_yaml
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "your_secret_key"
@@ -34,6 +35,29 @@ socketio = SocketIO(
     ],
 )
 
+@socketio.on('client_connect')
+def handle_client_connect(data):
+    client_latest_timestamp = data.get('latest_timestamp')
+    server_data = read_data_from_yaml('data_file.yml')
+    server_latest_timestamp = server_data.get('timestamp') if server_data else None
+    
+    if not server_latest_timestamp or (client_latest_timestamp and client_latest_timestamp > server_latest_timestamp):
+        # Client has newer data, update server and broadcast
+        # Convert incoming JSON data to YAML and store
+        data_yaml = yaml.safe_dump(data['data'])
+        write_data_to_yaml('data_file.yml', data['data'])
+        emit('update_data', data['data'], broadcast=True)
+    else:
+        # Server has newer data, send update to the connecting client
+        emit('update_data', server_data, room=request.sid)
+
+@socketio.on('connect')
+def handle_connect():
+    print(f"Client connected: {request.sid}")
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print(f"Client disconnected: {request.sid}")
 ####################
 # TOOLS
 ####################
@@ -103,7 +127,7 @@ def human_in_the_loop(content: str) -> str:
     response_received.clear()
     socketio.emit("human-in-the-loop", {"question": f'{content}'})
 
-    # Wait for the event or timeout after 10 seconds
+    # Wait for the event or timeout after x seconds
     response_received.wait(timeout=15)
 
     if not response_received.is_set():
