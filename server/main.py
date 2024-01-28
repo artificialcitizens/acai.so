@@ -9,6 +9,7 @@ from flask import Flask, request
 from werkzeug.utils import secure_filename
 import os
 from utility.yaml_utils import read_data_from_yaml, write_data_to_yaml
+import yaml
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "your_secret_key"
@@ -35,20 +36,38 @@ socketio = SocketIO(
     ],
 )
 
-@socketio.on('client_connect')
-def handle_client_connect(data):
+@socketio.on('sync_data')
+def sync_data(data):
+    client_id = data.get('id')
     client_latest_timestamp = data.get('latest_timestamp')
-    server_data = read_data_from_yaml('data_file.yml')
-    server_latest_timestamp = server_data.get('timestamp') if server_data else None
     
+    # Additional validation or logging inserted here if necessary
+    dir_path = 'data/workspaces/'
+    file_name = f"workspace_{client_id}.yml"
+    file_path = os.path.join(dir_path, file_name)
+
+    # Updated error handling for file and YAML operations could go here
+
+    try:
+        server_data = read_data_from_yaml(file_path)
+    except Exception as error:
+        # Handle errors like file not found or YAML parsing errors
+        print(f"Error reading from YAML: {error}")
+        server_data = {}
+    print(server_data)
+    server_latest_timestamp = server_data.get('latest_timestamp') if server_data else None
+    print(f"Client timestamp: {client_latest_timestamp}, Server timestamp: {server_latest_timestamp}")
     if not server_latest_timestamp or (client_latest_timestamp and client_latest_timestamp > server_latest_timestamp):
-        # Client has newer data, update server and broadcast
-        # Convert incoming JSON data to YAML and store
-        data_yaml = yaml.safe_dump(data['data'])
-        write_data_to_yaml('data_file.yml', data['data'])
-        emit('update_data', data['data'], broadcast=True)
+        # Client has newer data, send it to the server and update the file
+        server_data = data.get('data')
+        server_data['latest_timestamp'] = client_latest_timestamp
+        # No need to pre-dump data to YAML, pass the dictionary directly
+        try:
+            write_data_to_yaml(file_path, data)
+            emit('update_data', data, broadcast=True)
+        except Exception as error:
+            print(f"Error writing to YAML: {error}")
     else:
-        # Server has newer data, send update to the connecting client
         emit('update_data', server_data, room=request.sid)
 
 @socketio.on('connect')
