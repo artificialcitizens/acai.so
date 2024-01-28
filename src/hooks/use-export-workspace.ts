@@ -3,6 +3,7 @@ import { ACFile, Knowledge, db } from '../../db';
 import JSZip from 'jszip';
 import { ACDoc, AgentWorkspace, Workspace } from '../state';
 import SocketContext from '../context/SocketContext';
+import { toastifyInfo } from '../components/Toast';
 
 export const useExportWorkspace = () => {
   const socket = useContext(SocketContext);
@@ -30,7 +31,7 @@ export const useExportWorkspace = () => {
     [],
   );
 
-  const saveWorkspace = useCallback(
+  const syncWorkspace = useCallback(
     async (workspaceId: string) => {
       const workspace = await db.workspaces.get(workspaceId);
       if (!workspace) {
@@ -50,7 +51,6 @@ export const useExportWorkspace = () => {
           }),
         );
       }
-      console.log(knowledge);
 
       // Use the createSyncDataObject function to prepare the data
       const syncData = createSyncDataObject(
@@ -61,11 +61,14 @@ export const useExportWorkspace = () => {
         files,
       );
       if (socket) {
-        socket.emit('sync_data', {
+        toastifyInfo('Syncing workspace...');
+        socket.emit('sync_workspace', {
           id: workspaceId,
           latest_timestamp: syncData.timestamp,
           data: syncData,
         });
+      } else {
+        throw new Error('Socket not connected');
       }
       // Convert the sync data object to JSON and include it in the ZIP
       // const json = JSON.stringify(syncData, null, 2);
@@ -85,5 +88,5 @@ export const useExportWorkspace = () => {
     [createSyncDataObject, socket],
   );
 
-  return { saveWorkspace };
+  return { syncWorkspace };
 };

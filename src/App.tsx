@@ -129,7 +129,8 @@ const App = () => {
   };
 
   return (
-    globalServices.appStateService && (
+    globalServices.appStateService &&
+    socket && (
       <SocketContext.Provider value={socket}>
         <VectorStoreContext.Provider
           value={{

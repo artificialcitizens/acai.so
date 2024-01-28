@@ -154,7 +154,7 @@ const Chat: React.FC<ChatProps> = ({
     domain: string;
     id: string;
   }>();
-  const { saveWorkspace } = useExportWorkspace();
+  const { syncWorkspace } = useExportWorkspace();
   const workspaceId = rawWorkspaceId || 'docs';
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -317,7 +317,7 @@ const Chat: React.FC<ChatProps> = ({
             assistantChatHistory,
           ],
         });
-        saveWorkspace(workspaceId);
+        syncWorkspace(workspaceId);
         addMessage(answer, 'assistant', 'incoming');
       } catch (error) {
         addMessage(
@@ -334,7 +334,7 @@ const Chat: React.FC<ChatProps> = ({
       recentChatHistory,
       workspaceId,
       send,
-      saveWorkspace,
+      syncWorkspace,
     ],
   );
 

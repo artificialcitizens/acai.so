@@ -35,6 +35,7 @@ export const useSocketManager = () => {
   const navigate = useNavigate();
   const { addLogsToCrew } = useCrewAi();
   const { syncData } = useImportWorkspace();
+
   useEffect(() => {
     handleConnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -160,7 +161,7 @@ export const useSocketManager = () => {
 
     const latestTimestamp = new Date().toISOString();
 
-    socket.emit('sync_data', {
+    socket.emit('sync_workspace', {
       id: data.id,
       latest_timestamp: latestTimestamp,
     });

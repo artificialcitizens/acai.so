@@ -36,6 +36,7 @@ import { useParams } from 'react-router-dom';
 import { useSelector } from '@xstate/react';
 import { ImageResizer } from './extensions/image-resizer';
 import { useExportWorkspace } from '../../hooks/use-export-workspace';
+import SocketContext from '../../context/SocketContext';
 interface EditorProps {
   tab: ACDoc;
 }
@@ -81,7 +82,13 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { setEditor } = useContext(EditorContext)!;
   const [currentContext, setCurrentContext] = useState('');
-  const { saveWorkspace } = useExportWorkspace();
+  const { syncWorkspace } = useExportWorkspace();
+  const socket = useContext(SocketContext);
+
+  useEffect(() => {
+    if (!workspaceId || !socket) return;
+    syncWorkspace(workspaceId);
+  }, [socket, syncWorkspace, workspaceId]);
   // const {
   //   vectorstore,
   //   addDocuments,
@@ -102,7 +109,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
       content,
     });
     if (workspaceId) {
-      saveWorkspace(workspaceId);
+      syncWorkspace(workspaceId);
     }
     setTimeout(() => {
       setSaveStatus('Saved');
@@ -279,7 +286,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
     <div className="flex flex-col">
       {editor && <EditorBubbleMenu editor={editor} />}
       <h2 className="text-sm font-medium border-b border-solid border-dark text-acai-white mx-8 mt-6 sm:mx-12 mb-4 pb-1">
-        {tab.title}
+        {tab.title} {saveStatus === 'Unsaved' && '*'}
       </h2>
       <div
         onClick={() => {

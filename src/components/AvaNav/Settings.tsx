@@ -31,7 +31,7 @@ const DropdownSettings: React.FC<DropdownSettingsProps> = ({ onClose }) => {
     id: string;
   }>();
   const { loadWorkspace } = useImportWorkspace();
-  const { saveWorkspace } = useExportWorkspace();
+  const { syncWorkspace } = useExportWorkspace();
   // const doc = useSelector(globalServices.appStateService, (state) => {
   //   if (!activeTabId) return;
   //   return state.context?.docs?.[activeTabId];
@@ -162,7 +162,7 @@ const DropdownSettings: React.FC<DropdownSettingsProps> = ({ onClose }) => {
           className="px-4 py-2 block w-full rounded-none text-acai-white text-sm hover:text-acai-light disabled:text-gray-400 disabled:hover:text-gray-400 pl-2 transition duration-150 ease-linear text-left"
           onClick={() => {
             if (!workspaceId) return;
-            saveWorkspace(workspaceId);
+            syncWorkspace(workspaceId);
             onClose();
           }}
         >
