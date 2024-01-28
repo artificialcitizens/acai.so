@@ -9,7 +9,6 @@ from flask import Flask, request
 from werkzeug.utils import secure_filename
 import os
 from utility.yaml_utils import read_data_from_yaml, write_data_to_yaml
-import yaml
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "your_secret_key"
@@ -36,8 +35,8 @@ socketio = SocketIO(
     ],
 )
 
-@socketio.on('sync_data')
-def sync_data(data):
+@socketio.on('sync_workspace')
+def sync_workspace(data):
     client_id = data.get('id')
     client_latest_timestamp = data.get('latest_timestamp')
     
@@ -54,10 +53,9 @@ def sync_data(data):
         # Handle errors like file not found or YAML parsing errors
         print(f"Error reading from YAML: {error}")
         server_data = {}
-    print(server_data)
     server_latest_timestamp = server_data.get('latest_timestamp') if server_data else None
-    print(f"Client timestamp: {client_latest_timestamp}, Server timestamp: {server_latest_timestamp}")
     if not server_latest_timestamp or (client_latest_timestamp and client_latest_timestamp > server_latest_timestamp):
+        print(f"Client has newer data for workspace {client_id}")
         # Client has newer data, send it to the server and update the file
         server_data = data.get('data')
         server_data['latest_timestamp'] = client_latest_timestamp
@@ -65,9 +63,11 @@ def sync_data(data):
         try:
             write_data_to_yaml(file_path, data)
             emit('update_data', data, broadcast=True)
+            print(f"Data updated for workspace {client_id}")
         except Exception as error:
             print(f"Error writing to YAML: {error}")
     else:
+        print(f"Server has newer data for workspace {client_id}")
         emit('update_data', server_data, room=request.sid)
 
 @socketio.on('connect')
