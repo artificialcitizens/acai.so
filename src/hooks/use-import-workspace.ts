@@ -73,5 +73,39 @@ export const useImportWorkspace = () => {
     [globalServices.appStateService],
   );
 
-  return { loadWorkspace };
+  const syncData = useCallback(
+    async (updateData: any) => {
+      console.log('syncData', updateData);
+      const workspaceData = updateData.data;
+      // Load all files in the 'files' directory
+      // let's update our db tables here for workspace, agents, docs, files, and knowledge
+      db.workspaces.put(workspaceData.workspace);
+      db.agents.put(workspaceData.agent[0]);
+      workspaceData.docs.forEach((doc: ACDoc) => {
+        db.docs.put(doc);
+      });
+      workspaceData.knowledge.forEach((knowledge: Knowledge) => {
+        db.knowledge.put(knowledge);
+      });
+      globalServices.appStateService.send('RESYNC_DB');
+      return {
+        workspaceId: workspaceData.workspace.id,
+        docId: workspaceData.docs[0]?.id,
+      };
+      // Depending on the structure of updateData, handle its synchronization with local state/db
+      // For example, if updateData contains updated documents:
+      // if (updateData.docs && Array.isArray(updateData.docs)) {
+      //   for (const doc of updateData.docs) {
+      //     await db.docs.put(doc); // Assuming a 'put' operation will update or insert as needed
+      //   }
+      // }
+      //   // Handle other entities similarly: agents, knowledge pieces, etc.
+      //   // After syncing, you might need to notify the application of the update:
+      //   globalServices.appStateService.send('RESYNC_DB');
+      //   // Additional UI updates or notifications can be triggered here as well
+    },
+    [globalServices.appStateService],
+  );
+
+  return { loadWorkspace, syncData };
 };

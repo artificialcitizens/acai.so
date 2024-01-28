@@ -304,8 +304,8 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
             isContext: false,
             autoSave: false,
             canEdit: true,
-            createdAt: new Date().toString(),
-            lastUpdated: new Date().toString(),
+            createdAt: new Date().toISOString(),
+            lastUpdated: new Date().toISOString(),
             filetype: 'md',
             systemNote: '',
           };

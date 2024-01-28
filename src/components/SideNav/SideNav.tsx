@@ -76,8 +76,8 @@ export const SideNav: React.FC = () => {
     const newWorkspace: Workspace = {
       id,
       name,
-      createdAt: new Date().toString(),
-      lastUpdated: new Date().toString(),
+      createdAt: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
       private: false,
       docIds: [tabId],
     };
@@ -85,8 +85,8 @@ export const SideNav: React.FC = () => {
       id: tabId,
       title: `Home`,
       content: `Welcome to ${name}`,
-      createdAt: new Date().toString(),
-      lastUpdated: new Date().toString(),
+      createdAt: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
       workspaceId: id,
       filetype: 'md',
       canEdit: true,

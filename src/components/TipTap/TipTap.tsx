@@ -35,6 +35,7 @@ import {
 import { useParams } from 'react-router-dom';
 import { useSelector } from '@xstate/react';
 import { ImageResizer } from './extensions/image-resizer';
+import { useExportWorkspace } from '../../hooks/use-export-workspace';
 interface EditorProps {
   tab: ACDoc;
 }
@@ -80,6 +81,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { setEditor } = useContext(EditorContext)!;
   const [currentContext, setCurrentContext] = useState('');
+  const { saveWorkspace } = useExportWorkspace();
   // const {
   //   vectorstore,
   //   addDocuments,
@@ -99,6 +101,9 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
       id: tab.id,
       content,
     });
+    if (workspaceId) {
+      saveWorkspace(workspaceId);
+    }
     setTimeout(() => {
       setSaveStatus('Saved');
     }, 500);
@@ -125,7 +130,7 @@ const Tiptap: React.FC<EditorProps> = ({ tab }) => {
 
   const debouncedUpdates = useDebouncedCallback(async (editor: Editor) => {
     saveContent(editor);
-  }, 500);
+  }, 1000);
 
   const tokenQueue: string[] = [];
   let isProcessing = false;

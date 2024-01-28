@@ -22,8 +22,8 @@ const knowledgeTab = (workspaceId: string, title: string, content: string) => {
     content,
     isContext: false,
     systemNote: '',
-    createdAt: new Date().toString(),
-    lastUpdated: new Date().toString(),
+    createdAt: new Date().toISOString(),
+    lastUpdated: new Date().toISOString(),
     autoSave: false,
     canEdit: false,
   };

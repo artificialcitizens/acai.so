@@ -1,9 +1,11 @@
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import { ACFile, Knowledge, db } from '../../db';
 import JSZip from 'jszip';
 import { ACDoc, AgentWorkspace, Workspace } from '../state';
+import SocketContext from '../context/SocketContext';
 
 export const useExportWorkspace = () => {
+  const socket = useContext(SocketContext);
   // Function to create a sync data object
   const createSyncDataObject = useCallback(
     (
@@ -48,6 +50,7 @@ export const useExportWorkspace = () => {
           }),
         );
       }
+      console.log(knowledge);
 
       // Use the createSyncDataObject function to prepare the data
       const syncData = createSyncDataObject(
@@ -57,23 +60,29 @@ export const useExportWorkspace = () => {
         knowledge,
         files,
       );
-
+      if (socket) {
+        socket.emit('sync_data', {
+          id: workspaceId,
+          latest_timestamp: syncData.timestamp,
+          data: syncData,
+        });
+      }
       // Convert the sync data object to JSON and include it in the ZIP
-      const json = JSON.stringify(syncData, null, 2);
-      zip.file('data.json', json);
+      // const json = JSON.stringify(syncData, null, 2);
+      // zip.file('data.json', json);
 
-      const content = await zip.generateAsync({ type: 'blob' });
-      const url = URL.createObjectURL(content);
+      // const content = await zip.generateAsync({ type: 'blob' });
+      // const url = URL.createObjectURL(content);
 
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${workspace.name}.zip`;
-      link.click();
+      // // const link = document.createElement('a');
+      // // link.href = url;
+      // // link.download = `${workspace.name}.zip`;
+      // // link.click();
 
-      // Clean up
-      URL.revokeObjectURL(url);
+      // // Clean up
+      // URL.revokeObjectURL(url);
     },
-    [createSyncDataObject],
+    [createSyncDataObject, socket],
   );
 
   return { saveWorkspace };

@@ -31,6 +31,7 @@ import { MessageRole } from '../Ava/use-ava';
 import { v4 as uuidv4 } from 'uuid';
 import { getToken } from '../../utils/config';
 import { toastifyError } from '../Toast';
+import { useExportWorkspace } from '../../hooks/use-export-workspace';
 
 const markdownComponents = {
   code: ({ node, inline, className, children, ...props }: any) => {
@@ -153,7 +154,7 @@ const Chat: React.FC<ChatProps> = ({
     domain: string;
     id: string;
   }>();
-
+  const { saveWorkspace } = useExportWorkspace();
   const workspaceId = rawWorkspaceId || 'docs';
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -241,7 +242,7 @@ const Chat: React.FC<ChatProps> = ({
     return {
       id: uuidv4(),
       text: text,
-      timestamp: Math.floor(Date.now() / 1000).toString(),
+      timestamp: new Date().toISOString(),
       type: type,
     };
   };
@@ -316,7 +317,7 @@ const Chat: React.FC<ChatProps> = ({
             assistantChatHistory,
           ],
         });
-
+        saveWorkspace(workspaceId);
         addMessage(answer, 'assistant', 'incoming');
       } catch (error) {
         addMessage(
@@ -327,14 +328,13 @@ const Chat: React.FC<ChatProps> = ({
       }
     },
     [
+      apiToken,
       addMessage,
-      inputRef,
-      setMsgInputValue,
       onSubmitHandler,
       recentChatHistory,
-      send,
       workspaceId,
-      apiToken,
+      send,
+      saveWorkspace,
     ],
   );
 

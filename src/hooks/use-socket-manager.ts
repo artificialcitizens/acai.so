@@ -14,6 +14,7 @@ import {
   GlobalStateContextValue,
 } from '../context/GlobalStateContext';
 import { useCrewAi } from '../components/CrewAI/use-crew-ai';
+import { useImportWorkspace } from './use-import-workspace';
 
 export const useSocketManager = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -33,7 +34,7 @@ export const useSocketManager = () => {
   const workspaceId = rawWorkspaceId || 'docs';
   const navigate = useNavigate();
   const { addLogsToCrew } = useCrewAi();
-
+  const { syncData } = useImportWorkspace();
   useEffect(() => {
     handleConnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -97,10 +98,28 @@ export const useSocketManager = () => {
       socket.emit('human-in-the-loop-response', 'The user did not respond');
     }
   };
+
+  const handleUpdateData = async (data: any) => {
+    // Example: Update your application's local state or UI based on the received data
+    // This could involve checking if the data is new, if it needs to replace existing data, etc.
+    console.log('Data received from server:', data);
+    await syncData(data);
+    // Example action: Direct update or a function call to handle the data
+    // updateLocalState(data);
+
+    // If the data contains identifiable documents or entries, you can also route or perform specific actions
+    // For instance, if data has an 'id', you might want to navigate to that document's view/page:
+    // if (data.id) navigate(`/${workspaceId}/documents/${data.id}`);
+  };
+
   const events = [
     { name: 'connect', handler: handleConnectCb },
     { name: 'disconnect', handler: handleDisconnect },
     { name: 'create-tab', handler: handleTab },
+    {
+      name: 'update_data',
+      handler: handleUpdateData, // The new event handler for "update_data"
+    },
     {
       name: 'error',
       handler: (err: any) => {
@@ -136,6 +155,17 @@ export const useSocketManager = () => {
     },
   ];
 
+  const handleSyncData = (data: any) => {
+    if (!socket) return;
+
+    const latestTimestamp = new Date().toISOString();
+
+    socket.emit('sync_data', {
+      id: data.id,
+      latest_timestamp: latestTimestamp,
+    });
+  };
+
   useEffect(() => {
     if (!socket) return;
 
@@ -159,5 +189,5 @@ export const useSocketManager = () => {
     socket.disconnect();
   }
 
-  return { socket, disconnectSocket };
+  return { socket, disconnectSocket, handleSyncData };
 };

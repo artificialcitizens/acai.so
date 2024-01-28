@@ -1,6 +1,7 @@
 import { createMachine, assign } from 'xstate';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../../db';
+import { agentDbService } from '.';
 export type ACDoc = {
   id: string;
   workspaceId: string;
@@ -72,7 +73,7 @@ export const appDbService = {
     const docs = await db.docs.toArray();
     const workspaceDictionary: { [key: string]: Workspace } = {};
     const tabDictionary: { [key: string]: ACDoc } = {};
-
+    const agents = await db.agents.toArray();
     workspaces.forEach((workspace) => {
       workspaceDictionary[workspace.id] = { ...workspace, docIds: [] };
     });
@@ -81,6 +82,12 @@ export const appDbService = {
       if (workspaceDictionary[doc.workspaceId]) {
         workspaceDictionary[doc.workspaceId].docIds.push(doc.id);
         tabDictionary[doc.id] = doc; // Add doc to tabDictionary
+      }
+    });
+
+    agents.forEach(async (agent) => {
+      if (workspaceDictionary[agent.workspaceId]) {
+        await agentDbService.saveAgent(agent);
       }
     });
 
@@ -180,6 +187,8 @@ export const appStateMachine = createMachine<AppContext, AppEvent>({
         if (event.type !== 'UPDATE_WORKSPACE') return context;
         const updatedWorkspace = event.workspace;
         const id = event.id;
+        const lastUpdated = new Date().toISOString();
+        context.workspaces[id].lastUpdated = lastUpdated;
         const updatedWorkspaces = {
           ...context.workspaces,
           [id]: { ...context.workspaces[id], ...updatedWorkspace },
@@ -324,8 +333,8 @@ export const handleCreateDoc = async (
     autoSave,
     filetype,
     canEdit,
-    createdAt: new Date().toString(),
-    lastUpdated: new Date().toString(),
+    createdAt: new Date().toISOString(),
+    lastUpdated: new Date().toISOString(),
   };
   return newTab;
 };
@@ -346,8 +355,8 @@ export const createWorkspace = ({
   const newWorkspace: Workspace = {
     id: newId,
     name: workspaceName,
-    createdAt: new Date().toString(),
-    lastUpdated: new Date().toString(),
+    createdAt: new Date().toISOString(),
+    lastUpdated: new Date().toISOString(),
     private: false,
     docIds: [],
   };
