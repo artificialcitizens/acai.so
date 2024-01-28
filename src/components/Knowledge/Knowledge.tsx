@@ -64,7 +64,6 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                 id: slugifiedFilename,
                 workspaceId,
                 filetype: fileExtension,
-                file,
                 src,
                 originalFilename: file.name,
                 uploadTimestamp: new Date().toISOString(),
@@ -270,6 +269,14 @@ const KnowledgeUpload: React.FC<KnowledgeProps> = ({ workspaceId }) => {
                 );
                 for (const item of itemsToDelete) {
                   await db.knowledge.delete(item.id);
+                }
+                const filesToDelete = await db.files
+                  .where('id')
+                  .anyOf(itemsToDelete.map((item) => item.fileId))
+                  .toArray();
+
+                for (const file of filesToDelete) {
+                  await db.files.delete(file.id);
                 }
               }}
             >
