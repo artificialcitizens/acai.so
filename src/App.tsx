@@ -24,9 +24,10 @@ import { useSelector } from '@xstate/react';
 import AudioWaveform from './components/AudioWaveform/AudioWaveform';
 import { useSocketManager } from './hooks/use-socket-manager';
 import SocketContext from './context/SocketContext';
+import Proto from './components/Proto/Proto';
 // import { isMobile } from './utils/browser-support';
 
-const App = () => {
+const App = ({ proto = false }: { proto?: boolean }) => {
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const { workspaceId, domain } = useParams<{
@@ -109,7 +110,7 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    updateLocation(routerLocation.pathname);
+    // updateLocation(routerLocation.pathname);
   }, [routerLocation, updateLocation]);
 
   const toggleSideNav = () => {
@@ -170,7 +171,7 @@ const App = () => {
                 <span className="mt-[.75rem] text-base lg:text-lg font-semibold z-10 max-w-[25vw] truncate w-full flex-grow fixed ml-16">
                   {workspaceName}
                 </span>
-                <MainView domain={domain} />
+                {proto ? <Proto /> : <MainView domain={domain} />}
                 <Ava
                   workspaceId={workspaceId || 'docs'}
                   onVoiceActivation={setListening}

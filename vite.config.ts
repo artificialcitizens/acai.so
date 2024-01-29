@@ -485,6 +485,12 @@ export default defineConfig({
   build: {
     assetsDir: 'assets',
   },
+  server: {
+    headers: {
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+    },
+  },
   optimizeDeps: {
     exclude: ['vite-plugin-pwa'],
   },

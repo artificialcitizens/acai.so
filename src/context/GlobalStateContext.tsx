@@ -12,6 +12,9 @@ import {
   AppContext,
   AppEvent,
   appDbService,
+  protoMachine,
+  ProtoContext,
+  ProtoEvent,
 } from '../state/';
 import { ReactNode, createContext, useEffect } from 'react';
 import { useInterpret } from '@xstate/react';
@@ -46,6 +49,13 @@ export interface GlobalStateContextValue {
     { value: any; context: SpeechContext }, // replace State<SpeechContext, SpeechEvent> with { value: any; context: SpeechContext; }
     any
   >;
+  protoStateService: Interpreter<
+    ProtoContext,
+    any,
+    ProtoEvent,
+    { value: any; context: ProtoContext }, // replace State<ProtoContext, ProtoEvent> with { value: any; context: ProtoContext; }
+    any
+  >;
 }
 
 export const GlobalStateContext = createContext<GlobalStateContextValue>(
@@ -57,6 +67,7 @@ export const GlobalStateProvider = ({ children }: { children: ReactNode }) => {
   const uiService = useInterpret(uiMachine);
   const agentService = useInterpret(agentMachine);
   const speechService = useInterpret(speechMachine);
+  const protoService = useInterpret(protoMachine);
 
   useEffect(() => {
     appDbService.loadState().then((loadedState) => {
@@ -69,6 +80,7 @@ export const GlobalStateProvider = ({ children }: { children: ReactNode }) => {
     uiStateService: uiService,
     agentStateService: agentService,
     speechStateService: speechService,
+    protoStateService: protoService,
   };
 
   return (

@@ -28,6 +28,7 @@ import { db } from '../../../db';
 import { AIMessage, HumanMessage } from 'langchain/schema';
 import { askAi } from '../../lib/ac-langchain/chains/ask-ai-chain';
 import { Task, useCrewAi } from '../CrewAI/use-crew-ai';
+import { protoAgentResponse } from '../../lib/ac-langchain/agents/proto-agent/proto-agent';
 
 export type AvaChatResponse = {
   response: string;
@@ -46,6 +47,7 @@ type Message = {
 export const agentMode = [
   'chat',
   'crew',
+  'proto',
   // maps to rag agent
   'knowledge',
   'custom',
@@ -87,7 +89,7 @@ export const useAva = (): {
 
   const workspaceId = rawWorkspaceId || 'docs';
   const { models, tools, crews } = useCrewAi();
-
+  const [protoState] = useActor(globalServices.protoStateService);
   // @TODO - Seems to need to be here to get the context to load, why though?
   const knowledgeItems = useLiveQuery(async () => {
     if (!vectorContext) return;
@@ -229,6 +231,46 @@ export const useAva = (): {
           setLoading(false);
           return error.message;
         }
+      }
+      case 'proto': {
+        const response = await protoAgentResponse({
+          query: message,
+          chatHistory: '',
+          context: protoState.context.fileContent || '',
+          callbacks: {
+            handleProtoResponse: (response) => {
+              globalServices.protoStateService.send({
+                type: 'UPDATE_FILE_CONTENT',
+                fileContent: response,
+              });
+            },
+            handleLLMStart: () => {
+              setLoading(true);
+              // console.log({ llm, prompts });
+            },
+            handleLLMNewToken: (token) => {
+              setStreamingMessage((prev) => prev + token);
+              // console.log(token);
+            },
+            handleLLMEnd: () => {
+              setLoading(false);
+              setStreamingMessage('');
+
+              // console.log({ output });
+            },
+            handleLLMError: (err) => {
+              setError(err.message);
+              setLoading(false);
+              // console.log({ err });
+            },
+          },
+        });
+
+        setLoading(false);
+        return {
+          response: response.content,
+          // abortController: null,
+        };
       }
       // maps to rag agent
       case 'knowledge': {

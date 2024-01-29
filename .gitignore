@@ -29,3 +29,4 @@ dev-dist
 __pycache__
 server/env.py
 server/data
+src/components/Proto/apps
