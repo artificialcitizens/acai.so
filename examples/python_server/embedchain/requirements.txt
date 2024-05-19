@@ -1,0 +1,2 @@
+embedchain
+python-dotenv

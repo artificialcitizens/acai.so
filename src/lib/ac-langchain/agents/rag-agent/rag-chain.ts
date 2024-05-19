@@ -4,7 +4,7 @@ import {
   noContextPrompt,
   ragAgentResponsePrompt,
 } from './rag-prompts';
-import { handleAcaiChat } from '../../models/chat';
+import { loadChatModel } from '../../models/chat';
 
 let chatModel: ChatOpenAI | null = null;
 
@@ -23,7 +23,7 @@ const formQuestion = async ({
   const messages = questionPromptTemplate.toChatMessages();
 
   if (!chatModel) {
-    const { chat } = handleAcaiChat({
+    const { chat } = loadChatModel({
       modelName: 'gpt-3.5-turbo-16k',
     });
     chatModel = chat;

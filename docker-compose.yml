@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  whisper:
+    image: transcription-service
+    ports:
+      - '5051:5051'
+    volumes:
+      - /home/josh/dev/acai.so/server/.env:/app/.env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: ['gpu']
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+
+  server:
+    image: acai
+    network_mode: 'host'
+    volumes:
+      - /home/josh/dev/acai.so/server/.env:/app/.env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: ['gpu']
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+
+  embeddings:
+    image: michaelf34/infinity:0.0.26
+    command: --model-name-or-path BAAI/bge-base-en-v1.5 --port 7997
+    ports:
+      - '7997:7997'
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: ['gpu']
+
+  frontend:
+    image: acai-frontend
+    network_mode: 'host'
+    volumes:
+      - /home/josh/dev/acai.so/.env:/app/.env

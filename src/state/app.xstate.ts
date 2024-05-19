@@ -306,11 +306,12 @@ export const appStateMachine = createMachine<AppContext, AppEvent>({
   },
 });
 
+// @TODO: Fix this ugly param interface
 export const handleCreateDoc = async (
   args: { title: string; content: string },
   workspaceId: string,
   filetype = 'md' as 'md' | 'txt' | 'pdf',
-  autoSave = true,
+  autoSave = false,
   canEdit = true,
 ): Promise<ACDoc> => {
   const newTab = {

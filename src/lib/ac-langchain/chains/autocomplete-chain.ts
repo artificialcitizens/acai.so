@@ -1,6 +1,6 @@
 // import { CallbackManager } from 'langchain/callbacks';
 import { HumanMessage, SystemMessage } from 'langchain/schema';
-import { handleAcaiChat } from '../models/chat';
+import { loadChatModel } from '../models/chat';
 
 /**
  * @param context - The context of the message
@@ -49,7 +49,7 @@ export const autoComplete = async ({
     ],
   };
 
-  const { chat: model } = handleAcaiChat(fields);
+  const { chat: model } = loadChatModel(fields);
   const systemPrompt = [
     'You are an AI writing assistant that continues existing text based on given from prior text.',
     'Give more weight/priority to the later characters than the beginning ones.',
@@ -66,7 +66,6 @@ export const autoComplete = async ({
     new SystemMessage(systemMessage),
     new HumanMessage(context),
   ];
-
 
   const response = await model.call(messages);
   return response.content;

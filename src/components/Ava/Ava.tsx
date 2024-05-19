@@ -8,8 +8,9 @@ import {
   GlobalStateContext,
   GlobalStateContextValue,
 } from '../../context/GlobalStateContext';
-import QuickSettings from '../QuickSettings/QuickSettings';
+import VoiceSynthesis from '../VoiceSynthesis/VoiceSynthesis';
 import { toastifyError } from '../Toast';
+import ChatSettings from '../ChatSettings';
 // import AvaButton from '../AvaNav/AvaButton';
 // import { EllipsisMenuIcon } from '../Icons/Icons';
 // import './Ava.css';
@@ -72,7 +73,8 @@ export const Ava: React.FC<AvaProps> = ({
         }}
         title={formatAgentMode(currentAgentMode)}
       >
-        <QuickSettings
+        {workspaceId && <ChatSettings workspaceId={workspaceId} />}
+        <VoiceSynthesis
           onVoiceActivation={onVoiceActivation}
           audioContext={audioContext}
         />

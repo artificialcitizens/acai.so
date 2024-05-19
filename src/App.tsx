@@ -22,16 +22,19 @@ import { SideNavToggle } from './components/SideNavToggle/SideNavToggle';
 import ACModal from './components/Modal/Modal';
 import { useSelector } from '@xstate/react';
 import AudioWaveform from './components/AudioWaveform/AudioWaveform';
+import { useSocketManager } from './hooks/use-socket-manager';
+import SocketContext from './context/SocketContext';
+import Proto from './components/Proto/Proto';
 // import { isMobile } from './utils/browser-support';
 
-const App = () => {
+const App = ({ proto = false }: { proto?: boolean }) => {
   const globalServices: GlobalStateContextValue =
     useContext(GlobalStateContext);
   const { workspaceId, domain } = useParams<{
     workspaceId: string;
     domain: 'knowledge' | 'documents' | undefined;
   }>();
-
+  const { socket } = useSocketManager();
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined,
   );
@@ -107,7 +110,7 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    updateLocation(routerLocation.pathname);
+    // updateLocation(routerLocation.pathname);
   }, [routerLocation, updateLocation]);
 
   const toggleSideNav = () => {
@@ -128,56 +131,58 @@ const App = () => {
 
   return (
     globalServices.appStateService && (
-      <VectorStoreContext.Provider
-        value={{
-          vectorstore,
-          addText,
-          addDocuments,
-          similaritySearchWithScore,
-          filterAndCombineContent,
-        }}
-      >
-        <EditorContext.Provider value={{ editor, setEditor }}>
-          {/* {audioContext && <TTS audioContext={audioContext} />} */}
-          <SideNav />
-          <ACModal />
-          <SideNavToggle
-            className="fixed top-0 left-0 z-20"
-            handleClick={(e) => {
-              e.stopPropagation();
-              toggleSideNav();
-            }}
-          />
-          {audioContext && (
-            <AudioWaveform audioContext={audioContext} isOn={listening} />
-          )}
-          <ToastManager />
-          {/* <PullToRefresh
+      <SocketContext.Provider value={socket}>
+        <VectorStoreContext.Provider
+          value={{
+            vectorstore,
+            addText,
+            addDocuments,
+            similaritySearchWithScore,
+            filterAndCombineContent,
+          }}
+        >
+          <EditorContext.Provider value={{ editor, setEditor }}>
+            {/* {audioContext && <TTS audioContext={audioContext} />} */}
+            <SideNav />
+            <ACModal />
+            <SideNavToggle
+              className="fixed top-0 left-0 z-20"
+              handleClick={(e) => {
+                e.stopPropagation();
+                toggleSideNav();
+              }}
+            />
+            {audioContext && (
+              <AudioWaveform audioContext={audioContext} isOn={listening} />
+            )}
+            <ToastManager />
+            {/* <PullToRefresh
             onRefresh={async () => window.location.reload()}
             pullDownThreshold={125}
             maxPullDownDistance={150}
             pullingContent={''}
             isPullable={isMobile()}
           > */}
-          <main className="w-screen  max-h-full overflow-hidden">
-            <span
-              onClick={handleWindowClick}
-              className="h-full overflow-hidden flex flex-grow"
-            >
-              <span className="mt-[.75rem] text-base lg:text-lg font-semibold z-10 max-w-[25vw] truncate w-full flex-grow fixed ml-16">
-                {workspaceName}
-              </span>
-              <MainView domain={domain} />
-              <Ava
-                workspaceId={workspaceId || 'docs'}
-                onVoiceActivation={setListening}
-                audioContext={audioContext}
-              />
-            </span>{' '}
-          </main>
-          {/* </PullToRefresh> */}
-        </EditorContext.Provider>
-      </VectorStoreContext.Provider>
+            <main className="w-screen  max-h-full overflow-hidden">
+              <span
+                onClick={handleWindowClick}
+                className="h-full overflow-hidden flex flex-grow"
+              >
+                <span className="mt-[.75rem] text-base lg:text-lg font-semibold z-10 max-w-[25vw] truncate w-full flex-grow fixed ml-16">
+                  {workspaceName}
+                </span>
+                {proto ? <Proto /> : <MainView domain={domain} />}
+                <Ava
+                  workspaceId={workspaceId || 'docs'}
+                  onVoiceActivation={setListening}
+                  audioContext={audioContext}
+                />
+              </span>{' '}
+            </main>
+            {/* </PullToRefresh> */}
+          </EditorContext.Provider>
+        </VectorStoreContext.Provider>
+      </SocketContext.Provider>
     )
   );
 };

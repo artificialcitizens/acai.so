@@ -11,6 +11,7 @@ import { AcaiMemoryVector, db } from '../../db';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useParams } from 'react-router-dom';
 import { getToken } from '../utils/config';
+import { toastifyError } from '../components/Toast';
 
 export type VectorStoreContextType = {
   vectorstore: any; // Replace any with the actual type if available
@@ -61,7 +62,10 @@ export const useMemoryVectorStore = (
     }).then(async (res) => {
       const openAIApiKey =
         getToken('OPENAI_KEY') || import.meta.env.VITE_OPENAI_KEY;
-      if (!openAIApiKey) return;
+      if (!openAIApiKey) {
+        toastifyError('OpenAI API key not found');
+        return;
+      }
       const vectorStore = await initializeMemoryVectorStore({ docs: res });
       const vectorSet = new Set(vectorStore.memoryVectors);
       memoryVectors?.forEach((mem) => {

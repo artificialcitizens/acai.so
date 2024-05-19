@@ -18,9 +18,11 @@ import { useLiveQuery } from 'dexie-react-hooks';
 // import { toastifyInfo } from '../Toast';
 import KnowledgeView from '../KnowledgeView/KnowledgeView';
 import { useSelector } from '@xstate/react';
+import Proto from '../Proto/Proto';
+import { toastifyInfo } from '../Toast';
 
 interface MainViewProps {
-  domain: 'knowledge' | 'documents' | undefined;
+  domain: 'knowledge' | 'documents' | 'proto' | undefined;
 }
 
 const MainView: React.FC<MainViewProps> = ({ domain }) => {
@@ -145,8 +147,7 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
     setFileUrl(fileURL);
   };
 
-  if (!workspaceId) return <></>;
-
+  // if (!workspaceId) return <></>;
   return (
     <div className="w-full flex flex-col mt-16 md:mt-8 max-h-full">
       {/* editor dropzone was overriding the tiptap editor drop callbacks.
@@ -159,7 +160,7 @@ const MainView: React.FC<MainViewProps> = ({ domain }) => {
         onFilesDrop={handleFilesDrop}
       > */}
       {domain === 'documents' && activeDoc && <TipTap tab={activeDoc} />}
-      {domain === 'knowledge' && fileType && (
+      {domain === 'knowledge' && fileType && workspaceId && (
         <KnowledgeView
           workspaceId={workspaceId}
           filename={activeTabId || 'knowledge'}

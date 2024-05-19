@@ -199,3 +199,18 @@ body {
   overscroll-behavior: none;
   overflow: hidden;
 }
+
+.easy-edit-wrapper {
+  @apply font-bold;
+  width: fit-content;
+}
+
+.easy-edit-inline-wrapper {
+  @apply flex flex-col w-full;
+}
+
+.easy-edit-component-wrapper > input,
+.easy-edit-component-wrapper > select,
+.easy-edit-component-wrapper > textarea {
+  @apply !bg-base border border-solid border-lighter;
+}

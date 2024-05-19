@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { IMSDBLoader } from 'langchain/document_loaders/web/imsdb';
+import { toastifyInfo } from '../Toast';
 
 const ScriptLoader = () => {
   const [inputURL, setInputURL] = useState('');
@@ -13,7 +14,7 @@ const ScriptLoader = () => {
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    alert(`Submitting URL: ${inputURL}`);
+    toastifyInfo(`Submitting URL: ${inputURL}`);
     const loader = new IMSDBLoader(inputURL);
     const docs = await loader.load();
     const pageContent = docs[0].pageContent;

@@ -6,7 +6,7 @@ import {
   LLMResult,
   BaseMessage,
 } from 'langchain/schema';
-import { handleAcaiChat } from '../models/chat';
+import { loadChatModel } from '../models/chat';
 import { toastifyError } from '../../../components/Toast';
 
 type ChatResponse = {
@@ -42,7 +42,7 @@ export const queryChat = async ({
   };
 }): Promise<ChatResponse> => {
   const controller = new AbortController();
-  const { chat } = handleAcaiChat({
+  const { chat } = loadChatModel({
     modelName,
     temperature,
     // callbacks, // @TODO: idk why it doesn't let me put callbacks here, but it wasn't there before anyway...

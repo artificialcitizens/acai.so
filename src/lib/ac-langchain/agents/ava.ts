@@ -45,8 +45,8 @@ import {
 import { googleSearch } from './tools/search-engine';
 import { WebBrowser } from 'langchain/tools/webbrowser';
 import {
-  handleAcaiChat,
-  handleAcaiEmbeddings,
+  loadChatModel,
+  loadEmbeddingModel,
   handleAcaiLLM,
 } from '../models/chat';
 // import {
@@ -192,7 +192,7 @@ let embeddings: Embeddings | undefined;
 const createModels = () => {
   if (chatModel && model && embeddings) return { chatModel, model, embeddings };
 
-  const { chat } = handleAcaiChat({
+  const { chat } = loadChatModel({
     modelName: 'gpt-4-0314',
     temperature: 0.1,
   });
@@ -200,7 +200,7 @@ const createModels = () => {
     temperature: 0.3,
   });
 
-  const { embeddings: embeddingsFromHook } = handleAcaiEmbeddings();
+  const { embeddings: embeddingsFromHook } = loadEmbeddingModel();
 
   chatModel = chat;
   model = llm;
@@ -272,7 +272,7 @@ const createAgentArtifacts = ({
   const tools = [];
 
   const proxyUrl =
-    getToken('PROXY_SERVER_URL') || import.meta.env.VITE_PROXY_SERVER_URL;
+    getToken('CUSTOM_SERVER_URL') || import.meta.env.VITE_CUSTOM_SERVER_URL;
 
   if (!embeddings) {
     throw new Error('Embeddings is undefined');

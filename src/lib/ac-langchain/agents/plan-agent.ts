@@ -3,9 +3,9 @@ import { PlanAndExecuteAgentExecutor } from 'langchain/experimental/plan_and_exe
 import { GoogleCustomSearch, Tool, DynamicTool } from 'langchain/tools';
 
 import { getToken } from '../../../utils/config';
-import { handleAcaiChat } from '../models/chat';
+import { loadChatModel } from '../models/chat';
 
-const { chat: model } = handleAcaiChat({
+const { chat: model } = loadChatModel({
   temperature: 0,
   modelName: 'gpt-3.5-turbo-16k',
   verbose: false,

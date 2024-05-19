@@ -1,22 +1,23 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import './Settings.css';
 import { ExpansionPanel } from '@chatscope/chat-ui-kit-react';
 import NotificationCenter from '../../components/NotificationCenter';
-import ScratchPad from '../../components/ScratchPad/ScratchPad';
+// import ScratchPad from '../../components/ScratchPad/ScratchPad';
 import TokenManager from '../../components/TokenManager/token-manager';
-import { useSelector } from '@xstate/react';
-import {
-  GlobalStateContext,
-  GlobalStateContextValue,
-} from '../../context/GlobalStateContext';
-import ChatModelDropdown from '../ChatSettings';
-import { SocketManager } from '../SocketManager';
+// import { useSelector } from '@xstate/react';
+// import {
+//   GlobalStateContext,
+//   GlobalStateContextValue,
+// } from '../../context/GlobalStateContext';
+// import ChatSettings from '../ChatSettings';
 import UserProfile from '../UserProfile/UserProfile';
 import KnowledgeUpload from '../Knowledge/Knowledge';
 import { useParams } from 'react-router-dom';
-import AudioSettings from './AudioSettings';
+// import AudioSettings from './AudioSettings';
+// import CrewAIForm from '../CrewAI/CrewAIForm/CrewAIForm';
+import CrewAIContainer from '../CrewAI/CrewAIContainer/CrewAIContainer';
 
 interface SettingsProps {
   initialTabIndex?: number;
@@ -57,6 +58,7 @@ const Settings: React.FC<SettingsProps> = ({
         <TabList className="m-2 border-b-2 border-solid border-dark text-acai-white flex">
           <Tab>Config</Tab>
           <Tab>Knowledge</Tab>
+          <Tab>Crew Manager</Tab>
           <Tab>Logs</Tab>
         </TabList>
 
@@ -91,6 +93,10 @@ const Settings: React.FC<SettingsProps> = ({
 
         <TabPanel>
           {workspaceId && <KnowledgeUpload workspaceId={workspaceId} />}
+        </TabPanel>
+
+        <TabPanel>
+          <CrewAIContainer />
         </TabPanel>
 
         <TabPanel>

@@ -16,7 +16,7 @@ export const useXtts = () => {
     'XTTS_URL',
     import.meta.env.VITE_XTTS_URL ||
       getToken('XTTS_URL') ||
-      'http://localhost:8080',
+      'http://localhost:8000',
   );
   useEffect(() => {
     const fetchDefaultSpeakerEmbedding = async () => {

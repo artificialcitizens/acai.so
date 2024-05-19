@@ -1,0 +1,26 @@
+# .dockerignore
+
+# Ignore Git-related files
+.git
+.gitignore
+
+# Ignore Docker-related files
+Dockerfile
+.dockerignore
+
+# Ignore Node.js dependencies
+node_modules
+
+# Ignore build output
+dist
+
+# Ignore editor-specific files
+.vscode
+.idea
+
+# Ignore other unnecessary files
+README.md
+.env
+
+server/
+examples/

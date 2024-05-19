@@ -1,5 +1,5 @@
 import { HumanMessage, SystemMessage } from 'langchain/schema';
-import { handleAcaiChat } from '../models/chat';
+import { loadChatModel } from '../models/chat';
 
 /**
  * Generate observations based on the given context
@@ -19,7 +19,7 @@ Here is the previous list of observations
 ${priorObservations}
 `;
 
-  const { chat: model } = handleAcaiChat({
+  const { chat: model } = loadChatModel({
     modelName: 'gpt-4',
     temperature: 0,
   });
